@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fixed Chatbot Widget Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f2f5;
+            min-height: 100vh;
+        }
+        .content {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            margin-bottom: 100px; /* Space for chatbot */
+        }
+        .status {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: #007cba;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            z-index: 1002;
+        }
+        /* Debug styles to see the chatbot area */
+        .chatbot-debug {
+            position: fixed;
+            bottom: 0;
+            right: 0;
+            width: 200px;
+            height: 200px;
+            border: 2px dashed red;
+            background: rgba(255,0,0,0.1);
+            z-index: 999;
+            pointer-events: none;
+        }
+        .chatbot-debug::before {
+            content: "Chatbot Zone";
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            color: red;
+            font-size: 12px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="status">🤖 Chatbot Widget Test</div>
+    <div class="chatbot-debug"></div>
+
+    <div class="content">
+        <h1>🔧 Fixed Chatbot Widget Test</h1>
+
+        <div style="background: #e3f2fd; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <h3>🎯 What to look for:</h3>
+            <ul>
+                <li>✅ Chatbot icon should appear in bottom-right corner (red dashed area)</li>
+                <li>✅ Icon should be floating above this content</li>
+                <li>✅ Click icon to open chat window</li>
+                <li>✅ Check browser console for debug logs</li>
+            </ul>
+        </div>
+
+        <h2>📄 Sample Content</h2>
+        <p>This is sample content to test how the chatbot floats above the page content. The chatbot should appear in the bottom-right corner as a floating widget.</p>
+
+        <div style="height: 300px; background: #f5f5f5; border-radius: 8px; margin: 20px 0; padding: 20px;">
+            <h3>📊 More Content</h3>
+            <p>More content to make the page longer and test the floating behavior.</p>
+        </div>
+
+        <div style="height: 300px; background: #fff3cd; border-radius: 8px; margin: 20px 0; padding: 20px;">
+            <h3>📈 Even More Content</h3>
+            <p>Additional content to ensure the chatbot floats properly over all content.</p>
+        </div>
+    </div>
+
+    <!-- Fixed Chatbot Embed Code -->
+    <script>
+        console.log('🚀 Starting chatbot initialization...');
+
+        // Create iframe
+        const iframe = document.createElement("iframe");
+
+        // Enhanced styles for better positioning
+        const iframeStyles = (styleString) => {
+            const style = document.createElement('style');
+            style.textContent = styleString;
+            document.head.append(style);
+        }
+
+        iframeStyles(`
+            .chat-frame {
+                position: fixed !important;
+                bottom: 30px !important;
+                right: 30px !important;
+                border: none !important;
+                z-index: 10000 !important;
+                border-radius: 12px;
+                box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+                background: white;
+                transition: all 0.3s ease;
+                /* Ensure it's visible */
+                display: block !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+            }
+
+            /* Ensure iframe is above everything */
+            .chat-frame {
+                pointer-events: auto !important;
+            }
+
+            /* Debug border to see iframe boundaries */
+            .chat-frame {
+                border: 2px solid #007cba !important;
+            }
+        `)
+
+        // Set iframe properties
+        iframe.src = "http://localhost:3000/chatbot";
+        iframe.classList.add('chat-frame');
+
+        // Set initial size
+        iframe.width = "80";
+        iframe.height = "80";
+
+        // Add iframe to body
+        console.log('📦 Adding iframe to DOM...');
+        document.body.appendChild(iframe);
+
+        // Enhanced loading detection
+        iframe.onload = function() {
+            console.log('✅ Iframe loaded successfully');
+            console.log('📍 Iframe position:', {
+                bottom: iframe.style.bottom || 'auto',
+                right: iframe.style.right || 'auto',
+                position: iframe.style.position || 'static',
+                zIndex: iframe.style.zIndex || 'auto',
+                width: iframe.width,
+                height: iframe.height
+            });
+        };
+
+        iframe.onerror = function(error) {
+            console.error('❌ Iframe load error:', error);
+        };
+
+        // Message handling
+        window.addEventListener("message", (e) => {
+            console.log('📨 Message received:', e.data, 'from:', e.origin);
+
+            if(e.origin !== "http://localhost:3000") {
+                console.log('🚫 Ignored message from wrong origin');
+                return null;
+            }
+
+            try {
+                let dimensions = JSON.parse(e.data);
+                console.log('📏 Setting dimensions:', dimensions);
+
+                iframe.width = dimensions.width;
+                iframe.height = dimensions.height;
+
+                // Send domain ID
+                console.log('🔑 Sending domain ID to chatbot...');
+                iframe.contentWindow.postMessage("38418718-bf2e-41a3-a7a2-119ca454bbcb", "http://localhost:3000/");
+
+            } catch (error) {
+                console.log('📨 Non-JSON message:', e.data);
+            }
+        });
+
+        // Debug: Log iframe status every 2 seconds
+        setInterval(() => {
+            const frame = document.querySelector('.chat-frame');
+            if (frame) {
+                const rect = frame.getBoundingClientRect();
+                console.log('🔍 Iframe status:', {
+                    visible: rect.width > 0 && rect.height > 0,
+                    position: {
+                        top: rect.top,
+                        left: rect.left,
+                        bottom: window.innerHeight - rect.bottom,
+                        right: window.innerWidth - rect.right
+                    },
+                    size: { width: rect.width, height: rect.height }
+                });
+            } else {
+                console.log('❌ Iframe not found in DOM');
+            }
+        }, 2000);
+
+        console.log('🎉 Chatbot embed script loaded');
+    </script>
+</body>
+</html>

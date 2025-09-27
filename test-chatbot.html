@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Chatbot Integration</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .content {
+            line-height: 1.6;
+            color: #666;
+        }
+        .highlight {
+            background: #fff3cd;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+            border-left: 4px solid #ffc107;
+        }
+    </style>
+
+    <!-- Corinna AI Chatbot Embed Code -->
+    <script>
+        const iframe = document.createElement("iframe");
+
+        const iframeStyles = (styleString) => {
+            const style = document.createElement('style');
+            style.textContent = styleString;
+            document.head.append(style);
+        }
+
+        iframeStyles(`
+            .chat-frame {
+                position: fixed;
+                bottom: 50px;
+                right: 50px;
+                border: none;
+                z-index: 1000;
+                border-radius: 10px;
+                box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            }
+        `)
+
+        iframe.src = "http://localhost:3000/chatbot"
+        iframe.classList.add('chat-frame')
+        document.body.appendChild(iframe)
+
+        window.addEventListener("message", (e) => {
+            if(e.origin !== "http://localhost:3000") return null
+            let dimensions = JSON.parse(e.data)
+            iframe.width = dimensions.width
+            iframe.height = dimensions.height
+            iframe.contentWindow.postMessage("38418718-bf2e-41a3-a7a2-119ca454bbcb", "http://localhost:3000/")
+        })
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 Corinna AI Chatbot Test Page</h1>
+
+        <div class="content">
+            <p>Welcome to the Corinna AI chatbot test page! This simulates how the chatbot would appear on a real website.</p>
+
+            <div class="highlight">
+                <strong>What to look for:</strong>
+                <ul>
+                    <li>Chatbot icon should appear in the bottom-right corner</li>
+                    <li>Click the icon to open the chat window</li>
+                    <li>Test the AI conversation functionality</li>
+                    <li>Check if real-time messaging works</li>
+                </ul>
+            </div>
+
+            <h2>Test Content</h2>
+            <p>This is sample content to demonstrate how the chatbot integrates with existing website content. The chatbot should float above this content and be easily accessible.</p>
+
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.</p>
+
+            <h2>Features to Test</h2>
+            <ul>
+                <li>✅ Chatbot visibility</li>
+                <li>✅ Click to open/close functionality</li>
+                <li>✅ AI response system</li>
+                <li>✅ Real-time messaging</li>
+                <li>✅ Responsive design</li>
+                <li>✅ Domain-specific configuration</li>
+            </ul>
+
+            <p><strong>Note:</strong> Make sure your Corinna AI development server is running on <code>http://localhost:3000</code> for this test to work properly.</p>
+        </div>
+    </div>
+</body>
+</html>

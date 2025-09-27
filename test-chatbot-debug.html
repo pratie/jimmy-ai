@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Chatbot Integration</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f0f0f0;
+        }
+        .debug-panel {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .error { color: red; }
+        .success { color: green; }
+        .info { color: blue; }
+        button {
+            background: #007cba;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #005a87;
+        }
+        #chatbot-container {
+            border: 2px dashed #ccc;
+            min-height: 100px;
+            position: relative;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 Chatbot Debug Panel</h1>
+
+    <div class="debug-panel">
+        <h3>Step 1: Test Direct Chatbot Access</h3>
+        <p>First, let's test if the chatbot page loads directly:</p>
+        <button onclick="testDirectAccess()">Test /chatbot route</button>
+        <div id="direct-test-result"></div>
+    </div>
+
+    <div class="debug-panel">
+        <h3>Step 2: Test Iframe Loading</h3>
+        <button onclick="loadChatbotIframe()">Load Chatbot Iframe</button>
+        <button onclick="sendTestMessage()">Send Test Domain ID</button>
+        <div id="chatbot-container"></div>
+        <div id="iframe-logs"></div>
+    </div>
+
+    <div class="debug-panel">
+        <h3>Step 3: Console Logs</h3>
+        <div id="console-logs"></div>
+    </div>
+
+    <script>
+        let iframe = null;
+        let logs = [];
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            logs.push(`[${timestamp}] ${message}`);
+            const logDiv = document.getElementById('console-logs');
+            logDiv.innerHTML = logs.map(log => `<div class="${type}">${log}</div>`).join('');
+            console.log(message);
+        }
+
+        function testDirectAccess() {
+            log('Testing direct access to /chatbot...', 'info');
+            window.open('http://localhost:3000/chatbot', '_blank');
+            document.getElementById('direct-test-result').innerHTML =
+                '<p class="info">✅ Opened /chatbot in new tab. Check if it loads without errors.</p>';
+        }
+
+        function loadChatbotIframe() {
+            log('Loading chatbot iframe...', 'info');
+
+            if (iframe) {
+                iframe.remove();
+            }
+
+            iframe = document.createElement('iframe');
+            iframe.src = 'http://localhost:3000/chatbot';
+            iframe.style.width = '400px';
+            iframe.style.height = '600px';
+            iframe.style.border = '1px solid #ccc';
+            iframe.style.borderRadius = '8px';
+
+            iframe.onload = function() {
+                log('✅ Iframe loaded successfully', 'success');
+                document.getElementById('iframe-logs').innerHTML =
+                    '<p class="success">✅ Iframe loaded. Ready to send domain ID.</p>';
+            };
+
+            iframe.onerror = function() {
+                log('❌ Iframe failed to load', 'error');
+                document.getElementById('iframe-logs').innerHTML =
+                    '<p class="error">❌ Iframe failed to load. Check server status.</p>';
+            };
+
+            document.getElementById('chatbot-container').appendChild(iframe);
+        }
+
+        function sendTestMessage() {
+            if (!iframe) {
+                log('❌ Load iframe first', 'error');
+                return;
+            }
+
+            // Only send valid UUID for sneakyguy.com domain
+            const validDomainId = '38418718-bf2e-41a3-a7a2-119ca454bbcb';
+
+            log(`Sending valid domain ID: ${validDomainId}`, 'info');
+            iframe.contentWindow.postMessage(validDomainId, 'http://localhost:3000');
+        }
+
+        // Listen for messages from iframe
+        window.addEventListener('message', function(e) {
+            if (e.origin !== 'http://localhost:3000') return;
+
+            log(`📨 Received message from iframe: ${e.data}`, 'success');
+
+            try {
+                const dimensions = JSON.parse(e.data);
+                if (dimensions.width && dimensions.height) {
+                    log(`📏 Chatbot dimensions: ${dimensions.width}x${dimensions.height}`, 'info');
+                    if (iframe) {
+                        iframe.style.width = dimensions.width + 'px';
+                        iframe.style.height = dimensions.height + 'px';
+                    }
+                }
+            } catch (error) {
+                log(`📨 Raw message: ${e.data}`, 'info');
+            }
+        });
+
+        // Auto-load on page load
+        window.onload = function() {
+            log('🚀 Debug panel loaded', 'success');
+        };
+    </script>
+</body>
+</html>
