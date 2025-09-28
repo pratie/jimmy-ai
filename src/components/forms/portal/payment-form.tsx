@@ -2,24 +2,35 @@
 import { Loader } from '@/components/loader'
 import { Button } from '@/components/ui/button'
 import { useCompleteCustomerPayment } from '@/hooks/billing/use-billing'
-import { PaymentElement } from '@stripe/react-stripe-js'
 import React from 'react'
 
 type CustomerPaymentFormProps = {
-  onNext(): void
+  paymentLink: string
+  loading: boolean
 }
 
-export const CustomerPaymentForm = ({ onNext }: CustomerPaymentFormProps) => {
-  const { processing, onMakePayment } = useCompleteCustomerPayment(onNext)
+export const CustomerPaymentForm = ({ paymentLink, loading }: CustomerPaymentFormProps) => {
+  const { onRedirectToPayment } = useCompleteCustomerPayment()
+
   return (
     <div className="flex flex-col">
-      <PaymentElement />
+      <div className="mb-5 p-4 bg-blue-50 rounded-lg">
+        <p className="text-sm text-gray-600 mb-2">
+          You will be redirected to Dodo Payments to complete your purchase securely.
+        </p>
+        <p className="text-xs text-gray-500">
+          After payment, you&apos;ll be redirected back to continue.
+        </p>
+      </div>
       <Button
-        type="submit"
+        type="button"
         className="w-full mt-5"
-        onClick={onMakePayment}
+        onClick={() => onRedirectToPayment(paymentLink)}
+        disabled={!paymentLink || loading}
       >
-        <Loader loading={processing}>Pay</Loader>
+        <Loader loading={loading}>
+          {loading ? 'Creating payment link...' : 'Proceed to Payment'}
+        </Loader>
       </Button>
     </div>
   )

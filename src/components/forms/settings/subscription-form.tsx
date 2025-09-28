@@ -11,7 +11,7 @@ type Props = {
 }
 
 const SubscriptionForm = ({ plan }: Props) => {
-  const { loading, onSetPayment, payment, onUpdatetToFreTier } =
+  const { loading, onSetPayment, payment, onUpdateToFreeTier } =
     useSubscriptions(plan)
 
   return (
@@ -30,7 +30,7 @@ const SubscriptionForm = ({ plan }: Props) => {
           <SubscriptionCard
             title="PRO"
             description="Perfect if you’re just getting started with Corinna AI"
-            price="15"
+            price="19.99"
             payment={payment}
             onPayment={onSetPayment}
             id="PRO"
@@ -39,7 +39,7 @@ const SubscriptionForm = ({ plan }: Props) => {
           <SubscriptionCard
             title="ULTIMATE"
             description="Perfect if you’re just getting started with Corinna AI"
-            price="35"
+            price="34.99"
             payment={payment}
             onPayment={onSetPayment}
             id="ULTIMATE"
@@ -47,7 +47,7 @@ const SubscriptionForm = ({ plan }: Props) => {
         </div>
         <StripeElements payment={payment} />
         {payment === 'STANDARD' && (
-          <Button onClick={onUpdatetToFreTier}>
+          <Button onClick={onUpdateToFreeTier}>
             <Loader loading={loading}>Confirm</Loader>
           </Button>
         )}

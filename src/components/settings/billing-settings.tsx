@@ -11,11 +11,10 @@ import Image from 'next/image'
 type Props = {}
 
 const BillingSettings = async (props: Props) => {
-  const plan = await onGetSubscriptionPlan()
+  const plan = await onGetSubscriptionPlan() || 'STANDARD'
   const planFeatures = pricingCards.find(
     (card) => card.title.toUpperCase() === plan?.toUpperCase()
-  )?.features
-  if (!planFeatures) return
+  )?.features || []
 
   console.log(planFeatures)
   return (

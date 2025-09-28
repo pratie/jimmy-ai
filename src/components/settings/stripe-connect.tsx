@@ -2,22 +2,25 @@
 import React from 'react'
 import { Button } from '../ui/button'
 import { Loader } from '../loader'
-import { useStripe } from '@/hooks/billing/use-billing'
+import { useDodoPayments } from '@/hooks/billing/use-billing'
 
-type StripeConnectProps = {
+type DodoConnectProps = {
   connected: boolean
 }
 
-export const StripeConnect = ({ connected }: StripeConnectProps) => {
-  const { onStripeConnect, onStripeAccountPending } = useStripe()
+export const DodoConnect = ({ connected }: DodoConnectProps) => {
+  const { onDodoConnect, onDodoAccountPending } = useDodoPayments()
   return (
     <Button
       disabled={connected}
-      onClick={onStripeConnect}
+      onClick={onDodoConnect}
     >
-      <Loader loading={onStripeAccountPending}>
-        {connected ? 'Connected' : 'Connect to stripe'}
+      <Loader loading={onDodoAccountPending}>
+        {connected ? 'Connected to Dodo Payments' : 'Connect to Dodo Payments'}
       </Loader>
     </Button>
   )
 }
+
+// Keep the old export for backward compatibility, but deprecated
+export const StripeConnect = DodoConnect

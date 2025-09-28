@@ -35,7 +35,9 @@ type Props = {
       }[]
     | undefined
   amount?: number
-  stripeId?: string
+  customerEmail: string
+  domainId: string
+  customerId: string
 }
 
 const PortalSteps = ({
@@ -54,7 +56,9 @@ const PortalSteps = ({
   products,
   bookings,
   amount,
-  stripeId,
+  customerEmail,
+  domainId,
+  customerId,
 }: Props) => {
   if (step == 1) {
     return (
@@ -87,7 +91,9 @@ const PortalSteps = ({
     return (
       <PaymentCheckout
         products={products}
-        stripeId={stripeId}
+        customerEmail={customerEmail}
+        domainId={domainId}
+        customerId={customerId}
         onBack={onBack}
         onNext={onNext}
         amount={amount}

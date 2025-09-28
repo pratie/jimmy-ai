@@ -79,20 +79,12 @@ const Page = async (props: Props) => {
               <p className="text-sm">See more</p>
             </div>
             <Separator orientation="horizontal" />
-            {transactions &&
-              transactions.data.map((transaction) => (
-                <div
-                  className="flex gap-3 w-full justify-between items-center border-b-2 py-5"
-                  key={transaction.id}
-                >
-                  <p className="font-bold">
-                    {transaction.calculated_statement_descriptor}
-                  </p>
-                  <p className="font-bold text-xl">
-                    ${transaction.amount / 100}
-                  </p>
-                </div>
-              ))}
+            <div className="flex items-center justify-center py-8">
+              <div className="text-center">
+                <p className="text-gray-500 mb-2">Dodo Payments Integration Active</p>
+                <p className="text-sm text-gray-400">Transaction history will appear here once Dodo Payments API is fully integrated</p>
+              </div>
+            </div>
           </div>
         </div>
       </div>

@@ -1,10 +1,8 @@
 'use client'
 import React from 'react'
-import { loadStripe } from '@stripe/stripe-js'
-import { useStripeCustomer } from '@/hooks/billing/use-billing'
+import { useDodoCustomer } from '@/hooks/billing/use-billing'
 import { Loader } from '@/components/loader'
 import { Card } from '@/components/ui/card'
-import { Elements } from '@stripe/react-stripe-js'
 import Image from 'next/image'
 import { CustomerPaymentForm } from './payment-form'
 
@@ -12,6 +10,7 @@ type Props = {
   onBack(): void
   products?:
     | {
+        id?: string
         name: string
         image: string
         price: number
@@ -19,7 +18,9 @@ type Props = {
     | undefined
   amount?: number
   onNext(): void
-  stripeId?: string
+  customerEmail: string
+  domainId: string
+  customerId: string
 }
 
 const PaymentCheckout = ({
@@ -27,15 +28,23 @@ const PaymentCheckout = ({
   onNext,
   amount,
   products,
-  stripeId,
+  customerEmail,
+  domainId,
+  customerId,
 }: Props) => {
-  const StripePromise = loadStripe(
-    process.env.NEXT_PUBLIC_STRIPE_PUBLISH_KEY!,
-    {
-      stripeAccount: stripeId!,
-    }
+  // Transform products for Dodo API
+  const dodoProducts = products?.map(product => ({
+    id: product.id || `product_${Date.now()}`, // Generate ID if not provided
+    name: product.name,
+    price: product.price,
+  })) || []
+
+  const { paymentLink, loadForm } = useDodoCustomer(
+    dodoProducts,
+    customerEmail,
+    domainId,
+    customerId
   )
-  const { stripeSecret, loadForm } = useStripeCustomer(amount!, stripeId!)
 
   return (
     <Loader loading={loadForm}>
@@ -67,16 +76,10 @@ const PaymentCheckout = ({
               ))}
           </div>
           <div className="col-span-1 pl-5">
-            {stripeSecret && StripePromise && (
-              <Elements
-                stripe={StripePromise}
-                options={{
-                  clientSecret: stripeSecret,
-                }}
-              >
-                <CustomerPaymentForm onNext={onNext} />
-              </Elements>
-            )}
+            <CustomerPaymentForm
+              paymentLink={paymentLink}
+              loading={loadForm}
+            />
           </div>
         </div>
       </div>

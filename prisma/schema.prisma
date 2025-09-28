@@ -21,7 +21,7 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  stripeId String?
+  dodoMerchantId String? // Dodo Payments merchant account ID for receiving payments
 
   domains Domain[]
 

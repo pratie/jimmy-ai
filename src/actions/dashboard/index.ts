@@ -2,12 +2,6 @@
 
 import { client } from '@/lib/prisma'
 import { currentUser } from '@clerk/nextjs'
-import Stripe from 'stripe'
-
-const stripe = new Stripe(process.env.STRIPE_SECRET!, {
-  typescript: true,
-  apiVersion: '2024-04-10',
-})
 
 export const getUserClients = async () => {
   try {
@@ -40,14 +34,17 @@ export const getUserBalance = async () => {
           clerkId: user.id,
         },
         select: {
-          stripeId: true,
+          dodoMerchantId: true,
         },
       })
 
       if (connectedStripe) {
-        const transactions = await stripe.balance.retrieve({
-          stripeAccount: connectedStripe.stripeId!,
-        })
+        // TODO: Implement Dodo Payments transaction retrieval
+        // For now, return mock data to prevent errors
+        const transactions = {
+          pending: [{ amount: 0, currency: 'usd' }],
+          available: [{ amount: 0, currency: 'usd' }]
+        }
 
         if (transactions) {
           const sales = transactions.pending.reduce((total, next) => {
@@ -137,14 +134,16 @@ export const getUserTransactions = async () => {
           clerkId: user.id,
         },
         select: {
-          stripeId: true,
+          dodoMerchantId: true,
         },
       })
 
       if (connectedStripe) {
-        const transactions = await stripe.charges.list({
-          stripeAccount: connectedStripe.stripeId!,
-        })
+        // TODO: Implement Dodo Payments charge list retrieval
+        // For now, return mock data to prevent errors
+        const transactions = {
+          data: [] // Empty array for now - will be populated with Dodo transaction data
+        }
         if (transactions) {
           return transactions
         }

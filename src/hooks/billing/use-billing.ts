@@ -1,106 +1,101 @@
 import { useEffect, useState } from 'react'
 import {
-  onCreateCustomerPaymentIntentSecret,
-  onGetStripeClientSecret,
+  onCreateSubscriptionPaymentLink,
+  onCreateCustomerPaymentLink,
   onUpdateSubscription,
-} from '@/actions/stripe'
+  onConnectDodoPayments,
+} from '@/actions/dodo'
 import { useToast } from '@/components/ui/use-toast'
-import axios from 'axios'
-import {
-  useElements,
-  useStripe as useStripeHook,
-} from '@stripe/react-stripe-js'
 import { useRouter } from 'next/navigation'
 
-export const useStripe = () => {
-  const [onStripeAccountPending, setOnStripeAccountPending] =
+export const useDodoPayments = () => {
+  const [onDodoAccountPending, setOnDodoAccountPending] =
     useState<boolean>(false)
+  const { toast } = useToast()
 
-  const onStripeConnect = async () => {
+  const onDodoConnect = async () => {
     try {
-      setOnStripeAccountPending(true)
-      const account = await axios.get(`/api/stripe/connect`)
-      if (account) {
-        setOnStripeAccountPending(false)
-        if (account) {
-          window.location.href = account.data.url
-        }
+      setOnDodoAccountPending(true)
+      const result = await onConnectDodoPayments()
+      if (result.success) {
+        toast({
+          title: 'Success',
+          description: result.message,
+        })
       }
     } catch (error) {
-      console.log(error)
+      toast({
+        title: 'Error',
+        description: 'Failed to connect Dodo Payments account',
+        variant: 'destructive',
+      })
+      console.error(error)
+    } finally {
+      setOnDodoAccountPending(false)
     }
   }
-  return { onStripeConnect, onStripeAccountPending }
+  return { onDodoConnect, onDodoAccountPending }
 }
 
-export const useStripeCustomer = (amount: number, stripeId: string) => {
-  const [stripeSecret, setStripeSecret] = useState<string>('')
+export const useDodoCustomer = (
+  products: { id: string; name: string; price: number }[],
+  customerEmail: string,
+  domainId: string,
+  customerId: string
+) => {
+  const [paymentLink, setPaymentLink] = useState<string>('')
   const [loadForm, setLoadForm] = useState<boolean>(false)
+  const { toast } = useToast()
 
-  const onGetCustomerIntent = async (amount: number) => {
+  const onCreatePaymentLink = async () => {
     try {
       setLoadForm(true)
-      const intent = await onCreateCustomerPaymentIntentSecret(amount, stripeId)
-      if (intent) {
+      const result = await onCreateCustomerPaymentLink(
+        products,
+        customerEmail,
+        domainId,
+        customerId
+      )
+      if (result) {
         setLoadForm(false)
-        setStripeSecret(intent.secret!)
+        setPaymentLink(result.paymentLink)
       }
     } catch (error) {
-      console.log(error)
+      toast({
+        title: 'Error',
+        description: 'Failed to create payment link',
+        variant: 'destructive',
+      })
+      console.error(error)
+      setLoadForm(false)
     }
   }
 
   useEffect(() => {
-    onGetCustomerIntent(amount)
-  }, [])
+    if (products.length > 0) {
+      onCreatePaymentLink()
+    }
+  }, [products])
 
-  return { stripeSecret, loadForm }
+  return { paymentLink, loadForm }
 }
 
-export const useCompleteCustomerPayment = (onNext: () => void) => {
-  const [processing, setProcessing] = useState<boolean>(false)
+export const useCompleteCustomerPayment = () => {
   const { toast } = useToast()
-  const stripe = useStripeHook()
-  const elements = useElements()
 
-  const onMakePayment = async (e: React.MouseEvent) => {
-    e.preventDefault()
-    if (!stripe || !elements) {
-      return null
-    }
-
-    console.log('no reload')
-
-    try {
-      setProcessing(true)
-
-      const { error, paymentIntent } = await stripe.confirmPayment({
-        elements,
-        confirmParams: {
-          return_url: 'http://localhost:3000/settings',
-        },
-        redirect: 'if_required',
+  const onRedirectToPayment = (paymentLink: string) => {
+    if (paymentLink) {
+      window.location.href = paymentLink
+    } else {
+      toast({
+        title: 'Error',
+        description: 'Payment link not available',
+        variant: 'destructive',
       })
-
-      if (error) {
-        console.log(error)
-      }
-
-      if (paymentIntent?.status === 'succeeded') {
-        toast({
-          title: 'Success',
-          description: 'Payment complete',
-        })
-        onNext()
-      }
-
-      setProcessing(false)
-    } catch (error) {
-      console.log(error)
     }
   }
 
-  return { processing, onMakePayment }
+  return { onRedirectToPayment }
 }
 
 export const useSubscriptions = (plan: 'STANDARD' | 'PRO' | 'ULTIMATE') => {
@@ -108,7 +103,8 @@ export const useSubscriptions = (plan: 'STANDARD' | 'PRO' | 'ULTIMATE') => {
   const [payment, setPayment] = useState<'STANDARD' | 'PRO' | 'ULTIMATE'>(plan)
   const { toast } = useToast()
   const router = useRouter()
-  const onUpdatetToFreTier = async () => {
+
+  const onUpdateToFreeTier = async () => {
     try {
       setLoading(true)
       const free = await onUpdateSubscription('STANDARD')
@@ -121,7 +117,8 @@ export const useSubscriptions = (plan: 'STANDARD' | 'PRO' | 'ULTIMATE') => {
         router.refresh()
       }
     } catch (error) {
-      console.log(error)
+      console.error(error)
+      setLoading(false)
     }
   }
 
@@ -132,81 +129,76 @@ export const useSubscriptions = (plan: 'STANDARD' | 'PRO' | 'ULTIMATE') => {
     loading,
     onSetPayment,
     payment,
-    onUpdatetToFreTier,
+    onUpdateToFreeTier,
   }
 }
 
-export const useStripeElements = (payment: 'STANDARD' | 'PRO' | 'ULTIMATE') => {
-  const [stripeSecret, setStripeSecret] = useState<string>('')
+export const useDodoSubscription = (payment: 'STANDARD' | 'PRO' | 'ULTIMATE') => {
+  const [paymentLink, setPaymentLink] = useState<string>('')
   const [loadForm, setLoadForm] = useState<boolean>(false)
+  const { toast } = useToast()
 
-  const onGetBillingIntent = async (plans: 'STANDARD' | 'PRO' | 'ULTIMATE') => {
+  const onGetSubscriptionLink = async (plans: 'STANDARD' | 'PRO' | 'ULTIMATE') => {
     try {
       setLoadForm(true)
-      const intent = await onGetStripeClientSecret(plans)
-      if (intent) {
+      if (plans === 'STANDARD') {
+        // Free plan, no payment needed
         setLoadForm(false)
-        setStripeSecret(intent.secret!)
+        return
+      }
+
+      const result = await onCreateSubscriptionPaymentLink(plans)
+      if (result && 'paymentLink' in result) {
+        setLoadForm(false)
+        setPaymentLink(result.paymentLink)
       }
     } catch (error) {
-      console.log(error)
+      toast({
+        title: 'Error',
+        description: 'Failed to create subscription payment link',
+        variant: 'destructive',
+      })
+      console.error(error)
+      setLoadForm(false)
     }
   }
 
   useEffect(() => {
-    onGetBillingIntent(payment)
+    onGetSubscriptionLink(payment)
   }, [payment])
 
-  return { stripeSecret, loadForm }
+  return { paymentLink, loadForm }
 }
 
-export const useCompletePayment = (
+export const useCompleteSubscriptionPayment = (
   payment: 'STANDARD' | 'PRO' | 'ULTIMATE'
 ) => {
-  const [processing, setProcessing] = useState<boolean>(false)
-  const router = useRouter()
   const { toast } = useToast()
-  const stripe = useStripeHook()
-  const elements = useElements()
 
-  const onMakePayment = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!stripe || !elements) {
-      return null
-    }
-
-
-    try {
-      setProcessing(true)
-
-      const { error, paymentIntent } = await stripe.confirmPayment({
-        elements,
-        confirmParams: {
-          return_url: 'http://localhost:3000/settings',
-        },
-        redirect: 'if_required',
-      })
-
-      if (error) {
-        console.log(error)
-      }
-
-      if (paymentIntent?.status === 'succeeded') {
-        const plan = await onUpdateSubscription(payment)
-        if (plan) {
+  const onRedirectToSubscriptionPayment = (paymentLink: string) => {
+    if (payment === 'STANDARD') {
+      // Handle free plan upgrade directly
+      onUpdateSubscription('STANDARD').then((result) => {
+        if (result) {
           toast({
             title: 'Success',
-            description: plan.message,
+            description: result.message,
           })
         }
-      }
+      })
+      return
+    }
 
-      setProcessing(false)
-      router.refresh()
-    } catch (error) {
-      console.log(error)
+    if (paymentLink) {
+      window.location.href = paymentLink
+    } else {
+      toast({
+        title: 'Error',
+        description: 'Payment link not available',
+        variant: 'destructive',
+      })
     }
   }
 
-  return { processing, onMakePayment }
+  return { onRedirectToSubscriptionPayment }
 }

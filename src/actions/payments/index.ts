@@ -11,7 +11,7 @@ export const onGetDomainProductsAndConnectedAccountId = async (id: string) => {
       select: {
         User: {
           select: {
-            stripeId: true,
+            dodoMerchantId: true,
           },
         },
       },
@@ -22,6 +22,7 @@ export const onGetDomainProductsAndConnectedAccountId = async (id: string) => {
         domainId: id,
       },
       select: {
+        id: true,
         price: true,
         name: true,
         image: true,
@@ -35,7 +36,7 @@ export const onGetDomainProductsAndConnectedAccountId = async (id: string) => {
       return {
         products: products,
         amount: totalAmount,
-        stripeId: connectedAccount?.User?.stripeId,
+        dodoMerchantId: connectedAccount?.User?.dodoMerchantId,
       }
     }
   } catch (error) {

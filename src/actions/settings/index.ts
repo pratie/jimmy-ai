@@ -120,6 +120,16 @@ export const onGetAllAccountDomains = async () => {
             name: true,
             icon: true,
             id: true,
+            chatBot: {
+              select: {
+                id: true,
+                welcomeMessage: true,
+                background: true,
+                icon: true,
+                textColor: true,
+                helpdesk: true,
+              },
+            },
             customer: {
               select: {
                 chatRoom: {
@@ -488,11 +498,11 @@ export const onGetPaymentConnected = async () => {
           clerkId: user.id,
         },
         select: {
-          stripeId: true,
+          dodoMerchantId: true,
         },
       })
       if (connected) {
-        return connected.stripeId
+        return connected.dodoMerchantId
       }
     }
   } catch (error) {

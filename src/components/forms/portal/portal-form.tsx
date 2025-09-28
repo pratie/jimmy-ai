@@ -28,7 +28,7 @@ type PortalFormProps = {
       }[]
     | undefined
   amount?: number
-  stripeId?: string
+  dodoMerchantId?: string
 }
 
 const PortalForm = ({
@@ -40,7 +40,7 @@ const PortalForm = ({
   products,
   email,
   amount,
-  stripeId,
+  dodoMerchantId,
 }: PortalFormProps) => {
   const {
     step,
@@ -83,7 +83,9 @@ const PortalForm = ({
         products={products}
         onBack={onPrev}
         amount={amount}
-        stripeId={stripeId}
+        customerEmail={email}
+        domainId={domainid}
+        customerId={customerId}
       />
       {(step == 1 || step == 2) && (
         <div className="w-full flex justify-center">
