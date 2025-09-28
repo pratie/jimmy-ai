@@ -21,7 +21,7 @@ type Props = {
 }
 
 const ConversationMenu = ({ domains }: Props) => {
-  const { register, chatRooms, loading, onGetActiveChatMessages } =
+  const { register, setValue, chatRooms, loading, onGetActiveChatMessages, onLoadChatRoomsForDomain } =
     useConversation()
 
   return (
@@ -31,6 +31,8 @@ const ConversationMenu = ({ domains }: Props) => {
           <ConversationSearch
             domains={domains}
             register={register}
+            setValue={setValue}
+            onAutoSelect={onLoadChatRoomsForDomain}
           />
           <div className="flex flex-col">
             <Loader loading={loading}>

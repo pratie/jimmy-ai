@@ -12,11 +12,11 @@ import {
   ConversationSearchSchema,
 } from '@/schemas/conversation.schema'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import { useForm } from 'react-hook-form'
 
 export const useConversation = () => {
-  const { register, watch } = useForm({
+  const { register, watch, setValue } = useForm({
     resolver: zodResolver(ConversationSearchSchema),
     mode: 'onChange',
   })
@@ -36,21 +36,30 @@ export const useConversation = () => {
     }[]
   >([])
   const [loading, setLoading] = useState<boolean>(false)
+
+  // Function to manually load chat rooms for a domain
+  const onLoadChatRoomsForDomain = useCallback(async (domainId: string) => {
+    setLoading(true)
+    try {
+      const rooms = await onGetDomainChatRooms(domainId)
+      if (rooms) {
+        setLoading(false)
+        setChatRooms(rooms.customer)
+      }
+    } catch (error) {
+      console.log(error)
+      setLoading(false)
+    }
+  }, [])
+
   useEffect(() => {
     const search = watch(async (value) => {
-      setLoading(true)
-      try {
-        const rooms = await onGetDomainChatRooms(value.domain)
-        if (rooms) {
-          setLoading(false)
-          setChatRooms(rooms.customer)
-        }
-      } catch (error) {
-        console.log(error)
+      if (value.domain) {
+        await onLoadChatRoomsForDomain(value.domain)
       }
     })
     return () => search.unsubscribe()
-  }, [watch])
+  }, [watch, onLoadChatRoomsForDomain])
 
   const onGetActiveChatMessages = async (id: string) => {
     try {
@@ -67,9 +76,11 @@ export const useConversation = () => {
   }
   return {
     register,
+    setValue,
     chatRooms,
     loading,
     onGetActiveChatMessages,
+    onLoadChatRoomsForDomain,
   }
 }
 

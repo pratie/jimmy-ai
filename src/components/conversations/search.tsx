@@ -1,8 +1,10 @@
-import React from 'react'
-import { FieldValues, UseFormRegister } from 'react-hook-form'
+import React, { useEffect } from 'react'
+import { FieldValues, UseFormRegister, UseFormSetValue } from 'react-hook-form'
 
 type Props = {
   register: UseFormRegister<FieldValues>
+  setValue: UseFormSetValue<FieldValues>
+  onAutoSelect: (domainId: string) => void
   domains?:
     | {
         name: string
@@ -12,7 +14,16 @@ type Props = {
     | undefined
 }
 
-const ConversationSearch = ({ register, domains }: Props) => {
+const ConversationSearch = ({ register, setValue, onAutoSelect, domains }: Props) => {
+  // Auto-select first domain when domains are loaded
+  useEffect(() => {
+    if (domains && domains.length > 0) {
+      // Auto-select the first domain and trigger the manual load
+      setValue('domain', domains[0].id)
+      onAutoSelect(domains[0].id)
+    }
+  }, [domains, setValue, onAutoSelect])
+
   return (
     <div className="flex flex-col py-3">
       <select
@@ -21,7 +32,7 @@ const ConversationSearch = ({ register, domains }: Props) => {
       >
         <option
           disabled
-          selected
+          value=""
         >
           Domain name
         </option>
