@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { cn, extractUUIDFromString, getMonthName } from '@/lib/utils'
-import { getUploadCareUrl } from '@/lib/uploadcare'
+import { getKieImageUrl } from '@/lib/kie-api'
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'
 import { User } from 'lucide-react'
 import Image from 'next/image'
@@ -71,7 +71,7 @@ const Bubble = ({ message, createdAt }: Props) => {
         {image && !imageError ? (
           <div className="relative aspect-square">
             <Image
-              src={getUploadCareUrl(image[0])}
+              src={getKieImageUrl(image[0])}
               fill
               alt="image"
               onError={() => setImageError(true)}

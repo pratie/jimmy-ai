@@ -3,7 +3,7 @@ import React, { forwardRef, useState } from 'react'
 import { UseFormRegister } from 'react-hook-form'
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'
 import RealTimeMode from './real-time'
-import { getUploadCareUrl } from '@/lib/uploadcare'
+import { getKieImageUrl } from '@/lib/kie-api'
 import TabsMenu from '../tabs/intex'
 import { BOT_TABS_MENU } from '@/constants/menu'
 import ChatIcon from '@/icons/chat-icon'
@@ -81,7 +81,7 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
             <Avatar className="w-20 h-20">
               {botIcon && !avatarError ? (
                 <AvatarImage
-                  src={getUploadCareUrl(botIcon)}
+                  src={getKieImageUrl(botIcon)}
                   alt="Bot Avatar"
                   onError={() => setAvatarError(true)}
                 />

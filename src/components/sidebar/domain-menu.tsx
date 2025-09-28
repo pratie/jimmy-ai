@@ -9,7 +9,7 @@ import UploadButton from '../upload-button'
 import { Button } from '../ui/button'
 import Link from 'next/link'
 import Image from 'next/image'
-import { getUploadCareUrl } from '@/lib/uploadcare'
+import { getKieImageUrl } from '@/lib/kie-api'
 
 type Props = {
   min?: boolean
@@ -40,7 +40,7 @@ const DomainIcon = ({ icon, name }: { icon: string | null, name: string }) => {
 
   return (
     <Image
-      src={getUploadCareUrl(icon)}
+      src={getKieImageUrl(icon)}
       alt="domain logo"
       width={20}
       height={20}

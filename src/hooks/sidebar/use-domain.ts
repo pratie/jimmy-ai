@@ -3,7 +3,7 @@ import { onIntegrateDomain } from '@/actions/settings'
 import { useToast } from '@/components/ui/use-toast'
 import { AddDomainSchema } from '@/schemas/settings.schema'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { uploadFile } from '@/lib/uploadcare'
+import { uploadFile } from '@/lib/kie-api'
 import { usePathname, useRouter } from 'next/navigation'
 
 import { useEffect, useState } from 'react'
@@ -30,11 +30,14 @@ export const useDomain = () => {
     const formData = new FormData(e.target as HTMLFormElement)
     const domain = formData.get('domain') as string
     const imageFile = formData.get('image') as File
+    const imageUrl = formData.get('imageUrl') as string
 
     console.log('📝 Form data:', {
       domain,
       imageFile: imageFile?.name,
-      imageSize: imageFile?.size
+      imageSize: imageFile?.size,
+      imageUrl,
+      allFormData: Array.from(formData.entries())
     })
 
     if (!domain) {
@@ -46,7 +49,10 @@ export const useDomain = () => {
       return
     }
 
-    if (!imageFile || imageFile.size === 0) {
+    // Check if we have an already uploaded image URL or need to upload a new file
+    let iconReference = imageUrl
+
+    if (!imageUrl && (!imageFile || imageFile.size === 0)) {
       toast({
         title: 'Error',
         description: 'Image is required',
@@ -55,23 +61,26 @@ export const useDomain = () => {
       return
     }
 
-    console.log('📤 Starting image upload...')
-    const uploadResult = await uploadFile(imageFile)
+    // If no pre-uploaded URL, upload the file
+    if (!imageUrl && imageFile && imageFile.size > 0) {
+      console.log('📤 Starting image upload...')
+      const uploadResult = await uploadFile(imageFile)
 
-    if (!uploadResult.success) {
-      console.log('❌ Upload failed:', uploadResult.error)
-      toast({
-        title: 'Error',
-        description: `Upload failed: ${uploadResult.error}`,
-      })
-      setLoading(false)
-      return
+      if (!uploadResult.success) {
+        console.log('❌ Upload failed:', uploadResult.error)
+        toast({
+          title: 'Error',
+          description: `Upload failed: ${uploadResult.error}`,
+        })
+        setLoading(false)
+        return
+      }
+
+      console.log('✅ Upload successful! URL:', uploadResult.data!.downloadUrl)
+      iconReference = uploadResult.data?.downloadUrl
     }
 
-    console.log('✅ Upload successful! UUID:', uploadResult.data!.uuid)
-
-    console.log('🔗 Creating domain integration...')
-    const iconReference = uploadResult.data?.cdnUrl ?? uploadResult.data?.uuid
+    console.log('🔗 Creating domain integration with icon:', iconReference)
 
     const domainResult = await onIntegrateDomain(domain, iconReference || '')
 

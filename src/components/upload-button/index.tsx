@@ -2,19 +2,23 @@ import React, { useId, useRef, useState } from 'react'
 import { FieldErrors, FieldValues, UseFormRegister } from 'react-hook-form'
 import { Label } from '../ui/label'
 import { Input } from '../ui/input'
-import { Edit, CheckCircle, X } from 'lucide-react'
+import { Edit, CheckCircle, X, Upload } from 'lucide-react'
 import { ErrorMessage } from '@hookform/error-message'
 import Image from 'next/image'
+import { uploadFile } from '@/lib/kie-api'
 
 type Props = {
   register: UseFormRegister<any>
   errors: FieldErrors<FieldValues>
   label: string
+  onUploadComplete?: (url: string) => void
 }
 
-const UploadButton = ({ errors, label, register }: Props) => {
+const UploadButton = ({ errors, label, register, onUploadComplete }: Props) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+  const [isUploading, setIsUploading] = useState(false)
+  const [uploadedUrl, setUploadedUrl] = useState<string | null>(null)
   const inputId = useId()
   const inputRef = useRef<HTMLInputElement | null>(null)
 
@@ -33,9 +37,37 @@ const UploadButton = ({ errors, label, register }: Props) => {
     onChange: handleFileChange,
   })
 
+  // Register a hidden field for the uploaded URL
+  const urlRegister = register('imageUrl', {
+    value: uploadedUrl || undefined
+  })
+
+  const handleUpload = async () => {
+    if (!selectedFile) return
+
+    setIsUploading(true)
+    try {
+      const result = await uploadFile(selectedFile, 'images/chatbot')
+
+      if (result.success && result.data) {
+        setUploadedUrl(result.data.downloadUrl)
+        urlRegister.onChange({ target: { value: result.data.downloadUrl } })
+        onUploadComplete?.(result.data.downloadUrl)
+      } else {
+        console.error('Upload failed:', result.error)
+        // You might want to show an error toast here
+      }
+    } catch (error) {
+      console.error('Upload error:', error)
+    } finally {
+      setIsUploading(false)
+    }
+  }
+
   const clearSelection = () => {
     setSelectedFile(null)
     setPreviewUrl(null)
+    setUploadedUrl(null)
     if (inputRef.current) {
       inputRef.current.value = ''
     }
@@ -60,13 +92,40 @@ const UploadButton = ({ errors, label, register }: Props) => {
               id={inputId}
               accept="image/*"
             />
+            <Input
+              {...urlRegister}
+              type="hidden"
+              value={uploadedUrl || ''}
+            />
             <Edit size={16} />
             {label}
           </Label>
-          {selectedFile && (
+          {selectedFile && !uploadedUrl && (
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={handleUpload}
+                disabled={isUploading}
+                className="flex items-center gap-2 px-3 py-1.5 bg-orange-500 text-white text-sm font-medium rounded-md hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                {isUploading ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Uploading...
+                  </>
+                ) : (
+                  <>
+                    <Upload size={16} />
+                    Upload
+                  </>
+                )}
+              </button>
+            </div>
+          )}
+          {uploadedUrl && (
             <div className="flex items-center gap-2 text-green-600">
               <CheckCircle size={16} />
-              <span className="text-sm font-medium">File selected</span>
+              <span className="text-sm font-medium">Upload successful</span>
             </div>
           )}
         </div>

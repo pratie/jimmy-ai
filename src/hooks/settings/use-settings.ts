@@ -26,7 +26,7 @@ import {
   HelpDeskQuestionsSchema,
 } from '@/schemas/settings.schema'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { uploadFile } from '@/lib/uploadcare'
+import { uploadFile } from '@/lib/kie-api'
 import { useTheme } from 'next-themes'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
@@ -110,7 +110,7 @@ export const useSettings = (id: string) => {
         return
       }
 
-      const iconReference = uploadResult.data?.cdnUrl ?? uploadResult.data?.uuid
+      const iconReference = uploadResult.data?.downloadUrl
       const image = await onChatBotImageUpdate(id, iconReference || '')
       if (image) {
         toast({
@@ -288,7 +288,7 @@ export const useProducts = (domainId: string) => {
         return
       }
 
-      const imageReference = uploadResult.data?.cdnUrl ?? uploadResult.data?.uuid
+      const imageReference = uploadResult.data?.downloadUrl
       const product = await onCreateNewDomainProduct(
         domainId,
         values.name,

@@ -3,7 +3,7 @@ import { useChatBot } from '@/hooks/chatbot/use-chatbot'
 import React, { useState, useEffect } from 'react'
 import { BotWindow } from './window'
 import { cn } from '@/lib/utils'
-import { getUploadCareUrl } from '@/lib/uploadcare'
+import { getKieImageUrl } from '@/lib/kie-api'
 import Image from 'next/image'
 import { BotIcon } from '@/icons/bot-icon'
 
@@ -36,7 +36,7 @@ const AiChatBot = (props: Props) => {
       loading
     })
     if (currentBot?.chatBot?.icon) {
-      console.log('🖼️ Icon URL:', getUploadCareUrl(currentBot.chatBot.icon))
+      console.log('🖼️ Icon URL:', getKieImageUrl(currentBot.chatBot.icon))
     }
   }, [currentBot, iconError, loading])
 
@@ -73,7 +73,7 @@ const AiChatBot = (props: Props) => {
       >
         {((currentBot?.chatBot?.icon || currentBot?.icon) && !iconError) ? (
           <Image
-            src={getUploadCareUrl(currentBot?.chatBot?.icon || currentBot?.icon || '')}
+            src={getKieImageUrl(currentBot?.chatBot?.icon || currentBot?.icon || '')}
             alt="bot"
             fill
             onError={() => setIconError(true)}

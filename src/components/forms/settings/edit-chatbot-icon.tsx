@@ -1,7 +1,7 @@
 import Section from '@/components/section-label'
 import UploadButton from '@/components/upload-button'
 import { BotIcon } from '@/icons/bot-icon'
-import { getUploadCareUrl } from '@/lib/uploadcare'
+import { getKieImageUrl } from '@/lib/kie-api'
 
 import Image from 'next/image'
 import React, { useState } from 'react'
@@ -38,7 +38,7 @@ const EditChatbotIcon = ({ register, errors, chatBot }: Props) => {
       {chatBot?.icon && !imageError ? (
         <div className="rounded-full overflow-hidden border border-border w-20 h-20">
           <Image
-            src={getUploadCareUrl(chatBot.icon)}
+            src={getKieImageUrl(chatBot.icon)}
             alt="bot"
             width={80}
             height={80}

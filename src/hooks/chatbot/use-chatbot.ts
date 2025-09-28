@@ -1,6 +1,6 @@
 import { onAiChatBotAssistant, onGetCurrentChatBot } from '@/actions/bot'
 import { postToParent, pusherClient } from '@/lib/utils'
-import { uploadFile } from '@/lib/uploadcare'
+import { uploadFile } from '@/lib/kie-api'
 import {
   ChatBotMessageProps,
   ChatBotMessageSchema,
@@ -128,18 +128,18 @@ export const useChatBot = () => {
           ...prev,
           {
             role: 'user',
-            content: uploaded.uuid,
+            content: uploaded.downloadUrl,
           },
         ])
       }
 
-      console.log('🟡 RESPONSE FROM UC', uploaded.uuid)
+      console.log('🟡 RESPONSE FROM KIE', uploaded.downloadUrl)
       setOnAiTyping(true)
       const response = await onAiChatBotAssistant(
         currentBotId!,
         onChats,
         'user',
-        uploaded.uuid
+        uploaded.downloadUrl
       )
 
       if (response) {
