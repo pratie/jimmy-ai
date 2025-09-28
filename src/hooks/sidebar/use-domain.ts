@@ -50,7 +50,7 @@ export const useDomain = () => {
     }
 
     // Check if we have an already uploaded image URL or need to upload a new file
-    let iconReference = imageUrl
+    let iconReference: string = imageUrl || ''
 
     if (!imageUrl && (!imageFile || imageFile.size === 0)) {
       toast({
@@ -77,7 +77,7 @@ export const useDomain = () => {
       }
 
       console.log('✅ Upload successful! URL:', uploadResult.data!.downloadUrl)
-      iconReference = uploadResult.data?.downloadUrl
+      iconReference = uploadResult.data?.downloadUrl || ''
     }
 
     console.log('🔗 Creating domain integration with icon:', iconReference)
