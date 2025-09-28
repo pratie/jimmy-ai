@@ -1,6 +1,6 @@
 import { useDomain } from '@/hooks/sidebar/use-domain'
 import { cn } from '@/lib/utils'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import AppDrawer from '../drawer'
 import { Plus } from 'lucide-react'
 import { Loader } from '../loader'
@@ -25,6 +25,10 @@ type Props = {
 
 const DomainIcon = ({ icon, name }: { icon: string | null, name: string }) => {
   const [imageError, setImageError] = useState(false)
+
+  useEffect(() => {
+    setImageError(false)
+  }, [icon])
 
   if (!icon || imageError) {
     return (

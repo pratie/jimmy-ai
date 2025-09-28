@@ -22,6 +22,7 @@ export const useChatBot = () => {
   const [currentBot, setCurrentBot] = useState<
     | {
         name: string
+        icon: string | null
         chatBot: {
           id: string
           icon: string | null
@@ -73,39 +74,46 @@ export const useChatBot = () => {
     )
   }, [botOpened])
 
-  let limitRequest = 0
-
   const onGetDomainChatBot = async (id: string) => {
     setCurrentBotId(id)
     const chatbot = await onGetCurrentChatBot(id)
     if (chatbot) {
-      setOnChats((prev) => [
-        ...prev,
-        {
-          role: 'assistant',
-          content: chatbot.chatBot?.welcomeMessage!,
-        },
-      ])
+      const welcomeMessage = chatbot.chatBot?.welcomeMessage
+      if (welcomeMessage) {
+        setOnChats((prev) => [
+          ...prev,
+          {
+            role: 'assistant',
+            content: welcomeMessage,
+          },
+        ])
+      }
       setCurrentBot(chatbot)
       setLoading(false)
     }
   }
 
   useEffect(() => {
-    window.addEventListener('message', (e) => {
+    let handled = false
+    const handleMessage = (e: MessageEvent) => {
       console.log(e.data)
       const botid = e.data
-      if (limitRequest < 1 && typeof botid == 'string') {
+      if (!handled && typeof botid === 'string') {
+        handled = true
         onGetDomainChatBot(botid)
-        limitRequest++
       }
-    })
+    }
+
+    window.addEventListener('message', handleMessage)
+    return () => {
+      window.removeEventListener('message', handleMessage)
+    }
   }, [])
 
   const onStartChatting = handleSubmit(async (values) => {
     console.log('ALL VALUES', values)
 
-    if (values.image.length) {
+    if (values.image?.length) {
       console.log('IMAGE FROM ', values.image[0])
       const uploadResult = await uploadFile(values.image[0])
 
@@ -215,11 +223,14 @@ export const useRealTime = (
   const counterRef = useRef(1)
 
   useEffect(() => {
-    pusherClient.subscribe(chatRoom)
-    pusherClient.bind('realtime-mode', (data: any) => {
+    if (!chatRoom) return
+
+    counterRef.current = 1
+
+    const handler = (data: any) => {
       console.log('✅', data)
       if (counterRef.current !== 1) {
-        setChats((prev: any) => [
+        setChats((prev) => [
           ...prev,
           {
             role: data.chat.role,
@@ -228,10 +239,14 @@ export const useRealTime = (
         ])
       }
       counterRef.current += 1
-    })
+    }
+
+    pusherClient.subscribe(chatRoom)
+    pusherClient.bind('realtime-mode', handler)
+
     return () => {
-      pusherClient.unbind('realtime-mode')
+      pusherClient.unbind('realtime-mode', handler)
       pusherClient.unsubscribe(chatRoom)
     }
-  }, [])
+  }, [chatRoom, setChats])
 }

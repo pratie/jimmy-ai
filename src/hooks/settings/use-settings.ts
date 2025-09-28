@@ -110,7 +110,8 @@ export const useSettings = (id: string) => {
         return
       }
 
-      const image = await onChatBotImageUpdate(id, uploadResult.data!.uuid)
+      const iconReference = uploadResult.data?.cdnUrl ?? uploadResult.data?.uuid
+      const image = await onChatBotImageUpdate(id, iconReference || '')
       if (image) {
         toast({
           title: image.status == 200 ? 'Success' : 'Error',
@@ -287,10 +288,11 @@ export const useProducts = (domainId: string) => {
         return
       }
 
+      const imageReference = uploadResult.data?.cdnUrl ?? uploadResult.data?.uuid
       const product = await onCreateNewDomainProduct(
         domainId,
         values.name,
-        uploadResult.data!.uuid,
+        imageReference || '',
         values.price
       )
       if (product) {

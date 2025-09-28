@@ -71,7 +71,9 @@ export const useDomain = () => {
     console.log('✅ Upload successful! UUID:', uploadResult.data!.uuid)
 
     console.log('🔗 Creating domain integration...')
-    const domainResult = await onIntegrateDomain(domain, uploadResult.data!.uuid)
+    const iconReference = uploadResult.data?.cdnUrl ?? uploadResult.data?.uuid
+
+    const domainResult = await onIntegrateDomain(domain, iconReference || '')
 
     if (domainResult) {
       console.log('🎉 Domain created successfully!', domainResult)

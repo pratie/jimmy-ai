@@ -40,6 +40,7 @@ export const onGetCurrentChatBot = async (id: string) => {
       select: {
         helpdesk: true,
         name: true,
+        icon: true,
         chatBot: {
           select: {
             id: true,

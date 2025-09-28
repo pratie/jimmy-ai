@@ -40,6 +40,10 @@ const AiChatBot = (props: Props) => {
     }
   }, [currentBot, iconError, loading])
 
+  useEffect(() => {
+    setIconError(false)
+  }, [currentBot?.chatBot?.icon])
+
   return (
     <div className="h-screen flex flex-col justify-end items-end gap-4">
       {botOpened && (
@@ -57,7 +61,7 @@ const AiChatBot = (props: Props) => {
           register={register}
           onChat={onStartChatting}
           onResponding={onAiTyping}
-          botIcon={currentBot?.chatBot?.icon}
+          botIcon={currentBot?.chatBot?.icon || currentBot?.icon || null}
         />
       )}
       <div
@@ -67,9 +71,9 @@ const AiChatBot = (props: Props) => {
         )}
         onClick={onOpenChatBot}
       >
-        {currentBot?.chatBot?.icon && !iconError ? (
+        {((currentBot?.chatBot?.icon || currentBot?.icon) && !iconError) ? (
           <Image
-            src={getUploadCareUrl(currentBot.chatBot.icon)}
+            src={getUploadCareUrl(currentBot?.chatBot?.icon || currentBot?.icon || '')}
             alt="bot"
             fill
             onError={() => setIconError(true)}

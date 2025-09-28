@@ -3,7 +3,6 @@ import React, { forwardRef, useState } from 'react'
 import { UseFormRegister } from 'react-hook-form'
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'
 import RealTimeMode from './real-time'
-import Image from 'next/image'
 import { getUploadCareUrl } from '@/lib/uploadcare'
 import TabsMenu from '../tabs/intex'
 import { BOT_TABS_MENU } from '@/constants/menu'
@@ -94,9 +93,9 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
             </Avatar>
             <div className="flex items-start flex-col">
               <h3 className="text-lg font-bold leading-none">
-                Sales Rep - Web Prodigies
+                {domainName || 'Sales Rep'}
               </h3>
-              <p className="text-sm">{domainName.split('.com')[0]}</p>
+              <p className="text-sm text-muted-foreground">Chat Assistant</p>
               {realtimeMode?.mode && (
                 <RealTimeMode
                   setChats={setChat}
@@ -104,14 +103,6 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
                 />
               )}
             </div>
-          </div>
-          <div className="relative w-16 h-16">
-            <Image
-              src="https://ucarecdn.com/019dd17d-b69b-4dea-a16b-60e0f25de1e9/propuser.png"
-              fill
-              alt="users"
-              objectFit="contain"
-            />
           </div>
         </div>
         <TabsMenu
@@ -187,9 +178,6 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
             </div>
           </TabsContent>
         </TabsMenu>
-        <div className="flex justify-center ">
-          <p className="text-gray-400 text-xs">Powered By Web Prodigies</p>
-        </div>
       </div>
     )
   }

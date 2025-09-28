@@ -10,7 +10,11 @@ type Props = { params: { domain: string } }
 
 const DomainSettingsPage = async ({ params }: Props) => {
   const domain = await onGetCurrentDomainInfo(params.domain)
-  if (!domain) redirect('/dashboard')
+  if (!domain || !domain.domains.length) {
+    redirect('/dashboard')
+  }
+
+  const activeDomain = domain.domains[0]
 
   return (
     <>
@@ -18,14 +22,14 @@ const DomainSettingsPage = async ({ params }: Props) => {
       <div className="overflow-y-auto w-full chat-window flex-1 h-0">
         <SettingsForm
           plan={domain.subscription?.plan!}
-          chatBot={domain.domains[0].chatBot}
-          id={domain.domains[0].id}
-          name={domain.domains[0].name}
+          chatBot={activeDomain.chatBot}
+          id={activeDomain.id}
+          name={activeDomain.name}
         />
-        <BotTrainingForm id={domain.domains[0].id} />
+        <BotTrainingForm id={activeDomain.id} />
         <ProductTable
-          id={domain.domains[0].id}
-          products={domain.domains[0].products || []}
+          id={activeDomain.id}
+          products={activeDomain.products || []}
         />
       </div>
     </>

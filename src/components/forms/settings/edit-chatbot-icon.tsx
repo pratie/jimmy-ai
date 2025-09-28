@@ -36,7 +36,7 @@ const EditChatbotIcon = ({ register, errors, chatBot }: Props) => {
         errors={errors}
       />
       {chatBot?.icon && !imageError ? (
-        <div className="rounded-full overflow-hidden">
+        <div className="rounded-full overflow-hidden border border-border w-20 h-20">
           <Image
             src={getUploadCareUrl(chatBot.icon)}
             alt="bot"
@@ -44,10 +44,11 @@ const EditChatbotIcon = ({ register, errors, chatBot }: Props) => {
             height={80}
             onError={handleImageError}
             onLoad={() => setImageError(false)}
+            className="object-cover"
           />
         </div>
       ) : (
-        <div className="rounded-full cursor-pointer shadow-md w-20 h-20 flex items-center justify-center bg-grandis">
+        <div className="rounded-full w-20 h-20 flex items-center justify-center bg-muted text-muted-foreground">
           <BotIcon />
         </div>
       )}

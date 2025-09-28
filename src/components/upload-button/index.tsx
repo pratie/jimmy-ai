@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useId, useRef, useState } from 'react'
 import { FieldErrors, FieldValues, UseFormRegister } from 'react-hook-form'
 import { Label } from '../ui/label'
 import { Input } from '../ui/input'
@@ -15,6 +15,8 @@ type Props = {
 const UploadButton = ({ errors, label, register }: Props) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+  const inputId = useId()
+  const inputRef = useRef<HTMLInputElement | null>(null)
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -27,12 +29,16 @@ const UploadButton = ({ errors, label, register }: Props) => {
     }
   }
 
+  const inputRegister = register('image', {
+    onChange: handleFileChange,
+  })
+
   const clearSelection = () => {
     setSelectedFile(null)
     setPreviewUrl(null)
-    // Reset the input
-    const input = document.getElementById('upload-button') as HTMLInputElement
-    if (input) input.value = ''
+    if (inputRef.current) {
+      inputRef.current.value = ''
+    }
   }
 
   return (
@@ -40,16 +46,18 @@ const UploadButton = ({ errors, label, register }: Props) => {
       <div className="flex flex-col gap-3">
         <div className="flex gap-2 items-center">
           <Label
-            htmlFor="upload-button"
+            htmlFor={inputId}
             className="flex gap-2 p-3 rounded-lg bg-cream text-gray-600 cursor-pointer font-semibold text-sm items-center hover:bg-cream/80 transition-colors"
           >
             <Input
-              {...register('image', {
-                onChange: handleFileChange,
-              })}
+              {...inputRegister}
+              ref={(element) => {
+                inputRef.current = element
+                inputRegister.ref(element)
+              }}
               className="hidden"
               type="file"
-              id="upload-button"
+              id={inputId}
               accept="image/*"
             />
             <Edit size={16} />

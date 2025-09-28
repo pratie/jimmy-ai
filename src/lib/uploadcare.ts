@@ -20,18 +20,32 @@ export const validateUploadCareImage = async (uuid: string): Promise<boolean> =>
 
 // Get optimized UploadCare URL with transformations
 export const getUploadCareUrl = (
-  uuid: string,
+  identifier: string,
   transformations?: string
 ): string => {
-  // Use the standard UploadCare CDN format
-  const baseUrl = `https://ucarecdn.com/${uuid}/`
-  return transformations ? `${baseUrl}-/${transformations}/` : baseUrl
+  if (!identifier) return ''
+
+  const isAbsolute = identifier.startsWith('http')
+  const cleanedIdentifier = identifier.trim()
+  const trimmedIdentifier = cleanedIdentifier.replace(/^\/+|\/+$/g, '')
+  const base = isAbsolute
+    ? cleanedIdentifier.replace(/\/+$/g, '')
+    : `https://ucarecdn.com/${trimmedIdentifier}`
+  const normalizedBase = base.endsWith('/') ? base : `${base}/`
+
+  if (!transformations) {
+    return normalizedBase
+  }
+
+  return `${normalizedBase}-/${transformations}/`
 }
 
 // Upload file with error handling
 export const uploadFile = async (file: File) => {
   try {
-    const result = await uploadClient.uploadFile(file)
+    const result = await uploadClient.uploadFile(file, {
+      store: '1',
+    })
     return {
       success: true,
       data: result,
