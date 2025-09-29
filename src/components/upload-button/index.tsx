@@ -79,7 +79,7 @@ const UploadButton = ({ errors, label, register, onUploadComplete }: Props) => {
         <div className="flex gap-2 items-center">
           <Label
             htmlFor={inputId}
-            className="flex gap-2 p-3 rounded-lg bg-cream text-gray-600 cursor-pointer font-semibold text-sm items-center hover:bg-cream/80 transition-colors"
+            className="flex gap-2 p-3 rounded-lg bg-muted text-gray-600 cursor-pointer font-semibold text-sm items-center hover:bg-muted/80 transition-colors"
           >
             <Input
               {...inputRegister}
@@ -106,7 +106,7 @@ const UploadButton = ({ errors, label, register, onUploadComplete }: Props) => {
                 type="button"
                 onClick={handleUpload}
                 disabled={isUploading}
-                className="flex items-center gap-2 px-3 py-1.5 bg-orange-500 text-white text-sm font-medium rounded-md hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="flex items-center gap-2 px-3 py-1.5 bg-primary text-primary-foreground text-sm font-medium rounded-md hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 {isUploading ? (
                   <>

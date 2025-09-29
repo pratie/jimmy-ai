@@ -7,14 +7,20 @@ import { onGetAllAccountDomains } from '../settings'
 export const onCompleteUserRegistration = async (
   fullname: string,
   clerkId: string,
-  type: string
+  type: string,
+  email: string
 ) => {
+  if (!email) {
+    console.error('Registration attempted without email for Clerk user', clerkId)
+    return { status: 400, message: 'Email address is required' }
+  }
   try {
     const registered = await client.user.create({
       data: {
         fullname,
         clerkId,
         type,
+        email,
         subscription: {
           create: {},
         },
@@ -23,6 +29,7 @@ export const onCompleteUserRegistration = async (
         fullname: true,
         id: true,
         type: true,
+        email: true,
       },
     })
 
@@ -50,6 +57,7 @@ export const onLoginUser = async () => {
         fullname: true,
         id: true,
         type: true,
+        email: true,
       },
     })
 
@@ -58,9 +66,18 @@ export const onLoginUser = async () => {
       return { status: 200, user: authenticated, domain: domains?.domains }
     } else {
       // Auto-create user for OAuth sign-ins
-      const fullname = `${user.firstName || ''} ${user.lastName || ''}`.trim() ||
-                      user.emailAddresses[0]?.emailAddress.split('@')[0] ||
-                      'User'
+      const fullname =
+        `${user.firstName || ''} ${user.lastName || ''}`.trim() ||
+        user.emailAddresses[0]?.emailAddress.split('@')[0] ||
+        'User'
+      const primaryEmail =
+        user.primaryEmailAddress?.emailAddress ||
+        user.emailAddresses[0]?.emailAddress
+
+      if (!primaryEmail) {
+        console.error('Unable to determine primary email for Clerk user', user.id)
+        return { status: 400, message: 'Missing email address for user' }
+      }
 
       try {
         const newUser = await client.user.create({
@@ -68,11 +85,13 @@ export const onLoginUser = async () => {
             fullname,
             clerkId: user.id,
             type: 'OWNER',
+            email: primaryEmail,
           },
           select: {
             fullname: true,
             id: true,
             type: true,
+            email: true,
           },
         })
 
@@ -101,6 +120,7 @@ export const onLoginUser = async () => {
               fullname: true,
               id: true,
               type: true,
+              email: true,
             },
           })
 

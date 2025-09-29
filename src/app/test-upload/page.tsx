@@ -74,15 +74,15 @@ export default function TestUploadPage() {
       <h1 className="text-3xl font-bold mb-6 text-gray-900">KIE API Upload Test</h1>
 
       {/* Configuration Status */}
-      <div className="mb-8 p-4 rounded-lg bg-blue-50 border border-blue-200">
-        <h2 className="text-lg font-semibold mb-2 text-blue-900">Configuration Status:</h2>
-        <p className="text-blue-700">
+      <div className="mb-8 p-4 rounded-lg bg-gray-50 border border-gray-200">
+        <h2 className="text-lg font-semibold mb-2 text-gray-900">Configuration Status:</h2>
+        <p className="text-gray-700">
           KIE API Configured: <span className="font-bold">
             {isConfigured === null ? '⏳ Checking...' : isConfigured ? '✅ Yes' : '❌ No'}
           </span>
         </p>
-        <p className="text-sm text-blue-600 mt-1">
-          API Endpoint: <code className="bg-blue-100 px-2 py-1 rounded">https://kieai.redpandaai.co</code>
+        <p className="text-sm text-gray-600 mt-1">
+          API Endpoint: <code className="bg-gray-100 px-2 py-1 rounded">https://kieai.redpandaai.co</code>
         </p>
       </div>
 
@@ -95,7 +95,7 @@ export default function TestUploadPage() {
             onChange={handleFileUpload}
             accept="image/*"
             disabled={isUploading}
-            className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100 disabled:opacity-50"
+            className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-50 file:text-red-700 hover:file:bg-red-100 disabled:opacity-50"
           />
           <p className="text-sm text-gray-500">
             Select an image file to upload via KIE API (Base64 method)
@@ -114,12 +114,12 @@ export default function TestUploadPage() {
               onChange={(e) => setUploadFromUrl(e.target.value)}
               placeholder="https://example.com/image.jpg"
               disabled={isUploading}
-              className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 disabled:opacity-50"
+              className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50"
             />
             <button
               onClick={handleUrlUpload}
               disabled={isUploading || !uploadFromUrl.trim()}
-              className="px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Upload
             </button>
@@ -169,7 +169,7 @@ export default function TestUploadPage() {
                           href={file.downloadUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-blue-500 hover:text-blue-700 underline ml-1 break-all"
+                          className="text-primary hover:text-primary/90 underline ml-1 break-all"
                         >
                           {file.downloadUrl}
                         </a>
