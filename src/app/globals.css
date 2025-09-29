@@ -7,7 +7,7 @@ img {
 }
 
 body {
-  background: #FFFAEB;
+  background: #FFFEF9;
   position: relative;
 }
 
@@ -28,7 +28,7 @@ body::before {
     ),
     linear-gradient(90deg, transparent 0, transparent 40px, #E8B4B8 40px, #E8B4B8 42px, transparent 42px);
   background-size: 100% 30px, 100% 100%;
-  opacity: 0.15;
+  opacity: 0.08;
   pointer-events: none;
   z-index: 0;
 }
