@@ -14,9 +14,13 @@ type Props = {
       }[]
     | null
     | undefined
+  user?: {
+    fullname: string
+    email: string
+  } | null
 }
 
-const SideBar = ({ domains }: Props) => {
+const SideBar = ({ domains, user }: Props) => {
   const { expand, onExpand, page, onSignOut } = useSideBar()
 
   return (
@@ -35,6 +39,7 @@ const SideBar = ({ domains }: Props) => {
           current={page!}
           onExpand={onExpand}
           onSignOut={onSignOut}
+          user={user}
         />
       ) : (
         <MinMenu
@@ -42,6 +47,7 @@ const SideBar = ({ domains }: Props) => {
           onShrink={onExpand}
           current={page!}
           onSignOut={onSignOut}
+          user={user}
         />
       )}
     </div>

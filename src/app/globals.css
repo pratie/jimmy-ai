@@ -7,7 +7,30 @@ img {
 }
 
 body {
-  background: transparent;
+  background: #FFFAEB;
+  position: relative;
+}
+
+/* Notebook lines background - subtle */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image:
+    repeating-linear-gradient(
+      transparent,
+      transparent 29px,
+      #B8D4E8 29px,
+      #B8D4E8 30px
+    ),
+    linear-gradient(90deg, transparent 0, transparent 40px, #E8B4B8 40px, #E8B4B8 42px, transparent 42px);
+  background-size: 100% 30px, 100% 100%;
+  opacity: 0.15;
+  pointer-events: none;
+  z-index: 0;
 }
 
 .chat-window::-webkit-scrollbar {
@@ -21,33 +44,33 @@ body {
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 224 71.4% 4.1%;
+    --background: 45 100% 97%; /* notebook yellow */
+    --foreground: 356 64% 51%; /* sketch red */
 
-    --card: 0 0% 100%;
-    --card-foreground: 224 71.4% 4.1%;
+    --card: 45 100% 97%;
+    --card-foreground: 356 64% 51%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 224 71.4% 4.1%;
+    --popover: 45 100% 97%;
+    --popover-foreground: 356 64% 51%;
 
-    --primary: 346.8 77.2% 49.8%;
-    --primary-foreground: 355.7 100% 97.3%;
+    --primary: 356 64% 51%; /* sketch red */
+    --primary-foreground: 45 100% 97%;
 
-    --secondary: 220 13% 91%;
-    --secondary-foreground: 220.9 39.3% 11%;
+    --secondary: 45 100% 95%;
+    --secondary-foreground: 356 64% 51%;
 
-    --muted: 220 13% 91%;
-    --muted-foreground: 220 8.9% 46.1%;
+    --muted: 45 100% 95%;
+    --muted-foreground: 356 30% 40%;
 
-    --accent: 220 13% 91%;
-    --accent-foreground: 220.9 39.3% 11%;
+    --accent: 356 64% 51%;
+    --accent-foreground: 45 100% 97%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: 346.8 77.2% 49.8%;
+    --border: 356 30% 80%;
+    --input: 45 100% 95%;
+    --ring: 356 64% 51%;
 
     --radius: 0.5rem;
   }
@@ -89,6 +112,10 @@ body {
   }
   body {
     @apply bg-background text-foreground;
+  }
+  main, #__next, #root {
+    position: relative;
+    z-index: 1;
   }
 }
 

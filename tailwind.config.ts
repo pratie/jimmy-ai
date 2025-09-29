@@ -19,7 +19,10 @@ const config = {
     },
     extend: {
       colors: {
-        cream: '#F5F5F5',
+        cream: '#FFFAEB',
+        'notebook-yellow': '#FFFAEB',
+        'sketch-red': '#D63031',
+        'line-blue': '#B8D4E8',
         gravel: '#4E4E4E',
         iridium: '#3F3F3F',
         orange: '#FFA947',
