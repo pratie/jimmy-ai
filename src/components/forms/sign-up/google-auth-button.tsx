@@ -1,25 +1,71 @@
 'use client'
 import { Button } from '@/components/ui/button'
+import { useToast } from '@/components/ui/use-toast'
 import { useSignUp } from '@clerk/nextjs'
 import { useState } from 'react'
 
 const GoogleAuthButton = () => {
   const { signUp, isLoaded } = useSignUp()
+  const { toast } = useToast()
   const [loading, setLoading] = useState(false)
+  const oauthCallbackUrl =
+    process.env.NEXT_PUBLIC_CLERK_OAUTH_CALLBACK_URL || '/auth/sso-callback'
+  const redirectUrlComplete =
+    process.env.NEXT_PUBLIC_CLERK_SIGN_UP_FALLBACK_REDIRECT_URL || '/dashboard'
 
   const signUpWithGoogle = async () => {
-    if (!isLoaded) return
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[Google OAuth Sign-Up] Starting authentication process...')
+      console.log('[Google OAuth Sign-Up] Clerk loaded status:', isLoaded)
+      console.log('[Google OAuth Sign-Up] SignUp object available:', !!signUp)
+    }
+
+    if (!isLoaded || !signUp) {
+      console.error('[Google OAuth Sign-Up] Clerk is not loaded yet or signUp not available')
+      toast({
+        title: 'Authentication Error',
+        description: 'Authentication service is not ready. Please refresh the page.',
+        variant: 'destructive',
+      })
+      return
+    }
 
     try {
       setLoading(true)
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[Google OAuth Sign-Up] Initiating OAuth with Clerk v5 flow...')
+      }
+
+      // Clerk v5 OAuth flow - proper callback pattern
       await signUp.authenticateWithRedirect({
         strategy: 'oauth_google',
-        redirectUrl: '/dashboard',
-        redirectUrlComplete: '/dashboard',
+        redirectUrl: oauthCallbackUrl,
+        redirectUrlComplete,
       })
-    } catch (error) {
-      console.error('Google sign-up error:', error)
+
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[Google OAuth Sign-Up] OAuth redirect initiated')
+      }
+    } catch (error: any) {
+      console.error('[Google OAuth Sign-Up] Error:', error?.message || error)
       setLoading(false)
+
+      // Show user-friendly error message
+      const errorMessage = error?.errors?.[0]?.message || error?.message || 'Failed to start Google authentication'
+
+      toast({
+        title: 'Authentication Failed',
+        description: errorMessage,
+        variant: 'destructive',
+      })
+
+      if (process.env.NODE_ENV === 'development') {
+        console.error('[Google OAuth Sign-Up] Error details:', {
+          message: error?.message,
+          code: error?.code,
+          errors: error?.errors,
+        })
+      }
     }
   }
 
