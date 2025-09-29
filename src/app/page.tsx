@@ -89,7 +89,7 @@ export default async function Home() {
               Pricing That Scales With You
             </h2>
             <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-              Simple, transparent pricing. No hidden fees. Choose the plan that's right for your business.
+              Simple, transparent pricing. No hidden fees. Choose the plan that&apos;s right for your business.
             </p>
           </div>
 

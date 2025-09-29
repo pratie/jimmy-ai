@@ -71,8 +71,9 @@ export const onLoginUser = async () => {
         user.emailAddresses[0]?.emailAddress.split('@')[0] ||
         'User'
       const primaryEmail =
-        user.primaryEmailAddress?.emailAddress ||
-        user.emailAddresses[0]?.emailAddress
+        user.emailAddresses.find(
+          (address) => address.id === user.primaryEmailAddressId
+        )?.emailAddress || user.emailAddresses[0]?.emailAddress
 
       if (!primaryEmail) {
         console.error('Unable to determine primary email for Clerk user', user.id)
