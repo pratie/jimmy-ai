@@ -48,6 +48,7 @@ const useSideBar = () => {
     if (chatRoom) {
       onGetCurrentMode()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chatRoom])
 
   const page = pathname.split('/').pop()

@@ -60,6 +60,7 @@ const PortalForm = ({
     if (questions.every((question) => question.answered)) {
       onNext()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return (

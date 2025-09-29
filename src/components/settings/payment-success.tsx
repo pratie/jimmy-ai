@@ -22,6 +22,7 @@ const PaymentSuccess = ({ plan, subscriptionId, status }: Props) => {
     if (plan && status === 'active') {
       handleSubscriptionUpdate()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [plan, status])
 
   const handleSubscriptionUpdate = async () => {

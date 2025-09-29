@@ -63,10 +63,10 @@ export default async function Home() {
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-              Work Less. Earn More. It's That Simple.
+              Work Less. Earn More. It&apos;s That Simple.
             </h2>
             <p className="text-gray-600 text-lg max-w-3xl mx-auto">
-              While your competitors waste time on manual follow-ups, you'll be closing deals in your sleep. Icon AI works 24/7 so you don't have to.
+              While your competitors waste time on manual follow-ups, you&apos;ll be closing deals in your sleep. Icon AI works 24/7 so you don&apos;t have to.
             </p>
           </div>
 
@@ -80,7 +80,7 @@ export default async function Home() {
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-3">Never Miss a Lead Again</h3>
               <p className="text-gray-600 mb-4">
-                Every visitor who lands on your site at 2 AM? Captured. Every question while you're in a meeting? Answered. Your AI assistant never sleeps, never takes breaks, and never forgets to follow up.
+                Every visitor who lands on your site at 2 AM? Captured. Every question while you&apos;re in a meeting? Answered. Your AI assistant never sleeps, never takes breaks, and never forgets to follow up.
               </p>
               <p className="text-red-600 font-semibold">
                 Average result: 3x more qualified leads per month
@@ -96,7 +96,7 @@ export default async function Home() {
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-3">Stop Playing Phone Tag</h3>
               <p className="text-gray-600 mb-4">
-                No more back-and-forth emails. No more "when are you free?" No more lost opportunities. Icon AI books appointments instantly, syncs with your calendar, and sends reminders automatically.
+                No more back-and-forth emails. No more &quot;when are you free?&quot; No more lost opportunities. Icon AI books appointments instantly, syncs with your calendar, and sends reminders automatically.
               </p>
               <p className="text-red-600 font-semibold">
                 Save 15+ hours per week on scheduling
@@ -112,7 +112,7 @@ export default async function Home() {
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-3">Answer Questions Before They Bounce</h3>
               <p className="text-gray-600 mb-4">
-                73% of visitors leave if they can't find answers fast. Your AI responds in seconds with personalized answers to pricing, features, and objections—turning "just browsing" into "ready to buy."
+                73% of visitors leave if they can&apos;t find answers fast. Your AI responds in seconds with personalized answers to pricing, features, and objections—turning &quot;just browsing&quot; into &quot;ready to buy.&quot;
               </p>
               <p className="text-red-600 font-semibold">
                 Reduce bounce rate by up to 40%
