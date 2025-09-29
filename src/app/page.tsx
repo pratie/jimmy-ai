@@ -21,7 +21,7 @@ export default async function Home() {
 
       {/* Hero Section */}
       <section className="relative overflow-hidden">
-                <div className="relative flex items-center justify-center flex-col mt-[80px] gap-6 px-4">
+                <div className="relative flex items-center justify-center flex-col pt-24 md:pt-[80px] gap-6 px-4">
           <span className="text-red-600 bg-red-100 px-6 py-3 rounded-full text-sm font-semibold">
             🚀 Transform Your Business with AI
           </span>
@@ -32,14 +32,14 @@ export default async function Home() {
               width={500}
               height={100}
               alt="Icon AI Logo"
-              className="max-w-lg object-contain mx-auto"
+              className="max-w-xs sm:max-w-lg object-contain mx-auto"
             />
 
-            <h1 className="text-5xl md:text-6xl font-bold text-gray-900 leading-tight">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-900 leading-tight">
               Automate. Engage. Grow.
             </h1>
 
-            <p className="text-gray-700 text-xl max-w-[600px] mx-auto leading-relaxed">
+            <p className="text-gray-700 text-lg md:text-xl max-w-[600px] mx-auto leading-relaxed">
               Deploy Icon AI on your website to capture leads 24/7, book appointments automatically, and provide instant support.
               <span className="text-gray-900 font-bold"> Stop losing customers. Start closing deals.</span>
             </p>
@@ -70,7 +70,7 @@ export default async function Home() {
       <section className="bg-white py-20 mt-20">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-6">
               Your All-In-One Customer Interaction Platform
             </h2>
             <p className="text-gray-600 text-lg max-w-3xl mx-auto">
@@ -85,7 +85,7 @@ export default async function Home() {
       <section className="bg-gray-50 py-20 mt-20">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-6">
               Pricing That Scales With You
             </h2>
             <p className="text-gray-600 text-lg max-w-2xl mx-auto">
@@ -98,7 +98,7 @@ export default async function Home() {
               <Card
                 key={card.title}
                 className={clsx(
-                  'w-[320px] flex flex-col justify-between bg-white shadow-xl rounded-2xl overflow-hidden transition-all duration-300 hover:transform hover:scale-105 hover:shadow-2xl',
+                  'w-full max-w-[320px] sm:w-[320px] flex flex-col justify-between bg-white shadow-xl rounded-2xl overflow-hidden transition-all duration-300 hover:transform hover:scale-105 hover:shadow-2xl',
                   {
                     'border-2 border-red-600 relative': card.title === 'Unlimited',
                   }
