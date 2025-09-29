@@ -200,6 +200,7 @@ export const useHelpDesk = (id: string) => {
 
   useEffect(() => {
     onGetQuestions()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return {
@@ -251,6 +252,7 @@ export const useFilterQuestions = (id: string) => {
 
   useEffect(() => {
     onGetQuestions()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return {

@@ -118,10 +118,12 @@ export const useChatTime = (createdAt: Date, roomId: string) => {
 
   useEffect(() => {
     onSeenChat()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chatRoom])
 
   useEffect(() => {
     onSetMessageRecievedDate()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return { messageSentAt, urgent, onSeenChat }
@@ -158,6 +160,7 @@ export const useChatWindow = () => {
         pusherClient.unsubscribe(chatRoom)
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chatRoom])
 
   const onHandleSentMessage = handleSubmit(async (values) => {

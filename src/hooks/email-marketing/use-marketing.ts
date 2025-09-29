@@ -173,6 +173,7 @@ export const useAnswers = (id: string) => {
 
   useEffect(() => {
     onGetCustomerAnswers()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return { answers, loading }
@@ -197,7 +198,8 @@ export const useEditEmail = (id: string) => {
 
   useEffect(() => {
     onGetTemplate(id)
-  }, [])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id])
 
   return { loading, template }
 }

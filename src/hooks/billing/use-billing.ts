@@ -75,6 +75,7 @@ export const useDodoCustomer = (
     if (products.length > 0) {
       onCreatePaymentLink()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [products])
 
   return { paymentLink, loadForm }
@@ -165,6 +166,7 @@ export const useDodoSubscription = (payment: 'STANDARD' | 'PRO' | 'ULTIMATE') =>
 
   useEffect(() => {
     onGetSubscriptionLink(payment)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [payment])
 
   return { paymentLink, loadForm }
