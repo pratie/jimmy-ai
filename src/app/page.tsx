@@ -158,7 +158,7 @@ export default async function Home() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">Know Exactly What's Working</h3>
+              <h3 className="text-xl font-bold text-gray-900 mb-3">Know Exactly What&apos;s Working</h3>
               <p className="text-gray-600 mb-4">
                 No more guessing games. See exactly how many leads you captured, which messages convert best, and your ROI in real-time. Make data-driven decisions that actually move the needle.
               </p>
