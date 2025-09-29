@@ -90,8 +90,7 @@ export const onLoginUser = async () => {
       }
 
       // Get full user object from Clerk
-      const clerk = clerkClient()
-      const user = await clerk.users.getUser(userId)
+      const user = await clerkClient.users.getUser(userId)
 
       // Auto-create user for OAuth sign-ins
 
