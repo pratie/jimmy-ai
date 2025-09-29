@@ -1,8 +1,7 @@
 'use server'
 
 import { client } from '@/lib/prisma'
-import { auth } from '@clerk/nextjs/server'
-import { clerkClient } from '@clerk/nextjs/server'
+import { auth, currentUser } from '@clerk/nextjs/server'
 import { onGetAllAccountDomains } from '../settings'
 
 export const onCompleteUserRegistration = async (
@@ -55,7 +54,7 @@ export const onLoginUser = async () => {
     console.log('[Auth] onLoginUser called')
   }
   try {
-    const { userId } = auth()
+    const { userId } = await auth()
 
     if (!userId) {
       console.log('[Auth] No authenticated user found')
@@ -89,10 +88,13 @@ export const onLoginUser = async () => {
         console.log('[Auth] User not in database, auto-creating for OAuth sign-in...')
       }
 
-      // Get full user object from Clerk
-      const user = await clerkClient.users.getUser(userId)
+      // Get full user object from Clerk for OAuth auto-creation
+      const user = await currentUser()
 
-      // Auto-create user for OAuth sign-ins
+      if (!user) {
+        console.error('[Auth] Could not fetch user details from Clerk')
+        return { status: 400, message: 'Unable to retrieve user information' }
+      }
 
       // Validate that user has email addresses
       if (!user.emailAddresses || user.emailAddresses.length === 0) {

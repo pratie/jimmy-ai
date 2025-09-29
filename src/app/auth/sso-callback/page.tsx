@@ -4,9 +4,6 @@ import { AuthenticateWithRedirectCallback } from '@clerk/nextjs'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
-const signInFallback = process.env.NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL || '/dashboard'
-const signUpFallback = process.env.NEXT_PUBLIC_CLERK_SIGN_UP_FALLBACK_REDIRECT_URL || '/dashboard'
-
 export default function SSOCallback() {
   const router = useRouter()
   const [error, setError] = useState<string | null>(null)
@@ -66,10 +63,7 @@ export default function SSOCallback() {
           <p className="text-gray-600">Please wait while we sign you in</p>
         </div>
       </div>
-      <AuthenticateWithRedirectCallback
-        signInFallbackRedirectUrl={signInFallback}
-        signUpFallbackRedirectUrl={signUpFallback}
-      />
+      <AuthenticateWithRedirectCallback />
     </div>
   )
 }

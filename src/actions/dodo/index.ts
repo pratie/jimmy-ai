@@ -1,7 +1,7 @@
 'use server'
 
 import { client } from '@/lib/prisma'
-import { currentUser } from '@clerk/nextjs'
+import { currentUser } from '@clerk/nextjs/server'
 
 // Dodo Payments Configuration
 const DODO_API_BASE = process.env.NEXT_PUBLIC_DODO_API_URL || 'https://test.dodopayments.com'

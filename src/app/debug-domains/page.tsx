@@ -1,5 +1,5 @@
 import { onGetAllAccountDomains } from '@/actions/settings'
-import { currentUser } from '@clerk/nextjs'
+import { currentUser } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 
 const DebugDomainsPage = async () => {
