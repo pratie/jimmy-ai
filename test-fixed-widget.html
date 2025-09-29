@@ -161,7 +161,7 @@
         window.addEventListener("message", (e) => {
             console.log('📨 Message received:', e.data, 'from:', e.origin);
 
-            if(e.origin !== "http://localhost:3000") {
+            if(e.origin !== "https://icon--ai.com//") {
                 console.log('🚫 Ignored message from wrong origin');
                 return null;
             }
@@ -175,7 +175,7 @@
 
                 // Send domain ID
                 console.log('🔑 Sending domain ID to chatbot...');
-                iframe.contentWindow.postMessage("56f8bc20-8d78-427f-bd17-9156354471b1", "http://localhost:3000/");
+                iframe.contentWindow.postMessage("f7c3a9a8-9624-479d-bebd-8a183d0ab55c", "https://icon--ai.com//");
 
             } catch (error) {
                 console.log('📨 Non-JSON message:', e.data);

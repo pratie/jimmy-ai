@@ -10,7 +10,7 @@ type Props = {
 
 const CodeSnippet = ({ id }: Props) => {
   const { toast } = useToast()
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+  const appUrl = (process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000').replace(/\/$/, '')
 
   let snippet = `
     const iframe = document.createElement("iframe");
@@ -39,7 +39,7 @@ const CodeSnippet = ({ id }: Props) => {
         let dimensions = JSON.parse(e.data)
         iframe.width = dimensions.width
         iframe.height = dimensions.height
-        iframe.contentWindow.postMessage("${id}", "${appUrl}/")
+        iframe.contentWindow.postMessage("${id}", "${appUrl}")
     })
         `
 
