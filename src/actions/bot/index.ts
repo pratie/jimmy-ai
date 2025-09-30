@@ -11,6 +11,8 @@ import OpenAi from 'openai'
 
 const openai = new OpenAi({
   apiKey: process.env.OPEN_AI_KEY,
+  timeout: 30000, // 30 second timeout to prevent long waits
+  maxRetries: 2, // Retry failed requests twice
 })
 
 export const onStoreConversations = async (
@@ -110,26 +112,16 @@ export const onAiChatBotAssistant = async (
 
       // Handle anonymous conversations (no email yet)
       if (!customerEmail && anonymousId) {
-        // Check if anonymous chat room exists
-        let anonymousChatRoom = await client.chatRoom.findFirst({
-          where: {
-            anonymousId: anonymousId,
-            domainId: id,
-            customerId: null, // Ensure it's still anonymous
-          },
-          select: {
-            id: true,
-            live: true,
-            mailed: true,
-          },
-        })
+        // Declare outside try-catch so it's accessible throughout the block
+        let anonymousChatRoom
 
-        // Create anonymous chat room if doesn't exist
-        if (!anonymousChatRoom) {
-          const newChatRoom = await client.chatRoom.create({
-            data: {
+        try {
+          // Check if anonymous chat room exists
+          anonymousChatRoom = await client.chatRoom.findFirst({
+            where: {
               anonymousId: anonymousId,
               domainId: id,
+              customerId: null, // Ensure it's still anonymous
             },
             select: {
               id: true,
@@ -137,15 +129,38 @@ export const onAiChatBotAssistant = async (
               mailed: true,
             },
           })
-          anonymousChatRoom = newChatRoom
-        }
 
-        // Store the message
-        await onStoreConversations(
-          anonymousChatRoom.id,
-          message,
-          author
-        )
+          // Create anonymous chat room if doesn't exist
+          if (!anonymousChatRoom) {
+            const newChatRoom = await client.chatRoom.create({
+              data: {
+                anonymousId: anonymousId,
+                domainId: id,
+              },
+              select: {
+                id: true,
+                live: true,
+                mailed: true,
+              },
+            })
+            anonymousChatRoom = newChatRoom
+          }
+
+          // Store the message
+          await onStoreConversations(
+            anonymousChatRoom.id,
+            message,
+            author
+          )
+        } catch (error) {
+          console.error('[Bot] Anonymous chat error:', error)
+          return {
+            response: {
+              role: 'assistant',
+              content: 'Sorry, I encountered an error. Please try again in a moment.',
+            },
+          }
+        }
 
         // Check if live mode is active
         if (anonymousChatRoom.live) {

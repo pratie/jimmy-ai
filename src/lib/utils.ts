@@ -28,6 +28,9 @@ export const pusherClient = new PusherClient(
   }
 )
 
+// Send dimension updates to parent window
+// Note: Uses wildcard '*' origin because iframe can be embedded on any customer domain
+// This is safe - only sends non-sensitive dimension data: {width: number, height: number}
 export const postToParent = (message: string) => {
   window.parent.postMessage(message, '*')
 }

@@ -111,15 +111,36 @@ export const useChatBot = () => {
       }
       setCurrentBot(chatbot)
       setLoading(false)
+    } else {
+      // Chatbot not found - show error message
+      console.error('[Chatbot] Domain not found:', id)
+      setOnChats([{
+        role: 'assistant',
+        content: 'Configuration error. Please contact support.'
+      }])
+      setLoading(false)
     }
   }
 
   useEffect(() => {
     let handled = false
+    const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+
     const handleMessage = (e: MessageEvent) => {
       console.log(e.data)
       const botid = e.data
       if (!handled && typeof botid === 'string') {
+        // Validate UUID format
+        if (!UUID_REGEX.test(botid)) {
+          console.error('[Chatbot] Invalid domain ID format:', botid)
+          setOnChats([{
+            role: 'assistant',
+            content: 'Configuration error: Invalid domain ID. Please check your embed code.'
+          }])
+          setLoading(false)
+          return
+        }
+
         handled = true
         onGetDomainChatBot(botid)
       }

@@ -64,25 +64,28 @@ const AiChatBot = (props: Props) => {
           botIcon={currentBot?.chatBot?.icon || currentBot?.icon || null}
         />
       )}
-      <div
-        className={cn(
-          'rounded-full relative cursor-pointer shadow-md w-20 h-20 flex items-center justify-center bg-grandis',
-          loading ? 'invisible' : 'visible'
-        )}
-        onClick={onOpenChatBot}
-      >
-        {((currentBot?.chatBot?.icon || currentBot?.icon) && !iconError) ? (
-          <Image
-            src={getKieImageUrl(currentBot?.chatBot?.icon || currentBot?.icon || '')}
-            alt="bot"
-            fill
-            onError={() => setIconError(true)}
-            onLoad={() => setIconError(false)}
-          />
-        ) : (
-          <BotIcon />
-        )}
-      </div>
+      {loading ? (
+        <div className="rounded-full relative shadow-md w-20 h-20 flex items-center justify-center bg-grandis animate-pulse">
+          <div className="w-8 h-8 border-4 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
+        </div>
+      ) : (
+        <div
+          className="rounded-full relative cursor-pointer shadow-md w-20 h-20 flex items-center justify-center bg-grandis"
+          onClick={onOpenChatBot}
+        >
+          {((currentBot?.chatBot?.icon || currentBot?.icon) && !iconError) ? (
+            <Image
+              src={getKieImageUrl(currentBot?.chatBot?.icon || currentBot?.icon || '')}
+              alt="bot"
+              fill
+              onError={() => setIconError(true)}
+              onLoad={() => setIconError(false)}
+            />
+          ) : (
+            <BotIcon />
+          )}
+        </div>
+      )}
     </div>
   )
 }
