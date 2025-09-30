@@ -72,11 +72,15 @@ export const getUserAppointments = async () => {
   }
 }
 
+// Get user's balance from Dodo Payments
+// NOTE: Feature temporarily disabled - will be implemented with Dodo Payments API
+// When implementing, use: GET https://test.dodopayments.com/payments?status=succeeded
+// See documentation: https://docs.dodopayments.com/api-reference/payments/get-payments
 export const getUserBalance = async () => {
   try {
     const user = await currentUser()
     if (user) {
-      const connectedStripe = await client.user.findUnique({
+      const connectedDodo = await client.user.findUnique({
         where: {
           clerkId: user.id,
         },
@@ -85,25 +89,19 @@ export const getUserBalance = async () => {
         },
       })
 
-      if (connectedStripe) {
-        // TODO: Implement Dodo Payments transaction retrieval
-        // For now, return mock data to prevent errors
-        const transactions = {
-          pending: [{ amount: 0, currency: 'usd' }],
-          available: [{ amount: 0, currency: 'usd' }]
-        }
-
-        if (transactions) {
-          const sales = transactions.pending.reduce((total, next) => {
-            return total + next.amount
-          }, 0)
-
-          return sales / 100
-        }
+      if (connectedDodo?.dodoMerchantId) {
+        // IMPLEMENTATION PLACEHOLDER:
+        // 1. Fetch: GET /payments?status=succeeded&brand_id={merchantId}
+        // 2. Sum: payments.reduce((sum, p) => sum + p.total_amount, 0)
+        // 3. Return: total / 100 (convert cents to dollars)
+        return 0 // Returns $0 until feature is enabled
       }
+      return 0
     }
+    return 0
   } catch (error) {
     console.log(error)
+    return 0 // Safe fallback
   }
 }
 
@@ -172,11 +170,15 @@ export const getUserTotalProductPrices = async () => {
   }
 }
 
+// Get user's transaction history from Dodo Payments
+// NOTE: Feature temporarily disabled - will be implemented with Dodo Payments API
+// When implementing, use: GET https://test.dodopayments.com/payments
+// See documentation: https://docs.dodopayments.com/api-reference/payments/get-payments
 export const getUserTransactions = async () => {
   try {
     const user = await currentUser()
     if (user) {
-      const connectedStripe = await client.user.findUnique({
+      const connectedDodo = await client.user.findUnique({
         where: {
           clerkId: user.id,
         },
@@ -185,18 +187,18 @@ export const getUserTransactions = async () => {
         },
       })
 
-      if (connectedStripe) {
-        // TODO: Implement Dodo Payments charge list retrieval
-        // For now, return mock data to prevent errors
-        const transactions = {
-          data: [] // Empty array for now - will be populated with Dodo transaction data
-        }
-        if (transactions) {
-          return transactions
-        }
+      if (connectedDodo?.dodoMerchantId) {
+        // IMPLEMENTATION PLACEHOLDER:
+        // 1. Fetch: GET /payments?page_size=100&status=succeeded
+        // 2. Transform to: { id, amount, status, customer_email, created }
+        // 3. Return: { data: transactions }
+        return { data: [] } // Returns empty array until feature is enabled
       }
+      return { data: [] }
     }
+    return { data: [] }
   } catch (error) {
     console.log(error)
+    return { data: [] } // Safe fallback
   }
 }

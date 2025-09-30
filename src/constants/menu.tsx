@@ -25,11 +25,12 @@ export const SIDE_BAR_MENU: SIDE_BAR_MENU_PROPS[] = [
     icon: <ChatIcon />,
     path: 'conversation',
   },
-  {
-    label: 'Integrations',
-    icon: <IntegrationsIcon />,
-    path: 'integration',
-  },
+  // Integrations temporarily hidden - will be re-enabled later
+  // {
+  //   label: 'Integrations',
+  //   icon: <IntegrationsIcon />,
+  //   path: 'integration',
+  // },
   {
     label: 'Settings',
     icon: <SettingsIcon />,
