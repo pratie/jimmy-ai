@@ -4,7 +4,6 @@ import { getKieImageUrl } from '@/lib/kie-api'
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'
 import { User } from 'lucide-react'
 import Image from 'next/image'
-import Link from 'next/link'
 
 type Props = {
   message: {
@@ -86,13 +85,14 @@ const Bubble = ({ message, createdAt }: Props) => {
           <p className="text-sm">
             {message.content.replace('(complete)', ' ')}
             {message.link && (
-              <Link
+              <a
                 className="underline font-bold pl-2"
                 href={message.link}
                 target="_blank"
+                rel="noopener noreferrer"
               >
                 Your Link
-              </Link>
+              </a>
             )}
           </p>
         )}
