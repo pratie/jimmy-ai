@@ -28,9 +28,18 @@ export const useDomain = () => {
     console.log('🚀 Form submission started!')
 
     const formData = new FormData(e.target as HTMLFormElement)
-    const domain = formData.get('domain') as string
+    let domain = formData.get('domain') as string
     const imageFile = formData.get('image') as File
     const imageUrl = formData.get('imageUrl') as string
+
+    // Clean domain: remove protocol and trailing slashes
+    if (domain) {
+      domain = domain
+        .replace(/^https?:\/\//, '') // Remove http:// or https://
+        .replace(/^www\./, '')       // Remove www.
+        .replace(/\/.*$/, '')        // Remove everything after first /
+        .trim()
+    }
 
     console.log('📝 Form data:', {
       domain,

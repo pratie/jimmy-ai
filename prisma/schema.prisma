@@ -55,6 +55,17 @@ model ChatBot {
   background     String?
   textColor      String?
   helpdesk       Boolean @default(false)
+
+  // Knowledge Base fields for website scraping
+  knowledgeBase          String?   @db.Text
+  knowledgeBaseUpdatedAt DateTime?
+  knowledgeBaseStatus    String?   @default("pending")
+
+  // LLM Modes system fields
+  mode      String? @default("SALES")
+  brandTone String? @default("friendly, concise")
+  language  String? @default("en")
+
   Domain         Domain? @relation(fields: [domainId], references: [id], onDelete: Cascade)
   domainId       String? @unique @db.Uuid
 }

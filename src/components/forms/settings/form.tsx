@@ -7,9 +7,11 @@ import CodeSnippet from './code-snippet'
 import PremiumBadge from '@/icons/premium-badge'
 import EditChatbotIcon from './edit-chatbot-icon'
 import dynamic from 'next/dynamic'
-import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Loader } from '@/components/loader'
+import KnowledgeBaseViewer from '@/components/settings/knowledge-base-viewer'
+import { BotModeSelector } from '@/components/settings/bot-mode-selector'
+import { BrandVoiceSettings } from '@/components/settings/brand-voice-settings'
 
 const WelcomeMessage = dynamic(
   () => import('./greetings-message').then((props) => props.default),
@@ -26,6 +28,12 @@ type Props = {
     id: string
     icon: string | null
     welcomeMessage: string | null
+    knowledgeBase: string | null
+    knowledgeBaseStatus: string | null
+    knowledgeBaseUpdatedAt: Date | null
+    mode: string | null
+    brandTone: string | null
+    language: string | null
   } | null
 }
 
@@ -62,7 +70,7 @@ const SettingsForm = ({ id, name, chatBot, plan }: Props) => {
           </div>
         </div>
         <Separator orientation="horizontal" />
-        <div className="grid md:grid-cols-2">
+        <div className="grid md:grid-cols-2 gap-6">
           <div className="col-span-1 flex flex-col gap-5 order-last md:order-first">
             <EditChatbotIcon
               chatBot={chatBot}
@@ -75,17 +83,39 @@ const SettingsForm = ({ id, name, chatBot, plan }: Props) => {
               errors={errors}
             />
           </div>
-          <div className="col-span-1 relative ">
-            <Image
-              src="/images/bot-ui.png"
-              className="sticky top-0"
-              alt="bot-ui"
-              width={530}
-              height={769}
+          <div className="col-span-1">
+            <KnowledgeBaseViewer
+              domainId={id}
+              domainName={name}
+              knowledgeBase={chatBot?.knowledgeBase || null}
+              status={chatBot?.knowledgeBaseStatus || null}
+              updatedAt={chatBot?.knowledgeBaseUpdatedAt || null}
             />
           </div>
         </div>
       </div>
+
+      {/* AI Mode & Brand Voice Settings */}
+      <div className="flex flex-col gap-3 mt-5">
+        <h2 className="font-bold text-2xl">AI Behavior Settings</h2>
+        <Separator orientation="horizontal" />
+        <div className="grid md:grid-cols-2 gap-6">
+          <div className="col-span-1">
+            <BotModeSelector
+              domainId={id}
+              currentMode={chatBot?.mode || null}
+            />
+          </div>
+          <div className="col-span-1">
+            <BrandVoiceSettings
+              domainId={id}
+              currentBrandTone={chatBot?.brandTone || null}
+              currentLanguage={chatBot?.language || null}
+            />
+          </div>
+        </div>
+      </div>
+
       <div className="flex gap-5 justify-end">
         <Button
           onClick={onDeleteDomain}

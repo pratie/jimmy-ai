@@ -2,6 +2,8 @@
 
 import { client } from '@/lib/prisma'
 import { extractEmailsFromString, extractURLfromString } from '@/lib/utils'
+import { truncateMarkdown } from '@/lib/firecrawl'
+import { buildSystemPrompt } from '@/lib/promptBuilder'
 import { onRealTimeChat } from '../conversation'
 import { clerkClient } from '@clerk/nextjs/server'
 import { onMailer } from '../mailer'
@@ -85,6 +87,14 @@ export const onAiChatBotAssistant = async (
             question: true,
           },
         },
+        chatBot: {
+          select: {
+            knowledgeBase: true,
+            mode: true,
+            brandTone: true,
+            language: true,
+          },
+        },
       },
     })
     if (chatBotDomain) {
@@ -92,6 +102,10 @@ export const onAiChatBotAssistant = async (
       if (extractedEmail) {
         customerEmail = extractedEmail[0]
       }
+
+      const knowledgeBase = chatBotDomain.chatBot?.knowledgeBase
+        ? truncateMarkdown(chatBotDomain.chatBot.knowledgeBase, 12000)
+        : 'No knowledge base available yet. Please ask the customer to provide more details about their inquiry.'
 
       if (customerEmail) {
         const checkCustomer = await client.domain.findUnique({
@@ -206,37 +220,25 @@ export const onAiChatBotAssistant = async (
           author
         )
 
+        const systemPrompt = buildSystemPrompt({
+          businessName: chatBotDomain.name,
+          domain: `${process.env.NEXT_PUBLIC_APP_URL}/portal/${id}`,
+          knowledgeBase,
+          mode: (chatBotDomain.chatBot?.mode as 'SALES' | 'SUPPORT' | 'QUALIFIER' | 'FAQ_STRICT') || 'SALES',
+          brandTone: chatBotDomain.chatBot?.brandTone || 'friendly, concise',
+          language: chatBotDomain.chatBot?.language || 'en',
+          qualificationQuestions: chatBotDomain.filterQuestions.map((q) => q.question),
+          appointmentUrl: `${process.env.NEXT_PUBLIC_APP_URL}/portal/${id}/appointment/${checkCustomer?.customer[0].id}`,
+          paymentUrl: `${process.env.NEXT_PUBLIC_APP_URL}/portal/${id}/payment/${checkCustomer?.customer[0].id}`,
+          portalBaseUrl: `${process.env.NEXT_PUBLIC_APP_URL}/portal/${id}`,
+          customerId: checkCustomer?.customer[0].id || '',
+        })
+
         const chatCompletion = await openai.chat.completions.create({
           messages: [
             {
-              role: 'assistant',
-              content: `
-              You will get an array of questions that you must ask the customer. 
-              
-              Progress the conversation using those questions. 
-              
-              Whenever you ask a question from the array i need you to add a keyword at the end of the question (complete) this keyword is extremely important. 
-              
-              Do not forget it.
-
-              only add this keyword when your asking a question from the array of questions. No other question satisfies this condition
-
-              Always maintain character and stay respectfull.
-
-              The array of questions : [${chatBotDomain.filterQuestions
-                .map((questions) => questions.question)
-                .join(', ')}]
-
-              if the customer says something out of context or inapporpriate. Simply say this is beyond you and you will get a real user to continue the conversation. And add a keyword (realtime) at the end.
-
-              if the customer agrees to book an appointment send them this link ${process.env.NEXT_PUBLIC_APP_URL}/portal/${id}/appointment/${
-                checkCustomer?.customer[0].id
-              }
-
-              if the customer wants to buy a product redirect them to the payment page ${process.env.NEXT_PUBLIC_APP_URL}/portal/${id}/payment/${
-                checkCustomer?.customer[0].id
-              }
-          `,
+              role: 'system',
+              content: systemPrompt,
             },
             ...chat,
             {
@@ -244,7 +246,7 @@ export const onAiChatBotAssistant = async (
               content: message,
             },
           ],
-          model: 'gpt-3.5-turbo',
+          model: 'gpt-4o-mini',
         })
 
         if (chatCompletion.choices[0].message.content?.includes('(realtime)')) {
@@ -338,17 +340,26 @@ export const onAiChatBotAssistant = async (
         }
       }
       console.log('No customer')
+
+      const systemPromptNoEmail = buildSystemPrompt({
+        businessName: chatBotDomain.name,
+        domain: `${process.env.NEXT_PUBLIC_APP_URL}/portal/${id}`,
+        knowledgeBase,
+        mode: 'QUALIFIER',
+        brandTone: chatBotDomain.chatBot?.brandTone || 'friendly, warm, conversational',
+        language: chatBotDomain.chatBot?.language || 'en',
+        qualificationQuestions: ['What is your email address so I can assist you better?'],
+        appointmentUrl: '',
+        paymentUrl: '',
+        portalBaseUrl: `${process.env.NEXT_PUBLIC_APP_URL}/portal/${id}`,
+        customerId: '',
+      })
+
       const chatCompletion = await openai.chat.completions.create({
         messages: [
           {
-            role: 'assistant',
-            content: `
-            You are a highly knowledgeable and experienced sales representative for a ${chatBotDomain.name} that offers a valuable product or service. Your goal is to have a natural, human-like conversation with the customer in order to understand their needs, provide relevant information, and ultimately guide them towards making a purchase or redirect them to a link if they havent provided all relevant information.
-            Right now you are talking to a customer for the first time. Start by giving them a warm welcome on behalf of ${chatBotDomain.name} and make them feel welcomed.
-
-            Your next task is lead the conversation naturally to get the customers email address. Be respectful and never break character
-
-          `,
+            role: 'system',
+            content: systemPromptNoEmail,
           },
           ...chat,
           {
@@ -356,7 +367,7 @@ export const onAiChatBotAssistant = async (
             content: message,
           },
         ],
-        model: 'gpt-3.5-turbo',
+        model: 'gpt-4o-mini',
       })
 
       if (chatCompletion) {

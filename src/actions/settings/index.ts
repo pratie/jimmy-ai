@@ -194,6 +194,12 @@ export const onGetCurrentDomainInfo = async (domain: string) => {
                 id: true,
                 welcomeMessage: true,
                 icon: true,
+                knowledgeBase: true,
+                knowledgeBaseStatus: true,
+                knowledgeBaseUpdatedAt: true,
+                mode: true,
+                brandTone: true,
+                language: true,
               },
             },
           },
@@ -283,6 +289,66 @@ export const onChatBotImageUpdate = async (id: string, icon: string) => {
       status: 400,
       message: 'Oops something went wrong!',
     }
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+export const onUpdateBotMode = async (
+  mode: string,
+  domainId: string
+) => {
+  try {
+    const update = await client.domain.update({
+      where: {
+        id: domainId,
+      },
+      data: {
+        chatBot: {
+          update: {
+            data: {
+              mode,
+            },
+          },
+        },
+      },
+    })
+
+    if (update) {
+      return { status: 200, message: 'Bot mode updated' }
+    }
+    return { status: 400, message: 'Oops! something went wrong' }
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+export const onUpdateBrandVoice = async (
+  brandTone: string,
+  language: string,
+  domainId: string
+) => {
+  try {
+    const update = await client.domain.update({
+      where: {
+        id: domainId,
+      },
+      data: {
+        chatBot: {
+          update: {
+            data: {
+              brandTone,
+              language,
+            },
+          },
+        },
+      },
+    })
+
+    if (update) {
+      return { status: 200, message: 'Brand voice updated' }
+    }
+    return { status: 400, message: 'Oops! something went wrong' }
   } catch (error) {
     console.log(error)
   }
