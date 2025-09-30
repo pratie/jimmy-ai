@@ -129,7 +129,10 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
                 {onResponding && <Responding />}
               </div>
               <form
-                onSubmit={onChat}
+                onSubmit={(e) => {
+                  e.preventDefault()
+                  onChat()
+                }}
                 className="flex px-3 py-1 flex-col flex-1 bg-porcelain"
               >
                 <div className="flex justify-between">
