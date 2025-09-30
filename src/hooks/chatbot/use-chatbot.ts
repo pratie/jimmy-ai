@@ -10,6 +10,27 @@ import { useEffect, useRef, useState } from 'react'
 
 import { useForm } from 'react-hook-form'
 
+// Generate or retrieve anonymous user ID
+const getAnonymousId = (): string => {
+  const STORAGE_KEY = 'corinna_anonymous_id'
+
+  if (typeof window === 'undefined') return ''
+
+  let anonymousId = localStorage.getItem(STORAGE_KEY)
+
+  if (!anonymousId) {
+    // Generate UUID v4
+    anonymousId = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+      const r = (Math.random() * 16) | 0
+      const v = c === 'x' ? r : (r & 0x3) | 0x8
+      return v.toString(16)
+    })
+    localStorage.setItem(STORAGE_KEY, anonymousId)
+  }
+
+  return anonymousId
+}
+
 export const useChatBot = () => {
   const {
     register,
@@ -112,6 +133,7 @@ export const useChatBot = () => {
 
   const onStartChatting = handleSubmit(async (values) => {
     console.log('ALL VALUES', values)
+    const anonymousId = getAnonymousId()
 
     if (values.image?.length) {
       console.log('IMAGE FROM ', values.image[0])
@@ -139,7 +161,8 @@ export const useChatBot = () => {
         currentBotId!,
         onChats,
         'user',
-        uploaded.downloadUrl
+        uploaded.downloadUrl,
+        anonymousId
       )
 
       if (response) {
@@ -174,7 +197,8 @@ export const useChatBot = () => {
         currentBotId!,
         onChats,
         'user',
-        values.content
+        values.content,
+        anonymousId
       )
 
       if (response) {

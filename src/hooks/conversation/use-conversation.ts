@@ -165,6 +165,12 @@ export const useChatWindow = () => {
 
   const onHandleSentMessage = handleSubmit(async (values) => {
     try {
+      // Validate message content
+      if (!values.content || values.content.trim() === '') {
+        console.log('Empty message, skipping send')
+        return
+      }
+
       reset()
       const message = await onOwnerSendMessage(
         chatRoom!,

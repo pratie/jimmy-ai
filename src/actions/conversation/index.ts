@@ -51,39 +51,52 @@ export const onGetConversationMode = async (id: string) => {
 
 export const onGetDomainChatRooms = async (id: string) => {
   try {
-    const domains = await client.domain.findUnique({
+    // Fetch all chat rooms (anonymous + customers) for this domain
+    const chatRooms = await client.chatRoom.findMany({
       where: {
-        id,
+        domainId: id,
       },
       select: {
-        customer: {
+        id: true,
+        createdAt: true,
+        live: true,
+        mailed: true,
+        anonymousId: true,
+        Customer: {
           select: {
             email: true,
-            chatRoom: {
-              select: {
-                createdAt: true,
-                id: true,
-                message: {
-                  select: {
-                    message: true,
-                    createdAt: true,
-                    seen: true,
-                  },
-                  orderBy: {
-                    createdAt: 'desc',
-                  },
-                  take: 1,
-                },
-              },
-            },
           },
         },
+        message: {
+          select: {
+            message: true,
+            createdAt: true,
+            seen: true,
+          },
+          orderBy: {
+            createdAt: 'desc',
+          },
+          take: 1,
+        },
+      },
+      orderBy: {
+        updatedAt: 'desc',
       },
     })
 
-    if (domains) {
-      return domains
-    }
+    // Transform to match the expected format
+    const formattedRooms = chatRooms.map((room) => ({
+      email: room.Customer?.email || null,
+      chatRoom: [
+        {
+          id: room.id,
+          createdAt: room.createdAt,
+          message: room.message,
+        },
+      ],
+    }))
+
+    return { customer: formattedRooms }
   } catch (error) {
     console.log(error)
   }
@@ -159,6 +172,12 @@ export const onOwnerSendMessage = async (
   role: 'assistant' | 'user'
 ) => {
   try {
+    // Validate message content
+    if (!message || message.trim() === '') {
+      console.error('[onOwnerSendMessage] Empty message received')
+      return null
+    }
+
     const chat = await client.chatRoom.update({
       where: {
         id: chatroom,
@@ -166,7 +185,7 @@ export const onOwnerSendMessage = async (
       data: {
         message: {
           create: {
-            message,
+            message: message.trim(),
             role,
           },
         },
@@ -192,6 +211,6 @@ export const onOwnerSendMessage = async (
       return chat
     }
   } catch (error) {
-    console.log(error)
+    console.error('[onOwnerSendMessage] Error:', error)
   }
 }

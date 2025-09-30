@@ -3,6 +3,29 @@
 import { client } from '@/lib/prisma'
 import { currentUser } from '@clerk/nextjs/server'
 
+// Get total conversations (anonymous + leads) across all domains
+export const getUserConversations = async () => {
+  try {
+    const user = await currentUser()
+    if (user) {
+      const conversations = await client.chatRoom.count({
+        where: {
+          Domain: {
+            User: {
+              clerkId: user.id,
+            },
+          },
+        },
+      })
+      return conversations || 0
+    }
+  } catch (error) {
+    console.log(error)
+    return 0
+  }
+}
+
+// Get leads captured (customers with emails)
 export const getUserClients = async () => {
   try {
     const user = await currentUser()
@@ -22,6 +45,30 @@ export const getUserClients = async () => {
     }
   } catch (error) {
     console.log(error)
+  }
+}
+
+// Get appointments booked across all domains
+export const getUserAppointments = async () => {
+  try {
+    const user = await currentUser()
+    if (user) {
+      const appointments = await client.bookings.count({
+        where: {
+          Customer: {
+            Domain: {
+              User: {
+                clerkId: user.id,
+              },
+            },
+          },
+        },
+      })
+      return appointments || 0
+    }
+  } catch (error) {
+    console.log(error)
+    return 0
   }
 }
 

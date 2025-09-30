@@ -44,7 +44,7 @@ const ConversationMenu = ({ domains }: Props) => {
                     onChat={() => onGetActiveChatMessages(room.chatRoom[0].id)}
                     createdAt={room.chatRoom[0].message[0]?.createdAt}
                     key={room.chatRoom[0].id}
-                    title={room.email!}
+                    title={room.email || '👤 Anonymous User'}
                     description={room.chatRoom[0].message[0]?.message}
                   />
                 ))

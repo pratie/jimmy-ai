@@ -1,9 +1,8 @@
-import { getUserAppointments } from '@/actions/appointment'
 import {
-  getUserBalance,
+  getUserConversations,
   getUserClients,
+  getUserAppointments,
   getUserPlanInfo,
-  getUserTotalProductPrices,
   getUserTransactions,
 } from '@/actions/dashboard'
 import DashboardCard from '@/components/dashboard/cards'
@@ -14,18 +13,25 @@ import CalIcon from '@/icons/cal-icon'
 import EmailIcon from '@/icons/email-icon'
 import PersonIcon from '@/icons/person-icon'
 import { TransactionsIcon } from '@/icons/transactions-icon'
-import { DollarSign } from 'lucide-react'
+import { MessageSquare } from 'lucide-react'
 import React from 'react'
 
 type Props = {}
 
 const Page = async (props: Props) => {
-  const clients = await getUserClients()
-  const sales = await getUserBalance()
-  const bookings = await getUserAppointments()
+  const conversations = await getUserConversations()
+  const leads = await getUserClients()
+  const appointments = await getUserAppointments()
   const plan = await getUserPlanInfo()
   const transactions = await getUserTransactions()
-  const products = await getUserTotalProductPrices()
+
+  // Calculate conversion rates
+  const leadsConversionRate = conversations && conversations > 0 && leads
+    ? Math.round((leads / conversations) * 100)
+    : 0
+  const appointmentsConversionRate = leads && leads > 0 && appointments
+    ? Math.round((appointments / leads) * 100)
+    : 0
 
   return (
     <>
@@ -33,26 +39,21 @@ const Page = async (props: Props) => {
       <div className="overflow-y-auto w-full chat-window flex-1 h-0">
         <div className="flex gap-5 flex-wrap">
           <DashboardCard
-            value={clients || 0}
-            title="Potential Clients"
+            value={conversations || 0}
+            title="Conversations"
+            icon={<MessageSquare />}
+          />
+          <DashboardCard
+            value={leads || 0}
+            title="Leads Captured"
             icon={<PersonIcon />}
+            percentage={leadsConversionRate}
           />
           <DashboardCard
-            value={products! * clients! || 0}
-            sales
-            title="Pipline Value"
-            icon={<DollarSign />}
-          />
-          <DashboardCard
-            value={bookings || 0}
+            value={appointments || 0}
             title="Appointments"
             icon={<CalIcon />}
-          />
-          <DashboardCard
-            value={sales || 0}
-            sales
-            title="Total Sales"
-            icon={<DollarSign />}
+            percentage={appointmentsConversionRate}
           />
         </div>
         <div className="w-full grid grid-cols-1 lg:grid-cols-2 py-10">
@@ -67,7 +68,7 @@ const Page = async (props: Props) => {
               plan={plan?.plan!}
               credits={plan?.credits || 0}
               domains={plan?.domains || 0}
-              clients={clients || 0}
+              clients={leads || 0}
             />
           </div>
           <div className="flex flex-col">

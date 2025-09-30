@@ -70,7 +70,8 @@ export const onAiChatBotAssistant = async (
   id: string,
   chat: { role: 'assistant' | 'user'; content: string }[],
   author: 'user',
-  message: string
+  message: string,
+  anonymousId?: string // UUID from browser localStorage
 ) => {
   try {
     const chatBotDomain = await client.domain.findUnique({
@@ -107,6 +108,133 @@ export const onAiChatBotAssistant = async (
         ? truncateMarkdown(chatBotDomain.chatBot.knowledgeBase, 12000)
         : 'No knowledge base available yet. Please ask the customer to provide more details about their inquiry.'
 
+      // Handle anonymous conversations (no email yet)
+      if (!customerEmail && anonymousId) {
+        // Check if anonymous chat room exists
+        let anonymousChatRoom = await client.chatRoom.findFirst({
+          where: {
+            anonymousId: anonymousId,
+            domainId: id,
+            customerId: null, // Ensure it's still anonymous
+          },
+          select: {
+            id: true,
+            live: true,
+            mailed: true,
+          },
+        })
+
+        // Create anonymous chat room if doesn't exist
+        if (!anonymousChatRoom) {
+          const newChatRoom = await client.chatRoom.create({
+            data: {
+              anonymousId: anonymousId,
+              domainId: id,
+            },
+            select: {
+              id: true,
+              live: true,
+              mailed: true,
+            },
+          })
+          anonymousChatRoom = newChatRoom
+        }
+
+        // Store the message
+        await onStoreConversations(
+          anonymousChatRoom.id,
+          message,
+          author
+        )
+
+        // Check if live mode is active
+        if (anonymousChatRoom.live) {
+          onRealTimeChat(
+            anonymousChatRoom.id,
+            message,
+            'user',
+            author
+          )
+
+          // Send email notification to owner (first time only)
+          if (!anonymousChatRoom.mailed) {
+            const domainOwner = await client.domain.findUnique({
+              where: { id },
+              select: {
+                User: {
+                  select: {
+                    clerkId: true,
+                  },
+                },
+              },
+            })
+
+            if (domainOwner?.User?.clerkId) {
+              const user = await clerkClient.users.getUser(
+                domainOwner.User.clerkId
+              )
+              onMailer(user.emailAddresses[0].emailAddress)
+
+              await client.chatRoom.update({
+                where: { id: anonymousChatRoom.id },
+                data: { mailed: true },
+              })
+            }
+          }
+
+          return {
+            live: true,
+            chatRoom: anonymousChatRoom.id,
+          }
+        }
+
+        // Generate AI response for anonymous user
+        const systemPromptNoEmail = buildSystemPrompt({
+          businessName: chatBotDomain.name,
+          domain: `${process.env.NEXT_PUBLIC_APP_URL}/portal/${id}`,
+          knowledgeBase,
+          mode: 'QUALIFIER',
+          brandTone: chatBotDomain.chatBot?.brandTone || 'friendly, warm, conversational',
+          language: chatBotDomain.chatBot?.language || 'en',
+          qualificationQuestions: ['What is your email address so I can assist you better?'],
+          appointmentUrl: '',
+          paymentUrl: '',
+          portalBaseUrl: `${process.env.NEXT_PUBLIC_APP_URL}/portal/${id}`,
+          customerId: '',
+        })
+
+        const chatCompletion = await openai.chat.completions.create({
+          messages: [
+            {
+              role: 'system',
+              content: systemPromptNoEmail,
+            },
+            ...chat,
+            {
+              role: 'user',
+              content: message,
+            },
+          ],
+          model: 'gpt-4o-mini',
+        })
+
+        if (chatCompletion) {
+          const response = {
+            role: 'assistant',
+            content: chatCompletion.choices[0].message.content,
+          }
+
+          // Store AI response
+          await onStoreConversations(
+            anonymousChatRoom.id,
+            `${response.content}`,
+            'assistant'
+          )
+
+          return { response }
+        }
+      }
+
       if (customerEmail) {
         const checkCustomer = await client.domain.findUnique({
           where: {
@@ -141,6 +269,25 @@ export const onAiChatBotAssistant = async (
           },
         })
         if (checkCustomer && !checkCustomer.customer.length) {
+          // Check if this user was previously anonymous
+          let anonymousChatRoomId: string | undefined
+          if (anonymousId) {
+            const existingAnonymousChatRoom = await client.chatRoom.findFirst({
+              where: {
+                anonymousId: anonymousId,
+                domainId: id,
+                customerId: null,
+              },
+              select: {
+                id: true,
+              },
+            })
+            if (existingAnonymousChatRoom) {
+              anonymousChatRoomId = existingAnonymousChatRoom.id
+            }
+          }
+
+          // Create new customer and link anonymous chat history
           const newCustomer = await client.domain.update({
             where: {
               id,
@@ -152,15 +299,34 @@ export const onAiChatBotAssistant = async (
                   questions: {
                     create: chatBotDomain.filterQuestions,
                   },
-                  chatRoom: {
-                    create: {},
-                  },
+                  chatRoom: anonymousChatRoomId
+                    ? {
+                        // Link existing anonymous chat room to customer
+                        connect: { id: anonymousChatRoomId },
+                      }
+                    : {
+                        // Create new chat room if no anonymous history
+                        create: {
+                          domainId: id,
+                        },
+                      },
                 },
               },
             },
           })
+
+          // Update the anonymous chat room to link it to customer
+          if (anonymousChatRoomId) {
+            await client.chatRoom.update({
+              where: { id: anonymousChatRoomId },
+              data: {
+                anonymousId: null, // Clear anonymous ID since now linked to customer
+              },
+            })
+          }
+
           if (newCustomer) {
-            console.log('new customer made')
+            console.log('new customer made, linked anonymous history:', anonymousChatRoomId)
             const response = {
               role: 'assistant',
               content: `Welcome aboard ${
