@@ -57,7 +57,7 @@ const KnowledgeBaseViewer = ({
         </CardHeader>
         <CardContent>
           <p className="text-muted-foreground">
-            We're extracting content from <span className="font-semibold">{domainName}</span>.
+            We&apos;re extracting content from <span className="font-semibold">{domainName}</span>.
             This usually takes 10-30 seconds.
           </p>
         </CardContent>
@@ -77,7 +77,7 @@ const KnowledgeBaseViewer = ({
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-muted-foreground">
-            We couldn't scrape <span className="font-semibold">{domainName}</span>.
+            We couldn&apos;t scrape <span className="font-semibold">{domainName}</span>.
             This might be due to:
           </p>
           <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
@@ -213,7 +213,7 @@ const KnowledgeBaseViewer = ({
           <ReactMarkdown>{displayText}</ReactMarkdown>
           {!showFull && knowledgeBase.length > 1000 && (
             <p className="text-muted-foreground italic mt-4">
-              [Content preview - click "Show Full Content" below to see everything]
+              [Content preview - click &quot;Show Full Content&quot; below to see everything]
             </p>
           )}
         </div>

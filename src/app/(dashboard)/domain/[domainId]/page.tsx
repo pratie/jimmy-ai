@@ -31,7 +31,7 @@ const DomainPage = async ({ params }: Props) => {
           <div>
             <h1 className="text-3xl font-bold">{activeDomain.name}</h1>
             <p className="text-muted-foreground">
-              Manage your chatbot's knowledge base and training data
+              Manage your chatbot&apos;s knowledge base and training data
             </p>
           </div>
 
