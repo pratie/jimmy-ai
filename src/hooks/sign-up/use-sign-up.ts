@@ -5,7 +5,7 @@ import {
   UserRegistrationSchema,
 } from '@/schemas/auth.schema'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useSignUp, useSignIn } from '@clerk/nextjs'
+import { useSignUp } from '@clerk/nextjs'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
@@ -15,7 +15,6 @@ export const useSignUpForm = () => {
   const { toast } = useToast()
   const [loading, setLoading] = useState<boolean>(false)
   const { signUp, isLoaded, setActive } = useSignUp()
-  const { signIn, isLoaded: isSignInLoaded } = useSignIn()
   const router = useRouter()
   const methods = useForm<UserRegistrationProps>({
     resolver: zodResolver(UserRegistrationSchema),
@@ -30,91 +29,114 @@ export const useSignUpForm = () => {
     password: string,
     onNext: React.Dispatch<React.SetStateAction<number>>
   ) => {
-    if (!isLoaded) return
+    console.log('[Sign-Up] 🚀 Starting registration process...')
+    console.log('[Sign-Up] 📧 Email:', email)
+    console.log('[Sign-Up] 🔒 Password length:', password?.length || 0)
+    console.log('[Sign-Up] ✅ Clerk loaded:', isLoaded)
+
+    if (!isLoaded) {
+      console.log('[Sign-Up] ⚠️ Clerk not loaded yet, aborting...')
+      return
+    }
 
     try {
       setLoading(true)
-      // 1) Create Clerk user with email + password
+      console.log('[Sign-Up] 🔄 Setting loading state to true')
+
+      // Get user details from form
+      const { fullname, type } = methods.getValues()
+      console.log('[Sign-Up] 👤 User details:', { fullname, type, email })
+
+      // Create the Clerk user
+      console.log('[Sign-Up] 📝 Creating Clerk user...')
       const created = await signUp.create({
         emailAddress: email,
         password: password,
       })
+      console.log('[Sign-Up] ✅ Clerk user created')
+      console.log('[Sign-Up] 📊 Created status:', created.status)
+      console.log('[Sign-Up] 🆔 Created user ID:', created.createdUserId)
+      console.log('[Sign-Up] 🎫 Created session ID:', created.createdSessionId)
 
-      // 2) Try to prepare email verification. If OTP is disabled, this may throw.
-      try {
-        await signUp.prepareEmailAddressVerification({ strategy: 'email_code' })
-        // OTP flow enabled → move to OTP step
-        onNext((prev) => prev + 1)
-        setLoading(false)
-        return
-      } catch (prepErr: any) {
-        // If OTP strategy is disabled/unavailable, finish sign-up immediately
-        const prepCode = prepErr?.errors?.[0]?.code
-        const otpDisabledCodes = new Set([
-          'strategy_unavailable',
-          'strategy_forbidden',
-          'strategy_not_supported',
-          'verification_strategy_unsupported',
-          'not_allowed',
-        ])
-
-        if (!otpDisabledCodes.has(prepCode)) {
-          throw prepErr
-        }
-
-        // No OTP required → complete app registration and sign in
-        const { fullname, type } = methods.getValues()
-
-        if (!created?.createdUserId) throw prepErr
-
-        // 3) Create app user record
-        await onCompleteUserRegistration(
-          fullname,
-          created.createdUserId,
-          type,
-          email
-        )
-
-        // 4) Activate session - check if signUp already created one
-        if (created.status === 'complete' && created.createdSessionId) {
-          await setActive({ session: created.createdSessionId })
+      // If verification is required (status will be null when email verification is enabled)
+      if (created.status !== 'complete') {
+        console.log('[Sign-Up] ✉️ Email verification required, preparing email code...')
+        try {
+          await signUp.prepareEmailAddressVerification({ strategy: 'email_code' })
+          console.log('[Sign-Up] ✅ Verification email sent')
+          toast({
+            title: 'Check your email',
+            description: 'We sent you a 6-digit code. Enter it to complete sign-up.',
+          })
           setLoading(false)
-          router.push('/dashboard')
+          console.log('[Sign-Up] ➡️ Moving to OTP step (step 3)')
+          onNext(3)
+          return
+        } catch (prepError: any) {
+          console.error('[Sign-Up] ❌ Failed to prepare email verification:', prepError)
+          setLoading(false)
+          toast({
+            title: 'Error',
+            description: prepError?.errors?.[0]?.longMessage || 'Failed to send verification email'
+          })
           return
         }
-
-        // Fallback: if no session from signUp, try signing in
-        if (!isSignInLoaded || !signIn) {
-          setLoading(false)
-          throw new Error('Auth not ready, please try signing in manually')
-        }
-
-        const authenticated = await signIn.create({
-          identifier: email,
-          password,
-        })
-
-        if (authenticated.status === 'complete') {
-          await setActive({ session: authenticated.createdSessionId })
-          setLoading(false)
-          router.push('/dashboard')
-          return
-        }
-
-        setLoading(false)
-        throw new Error('Sign-in did not complete. Please try logging in manually.')
       }
+
+      // If status is 'complete', no verification required (instant sign-up)
+      console.log('[Sign-Up] ✅ Sign-up complete without verification')
+
+      if (!created.createdUserId) {
+        console.error('[Sign-Up] ❌ No user ID found after creation')
+        setLoading(false)
+        toast({ title: 'Error', description: 'User ID not found. Please try again.' })
+        return
+      }
+
+      if (!created.createdSessionId) {
+        console.error('[Sign-Up] ❌ No session ID found after creation')
+        setLoading(false)
+        toast({ title: 'Error', description: 'Session not created. Please try signing in.' })
+        return
+      }
+
+      // Create DB record
+      console.log('[Sign-Up] 💾 Creating database user record...')
+      const registered = await onCompleteUserRegistration(
+        fullname,
+        created.createdUserId,
+        type,
+        email
+      )
+      console.log('[Sign-Up] 📊 Database registration response:', registered)
+
+      if (registered?.status !== 200) {
+        console.error('[Sign-Up] ❌ Database user creation failed:', registered)
+        setLoading(false)
+        toast({ title: 'Error', description: 'Failed to create user record' })
+        return
+      }
+
+      console.log('[Sign-Up] ✅ Database user created successfully')
+      console.log('[Sign-Up] 🎫 Activating Clerk session...')
+      await setActive({ session: created.createdSessionId })
+      console.log('[Sign-Up] ✅ Session activated successfully')
+
+      setLoading(false)
+      console.log('[Sign-Up] 🚀 Redirecting to dashboard...')
+      router.push('/dashboard')
     } catch (error: any) {
+      console.error('[Sign-Up] ❌ Error during sign-up process:', error)
       const code = error?.errors?.[0]?.code
       const message = error?.errors?.[0]?.longMessage || error?.message
 
       if (code === 'form_identifier_exists' || code === 'identifier_already_exists') {
+        console.log('[Sign-Up] 🔄 Duplicate email detected, redirecting to sign-in...')
         toast({
           title: 'Account already exists',
           description: 'An account with this email already exists. Please sign in instead.',
         })
         setLoading(false)
-        // Redirect to sign-in with prefilled email for convenience
         try {
           const params = new URLSearchParams({ email })
           router.push(`/auth/sign-in?${params.toString()}`)
@@ -132,26 +154,41 @@ export const useSignUpForm = () => {
 
   const onHandleSubmit = methods.handleSubmit(
     async (values: UserRegistrationProps) => {
-      if (!isLoaded) return
+      console.log('[Sign-Up OTP] 🔐 OTP verification flow started')
+      console.log('[Sign-Up OTP] 📊 Form values:', { ...values, password: '[REDACTED]', confirmPassword: '[REDACTED]' })
+
+      if (!isLoaded) {
+        console.log('[Sign-Up OTP] ⚠️ Clerk not loaded, aborting...')
+        return
+      }
 
       try {
         setLoading(true)
+        console.log('[Sign-Up OTP] 📝 Attempting email verification with OTP:', values.otp)
+
         // If OTP step is shown, verify the code; otherwise this path likely won't be used.
         const completeSignUp = await signUp.attemptEmailAddressVerification({
           code: values.otp,
         })
+        console.log('[Sign-Up OTP] ✅ Email verification completed')
+        console.log('[Sign-Up OTP] 📊 Verification status:', completeSignUp.status)
 
         if (completeSignUp.status !== 'complete') {
+          console.error('[Sign-Up OTP] ❌ Verification status not complete:', completeSignUp.status)
           setLoading(false)
           toast({ title: 'Error', description: 'Verification failed. Please try again.' })
           return
         }
 
         if (!signUp.createdUserId) {
+          console.error('[Sign-Up OTP] ❌ No created user ID found')
           setLoading(false)
           toast({ title: 'Error', description: 'User not created. Please try again.' })
           return
         }
+
+        console.log('[Sign-Up OTP] 🆔 Created user ID:', signUp.createdUserId)
+        console.log('[Sign-Up OTP] 💾 Creating database user record...')
 
         const registered = await onCompleteUserRegistration(
           values.fullname,
@@ -159,17 +196,41 @@ export const useSignUpForm = () => {
           values.type,
           values.email
         )
+        console.log('[Sign-Up OTP] 📊 Database registration response:', registered)
 
-        if (registered?.status == 200 && registered.user) {
+        // Treat duplicate-user response as success (idempotent)
+        const isDuplicate =
+          registered?.status === 400 &&
+          typeof registered?.message === 'string' &&
+          registered.message.toLowerCase().includes('already exists')
+
+        if ((registered?.status === 200 && registered.user) || isDuplicate) {
+          if (isDuplicate) {
+            console.log('[Sign-Up OTP] ℹ️ User already exists in DB; proceeding to activate session')
+          } else {
+            console.log('[Sign-Up OTP] ✅ Database user created successfully')
+          }
+
+          console.log('[Sign-Up OTP] 🎫 Activating session...')
           await setActive({ session: completeSignUp.createdSessionId })
+          console.log('[Sign-Up OTP] ✅ Session activated')
           setLoading(false)
+          console.log('[Sign-Up OTP] 🚀 Redirecting to dashboard...')
           router.push('/dashboard')
           return
         }
 
+        console.error('[Sign-Up OTP] ❌ Database registration failed or user not returned')
         toast({ title: 'Error', description: 'Unable to complete registration' })
         setLoading(false)
       } catch (error: any) {
+        console.error('[Sign-Up OTP] ❌ Error during OTP verification:', error)
+        console.error('[Sign-Up OTP] 📊 Error details:', {
+          message: error?.message,
+          code: error?.errors?.[0]?.code,
+          longMessage: error?.errors?.[0]?.longMessage,
+          errors: error?.errors,
+        })
         const description = error?.errors?.[0]?.longMessage || error?.message || 'Sign up failed'
         toast({ title: 'Error', description })
         setLoading(false)

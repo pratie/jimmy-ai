@@ -10,23 +10,21 @@ export const onCompleteUserRegistration = async (
   type: string,
   email: string
 ) => {
-  console.log('[Auth Registration] Starting registration for:', { fullname, clerkId, type, email })
+  console.log('[Auth Registration] 🚀 Starting database user registration...')
+  console.log('[Auth Registration] 📊 Registration data:', { fullname, clerkId, type, email })
 
   if (!email) {
-    console.error('[Auth Registration] Registration attempted without email for Clerk user', clerkId)
+    console.error('[Auth Registration] ❌ Registration attempted without email for Clerk user:', clerkId)
     return { status: 400, message: 'Email address is required' }
   }
+
   try {
-    const registered = await client.user.create({
-      data: {
-        fullname,
-        clerkId,
-        type,
-        email,
-        subscription: {
-          create: {},
-        },
-      },
+    console.log('[Auth Registration] 💾 Upserting user in database...')
+    // 1) Ensure user exists (idempotent). We avoid overwriting existing fields.
+    const user = await client.user.upsert({
+      where: { clerkId },
+      create: { fullname, clerkId, type, email },
+      update: {},
       select: {
         fullname: true,
         id: true,
@@ -35,17 +33,30 @@ export const onCompleteUserRegistration = async (
       },
     })
 
-    if (registered) {
-      console.log('[Auth Registration] User registered successfully:', registered.email)
-      return { status: 200, user: registered }
-    }
+    // 2) Ensure a billing row exists for this user (idempotent)
+    await client.billings.upsert({
+      where: { userId: user.id },
+      update: {},
+      create: { userId: user.id },
+    })
+
+    console.log('[Auth Registration] ✅ User ensured in database with billing record')
+    console.log('[Auth Registration] 👤 User details:', {
+      id: user.id,
+      email: user.email,
+      fullname: user.fullname,
+      type: user.type,
+    })
+    return { status: 200, user }
   } catch (error: any) {
-    console.error('[Auth Registration] Error in onCompleteUserRegistration:', {
+    console.error('[Auth Registration] ❌ Database error during upsert')
+    console.error('[Auth Registration] 📊 Error details:', {
       message: error?.message,
       code: error?.code,
-      fullError: error
+      meta: error?.meta,
     })
-    return { status: 400 }
+    console.error('[Auth Registration] 🔍 Full error object:', error)
+    return { status: 400, message: error?.message || 'Database error during registration' }
   }
 }
 

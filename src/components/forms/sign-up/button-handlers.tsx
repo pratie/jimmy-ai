@@ -18,7 +18,16 @@ const ButtonHandler = (props: Props) => {
   const { isDirty: isEmail } = getFieldState('email', formState)
   const { isDirty: isPassword } = getFieldState('password', formState)
 
+  console.log('[Sign-Up Form] 📊 Current step:', currentStep)
+  console.log('[Sign-Up Form] ✅ Form validation status:', {
+    isNameDirty: isName,
+    isEmailDirty: isEmail,
+    isPasswordDirty: isPassword,
+  })
+
   if (currentStep === 3) {
+    console.log('[Sign-Up Form] 🔐 Step 3: OTP verification step')
+
     return (
       <div className="w-full flex flex-col gap-3 items-center">
         <Button
@@ -41,20 +50,24 @@ const ButtonHandler = (props: Props) => {
   }
 
   if (currentStep === 2) {
+    console.log('[Sign-Up Form] 📝 Step 2: Account details step')
+    const canProceed = isName && isEmail && isPassword
+    console.log('[Sign-Up Form] ✅ Can proceed to registration:', canProceed)
+
     return (
       <div className="w-full flex flex-col gap-3 items-center">
         <Button
-          type="submit"
+          type="button"
           className="w-full"
-          {...(isName &&
-            isEmail &&
-            isPassword && {
-              onClick: () =>
+          {...(canProceed && {
+              onClick: () => {
+                console.log('[Sign-Up Form] 🚀 Continue button clicked, triggering registration...')
                 onGenerateOTP(
                   getValues('email'),
                   getValues('password'),
                   setCurrentStep
-                ),
+                )
+              },
             })}
         >
           Continue
@@ -72,12 +85,17 @@ const ButtonHandler = (props: Props) => {
     )
   }
 
+  console.log('[Sign-Up Form] 🎯 Step 1: User type selection step')
+
   return (
     <div className="w-full flex flex-col gap-3 items-center">
       <Button
-        type="submit"
+        type="button"
         className="w-full"
-        onClick={() => setCurrentStep((prev: number) => prev + 1)}
+        onClick={() => {
+          console.log('[Sign-Up Form] ➡️ Moving to step 2 (Account details)')
+          setCurrentStep((prev: number) => prev + 1)
+        }}
       >
         Continue
       </Button>

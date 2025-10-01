@@ -33,17 +33,18 @@ const FormGenerator = ({
   lines,
   options,
 }: Props) => {
+  const inputIdBase = label ? String(label).replace(/\s+/g, '-').toLowerCase() : name
   switch (inputType) {
     case 'input':
     default:
       return (
         <Label
           className="flex flex-col gap-2"
-          htmlFor={`input-${label}`}
+          htmlFor={`input-${inputIdBase}`}
         >
           {label && label}
           <Input
-            id={`input-${label}`}
+            id={`input-${inputIdBase}`}
             type={type}
             placeholder={placeholder}
             form={form}
@@ -63,11 +64,11 @@ const FormGenerator = ({
       )
     case 'select':
       return (
-        <Label htmlFor={`select-${label}`}>
+        <Label htmlFor={`select-${inputIdBase}`}>
           {label && label}
           <select
             form={form}
-            id={`select-${label}`}
+            id={`select-${inputIdBase}`}
             {...register(name)}
           >
             {options?.length &&
@@ -95,12 +96,12 @@ const FormGenerator = ({
       return (
         <Label
           className="flex flex-col gap-2"
-          htmlFor={`input-${label}`}
+          htmlFor={`input-${inputIdBase}`}
         >
           {label && label}
           <Textarea
             form={form}
-            id={`input-${label}`}
+            id={`input-${inputIdBase}`}
             placeholder={placeholder}
             {...register(name)}
             rows={lines}
