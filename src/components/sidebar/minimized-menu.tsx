@@ -2,8 +2,7 @@ import { SIDE_BAR_MENU } from '@/constants/menu'
 
 import React, { useState } from 'react'
 
-import { LogOut, User } from 'lucide-react'
-import { MenuLogo } from '@/icons/menu-logo'
+import { LogOut, User, Menu } from 'lucide-react'
 import MenuItem from './menu-item'
 import DomainMenu from './domain-menu'
 
@@ -36,9 +35,12 @@ export const MinMenu = ({
 
   return (
     <div className="p-3 flex flex-col items-center h-full">
-      <span className="animate-fade-in opacity-0 delay-300 fill-mode-forwards cursor-pointer">
-        <MenuLogo onClick={onShrink} />
-      </span>
+      <button
+        onClick={onShrink}
+        className="animate-fade-in opacity-0 delay-300 fill-mode-forwards cursor-pointer w-10 h-10 flex items-center justify-center rounded-lg hover:bg-pastel-lavender/50 transition-all"
+      >
+        <Menu className="w-5 h-5 text-text-primary" />
+      </button>
       <div className="animate-fade-in opacity-0 delay-300 fill-mode-forwards flex flex-col justify-between h-full pt-10">
         <div className="flex flex-col">
           {SIDE_BAR_MENU.map((menu, key) => (

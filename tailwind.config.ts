@@ -19,6 +19,26 @@ const config = {
     },
     extend: {
       colors: {
+        // Pastel Palette - Subtle Hues Theme
+        'pastel-lavender': '#eae4e9',    // Soft lavender
+        'pastel-cream': '#fff1e6',       // Warm cream
+        'pastel-blush': '#fde2e4',       // Light blush
+        'pastel-pink': '#fad2e1',        // Soft pink
+        'pastel-mint': '#e2ece9',        // Mint cream
+        'pastel-sky': '#dfe7fd',         // Light sky
+        'pastel-periwinkle': '#cddafd',  // Periwinkle
+
+        // Darker shades for text/contrast
+        'text-primary': '#2d3748',       // Deep slate for main text
+        'text-secondary': '#4a5568',     // Medium slate for secondary text
+        'text-muted': '#718096',         // Light slate for muted text
+
+        // Interactive states (darker pastels for visibility)
+        'interactive-pink': '#f7a6c4',   // Darker pink for buttons
+        'interactive-blue': '#a7c7e7',   // Darker blue for links
+        'interactive-mint': '#b8ddd3',   // Darker mint for success
+
+        // Legacy colors (keeping for compatibility)
         cream: '#FFFAEB',
         'notebook-yellow': '#FFFAEB',
         'sketch-red': '#D63031',
@@ -32,6 +52,8 @@ const config = {
         grandis: '#FFC989',
         porcelain: '#F1F1F1',
         ironside: '#636363',
+
+        // Shadcn theme colors
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
         ring: 'hsl(var(--ring))',
