@@ -31,7 +31,14 @@ const getAnonymousId = (): string => {
   return anonymousId
 }
 
-export const useChatBot = () => {
+type UseChatBotOptions = {
+  domainId?: string
+  defaultOpen?: boolean
+  disablePostMessage?: boolean
+}
+
+export const useChatBot = (options?: UseChatBotOptions) => {
+  const { domainId, defaultOpen, disablePostMessage } = options || {}
   const {
     register,
     handleSubmit,
@@ -62,7 +69,7 @@ export const useChatBot = () => {
     | undefined
   >()
   const messageWindowRef = useRef<HTMLDivElement | null>(null)
-  const [botOpened, setBotOpened] = useState<boolean>(false)
+  const [botOpened, setBotOpened] = useState<boolean>(!!defaultOpen)
   const onOpenChatBot = () => setBotOpened((prev) => !prev)
   const [loading, setLoading] = useState<boolean>(true)
   const [onChats, setOnChats] = useState<
@@ -87,13 +94,15 @@ export const useChatBot = () => {
   }, [onChats, messageWindowRef])
 
   useEffect(() => {
-    postToParent(
-      JSON.stringify({
-        width: botOpened ? 550 : 80,
-        height: botOpened ? 800 : 80,
-      })
-    )
-  }, [botOpened])
+    if (!disablePostMessage) {
+      postToParent(
+        JSON.stringify({
+          width: botOpened ? 550 : 80,
+          height: botOpened ? 800 : 80,
+        })
+      )
+    }
+  }, [botOpened, disablePostMessage])
 
   const onGetDomainChatBot = async (id: string) => {
     setCurrentBotId(id)
@@ -123,6 +132,12 @@ export const useChatBot = () => {
   }
 
   useEffect(() => {
+    // If domainId provided (preview mode), load directly and skip postMessage listener
+    if (domainId) {
+      onGetDomainChatBot(domainId)
+      return
+    }
+
     let handled = false
     const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 
@@ -133,10 +148,13 @@ export const useChatBot = () => {
         // Validate UUID format
         if (!UUID_REGEX.test(botid)) {
           console.error('[Chatbot] Invalid domain ID format:', botid)
-          setOnChats([{
-            role: 'assistant',
-            content: 'Configuration error: Invalid domain ID. Please check your embed code.'
-          }])
+          setOnChats([
+            {
+              role: 'assistant',
+              content:
+                'Configuration error: Invalid domain ID. Please check your embed code.',
+            },
+          ])
           setLoading(false)
           return
         }
@@ -150,7 +168,7 @@ export const useChatBot = () => {
     return () => {
       window.removeEventListener('message', handleMessage)
     }
-  }, [])
+  }, [domainId])
 
   const onStartChatting = handleSubmit(async (values) => {
     console.log('ALL VALUES', values)

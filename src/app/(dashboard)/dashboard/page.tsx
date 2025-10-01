@@ -5,6 +5,7 @@ import {
   getUserPlanInfo,
   getUserTransactions,
 } from '@/actions/dashboard'
+import { onGetAllAccountDomains } from '@/actions/settings'
 import DashboardCard from '@/components/dashboard/cards'
 import { PlanUsage } from '@/components/dashboard/plan-usage'
 import InfoBar from '@/components/infobar'
@@ -15,6 +16,7 @@ import PersonIcon from '@/icons/person-icon'
 import { TransactionsIcon } from '@/icons/transactions-icon'
 import { MessageSquare } from 'lucide-react'
 import React from 'react'
+import AddDomainCTA from '@/components/onboarding/add-domain-cta'
 
 type Props = {}
 
@@ -24,6 +26,7 @@ const Page = async (props: Props) => {
   const appointments = await getUserAppointments()
   const plan = await getUserPlanInfo()
   const transactions = await getUserTransactions()
+  const domains = await onGetAllAccountDomains()
 
   // Calculate conversion rates
   const leadsConversionRate = conversations && conversations > 0 && leads
@@ -37,6 +40,11 @@ const Page = async (props: Props) => {
     <>
       <InfoBar />
       <div className="overflow-y-auto w-full chat-window flex-1 h-0">
+        {!domains?.domains?.length && (
+          <div className="mb-6">
+            <AddDomainCTA />
+          </div>
+        )}
         <div className="flex gap-5 flex-wrap">
           <DashboardCard
             value={conversations || 0}

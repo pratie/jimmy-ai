@@ -93,6 +93,7 @@ const SettingsForm = ({ id, name, chatBot, plan }: Props) => {
             />
           </div>
         </div>
+
       </div>
 
       {/* AI Mode & Brand Voice Settings */}

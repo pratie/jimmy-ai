@@ -99,7 +99,7 @@ export const useSettings = (id: string) => {
         })
       }
     }
-    if (values.image[0]) {
+    if (values.image?.[0]) {
       const uploadResult = await uploadFile(values.image[0])
       if (!uploadResult.success) {
         toast({

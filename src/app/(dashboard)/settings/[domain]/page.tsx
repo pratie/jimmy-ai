@@ -3,6 +3,7 @@ import BotTrainingForm from '@/components/forms/settings/bot-training'
 import SettingsForm from '@/components/forms/settings/form'
 import InfoBar from '@/components/infobar'
 import ProductTable from '@/components/products'
+import ChatbotPreview from '@/components/settings/chatbot-preview'
 import { redirect } from 'next/navigation'
 import React from 'react'
 
@@ -26,6 +27,20 @@ const DomainSettingsPage = async ({ params }: Props) => {
           id={activeDomain.id}
           name={activeDomain.name}
         />
+        <div className="mt-6">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-lg font-semibold">Preview</h3>
+            <a
+              href={`/preview/${activeDomain.id}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm underline text-primary"
+            >
+              Open full preview ↗
+            </a>
+          </div>
+          <ChatbotPreview domainId={activeDomain.id} />
+        </div>
         <BotTrainingForm id={activeDomain.id} />
         <ProductTable
           id={activeDomain.id}

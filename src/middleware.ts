@@ -7,7 +7,9 @@ const isPublicRoute = createRouteMatcher([
   '/images(.*)',
   '/chatbot',
   '/favicon.ico',
-  '/api/webhooks(.*)'
+  '/api/webhooks(.*)',
+  '/api/dodo/webhook',
+  '/api/dodo(.*)'
 ])
 
 export default clerkMiddleware((auth, request) => {
