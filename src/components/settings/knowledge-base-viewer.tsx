@@ -5,9 +5,29 @@ import ReactMarkdown from 'react-markdown'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Textarea } from '@/components/ui/textarea'
-import { RefreshCw, FileText, AlertCircle, Loader2, Edit, Save, X } from 'lucide-react'
-import { useScrapeWebsite, useUpdateKnowledgeBase } from '@/hooks/firecrawl/use-scrape'
+import { RefreshCw, FileText, AlertCircle, Loader2, Edit, Save, X, Brain, Sparkles, Upload } from 'lucide-react'
+import { useScrapeWebsite, useUpdateKnowledgeBase, useTrainChatbot, useUploadText } from '@/hooks/firecrawl/use-scrape'
 import { formatDistanceToNow } from 'date-fns'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog'
 
 type Props = {
   domainId: string
@@ -27,8 +47,12 @@ const KnowledgeBaseViewer = ({
   const [showFull, setShowFull] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
   const [editedMarkdown, setEditedMarkdown] = useState(knowledgeBase || '')
+  const [uploadDialogOpen, setUploadDialogOpen] = useState(false)
+  const [uploadText, setUploadText] = useState('')
   const { onScrape, loading: scraping } = useScrapeWebsite()
   const { onUpdate, loading: updating } = useUpdateKnowledgeBase()
+  const { onTrain, loading: training } = useTrainChatbot()
+  const { onUpload, loading: uploading } = useUploadText()
 
   // Update edited markdown when knowledge base changes
   React.useEffect(() => {
@@ -96,6 +120,12 @@ const KnowledgeBaseViewer = ({
     )
   }
 
+  const handleTextUpload = async () => {
+    await onUpload(domainId, uploadText, true)
+    setUploadText('')
+    setUploadDialogOpen(false)
+  }
+
   // Status: No knowledge base yet
   if (!knowledgeBase) {
     return (
@@ -108,13 +138,64 @@ const KnowledgeBaseViewer = ({
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-muted-foreground">
-            No knowledge base yet. Click below to scrape <span className="font-semibold">{domainName}</span> and
-            extract content for your chatbot to use in conversations.
+            No knowledge base yet. Scrape <span className="font-semibold">{domainName}</span> or upload text content.
           </p>
-          <Button onClick={() => onScrape(domainId)} disabled={scraping}>
-            <FileText className="w-4 h-4 mr-2" />
-            Scrape Website
-          </Button>
+          <div className="flex gap-2">
+            <Button onClick={() => onScrape(domainId)} disabled={scraping}>
+              <FileText className="w-4 h-4 mr-2" />
+              Scrape Website
+            </Button>
+            <Dialog open={uploadDialogOpen} onOpenChange={setUploadDialogOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline">
+                  <Upload className="w-4 h-4 mr-2" />
+                  Upload Text
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle>Upload Text Content</DialogTitle>
+                  <DialogDescription>
+                    Add custom text content to your chatbot's knowledge base. This will be appended to existing content.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <Textarea
+                    placeholder="Paste your content here... (markdown supported, minimum 50 characters, max 10MB)"
+                    value={uploadText}
+                    onChange={(e) => setUploadText(e.target.value)}
+                    className="min-h-[300px] font-mono text-sm"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    {uploadText.length.toLocaleString()} characters
+                  </p>
+                </div>
+                <DialogFooter>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setUploadDialogOpen(false)
+                      setUploadText('')
+                    }}
+                    disabled={uploading}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handleTextUpload}
+                    disabled={uploading || uploadText.length < 50}
+                  >
+                    {uploading ? (
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    ) : (
+                      <Upload className="w-4 h-4 mr-2" />
+                    )}
+                    {uploading ? 'Uploading...' : 'Upload'}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </div>
         </CardContent>
       </Card>
     )
@@ -185,7 +266,7 @@ const KnowledgeBaseViewer = ({
                 ` • Updated ${formatDistanceToNow(new Date(updatedAt), { addSuffix: true })}`}
             </p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
             <Button
               variant="outline"
               size="sm"
@@ -205,6 +286,54 @@ const KnowledgeBaseViewer = ({
               />
               Re-scrape
             </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  size="sm"
+                  className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                  disabled={training}
+                >
+                  {training ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <Brain className="w-4 h-4 mr-2" />
+                  )}
+                  {training ? 'Training...' : 'Train Chatbot'}
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle className="flex items-center gap-2">
+                    <Sparkles className="w-5 h-5 text-purple-600" />
+                    Train Chatbot with RAG Embeddings
+                  </AlertDialogTitle>
+                  <AlertDialogDescription className="space-y-3">
+                    <p>
+                      This will process your knowledge base and create semantic embeddings for AI-powered retrieval.
+                    </p>
+                    <p className="font-semibold">What happens next:</p>
+                    <ul className="list-disc list-inside space-y-1 text-sm">
+                      <li>Your content will be split into {Math.ceil((knowledgeBase?.length || 0) / 500)} chunks</li>
+                      <li>Each chunk will be embedded using OpenAI (text-embedding-3-small)</li>
+                      <li>Embeddings will be stored in your vector database</li>
+                      <li>Your chatbot will use semantic search for better responses</li>
+                    </ul>
+                    <p className="text-xs text-muted-foreground">
+                      Training typically takes 10-30 seconds depending on content size.
+                    </p>
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={() => onTrain(domainId)}
+                    className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                  >
+                    Start Training
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         </div>
       </CardHeader>
