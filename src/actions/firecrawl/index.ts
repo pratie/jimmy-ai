@@ -297,6 +297,7 @@ export const onTrainChatbot = async (domainId: string) => {
         embeddingStatus: 'completed',
         embeddingProgress: 100,
         embeddingCompletedAt: new Date(),
+        hasEmbeddings: true, // ✅ Set flag for instant embedding checks
       },
     })
 

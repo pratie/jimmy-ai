@@ -156,7 +156,7 @@ const KnowledgeBaseViewer = ({
                 <DialogHeader>
                   <DialogTitle>Upload Text Content</DialogTitle>
                   <DialogDescription>
-                    Add custom text content to your chatbot's knowledge base. This will be appended to existing content.
+                    Add custom text content to your chatbot&apos;s knowledge base. This will be appended to existing content.
                   </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4">

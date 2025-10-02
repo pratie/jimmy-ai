@@ -39,6 +39,9 @@ model Domain {
   helpdesk        HelpDesk[]
   knowledgeChunks KnowledgeChunk[]
   products        Product[]
+
+  @@index([userId])
+  @@index([campaignId])
 }
 
 model ChatBot {
@@ -60,6 +63,7 @@ model ChatBot {
   embeddingChunksTotal     Int?
   embeddingChunksProcessed Int?
   embeddingCompletedAt     DateTime?
+  hasEmbeddings            Boolean          @default(false)
   Domain                   Domain?          @relation(fields: [domainId], references: [id], onDelete: Cascade)
   knowledgeChunks          KnowledgeChunk[]
 }
@@ -78,6 +82,8 @@ model HelpDesk {
   answer   String
   domainId String? @db.Uuid
   Domain   Domain? @relation(fields: [domainId], references: [id], onDelete: Cascade)
+
+  @@index([domainId])
 }
 
 model FilterQuestions {
@@ -86,6 +92,8 @@ model FilterQuestions {
   answered String?
   domainId String? @db.Uuid
   Domain   Domain? @relation(fields: [domainId], references: [id], onDelete: Cascade)
+
+  @@index([domainId])
 }
 
 model CustomerResponses {
@@ -104,6 +112,8 @@ model Customer {
   chatRoom  ChatRoom[]
   Domain    Domain?             @relation(fields: [domainId], references: [id], onDelete: Cascade)
   questions CustomerResponses[]
+
+  @@index([domainId])
 }
 
 model ChatRoom {
@@ -132,6 +142,8 @@ model ChatMessage {
   chatRoomId String?   @db.Uuid
   seen       Boolean   @default(false)
   ChatRoom   ChatRoom? @relation(fields: [chatRoomId], references: [id], onDelete: Cascade)
+
+  @@index([chatRoomId])
 }
 
 model Bookings {
@@ -164,6 +176,8 @@ model Product {
   createdAt DateTime @default(now())
   domainId  String?  @db.Uuid
   Domain    Domain?  @relation(fields: [domainId], references: [id], onDelete: Cascade)
+
+  @@index([domainId])
 }
 
 model KnowledgeChunk {

@@ -70,19 +70,11 @@ export async function searchKnowledgeBaseWithFallback(
   domainId: string,
   limit: number = 5
 ): Promise<SearchResult[]> {
-  // Try with standard threshold (0.65)
-  let results = await searchKnowledgeBase(query, domainId, limit, 0.65)
+  // Use 30% similarity threshold (0.3) - single attempt
+  const results = await searchKnowledgeBase(query, domainId, limit, 0.3)
 
-  // If no results, try with lower threshold (0.5)
   if (results.length === 0) {
-    console.log('[RAG] No results with 0.65 threshold, trying 0.5...')
-    results = await searchKnowledgeBase(query, domainId, limit, 0.5)
-  }
-
-  // If still no results, try with very permissive threshold (0.3)
-  if (results.length === 0) {
-    console.log('[RAG] No results with 0.5 threshold, trying 0.3...')
-    results = await searchKnowledgeBase(query, domainId, limit, 0.3)
+    console.log('[RAG] No results found with 0.3 threshold - will use fallback knowledge base')
   }
 
   return results

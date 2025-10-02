@@ -20,7 +20,7 @@ type MinMenuProps = {
     | undefined
   user?: {
     fullname: string
-    email: string
+    email: string | null
   } | null
 }
 
