@@ -498,7 +498,7 @@ const KnowledgeBaseViewer = ({
             </div>
           </div>
         )}
-        <div className="prose prose-sm max-w-none bg-muted/30 p-4 rounded-lg max-h-[500px] overflow-y-auto">
+        <div className="prose prose-sm max-w-none bg-muted/30 p-4 rounded-lg max-h-[500px] overflow-y-auto overflow-x-auto">
           <ReactMarkdown>{displayText}</ReactMarkdown>
           {!showFull && knowledgeBase.length > 1000 && (
             <p className="text-muted-foreground italic mt-4">

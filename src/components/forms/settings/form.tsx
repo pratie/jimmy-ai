@@ -14,6 +14,7 @@ import { BotModeSelector } from '@/components/settings/bot-mode-selector'
 import { BrandVoiceSettings } from '@/components/settings/brand-voice-settings'
 import { onGetEmbeddingStatus } from '@/actions/firecrawl'
 import { CheckCircle2, CircleDashed, ExternalLink } from 'lucide-react'
+import HelpDesk from './help-desk'
 
 const WelcomeMessage = dynamic(
   () => import('./greetings-message').then((props) => props.default),
@@ -76,13 +77,15 @@ const SettingsForm = ({ id, name, chatBot, plan }: Props) => {
   const trainDone = hasEmbeddings || embedStatus === 'completed'
   const behaviorDone = !!(chatBot?.mode) && !!(chatBot?.brandTone) && !!(chatBot?.language)
   return (
-    <form
-      className="flex flex-col gap-8 pb-10"
-      onSubmit={onUpdateSettings}
-    >
+    <form className="flex flex-col gap-8 pb-10" onSubmit={onUpdateSettings}>
       {/* Setup Checklist */}
       <div className="flex flex-col gap-2 rounded-lg border border-sauce-cyan/40 bg-white px-4 py-3 shadow-sm">
-        <h2 className="font-semibold text-lg text-sauce-black">Setup Checklist</h2>
+        <div className="flex items-center justify-between">
+          <h2 className="font-semibold text-lg text-sauce-black">Setup Checklist</h2>
+          <Button asChild variant="outline" size="sm">
+            <a href={`/preview/${id}`} target="_blank" rel="noopener noreferrer">Live Preview ↗</a>
+          </Button>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mt-1">
           <a href="#knowledge-base" className="flex items-center justify-between rounded-md border border-sauce-cyan/30 bg-white px-2.5 py-1.5 hover:bg-sauce-mint/20 transition text-xs">
             <div className="flex items-center gap-1.5 font-medium text-sauce-black">
@@ -108,49 +111,16 @@ const SettingsForm = ({ id, name, chatBot, plan }: Props) => {
         </div>
       </div>
 
-      <div className="flex flex-col gap-2.5 rounded-lg border border-sauce-cyan/40 bg-white px-4 py-3.5 shadow-sm">
-        <h2 id="domain-basics" className="font-semibold text-lg text-sauce-black">Domain Settings</h2>
-        <DomainUpdate
-          name={name}
-          register={register}
-          errors={errors}
+      {/* Knowledge Base */}
+      <div id="knowledge-base" className="flex flex-col gap-2.5 rounded-lg border border-sauce-cyan/40 bg-white px-4 py-3.5 shadow-sm">
+        <h2 className="font-semibold text-lg text-sauce-black">Knowledge Base</h2>
+        <KnowledgeBaseViewer
+          domainId={id}
+          domainName={name}
+          knowledgeBase={chatBot?.knowledgeBase || null}
+          status={chatBot?.knowledgeBaseStatus || null}
+          updatedAt={chatBot?.knowledgeBaseUpdatedAt || null}
         />
-        <div id="embed" />
-        <CodeSnippet id={id} />
-      </div>
-      <div className="flex flex-col gap-2.5 mt-5 rounded-lg border border-sauce-cyan/40 bg-white px-4 py-3.5 shadow-sm">
-        <div className="flex gap-3 items-center">
-          <h2 className="font-semibold text-lg text-sauce-black">Chatbot Settings</h2>
-          <div className="flex gap-1 bg-sauce-purple/10 rounded-full px-2.5 py-0.5 text-[10px] items-center font-semibold text-sauce-purple">
-            <PremiumBadge />
-            Premium
-          </div>
-        </div>
-        <Separator orientation="horizontal" />
-        <div className="grid md:grid-cols-2 gap-6">
-          <div className="col-span-1 flex flex-col gap-5 order-last md:order-first">
-            <EditChatbotIcon
-              chatBot={chatBot}
-              register={register}
-              errors={errors}
-            />
-            <WelcomeMessage
-              message={chatBot?.welcomeMessage!}
-              register={register}
-              errors={errors}
-            />
-          </div>
-          <div id="knowledge-base" className="col-span-1">
-            <KnowledgeBaseViewer
-              domainId={id}
-              domainName={name}
-              knowledgeBase={chatBot?.knowledgeBase || null}
-              status={chatBot?.knowledgeBaseStatus || null}
-              updatedAt={chatBot?.knowledgeBaseUpdatedAt || null}
-            />
-          </div>
-        </div>
-
       </div>
 
       {/* AI Mode & Brand Voice Settings */}
@@ -171,6 +141,39 @@ const SettingsForm = ({ id, name, chatBot, plan }: Props) => {
             />
           </div>
         </div>
+      </div>
+
+      {/* FAQs / Help Desk */}
+      <div className="flex flex-col gap-2.5 mt-5 rounded-lg border border-sauce-cyan/40 bg-white px-4 py-3.5 shadow-sm">
+        <h2 className="font-semibold text-lg text-sauce-black">FAQs</h2>
+        <HelpDesk id={id} />
+      </div>
+
+      {/* Chatbot Settings (Icon & Greetings) */}
+      <div className="flex flex-col gap-2.5 mt-5 rounded-lg border border-sauce-cyan/40 bg-white px-4 py-3.5 shadow-sm">
+        <div className="flex gap-3 items-center">
+          <h2 className="font-semibold text-lg text-sauce-black">Chatbot Settings</h2>
+          <div className="flex gap-1 bg-sauce-purple/10 rounded-full px-2.5 py-0.5 text-[10px] items-center font-semibold text-sauce-purple">
+            <PremiumBadge />
+            Premium
+          </div>
+        </div>
+        <Separator orientation="horizontal" />
+        <div className="grid md:grid-cols-2 gap-6">
+          <div className="col-span-1 flex flex-col gap-5 order-last md:order-first">
+            <EditChatbotIcon chatBot={chatBot} register={register} errors={errors} />
+            <WelcomeMessage message={chatBot?.welcomeMessage!} register={register} errors={errors} />
+          </div>
+          <div className="col-span-1"></div>
+        </div>
+      </div>
+
+      {/* Domain Settings & Embed */}
+      <div className="flex flex-col gap-2.5 mt-5 rounded-lg border border-sauce-cyan/40 bg-white px-4 py-3.5 shadow-sm">
+        <h2 id="domain-basics" className="font-semibold text-lg text-sauce-black">Domain Settings</h2>
+        <DomainUpdate name={name} register={register} errors={errors} />
+        <div id="embed" />
+        <CodeSnippet id={id} />
       </div>
 
       <div className="flex gap-5 justify-end">

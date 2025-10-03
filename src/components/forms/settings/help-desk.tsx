@@ -25,10 +25,7 @@ const HelpDesk = ({ id }: Props) => {
     <Card className="w-full grid grid-cols-1 lg:grid-cols-2">
       <CardContent className="p-6 border-r-[1px]">
         <CardTitle>Help Desk</CardTitle>
-        <form
-          onSubmit={onSubmitQuestion}
-          className="flex flex-col gap-6 mt-10"
-        >
+        <div className="flex flex-col gap-6 mt-10">
           <div className="flex flex-col gap-3">
             <Section
               label="Question"
@@ -61,12 +58,13 @@ const HelpDesk = ({ id }: Props) => {
             />
           </div>
           <Button
-            type="submit"
+            type="button"
+            onClick={() => onSubmitQuestion()}
             className="bg-primary hover:bg-primary/80 transition duration-150 ease-in-out text-primary-foreground font-semibold"
           >
             Create
           </Button>
-        </form>
+        </div>
       </CardContent>
       <CardContent className="p-6 overflow-y-auto chat-window">
         <Loader loading={loading}>

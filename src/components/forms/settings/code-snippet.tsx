@@ -49,7 +49,7 @@ const CodeSnippet = ({ id }: Props) => {
         label="Code snippet"
         message="Copy and paste this code snippet into the header tag of your website"
       />
-      <div className="bg-cream px-10 rounded-lg inline-block relative">
+      <div className="bg-cream px-6 py-4 rounded-lg relative w-full overflow-x-auto">
         <Copy
           className="absolute top-5 right-5 text-gray-400 cursor-pointer"
           onClick={() => {
@@ -60,8 +60,8 @@ const CodeSnippet = ({ id }: Props) => {
             })
           }}
         />
-        <pre>
-          <code className="text-gray-500">{snippet}</code>
+        <pre className="whitespace-pre text-sm min-w-full">
+          <code className="text-gray-600">{snippet}</code>
         </pre>
       </div>
     </div>
