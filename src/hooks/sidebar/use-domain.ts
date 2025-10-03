@@ -100,6 +100,11 @@ export const useDomain = () => {
         title: domainResult.status == 200 ? 'Success' : 'Error',
         description: domainResult.message,
       })
+      // On success, take the user straight to the domain settings for onboarding
+      if (domainResult.status === 200 && domainResult.name) {
+        router.push(`/settings/${domainResult.name}`)
+        return
+      }
       router.refresh()
     } else {
       console.log('❌ Domain creation failed')

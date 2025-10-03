@@ -112,6 +112,8 @@ export const onGetKnowledgeBaseStatus = async (domainId: string) => {
             knowledgeBase: true,
             knowledgeBaseStatus: true,
             knowledgeBaseUpdatedAt: true,
+            // Embedding status fields are intentionally not exposed here
+            // to keep this endpoint focused on KB status
           },
         },
       },
@@ -133,6 +135,49 @@ export const onGetKnowledgeBaseStatus = async (domainId: string) => {
   } catch (error) {
     console.error('[Firecrawl] Error getting status:', error)
     return { status: 500, message: 'Failed to get knowledge base status' }
+  }
+}
+
+// Embedding progress/status for training UI
+export const onGetEmbeddingStatus = async (domainId: string) => {
+  try {
+    const domain = await client.domain.findUnique({
+      where: { id: domainId },
+      select: {
+        chatBot: {
+          select: {
+            embeddingStatus: true,
+            embeddingProgress: true,
+            embeddingChunksTotal: true,
+            embeddingChunksProcessed: true,
+            hasEmbeddings: true,
+            embeddingCompletedAt: true,
+            knowledgeBaseUpdatedAt: true,
+          },
+        },
+      },
+    })
+
+    if (!domain?.chatBot) {
+      return { status: 404, message: 'ChatBot not found' }
+    }
+
+    const cb = domain.chatBot
+    return {
+      status: 200,
+      data: {
+        status: cb.embeddingStatus || 'not_started',
+        progress: cb.embeddingProgress || 0,
+        total: cb.embeddingChunksTotal || 0,
+        processed: cb.embeddingChunksProcessed || 0,
+        hasEmbeddings: !!cb.hasEmbeddings,
+        completedAt: cb.embeddingCompletedAt || null,
+        kbUpdatedAt: cb.knowledgeBaseUpdatedAt || null,
+      },
+    }
+  } catch (error) {
+    console.error('[RAG] Error getting embedding status:', error)
+    return { status: 500, message: 'Failed to get embedding status' }
   }
 }
 
@@ -168,7 +213,7 @@ export const onUpdateKnowledgeBase = async (domainId: string, markdown: string) 
   }
 }
 
-export const onTrainChatbot = async (domainId: string) => {
+export const onTrainChatbot = async (domainId: string, force: boolean = false) => {
   try {
     console.log('[RAG] Starting chatbot training for domain:', domainId)
 
@@ -180,6 +225,9 @@ export const onTrainChatbot = async (domainId: string) => {
           select: {
             id: true,
             knowledgeBase: true,
+            knowledgeBaseUpdatedAt: true,
+            hasEmbeddings: true,
+            embeddingCompletedAt: true,
           },
         },
       },
@@ -197,6 +245,17 @@ export const onTrainChatbot = async (domainId: string) => {
     }
 
     const chatBotId = domain.chatBot.id
+
+    // Skip if already up to date and not forced
+    const { knowledgeBaseUpdatedAt, hasEmbeddings, embeddingCompletedAt } = domain.chatBot
+    const upToDate = !!hasEmbeddings && !!embeddingCompletedAt && !!knowledgeBaseUpdatedAt && embeddingCompletedAt >= knowledgeBaseUpdatedAt
+    if (upToDate && !force) {
+      return {
+        status: 200,
+        message: 'Chatbot already trained and up to date',
+        data: { skipped: true },
+      }
+    }
 
     // Validate content
     const validation = validateContent(domain.chatBot.knowledgeBase)

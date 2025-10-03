@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useToast } from '@/components/ui/use-toast'
-import { onScrapeWebsiteForDomain, onUpdateKnowledgeBase, onTrainChatbot, onUploadTextKnowledgeBase } from '@/actions/firecrawl'
+import { onScrapeWebsiteForDomain, onUpdateKnowledgeBase, onTrainChatbot, onUploadTextKnowledgeBase, onGetEmbeddingStatus } from '@/actions/firecrawl'
 import { useRouter } from 'next/navigation'
 
 export const useScrapeWebsite = () => {
@@ -89,27 +89,65 @@ export const useUpdateKnowledgeBase = () => {
 export const useTrainChatbot = () => {
   const [loading, setLoading] = useState(false)
   const [progress, setProgress] = useState(0)
+  const [status, setStatus] = useState<'not_started' | 'processing' | 'completed' | 'failed'>('not_started')
+  const [counts, setCounts] = useState<{ processed: number; total: number }>({ processed: 0, total: 0 })
+  const [hasEmbeddings, setHasEmbeddings] = useState(false)
+  const [completedAt, setCompletedAt] = useState<Date | null>(null)
+  const [kbUpdatedAt, setKbUpdatedAt] = useState<Date | null>(null)
   const { toast } = useToast()
   const router = useRouter()
 
-  const onTrain = async (domainId: string) => {
+  const onTrain = async (domainId: string, force: boolean = false) => {
     try {
       setLoading(true)
       setProgress(0)
+      setStatus('processing')
 
       toast({
         title: 'Training Started',
         description: 'Generating embeddings for your knowledge base...',
       })
 
-      const result = await onTrainChatbot(domainId)
+      // Start polling embedding status while training runs server-side
+      let stop = false
+      const poll = async () => {
+        try {
+          const res = await onGetEmbeddingStatus(domainId)
+          if (res?.status === 200 && res.data) {
+            setProgress(res.data.progress)
+            setStatus(res.data.status)
+            setCounts({ processed: res.data.processed, total: res.data.total })
+            setHasEmbeddings(!!res.data.hasEmbeddings)
+            setCompletedAt(res.data.completedAt ? new Date(res.data.completedAt) : null)
+            setKbUpdatedAt(res.data.kbUpdatedAt ? new Date(res.data.kbUpdatedAt) : null)
+            if (res.data.status === 'completed' || res.data.status === 'failed') {
+              stop = true
+            }
+          }
+        } catch (e) {
+          // swallow poll errors
+        }
+        if (!stop) setTimeout(poll, 1000)
+      }
+      // kick off poll loop
+      poll()
+
+      const result = await onTrainChatbot(domainId, force)
 
       if (result.status === 200) {
         setProgress(100)
-        toast({
-          title: 'Training Complete! 🎉',
-          description: `${result.data?.chunksProcessed} chunks processed successfully.`,
-        })
+        setStatus('completed')
+        if (!result.data?.skipped) {
+          toast({
+            title: 'Training Complete! 🎉',
+            description: `${result.data?.chunksProcessed} chunks processed successfully.`,
+          })
+        } else {
+          toast({
+            title: 'Up to date',
+            description: 'Your chatbot is already trained with the latest content.',
+          })
+        }
         router.refresh()
       } else {
         toast({
@@ -129,7 +167,7 @@ export const useTrainChatbot = () => {
     }
   }
 
-  return { onTrain, loading, progress }
+  return { onTrain, loading, progress, status, counts, hasEmbeddings, completedAt, kbUpdatedAt }
 }
 
 export const useUploadText = () => {

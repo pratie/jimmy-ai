@@ -63,7 +63,20 @@ export const onIntegrateDomain = async (domain: string, icon: string) => {
         })
 
         if (newDomain) {
-          return { status: 200, message: 'Domain successfully added' }
+          // Fetch the newly created domain's id to enable redirects post-onboarding
+          const created = await client.domain.findFirst({
+            where: {
+              name: domain,
+              User: { clerkId: user.id },
+            },
+            select: { id: true, name: true },
+          })
+          return {
+            status: 200,
+            message: 'Domain successfully added',
+            id: created?.id,
+            name: created?.name,
+          }
         }
       }
       return {
