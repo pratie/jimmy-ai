@@ -115,7 +115,10 @@ export const useTrainChatbot = () => {
           const res = await onGetEmbeddingStatus(domainId)
           if (res?.status === 200 && res.data) {
             setProgress(res.data.progress)
-            setStatus(res.data.status)
+            const statusValue = res.data.status
+            if (statusValue === 'not_started' || statusValue === 'processing' || statusValue === 'completed' || statusValue === 'failed') {
+              setStatus(statusValue)
+            }
             setCounts({ processed: res.data.processed, total: res.data.total })
             setHasEmbeddings(!!res.data.hasEmbeddings)
             setCompletedAt(res.data.completedAt ? new Date(res.data.completedAt) : null)

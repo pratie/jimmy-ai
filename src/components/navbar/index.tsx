@@ -4,14 +4,15 @@ import Link from 'next/link'
 
 function NavBar() {
   return (
-    <div className="flex gap-5 justify-between items-center px-7 py-3 font-bold border-b-2 border-pastel-lavender/40 backdrop-blur-md bg-pastel-cream/60 leading-[154.5%] max-md:flex-wrap max-md:px-5 shadow-sm">
+    <>
+    <div className="flex gap-5 justify-between items-center px-7 py-3 font-bold leading-[154.5%] max-md:flex-wrap max-md:px-5">
       <div className="flex gap-1.5 justify-center self-stretch my-auto text-2xl tracking-tighter text-text-primary">
         <Image
-          src="/images/icon-ai-logo.png"
-          alt="Icon AI Logo"
+          src="/images/logo.svg"
+          alt="Logo"
           sizes="100vw"
           style={{
-            width: '100px',
+            width: '50px',
             height: 'auto',
           }}
           width={0}
@@ -24,11 +25,13 @@ function NavBar() {
       </ul>
       <Link
         href="/dashboard"
-        className="bg-interactive-pink px-6 py-2.5 rounded-xl text-text-primary font-bold hover:bg-interactive-pink/90 transition-all shadow-md hover:shadow-lg transform hover:scale-105 border-2 border-interactive-pink/40"
+        className="px-6 py-2.5 text-sauce-black font-bold hover:underline transition-all"
       >
         Start Automating Now
       </Link>
     </div>
+    <div className="w-full h-px bg-sauce-black/10"></div>
+    </>
   )
 }
 

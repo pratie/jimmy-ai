@@ -10,21 +10,31 @@ type Props = {
 
 const DashboardCard = ({ icon, title, value, sales, percentage }: Props) => {
   return (
-    <div className=" rounded-lg flex flex-col gap-3 pr-10 pl-10 py-10 md:pl-10 md:pr-20 border-[1px] border-border bg-cream dark:bg-muted md:w-fit w-full">
-      <div className="flex gap-3">
-        {icon}
-        <h2 className="font-bold text-xl">{title}</h2>
-      </div>
-      <div className="flex items-baseline gap-2">
-        <p className="font-bold text-4xl">
-          {sales && '$'}
-          {value}
-        </p>
-        {percentage !== undefined && percentage > 0 && (
-          <span className="text-sm text-gray-500 font-normal">
-            ({percentage}% conversion)
-          </span>
-        )}
+    <div className="group relative flex-1 min-w-[280px]">
+      {/* Top accent bar */}
+      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-sauce-black via-sauce-gray to-sauce-black rounded-t-lg"></div>
+
+      <div className="bg-white border border-sauce-cyan/40 rounded-lg shadow-sm hover:shadow-md transition-all p-5 pt-6">
+        <div className="flex items-start justify-between mb-4">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-lg bg-sauce-purple/10 flex items-center justify-center text-sauce-purple">
+              {icon}
+            </div>
+            <h3 className="font-medium text-sm text-sauce-gray">{title}</h3>
+          </div>
+        </div>
+
+        <div className="flex items-end gap-2">
+          <p className="font-bold text-3xl text-sauce-black">
+            {sales && '$'}
+            {value}
+          </p>
+          {percentage !== undefined && percentage > 0 && (
+            <span className="text-xs text-accent-green font-semibold mb-1 bg-accent-green/10 px-2 py-0.5 rounded">
+              {percentage}%
+            </span>
+          )}
+        </div>
       </div>
     </div>
   )

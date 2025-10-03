@@ -1,7 +1,7 @@
 'use client'
 import { Separator } from '@/components/ui/separator'
 import { useSettings } from '@/hooks/settings/use-settings'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { DomainUpdate } from './domain-update'
 import CodeSnippet from './code-snippet'
 import PremiumBadge from '@/icons/premium-badge'
@@ -12,6 +12,8 @@ import { Loader } from '@/components/loader'
 import KnowledgeBaseViewer from '@/components/settings/knowledge-base-viewer'
 import { BotModeSelector } from '@/components/settings/bot-mode-selector'
 import { BrandVoiceSettings } from '@/components/settings/brand-voice-settings'
+import { onGetEmbeddingStatus } from '@/actions/firecrawl'
+import { CheckCircle2, CircleDashed, ExternalLink } from 'lucide-react'
 
 const WelcomeMessage = dynamic(
   () => import('./greetings-message').then((props) => props.default),
@@ -46,25 +48,80 @@ const SettingsForm = ({ id, name, chatBot, plan }: Props) => {
     deleting,
     loading,
   } = useSettings(id)
+  
+  // Setup checklist state
+  const [embedStatus, setEmbedStatus] = useState<'not_started' | 'processing' | 'completed' | 'failed'>('not_started')
+  const [hasEmbeddings, setHasEmbeddings] = useState(false)
+
+  useEffect(() => {
+    let mounted = true
+    ;(async () => {
+      try {
+        const res = await onGetEmbeddingStatus(id)
+        if (mounted && res?.status === 200 && res.data) {
+          const status = res.data.status
+          if (status === 'not_started' || status === 'processing' || status === 'completed' || status === 'failed') {
+            setEmbedStatus(status)
+          }
+          setHasEmbeddings(!!res.data.hasEmbeddings)
+        }
+      } catch {}
+    })()
+    return () => { mounted = false }
+  }, [id])
+
+  const hasKB = !!chatBot?.knowledgeBase && chatBot.knowledgeBase.length >= 50
+  const basicsDone = !!name && !!(chatBot?.icon)
+  const kbDone = hasKB
+  const trainDone = hasEmbeddings || embedStatus === 'completed'
+  const behaviorDone = !!(chatBot?.mode) && !!(chatBot?.brandTone) && !!(chatBot?.language)
   return (
     <form
       className="flex flex-col gap-8 pb-10"
       onSubmit={onUpdateSettings}
     >
-      <div className="flex flex-col gap-3">
-        <h2 className="font-bold text-2xl">Domain Settings</h2>
-        <Separator orientation="horizontal" />
+      {/* Setup Checklist */}
+      <div className="flex flex-col gap-2 rounded-lg border border-sauce-cyan/40 bg-white px-4 py-3 shadow-sm">
+        <h2 className="font-semibold text-lg text-sauce-black">Setup Checklist</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mt-1">
+          <a href="#knowledge-base" className="flex items-center justify-between rounded-md border border-sauce-cyan/30 bg-white px-2.5 py-1.5 hover:bg-sauce-mint/20 transition text-xs">
+            <div className="flex items-center gap-1.5 font-medium text-sauce-black">
+              {kbDone ? <CheckCircle2 className="w-3.5 h-3.5 text-accent-green" /> : <CircleDashed className="w-3.5 h-3.5 text-sauce-gray" />}
+              <span>1) Knowledge Base</span>
+            </div>
+            <ExternalLink className="w-3 h-3 text-sauce-gray" />
+          </a>
+          <a href="#ai-behavior" className="flex items-center justify-between rounded-md border border-sauce-cyan/30 bg-white px-2.5 py-1.5 hover:bg-sauce-mint/20 transition text-xs">
+            <div className="flex items-center gap-1.5 font-medium text-sauce-black">
+              {behaviorDone ? <CheckCircle2 className="w-3.5 h-3.5 text-accent-green" /> : <CircleDashed className="w-3.5 h-3.5 text-sauce-gray" />}
+              <span>2) AI Behavior</span>
+            </div>
+            <ExternalLink className="w-3 h-3 text-sauce-gray" />
+          </a>
+          <a href="#embed" className="flex items-center justify-between rounded-md border border-sauce-cyan/30 bg-white px-2.5 py-1.5 hover:bg-sauce-mint/20 transition text-xs">
+            <div className="flex items-center gap-1.5 font-medium text-sauce-black">
+              {trainDone ? <CheckCircle2 className="w-3.5 h-3.5 text-accent-green" /> : <CircleDashed className="w-3.5 h-3.5 text-sauce-gray" />}
+              <span>3) Embed & Preview</span>
+            </div>
+            <ExternalLink className="w-3 h-3 text-sauce-gray" />
+          </a>
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-2.5 rounded-lg border border-sauce-cyan/40 bg-white px-4 py-3.5 shadow-sm">
+        <h2 id="domain-basics" className="font-semibold text-lg text-sauce-black">Domain Settings</h2>
         <DomainUpdate
           name={name}
           register={register}
           errors={errors}
         />
+        <div id="embed" />
         <CodeSnippet id={id} />
       </div>
-      <div className="flex flex-col gap-3 mt-5">
-        <div className="flex gap-4 items-center">
-          <h2 className="font-bold text-2xl">Chatbot Settings</h2>
-          <div className="flex gap-1 bg-cream rounded-full px-3 py-1 text-xs items-center font-bold">
+      <div className="flex flex-col gap-2.5 mt-5 rounded-lg border border-sauce-cyan/40 bg-white px-4 py-3.5 shadow-sm">
+        <div className="flex gap-3 items-center">
+          <h2 className="font-semibold text-lg text-sauce-black">Chatbot Settings</h2>
+          <div className="flex gap-1 bg-sauce-purple/10 rounded-full px-2.5 py-0.5 text-[10px] items-center font-semibold text-sauce-purple">
             <PremiumBadge />
             Premium
           </div>
@@ -83,7 +140,7 @@ const SettingsForm = ({ id, name, chatBot, plan }: Props) => {
               errors={errors}
             />
           </div>
-          <div className="col-span-1">
+          <div id="knowledge-base" className="col-span-1">
             <KnowledgeBaseViewer
               domainId={id}
               domainName={name}
@@ -97,10 +154,9 @@ const SettingsForm = ({ id, name, chatBot, plan }: Props) => {
       </div>
 
       {/* AI Mode & Brand Voice Settings */}
-      <div className="flex flex-col gap-3 mt-5">
-        <h2 className="font-bold text-2xl">AI Behavior Settings</h2>
-        <Separator orientation="horizontal" />
-        <div className="grid md:grid-cols-2 gap-6">
+      <div className="flex flex-col gap-2.5 mt-5 rounded-lg border border-sauce-cyan/40 bg-white px-4 py-3.5 shadow-sm">
+        <h2 id="ai-behavior" className="font-semibold text-lg text-sauce-black">AI Behavior Settings</h2>
+        <div className="grid md:grid-cols-2 gap-6 mt-1">
           <div className="col-span-1">
             <BotModeSelector
               domainId={id}

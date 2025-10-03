@@ -7,13 +7,13 @@ img {
 }
 
 body {
-  background: linear-gradient(135deg, #fff1e6 0%, #fde2e4 25%, #dfe7fd 50%, #e2ece9 75%, #eae4e9 100%);
+  background: #d4f4f4;
   background-attachment: fixed;
   position: relative;
   min-height: 100vh;
 }
 
-/* Subtle pastel overlay pattern */
+/* Sauce AI inspired grid pattern */
 body::before {
   content: '';
   position: fixed;
@@ -22,9 +22,9 @@ body::before {
   right: 0;
   bottom: 0;
   background-image:
-    radial-gradient(circle at 20% 30%, rgba(250, 210, 225, 0.1) 0%, transparent 50%),
-    radial-gradient(circle at 80% 70%, rgba(223, 231, 253, 0.1) 0%, transparent 50%),
-    radial-gradient(circle at 50% 50%, rgba(226, 236, 233, 0.08) 0%, transparent 50%);
+    linear-gradient(to right, rgba(184, 230, 230, 0.3) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(184, 230, 230, 0.3) 1px, transparent 1px);
+  background-size: 50px 50px;
   pointer-events: none;
   z-index: 0;
 }
@@ -40,67 +40,67 @@ body::before {
 
 @layer base {
   :root {
-    /* Pastel Theme - Subtle Hues */
-    --background: 32 100% 96%;        /* pastel-cream #fff1e6 */
-    --foreground: 210 24% 16%;        /* text-primary #2d3748 */
+    /* Sauce AI Theme - Mint Grid with Purple Accents */
+    --background: 180 45% 95%;        /* sauce-mint #d4f4f4 */
+    --foreground: 0 0% 4%;            /* sauce-black #0a0a0a */
 
-    --card: 300 20% 91%;              /* pastel-lavender #eae4e9 */
-    --card-foreground: 210 24% 16%;   /* text-primary */
+    --card: 0 0% 100%;                /* White cards for contrast */
+    --card-foreground: 0 0% 4%;       /* sauce-black */
 
-    --popover: 32 100% 96%;           /* pastel-cream */
-    --popover-foreground: 210 24% 16%;
+    --popover: 0 0% 100%;             /* White popover */
+    --popover-foreground: 0 0% 4%;
 
-    --primary: 333 86% 78%;           /* interactive-pink #f7a6c4 */
-    --primary-foreground: 210 24% 16%; /* Dark text on pink */
+    --primary: 271 81% 56%;           /* sauce-purple #9333ea */
+    --primary-foreground: 0 0% 100%;  /* White text on purple */
 
-    --secondary: 160 30% 82%;         /* pastel-mint #e2ece9 */
-    --secondary-foreground: 210 24% 16%;
+    --secondary: 180 40% 90%;         /* Light cyan */
+    --secondary-foreground: 0 0% 4%;
 
-    --muted: 351 100% 94%;            /* pastel-blush #fde2e4 */
-    --muted-foreground: 214 13% 47%;  /* text-muted */
+    --muted: 180 30% 92%;             /* Muted mint */
+    --muted-foreground: 0 0% 32%;     /* sauce-gray */
 
-    --accent: 218 100% 91%;           /* pastel-sky #dfe7fd */
-    --accent-foreground: 210 24% 16%;
+    --accent: 271 91% 65%;            /* sauce-purple-light #a855f7 */
+    --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 84% 60%;         /* Soft red for errors */
+    --destructive: 0 84% 60%;         /* Red for errors */
     --destructive-foreground: 0 0% 98%;
 
-    --border: 300 20% 85%;            /* Soft lavender border */
-    --input: 32 100% 96%;             /* pastel-cream */
-    --ring: 333 86% 78%;              /* interactive-pink */
+    --border: 180 30% 85%;            /* Soft cyan border */
+    --input: 0 0% 100%;               /* White input */
+    --ring: 271 81% 56%;              /* sauce-purple */
 
-    --radius: 0.75rem;                /* Softer, more rounded */
+    --radius: 0.75rem;                /* Rounded corners */
   }
 
   .dark {
-    /* Dark mode with pastel accents */
-    --background: 222 47% 11%;
-    --foreground: 210 40% 98%;
+    /* Dark mode - Keep mint grid concept */
+    --background: 180 15% 12%;        /* Dark teal/mint */
+    --foreground: 0 0% 98%;
 
-    --card: 222 47% 15%;
-    --card-foreground: 210 40% 98%;
+    --card: 180 12% 15%;
+    --card-foreground: 0 0% 98%;
 
-    --popover: 222 47% 15%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 180 12% 15%;
+    --popover-foreground: 0 0% 98%;
 
-    --primary: 333 86% 78%;           /* Keep pastel-pink accent */
-    --primary-foreground: 222 47% 11%;
+    --primary: 271 81% 56%;           /* sauce-purple */
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 217 33% 17%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 180 12% 20%;
+    --secondary-foreground: 0 0% 98%;
 
-    --muted: 223 47% 11%;
-    --muted-foreground: 215 20% 65%;
+    --muted: 180 12% 18%;
+    --muted-foreground: 0 0% 65%;
 
-    --accent: 218 100% 91%;           /* pastel-sky accent */
-    --accent-foreground: 222 47% 11%;
+    --accent: 271 91% 65%;            /* sauce-purple-light */
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 63% 31%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 0 0% 98%;
 
-    --border: 217 33% 20%;
-    --input: 217 33% 17%;
-    --ring: 333 86% 78%;
+    --border: 180 15% 25%;
+    --input: 180 12% 18%;
+    --ring: 271 81% 56%;
   }
 }
 
@@ -118,13 +118,13 @@ body::before {
 }
 
 .chat-bubble {
-  background: linear-gradient(135deg, #dfe7fd 0%, #cddafd 100%);
+  background: #ffffff;
   padding: 16px 28px;
   border-radius: 18px;
   border-bottom-left-radius: 4px;
   display: inline-block;
-  box-shadow: 0 2px 8px rgba(205, 218, 253, 0.3);
-  border: 2px solid rgba(167, 199, 231, 0.3);
+  box-shadow: 0 2px 12px rgba(147, 51, 234, 0.15);
+  border: 2px solid rgba(184, 230, 230, 0.4);
 }
 .typing {
   align-items: center;
@@ -133,7 +133,7 @@ body::before {
 }
 .typing .dot {
   animation: mercuryTypingAnimation 1.8s infinite ease-in-out;
-  background-color: #f7a6c4;
+  background-color: #9333ea;
   border-radius: 50%;
   height: 7px;
   margin-right: 4px;
@@ -157,15 +157,15 @@ body::before {
 @keyframes mercuryTypingAnimation {
   0% {
     transform: translateY(0px);
-    background-color: #f7a6c4;
+    background-color: #9333ea;
   }
   28% {
     transform: translateY(-7px);
-    background-color: #fad2e1;
+    background-color: #a855f7;
   }
   44% {
     transform: translateY(0px);
-    background-color: #a7c7e7;
+    background-color: #7c3aed;
   }
 }
 
