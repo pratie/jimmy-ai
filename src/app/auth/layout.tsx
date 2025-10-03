@@ -31,12 +31,12 @@ const Layout = async ({ children }: Props) => {
       </div>
       <div className="hidden lg:flex flex-1 w-full max-h-full max-w-4000px overflow-hidden relative bg-cream  flex-col pt-10 pl-24 gap-3">
         <h2 className="text-gravel md:text-4xl font-bold">
-          Hi, I’m your AI powered sales assistant, Corinna!
+          Transform Customer Conversations into Sales
         </h2>
         <p className="text-iridium md:text-sm mb-10">
-          Corinna is capable of capturing lead information without a form...{' '}
+          Our AI chatbot engages visitors naturally, captures leads intelligently,{' '}
           <br />
-          something never done before 😉
+          and schedules appointments automatically—all without traditional forms.
         </p>
         <Image
           src="/images/app-ui.png"
