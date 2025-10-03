@@ -65,15 +65,29 @@ export const onLoginUser = async () => {
     console.log('[Auth] onLoginUser called')
   }
   try {
-    const { userId } = await auth()
+    const authResult = await auth()
+    const { userId } = authResult
+
+    // Enhanced debugging for Clerk session
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[Auth Debug] Full auth() result:', {
+        userId: authResult.userId,
+        sessionId: authResult.sessionId,
+        orgId: authResult.orgId,
+        hasSession: !!authResult.sessionId,
+      })
+    }
 
     if (!userId) {
-      console.log('[Auth] No authenticated user found')
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[Auth] No authenticated user found (userId is null/undefined)')
+        console.log('[Auth] This is expected for unauthenticated users')
+      }
       return { status: 401, message: 'No user found' }
     }
 
     if (process.env.NODE_ENV === 'development') {
-      console.log('[Auth] Current Clerk userId:', userId)
+      console.log('[Auth] ✅ Clerk userId found:', userId)
     }
 
     let authenticated = await client.user.findUnique({

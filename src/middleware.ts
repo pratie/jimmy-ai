@@ -1,20 +1,23 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
 
+// Clerk v6 middleware style: define public route matcher, protect everything else
 const isPublicRoute = createRouteMatcher([
   '/',
   '/auth(.*)',
   '/portal(.*)',
   '/images(.*)',
   '/chatbot',
-  '/favicon.ico',
+  '/favicon\\.ico',
   '/api/webhooks(.*)',
   '/api/dodo/webhook',
-  '/api/dodo(.*)'
+  '/api/dodo(.*)',
+  // Allow public chatbot streaming + related bot APIs
+  '/api/bot(.*)'
 ])
 
-export default clerkMiddleware((auth, request) => {
-  if (!isPublicRoute(request)) {
-    auth().protect()
+export default clerkMiddleware(async (auth, req) => {
+  if (!isPublicRoute(req)) {
+    await auth.protect()
   }
 })
 

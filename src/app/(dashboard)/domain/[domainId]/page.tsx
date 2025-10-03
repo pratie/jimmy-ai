@@ -6,13 +6,13 @@ import { Separator } from '@/components/ui/separator'
 import { redirect } from 'next/navigation'
 import React from 'react'
 
-type Props = {
-  params: { domainId: string }
-}
-
-const DomainPage = async ({ params }: Props) => {
+const DomainPage = async ({
+  params,
+}: {
+  params: Promise<{ domainId: string }>
+}) => {
   // Extract domain name from ID (e.g., "example" from URL)
-  const domainName = params.domainId
+  const { domainId: domainName } = await params
 
   const domain = await onGetCurrentDomainInfo(domainName)
 

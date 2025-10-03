@@ -4,6 +4,10 @@ import { ChatProvider } from '@/context/user-chat-context'
 import { redirect } from 'next/navigation'
 import React from 'react'
 
+// Mark the entire (dashboard) segment as dynamic to avoid
+// static generation warnings for auth/headers usage
+export const dynamic = 'force-dynamic'
+
 type Props = {
   children: React.ReactNode
 }
@@ -13,7 +17,7 @@ const OwnerLayout = async ({ children }: Props) => {
     const authenticated = await onLoginUser()
 
     if (!authenticated) {
-      console.error('[Dashboard Layout] No authentication response received')
+      console.log('[Dashboard Layout] No authentication response received')
       redirect('/auth/sign-in')
     }
 
@@ -23,12 +27,12 @@ const OwnerLayout = async ({ children }: Props) => {
     }
 
     if (authenticated.status !== 200) {
-      console.error('[Dashboard Layout] Authentication failed:', authenticated.message)
+      console.log('[Dashboard Layout] Authentication failed:', authenticated.message)
       redirect('/auth/sign-in')
     }
 
     if (!authenticated.user) {
-      console.error('[Dashboard Layout] User data missing from authentication response')
+      console.log('[Dashboard Layout] User data missing from authentication response')
       redirect('/auth/sign-in')
     }
 
@@ -46,6 +50,17 @@ const OwnerLayout = async ({ children }: Props) => {
       </ChatProvider>
     )
   } catch (error) {
+    // Next.js 15: redirect() throws NEXT_REDIRECT error (expected behavior)
+    // Check if this is a Next.js redirect (not a real error)
+    if (error && typeof error === 'object' && 'digest' in error) {
+      const digest = (error as any).digest
+      if (typeof digest === 'string' && digest.startsWith('NEXT_REDIRECT')) {
+        // This is an expected redirect, re-throw it so Next.js can handle it
+        throw error
+      }
+    }
+
+    // Only log and handle actual unexpected errors
     console.error('[Dashboard Layout] Unexpected error:', error)
     redirect('/auth/sign-in')
   }

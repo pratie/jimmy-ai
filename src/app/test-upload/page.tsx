@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Image from 'next/image'
 import { uploadFile, uploadFileFromUrl, isKieApiConfigured } from '@/lib/kie-api'
 
 export default function TestUploadPage() {
@@ -179,13 +180,17 @@ export default function TestUploadPage() {
 
                   <div className="flex justify-center">
                     {file.mimeType.startsWith('image/') ? (
-                      <img
-                        src={file.downloadUrl}
-                        alt={file.fileName}
-                        className="max-w-full max-h-48 object-contain border rounded"
-                        onLoad={() => console.log('✅ Image loaded successfully:', file.downloadUrl)}
-                        onError={() => console.log('❌ Image failed to load:', file.downloadUrl)}
-                      />
+                      <div className="relative w-full h-48 border rounded">
+                        <Image
+                          src={file.downloadUrl}
+                          alt={file.fileName}
+                          fill
+                          className="object-contain"
+                          sizes="(max-width: 768px) 100vw, 50vw"
+                          onLoadingComplete={() => console.log('✅ Image loaded successfully:', file.downloadUrl)}
+                          onError={() => console.log('❌ Image failed to load:', file.downloadUrl)}
+                        />
+                      </div>
                     ) : (
                       <div className="w-48 h-48 bg-gray-100 border rounded flex items-center justify-center">
                         <span className="text-gray-500 text-sm">Non-image file</span>

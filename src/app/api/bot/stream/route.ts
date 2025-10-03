@@ -8,6 +8,60 @@ import { buildSystemPrompt } from '@/lib/promptBuilder'
 import { searchKnowledgeBaseWithFallback, formatResultsForPrompt, hasTrainedEmbeddings } from '@/lib/vector-search'
 import OpenAI from 'openai'
 
+// --- Minimal in-memory LRU cache for domain config ---
+type DomainConfig = {
+  name: string
+  chatBot: {
+    mode: string | null
+    brandTone: string | null
+    language: string | null
+    hasEmbeddings: boolean | null
+  } | null
+}
+
+const DOMAIN_CACHE_TTL_MS = 60_000 // 60 seconds
+const DOMAIN_CACHE_CAPACITY = 100
+const domainCache = new Map<string, { value: DomainConfig; expires: number }>()
+
+// Simple metrics for cache hits/misses (global + per-domain)
+let cacheHits = 0
+let cacheMisses = 0
+const domainCacheStats = new Map<string, { hits: number; misses: number }>()
+
+function recordCacheStat(domainId: string, hit: boolean) {
+  const stat = domainCacheStats.get(domainId) || { hits: 0, misses: 0 }
+  if (hit) {
+    cacheHits++
+    stat.hits++
+  } else {
+    cacheMisses++
+    stat.misses++
+  }
+  domainCacheStats.set(domainId, stat)
+}
+
+function getDomainFromCache(domainId: string): DomainConfig | undefined {
+  const entry = domainCache.get(domainId)
+  if (!entry) return undefined
+  if (Date.now() > entry.expires) {
+    domainCache.delete(domainId)
+    return undefined
+  }
+  // LRU update: reinsert to refresh recency
+  domainCache.delete(domainId)
+  domainCache.set(domainId, entry)
+  return entry.value
+}
+
+function setDomainInCache(domainId: string, value: DomainConfig) {
+  // Trim if over capacity
+  if (domainCache.size >= DOMAIN_CACHE_CAPACITY) {
+    const firstKey = domainCache.keys().next().value
+    if (firstKey) domainCache.delete(firstKey)
+  }
+  domainCache.set(domainId, { value, expires: Date.now() + DOMAIN_CACHE_TTL_MS })
+}
+
 const openai = new OpenAI({
   apiKey: process.env.OPEN_AI_KEY,
   timeout: 30000,
@@ -49,34 +103,43 @@ export async function POST(req: Request) {
       customerEmail = extractedEmail[0]
     }
 
-    // ⚡ PARALLEL EXECUTION: Run DB query + embedding check at same time
+    // ⚡ Domain config: use in-memory cache to avoid repeated DB round-trips
     const parallelStartTime = Date.now()
     const dbQueryStart = Date.now()
-    const embeddingCheckStart = Date.now()
+    let chatBotDomain = getDomainFromCache(domainId)
+    let cacheHit = false
 
-    // Fetch domain config with hasEmbeddings flag (single query!)
-    const chatBotDomain = await client.domain.findUnique({
-      where: { id: domainId },
-      select: {
-        name: true,
-        // filterQuestions removed - not used in stream route, kept in settings for future use
-        chatBot: {
-          select: {
-            // knowledgeBase removed - only fetch if embeddings not trained (see below)
-            mode: true,
-            brandTone: true,
-            language: true,
-            hasEmbeddings: true, // ✅ New: Check embeddings status instantly
+    if (!chatBotDomain) {
+      const found = await client.domain.findUnique({
+        where: { id: domainId },
+        select: {
+          name: true,
+          chatBot: {
+            select: {
+              mode: true,
+              brandTone: true,
+              language: true,
+              hasEmbeddings: true,
+            },
           },
         },
-      },
-    })
+      })
 
-    console.log(`[Bot Stream]   └─ Domain query: ${Date.now() - dbQueryStart}ms`)
+      if (found) {
+        chatBotDomain = found as DomainConfig
+        setDomainInCache(domainId, chatBotDomain)
+      }
+      recordCacheStat(domainId, false)
+      console.log(`[Bot Stream]   └─ Domain query: ${Date.now() - dbQueryStart}ms`)
+    } else {
+      cacheHit = true
+      recordCacheStat(domainId, true)
+      console.log('[Bot Stream]   └─ Domain query: 0ms (cache hit)')
+    }
 
-    const hasTrained = chatBotDomain?.chatBot?.hasEmbeddings || false
+    const hasTrained = !!(chatBotDomain?.chatBot?.hasEmbeddings)
 
-    console.log(`[Bot Stream] ✅ Parallel queries took: ${Date.now() - parallelStartTime}ms (max of both)`)
+    console.log(`[Bot Stream] ✅ Parallel queries took: ${Date.now() - parallelStartTime}ms (max of both)`)    
 
     if (!chatBotDomain) {
       return new Response(JSON.stringify({ error: 'Chatbot not found' }), {
@@ -196,6 +259,7 @@ export async function POST(req: Request) {
         try {
           let firstTokenTime: number | null = null
           let tokenCount = 0
+          let ttft = 0
 
           for await (const chunk of stream) {
             const content = chunk.choices[0]?.delta?.content || ''
@@ -213,12 +277,31 @@ export async function POST(req: Request) {
 
           const totalTime = Date.now() - startTime
           const streamTime = Date.now() - llmStartTime
+          ttft = (firstTokenTime ?? llmStartTime) - llmStartTime
           console.log(`[Bot Stream] ✅ Stream completed: ${tokenCount} tokens in ${streamTime}ms`)
           console.log(`[Bot Stream] 📊 Total request time: ${totalTime}ms`)
 
-          // Store complete AI response
+          // Small metrics line
+          const stats = domainCacheStats.get(domainId) || { hits: 0, misses: 0 }
+          const globalRatio = (cacheHits + cacheMisses) > 0 ? (cacheHits / (cacheHits + cacheMisses)) : 0
+          const domainRatio = (stats.hits + stats.misses) > 0 ? (stats.hits / (stats.hits + stats.misses)) : 0
+          console.log('[Metrics] domainId=%s cache=%s ttftMs=%d streamMs=%d totalMs=%d domainHits=%d domainMisses=%d domainHitRatio=%.2f globalHitRatio=%.2f',
+            domainId,
+            cacheHit ? 'hit' : 'miss',
+            ttft,
+            streamTime,
+            totalTime,
+            stats.hits,
+            stats.misses,
+            domainRatio,
+            globalRatio
+          )
+
+          // Store complete AI response (background, do not block request end)
           if (chatRoomId && fullResponse) {
-            await storeConversation(chatRoomId, fullResponse, 'assistant')
+            storeConversation(chatRoomId, fullResponse, 'assistant').catch((e) => {
+              console.error('[Bot Stream] Failed to persist assistant message:', e)
+            })
           }
 
           controller.enqueue(encoder.encode('data: [DONE]\n\n'))

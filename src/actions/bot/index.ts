@@ -197,7 +197,8 @@ export const onAiChatBotAssistant = async (
             })
 
             if (domainOwner?.User?.clerkId) {
-              const user = await clerkClient.users.getUser(
+              const clerk = await clerkClient()
+              const user = await clerk.users.getUser(
                 domainOwner.User.clerkId
               )
               onMailer(user.emailAddresses[0].emailAddress)
@@ -378,7 +379,8 @@ export const onAiChatBotAssistant = async (
           )
 
           if (!checkCustomer.customer[0].chatRoom[0].mailed) {
-            const user = await clerkClient.users.getUser(
+            const clerk = await clerkClient()
+            const user = await clerk.users.getUser(
               checkCustomer.User?.clerkId!
             )
 
