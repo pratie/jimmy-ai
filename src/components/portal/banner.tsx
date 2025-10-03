@@ -5,11 +5,11 @@ export const PortalBanner = () => {
   return (
     <div className="w-full bg-muted flex justify-center py-5">
       <Image
-        src="/images/logo.png"
-        alt="LOGO"
+        src="/images/logo.svg"
+        alt="Logo"
         sizes="100vw"
         style={{
-          width: '100px',
+          width: '60px',
           height: 'auto',
         }}
         width={0}

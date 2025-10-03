@@ -1,144 +1,133 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model User {
-  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  fullname  String
-  clerkId   String   @unique
-  email     String   @unique
-  type      String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  dodoMerchantId String? // Dodo Payments merchant account ID for receiving payments
-
-  domains Domain[]
-
-  campaign Campaign[]
-
-  subscription Billings?
+  id             String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  fullname       String
+  clerkId        String     @unique
+  type           String
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+  dodoMerchantId String?
+  email          String?
+  Account        Account[]
+  subscription   Billings?
+  campaign       Campaign[]
+  domains        Domain[]
+  Session        Session[]
 }
 
 model Domain {
-  id   String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name String
-  icon String
-
+  id              String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name            String
+  icon            String
+  userId          String?           @db.Uuid
+  campaignId      String?           @db.Uuid
   chatBot         ChatBot?
-  helpdesk        HelpDesk[]
+  chatRooms       ChatRoom[]
+  customer        Customer[]
+  Campaign        Campaign?         @relation(fields: [campaignId], references: [id])
+  User            User?             @relation(fields: [userId], references: [id], onDelete: Cascade)
   filterQuestions FilterQuestions[]
+  helpdesk        HelpDesk[]
+  knowledgeChunks KnowledgeChunk[]
   products        Product[]
 
-  customer   Customer[]
-  chatRooms  ChatRoom[] // Track all conversations (anonymous + leads)
-
-  User       User?      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId     String?    @db.Uuid
-  Campaign   Campaign?  @relation(fields: [campaignId], references: [id])
-  campaignId String?    @db.Uuid
+  @@index([userId])
+  @@index([campaignId])
 }
 
 model ChatBot {
-  id             String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  welcomeMessage String?
-  icon           String?
-  background     String?
-  textColor      String?
-  helpdesk       Boolean @default(false)
-
-  // Knowledge Base fields for website scraping
-  knowledgeBase          String?   @db.Text
-  knowledgeBaseUpdatedAt DateTime?
-  knowledgeBaseStatus    String?   @default("pending")
-
-  // LLM Modes system fields
-  mode      String? @default("SALES")
-  brandTone String? @default("friendly, concise")
-  language  String? @default("en")
-
-  Domain         Domain? @relation(fields: [domainId], references: [id], onDelete: Cascade)
-  domainId       String? @unique @db.Uuid
+  id                       String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  welcomeMessage           String?
+  icon                     String?
+  background               String?
+  textColor                String?
+  helpdesk                 Boolean          @default(false)
+  domainId                 String?          @unique @db.Uuid
+  knowledgeBase            String?
+  knowledgeBaseUpdatedAt   DateTime?        @db.Timestamp(6)
+  knowledgeBaseStatus      String?          @default("pending")
+  mode                     String?          @default("SALES")
+  brandTone                String?          @default("friendly, concise")
+  language                 String?          @default("en")
+  embeddingStatus          String?          @default("not_started")
+  embeddingProgress        Int?             @default(0)
+  embeddingChunksTotal     Int?
+  embeddingChunksProcessed Int?
+  embeddingCompletedAt     DateTime?
+  hasEmbeddings            Boolean          @default(false)
+  Domain                   Domain?          @relation(fields: [domainId], references: [id], onDelete: Cascade)
+  knowledgeChunks          KnowledgeChunk[]
 }
 
 model Billings {
   id      String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   plan    Plans   @default(STANDARD)
   credits Int     @default(10)
-  User    User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId  String? @unique @db.Uuid
+  User    User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model HelpDesk {
-  id       String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id       String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   question String
   answer   String
-
-  Domain   Domain? @relation(fields: [domainId], references: [id], onDelete: Cascade)
   domainId String? @db.Uuid
+  Domain   Domain? @relation(fields: [domainId], references: [id], onDelete: Cascade)
+
+  @@index([domainId])
 }
 
 model FilterQuestions {
   id       String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   question String
   answered String?
-
-  Domain   Domain? @relation(fields: [domainId], references: [id], onDelete: Cascade)
   domainId String? @db.Uuid
+  Domain   Domain? @relation(fields: [domainId], references: [id], onDelete: Cascade)
+
+  @@index([domainId])
 }
 
 model CustomerResponses {
   id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   question   String
   answered   String?
-  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
   customerId String   @db.Uuid
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
 }
 
 model Customer {
-  id    String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  email String? 
-
+  id        String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email     String?
+  domainId  String?             @db.Uuid
+  booking   Bookings[]
+  chatRoom  ChatRoom[]
+  Domain    Domain?             @relation(fields: [domainId], references: [id], onDelete: Cascade)
   questions CustomerResponses[]
 
-  chatRoom ChatRoom[]
-
-  booking Bookings[]
-
-  Domain   Domain? @relation(fields: [domainId], references: [id], onDelete: Cascade)
-  domainId String? @db.Uuid
+  @@index([domainId])
 }
 
 model ChatRoom {
-  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  live       Boolean   @default(false)
-  mailed     Boolean   @default(false)
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
-
-  // Anonymous visitor tracking
-  anonymousId String?  // UUID stored in browser localStorage for anonymous users
-
-  // Domain relationship for tracking conversations per domain
-  Domain     Domain?   @relation(fields: [domainId], references: [id], onDelete: Cascade)
-  domainId   String?   @db.Uuid
-
-  // Customer relationship (null for anonymous conversations)
-  Customer   Customer? @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  customerId String?   @db.Uuid
-
-  message ChatMessage[]
+  id          String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  live        Boolean       @default(false)
+  mailed      Boolean       @default(false)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  customerId  String?       @db.Uuid
+  anonymousId String?
+  domainId    String?       @db.Uuid
+  message     ChatMessage[]
+  Customer    Customer?     @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  Domain      Domain?       @relation(fields: [domainId], references: [id], onDelete: Cascade)
 
   @@index([domainId])
   @@index([anonymousId])
@@ -150,9 +139,11 @@ model ChatMessage {
   role       Role?
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
-  ChatRoom   ChatRoom? @relation(fields: [chatRoomId], references: [id], onDelete: Cascade)
   chatRoomId String?   @db.Uuid
   seen       Boolean   @default(false)
+  ChatRoom   ChatRoom? @relation(fields: [chatRoomId], references: [id], onDelete: Cascade)
+
+  @@index([chatRoomId])
 }
 
 model Bookings {
@@ -160,21 +151,21 @@ model Bookings {
   date       DateTime
   slot       String
   email      String
-  Customer   Customer? @relation(fields: [customerId], references: [id], onDelete: Cascade)
   customerId String?   @db.Uuid
   domainId   String?   @db.Uuid
   createdAt  DateTime  @default(now())
+  Customer   Customer? @relation(fields: [customerId], references: [id], onDelete: Cascade)
 }
 
 model Campaign {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name      String
   customers String[]
-  domain    Domain[]
   template  String?
-  User      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    String?  @db.Uuid
   createdAt DateTime @default(now())
+  User      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  domain    Domain[]
 }
 
 model Product {
@@ -183,8 +174,64 @@ model Product {
   price     Int
   image     String
   createdAt DateTime @default(now())
-  Domain    Domain?  @relation(fields: [domainId], references: [id], onDelete: Cascade)
   domainId  String?  @db.Uuid
+  Domain    Domain?  @relation(fields: [domainId], references: [id], onDelete: Cascade)
+
+  @@index([domainId])
+}
+
+model KnowledgeChunk {
+  id         String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  domainId   String                 @db.Uuid
+  chatBotId  String                 @db.Uuid
+  content    String
+  embedding  Unsupported("vector")?
+  sourceType String
+  sourceUrl  String?
+  sourceName String?
+  createdAt  DateTime               @default(now())
+  updatedAt  DateTime               @default(now()) @updatedAt
+  chatBot    ChatBot                @relation(fields: [chatBotId], references: [id], onDelete: Cascade)
+  domain     Domain                 @relation(fields: [domainId], references: [id], onDelete: Cascade)
+
+  @@index([domainId])
+  @@index([chatBotId])
+  @@index([sourceType])
+  @@index([embedding], map: "knowledge_chunk_embedding_idx")
+}
+
+model Account {
+  id                String  @id
+  userId            String  @db.Uuid
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  User              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id
+  sessionToken String   @unique
+  userId       String   @db.Uuid
+  expires      DateTime
+  User         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@id([identifier, token])
 }
 
 enum Plans {

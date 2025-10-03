@@ -16,7 +16,7 @@ type Props = {
     | undefined
   user?: {
     fullname: string
-    email: string
+    email: string | null
   } | null
 }
 

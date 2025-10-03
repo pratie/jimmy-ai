@@ -19,24 +19,39 @@ const config = {
     },
     extend: {
       colors: {
-        // Pastel Palette - Subtle Hues Theme
-        'pastel-lavender': '#eae4e9',    // Soft lavender
-        'pastel-cream': '#fff1e6',       // Warm cream
-        'pastel-blush': '#fde2e4',       // Light blush
-        'pastel-pink': '#fad2e1',        // Soft pink
-        'pastel-mint': '#e2ece9',        // Mint cream
-        'pastel-sky': '#dfe7fd',         // Light sky
-        'pastel-periwinkle': '#cddafd',  // Periwinkle
+        // Sauce AI Inspired - Mint Grid Theme
+        'sauce-mint': '#d4f4f4',         // Light mint background
+        'sauce-cyan': '#b8e6e6',         // Cyan grid lines
+        'sauce-purple': '#9333ea',       // Primary purple (buttons)
+        'sauce-purple-dark': '#7c3aed',  // Darker purple hover
+        'sauce-purple-light': '#a855f7', // Lighter purple
+        'sauce-black': '#0a0a0a',        // Bold text
+        'sauce-gray': '#525252',         // Secondary text
+        'sauce-grid': '#c5e8e8',         // Grid lines
+
+        // Accent colors from logos
+        'accent-red': '#ef4444',         // incident.io red
+        'accent-yellow': '#fbbf24',      // whatnot yellow
+        'accent-green': '#10b981',       // linktree green
+
+        // Pastel Palette - Subtle Hues Theme (keeping for compatibility)
+        'pastel-lavender': '#eae4e9',
+        'pastel-cream': '#fff1e6',
+        'pastel-blush': '#fde2e4',
+        'pastel-pink': '#fad2e1',
+        'pastel-mint': '#e2ece9',
+        'pastel-sky': '#dfe7fd',
+        'pastel-periwinkle': '#cddafd',
 
         // Darker shades for text/contrast
-        'text-primary': '#2d3748',       // Deep slate for main text
-        'text-secondary': '#4a5568',     // Medium slate for secondary text
-        'text-muted': '#718096',         // Light slate for muted text
+        'text-primary': '#0a0a0a',       // Bold black
+        'text-secondary': '#525252',     // Medium gray
+        'text-muted': '#737373',         // Light gray
 
-        // Interactive states (darker pastels for visibility)
-        'interactive-pink': '#f7a6c4',   // Darker pink for buttons
-        'interactive-blue': '#a7c7e7',   // Darker blue for links
-        'interactive-mint': '#b8ddd3',   // Darker mint for success
+        // Interactive states
+        'interactive-pink': '#f7a6c4',
+        'interactive-blue': '#a7c7e7',
+        'interactive-mint': '#b8ddd3',
 
         // Legacy colors (keeping for compatibility)
         cream: '#FFFAEB',

@@ -14,21 +14,28 @@ export const PlanUsage = ({
   domains,
   clients,
 }: PlanUsageProps) => {
-  console.log(credits)
+  const planLimits = {
+    STANDARD: { credits: 10, domains: 1, contacts: 10 },
+    PRO: { credits: 50, domains: 2, contacts: 50 },
+    ULTIMATE: { credits: 500, domains: 100, contacts: 500 },
+  }
+
+  const limits = planLimits[plan] || planLimits.STANDARD
+
   return (
-    <div className="flex flex-col gap-5 py-5">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
       <ProgressBar
-        end={plan == 'STANDARD' ? 10 : plan == 'PRO' ? 50 : 500}
+        end={limits.credits}
         label="Email Credits"
         credits={credits}
       />
       <ProgressBar
-        end={plan == 'STANDARD' ? 1 : plan == 'PRO' ? 2 : 100}
+        end={limits.domains}
         label="Domains"
         credits={domains}
       />
       <ProgressBar
-        end={plan == 'STANDARD' ? 10 : plan == 'PRO' ? 50 : 500}
+        end={limits.contacts}
         label="Contacts"
         credits={clients}
       />

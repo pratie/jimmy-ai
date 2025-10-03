@@ -8,6 +8,7 @@ import { onRealTimeChat } from '../conversation'
 import { clerkClient } from '@clerk/nextjs/server'
 import { onMailer } from '../mailer'
 import OpenAi from 'openai'
+import { searchKnowledgeBaseWithFallback, formatResultsForPrompt, hasTrainedEmbeddings } from '@/lib/vector-search'
 
 const openai = new OpenAi({
   apiKey: process.env.OPEN_AI_KEY,
@@ -106,9 +107,20 @@ export const onAiChatBotAssistant = async (
         customerEmail = extractedEmail[0]
       }
 
-      const knowledgeBase = chatBotDomain.chatBot?.knowledgeBase
-        ? truncateMarkdown(chatBotDomain.chatBot.knowledgeBase, 12000)
-        : 'No knowledge base available yet. Please ask the customer to provide more details about their inquiry.'
+      // RAG: Check if embeddings are trained, use vector search if available
+      let knowledgeBase: string
+      const hasTrained = await hasTrainedEmbeddings(id)
+
+      if (hasTrained) {
+        console.log('[Bot] Using RAG vector search for knowledge retrieval')
+        const searchResults = await searchKnowledgeBaseWithFallback(message, id, 5)
+        knowledgeBase = formatResultsForPrompt(searchResults)
+      } else {
+        console.log('[Bot] Using fallback: truncated knowledge base')
+        knowledgeBase = chatBotDomain.chatBot?.knowledgeBase
+          ? truncateMarkdown(chatBotDomain.chatBot.knowledgeBase, 12000)
+          : 'No knowledge base available yet. Please ask the customer to provide more details about their inquiry.'
+      }
 
       // Handle anonymous conversations (no email yet)
       if (!customerEmail && anonymousId) {
