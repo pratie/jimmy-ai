@@ -1,12 +1,12 @@
 import ChatbotPreview from '@/components/settings/chatbot-preview'
 import { redirect } from 'next/navigation'
 
-type Props = {
-  params: { domainId: string }
-}
-
-export default async function PreviewPage({ params }: Props) {
-  const { domainId } = params
+export default async function PreviewPage({
+  params,
+}: {
+  params: Promise<{ domainId: string }>
+}) {
+  const { domainId } = await params
 
   // Basic guard
   if (!domainId || typeof domainId !== 'string') {
@@ -26,4 +26,3 @@ export default async function PreviewPage({ params }: Props) {
     </div>
   )
 }
-

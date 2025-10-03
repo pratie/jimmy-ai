@@ -6,10 +6,11 @@ import ChatbotPreview from '@/components/settings/chatbot-preview'
 import { redirect } from 'next/navigation'
 import React from 'react'
 
-type Props = { params: { domain: string } }
-
-const DomainSettingsPage = async ({ params }: Props) => {
-  const domain = await onGetCurrentDomainInfo(params.domain)
+const DomainSettingsPage = async (
+  { params }: { params: Promise<{ domain: string }> }
+) => {
+  const { domain: domainParam } = await params
+  const domain = await onGetCurrentDomainInfo(domainParam)
   if (!domain || !domain.domains.length) {
     redirect('/dashboard')
   }

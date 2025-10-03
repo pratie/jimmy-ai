@@ -4,10 +4,13 @@ import { getMonthName } from '@/lib/utils'
 import parse from 'html-react-parser'
 import React from 'react'
 
-type Props = { params: { id: string } }
-
-const PostPage = async ({ params }: Props) => {
-  const post = await onGetBlogPost(params.id)
+const PostPage = async ({
+  params,
+}: {
+  params: Promise<{ id: string }>
+}) => {
+  const { id } = await params
+  const post = await onGetBlogPost(id)
   console.log(parse(post?.content || ''))
   return (
     <div className="container flex justify-center my-10">

@@ -167,7 +167,8 @@ export const onUpdatePassword = async (password: string) => {
     const user = await currentUser()
 
     if (!user) return null
-    const update = await clerkClient.users.updateUser(user.id, { password })
+    const clerk = await clerkClient()
+    const update = await clerk.users.updateUser(user.id, { password })
     if (update) {
       return { status: 200, message: 'Password updated' }
     }
