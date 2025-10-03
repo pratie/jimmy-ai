@@ -39,10 +39,7 @@ export default async function Home() {
 
           <div className="flex flex-col sm:flex-row gap-4 mt-8">
             <Button className="bg-interactive-pink hover:bg-interactive-pink/90 text-text-primary font-bold px-8 py-4 text-lg shadow-lg transition-all duration-300 transform hover:scale-105 border-2 border-interactive-pink/40">
-              🚀 Get Started For Free
-            </Button>
-            <Button variant="outline" className="border-2 border-pastel-periwinkle bg-pastel-sky/40 backdrop-blur-sm text-text-primary hover:bg-pastel-sky/60 font-semibold px-8 py-4 text-lg">
-              📖 See It In Action
+              Get Started For Free
             </Button>
           </div>
 
