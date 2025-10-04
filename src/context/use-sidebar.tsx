@@ -45,6 +45,11 @@ const useSideBar = () => {
   }
 
   useEffect(() => {
+    // Collapse sidebar by default on small screens
+    if (typeof window !== 'undefined') {
+      const isSmall = window.innerWidth < 768
+      if (isSmall) setExpand(false)
+    }
     if (chatRoom) {
       onGetCurrentMode()
     }

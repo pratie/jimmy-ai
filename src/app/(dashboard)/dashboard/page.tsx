@@ -40,7 +40,7 @@ const Page = async (props: Props) => {
             <AddDomainCTA />
           </div>
         )}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="mx-auto max-w-5xl px-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <DashboardCard
             value={conversations || 0}
             title="Conversations"
@@ -60,7 +60,7 @@ const Page = async (props: Props) => {
           />
         </div>
         <div className="w-full py-10">
-          <div className="relative bg-white rounded-lg border border-sauce-cyan/40 shadow-sm p-6">
+          <div className="mx-auto max-w-5xl px-4 relative bg-white rounded-lg border border-sauce-cyan/40 shadow-sm p-6">
             {/* Top accent bar */}
             <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-sauce-black via-sauce-gray to-sauce-black rounded-t-lg"></div>
 

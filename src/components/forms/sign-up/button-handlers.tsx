@@ -4,6 +4,7 @@ import { useAuthContextHook } from '@/context/use-auth-context'
 import { useSignUpForm } from '@/hooks/sign-up/use-sign-up'
 import GoogleAuthButton from './google-auth-button'
 import Link from 'next/link'
+import { Loader2 } from 'lucide-react'
 import React from 'react'
 import { useFormContext } from 'react-hook-form'
 
@@ -12,7 +13,7 @@ type Props = {}
 const ButtonHandler = (props: Props) => {
   const { setCurrentStep, currentStep } = useAuthContextHook()
   const { formState, getFieldState, getValues } = useFormContext()
-  const { onGenerateOTP } = useSignUpForm()
+  const { onGenerateOTP, loading } = useSignUpForm()
 
   const { isDirty: isName } = getFieldState('fullname', formState)
   const { isDirty: isEmail } = getFieldState('email', formState)
@@ -33,8 +34,15 @@ const ButtonHandler = (props: Props) => {
         <Button
           type="submit"
           className="w-full"
+          disabled={loading}
         >
-          Create an account
+          {loading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Creating...
+            </>
+          ) : (
+            'Create an account'
+          )}
         </Button>
         <p>
           Already have an account?
@@ -59,18 +67,24 @@ const ButtonHandler = (props: Props) => {
         <Button
           type="button"
           className="w-full"
-          {...(canProceed && {
-              onClick: () => {
-                console.log('[Sign-Up Form] 🚀 Continue button clicked, triggering registration...')
-                onGenerateOTP(
-                  getValues('email'),
-                  getValues('password'),
-                  setCurrentStep
-                )
-              },
-            })}
+          disabled={!canProceed || loading}
+          onClick={() => {
+            if (!canProceed || loading) return
+            console.log('[Sign-Up Form] 🚀 Continue button clicked, triggering registration...')
+            onGenerateOTP(
+              getValues('email'),
+              getValues('password'),
+              setCurrentStep
+            )
+          }}
         >
-          Continue
+          {loading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Sending code...
+            </>
+          ) : (
+            'Continue'
+          )}
         </Button>
         <p>
           Already have an account?{' '}

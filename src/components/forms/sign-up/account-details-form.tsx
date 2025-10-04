@@ -22,6 +22,8 @@ function AccountDetailsForm({ errors, register }: Props) {
           name={field.name}
         />
       ))}
+      {/* Container for Clerk Smart CAPTCHA if bot protection is enabled */}
+      <div id="clerk-captcha" className="mt-2" />
     </>
   )
 }
