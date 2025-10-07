@@ -74,6 +74,13 @@ model Billings {
   credits Int     @default(10)
   userId  String? @unique @db.Uuid
   User    User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Billing provider metadata (for managing subscription lifecycle)
+  provider               String?
+  providerSubscriptionId String? @unique
+  status                 String?
+  cancelAtPeriodEnd      Boolean? @default(false)
+  endsAt                 DateTime?
 }
 
 model HelpDesk {

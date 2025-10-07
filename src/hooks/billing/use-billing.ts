@@ -204,3 +204,43 @@ export const useCompleteSubscriptionPayment = (
 
   return { onRedirectToSubscriptionPayment }
 }
+
+export const useCancelSubscription = () => {
+  const [loading, setLoading] = useState(false)
+  const { toast } = useToast()
+  const router = useRouter()
+
+  const onCancel = async () => {
+    try {
+      setLoading(true)
+      const result = await onCancelSubscription({ atPeriodEnd: true })
+
+      if (result.status === 200) {
+        toast({
+          title: 'Subscription Cancelled',
+          description: result.message,
+        })
+        router.refresh()
+        return true
+      } else {
+        toast({
+          title: 'Error',
+          description: result.message || 'Failed to cancel subscription',
+          variant: 'destructive',
+        })
+        return false
+      }
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to cancel subscription',
+        variant: 'destructive',
+      })
+      return false
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return { onCancel, loading }
+}

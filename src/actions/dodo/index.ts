@@ -162,7 +162,9 @@ export const onCreateCustomerPaymentLink = async (
 
 // Update user subscription after successful payment
 export const onUpdateSubscription = async (
-  plan: 'STANDARD' | 'PRO' | 'ULTIMATE'
+  plan: 'STANDARD' | 'PRO' | 'ULTIMATE',
+  providerSubscriptionId?: string,
+  status?: string
 ) => {
   try {
     const user = await currentUser()
@@ -185,10 +187,21 @@ export const onUpdateSubscription = async (
         userId: dbUser.id,
         plan,
         credits,
+        provider: 'dodo',
+        providerSubscriptionId,
+        status: status || 'active',
+        cancelAtPeriodEnd: false,
+        endsAt: null,
       },
       update: {
         plan,
         credits,
+        provider: 'dodo',
+        // Only set providerSubscriptionId if provided (avoid overwriting with undefined)
+        ...(providerSubscriptionId ? { providerSubscriptionId } : {}),
+        status: status || 'active',
+        cancelAtPeriodEnd: false,
+        endsAt: null,
       },
     })
 
@@ -202,6 +215,155 @@ export const onUpdateSubscription = async (
   } catch (error) {
     console.error('Subscription update error:', error)
     throw error
+  }
+}
+
+// Internal helper: call Dodo API to cancel a subscription
+async function callDodoCancel(subscriptionId: string, atPeriodEnd: boolean) {
+  // Attempt 1: POST /subscriptions/cancel (body with subscription_id)
+  const attempt1 = async () => {
+    const url = `${DODO_API_BASE}/subscriptions/cancel`
+    const body = {
+      subscription_id: subscriptionId,
+      cancel_at_period_end: atPeriodEnd,
+    }
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${DODO_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(body),
+    })
+    if (!res.ok) throw new Error(`Attempt1 ${res.status}`)
+    try { return await res.json() } catch { return { success: true } }
+  }
+
+  // Attempt 2: PATCH /subscriptions/{id} (toggle cancel_at_period_end)
+  const attempt2 = async () => {
+    const url = `${DODO_API_BASE}/subscriptions/${subscriptionId}`
+    const body = { cancel_at_period_end: atPeriodEnd }
+    const res = await fetch(url, {
+      method: 'PATCH',
+      headers: {
+        'Authorization': `Bearer ${DODO_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(body),
+    })
+    if (!res.ok) throw new Error(`Attempt2 ${res.status}`)
+    try { return await res.json() } catch { return { success: true } }
+  }
+
+  try {
+    return await attempt1()
+  } catch (e1) {
+    // Fallback to PATCH shape
+    try {
+      return await attempt2()
+    } catch (e2) {
+      throw new Error(`Dodo cancel failed: ${String(e1)}; ${String(e2)}`)
+    }
+  }
+}
+
+// Cancel current user's subscription
+export const onCancelSubscription = async ({ atPeriodEnd = true }: { atPeriodEnd?: boolean }) => {
+  try {
+    const user = await currentUser()
+    if (!user) throw new Error('User not authenticated')
+
+    const dbUser = await client.user.findUnique({
+      where: { clerkId: user.id },
+      select: { id: true, subscription: { select: { providerSubscriptionId: true } } },
+    })
+
+    const subscriptionId = dbUser?.subscription?.providerSubscriptionId
+    if (!subscriptionId) {
+      return { status: 400, message: 'No active subscription found' }
+    }
+
+    // Call Dodo API to cancel (at period end by default)
+    await callDodoCancel(subscriptionId, atPeriodEnd)
+
+    // Mark as scheduled to cancel, keep plan active until webhook confirms
+    await client.billings.update({
+      where: { userId: dbUser!.id },
+      data: {
+        cancelAtPeriodEnd: true,
+        status: 'active',
+      },
+    })
+
+    return { status: 200, message: 'Subscription cancellation scheduled at period end' }
+  } catch (error) {
+    console.error('Cancel subscription error:', error)
+    return { status: 400, message: 'Failed to cancel subscription' }
+  }
+}
+
+// Change current user's subscription plan (no new checkout), using Dodo change-plan API
+export const onChangeSubscriptionPlan = async (
+  newPlan: 'PRO' | 'ULTIMATE',
+  proration: 'prorated_immediately' | 'full_immediately' | 'difference_immediately' = 'prorated_immediately'
+) => {
+  try {
+    const user = await currentUser()
+    if (!user) return { status: 401, message: 'User not authenticated' }
+
+    // Get DB user + current subscription id
+    const dbUser = await client.user.findUnique({
+      where: { clerkId: user.id },
+      select: { id: true, subscription: { select: { providerSubscriptionId: true, plan: true } } },
+    })
+
+    const subscriptionId = dbUser?.subscription?.providerSubscriptionId
+    if (!subscriptionId) {
+      return { status: 400, message: 'No active subscription found. Please subscribe first.' }
+    }
+
+    // Map target plan to Dodo product id
+    const productId = getPlanProductId(newPlan)
+    if (!productId) {
+      return { status: 400, message: 'Invalid target plan or product id not configured' }
+    }
+
+    // Make Dodo change-plan call
+    const res = await fetch(`${DODO_API_BASE}/subscriptions/change-plan`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${DODO_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        subscription_id: subscriptionId,
+        product_id: productId,
+        proration_option: proration,
+      }),
+    })
+
+    if (!res.ok) {
+      const err = await res.text().catch(() => '')
+      console.error('[Dodo change-plan] Error:', res.status, err)
+      return { status: 400, message: 'Failed to change plan' }
+    }
+
+    // Update local billing record to reflect new plan immediately
+    const credits = newPlan == 'PRO' ? 50 : 500
+    await client.billings.update({
+      where: { userId: dbUser.id },
+      data: {
+        plan: newPlan,
+        credits,
+        status: 'active',
+        cancelAtPeriodEnd: false,
+      },
+    })
+
+    return { status: 200, message: 'Plan changed successfully', plan: newPlan }
+  } catch (error) {
+    console.error('Change subscription plan error:', error)
+    return { status: 400, message: 'Failed to change plan' }
   }
 }
 

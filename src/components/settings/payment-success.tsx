@@ -30,7 +30,7 @@ const PaymentSuccess = ({ plan, subscriptionId, status }: Props) => {
 
     setIsUpdating(true)
     try {
-      const result = await onUpdateSubscription(plan)
+      const result = await onUpdateSubscription(plan, subscriptionId, status)
       if (result?.status === 200) {
         setUpdateComplete(true)
         // Force refresh to show updated plan

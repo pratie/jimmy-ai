@@ -7,6 +7,8 @@ import { pricingCards } from '@/constants/landing-page'
 import Modal from '../mondal'
 import SubscriptionForm from '../forms/settings/subscription-form'
 import Image from 'next/image'
+import CancelSubscriptionButton from './cancel-subscription'
+import ChangePlan from './change-plan'
 
 type Props = {}
 
@@ -25,12 +27,12 @@ const BillingSettings = async (props: Props) => {
           message="Add payment information, upgrade and modify your plan."
         />
       </div>
-      <div className="lg:col-span-2 flex justify-start lg:justify-center ">
-        <Modal
-          title="Choose A Plan"
-          description="Tell us about yourself! What do you do? Let’s tailor your experience so it best suits you."
-          trigger={
-            plan && plan === 'STANDARD' ? (
+      {plan === 'STANDARD' ? (
+        <div className="lg:col-span-2 flex justify-start lg:justify-center ">
+          <Modal
+            title="Choose A Plan"
+            description="Tell us about yourself! What do you do? Let's tailor your experience so it best suits you."
+            trigger={
               <Card className="border-dashed bg-cream border-gray-400 w-full cursor-pointer h-[270px] flex justify-center items-center">
                 <CardContent className="flex gap-2 items-center">
                   <div className="rounded-full border-2 p-1">
@@ -41,19 +43,14 @@ const BillingSettings = async (props: Props) => {
                   </CardDescription>
                 </CardContent>
               </Card>
-            ) : (
-              <Image
-                src="/images/creditcard.png"
-                width={400}
-                height={400}
-                alt="image"
-              />
-            )
-          }
-        >
-          <SubscriptionForm plan={plan!} />
-        </Modal>
-      </div>
+            }
+          >
+            <SubscriptionForm plan={plan!} />
+          </Modal>
+        </div>
+      ) : (
+        <div className="lg:col-span-2" />
+      )}
       <div className="lg:col-span-2">
         <h3 className="text-xl font-semibold mb-2">Current Plan</h3>
         <p className="text-sm font-semibold">{plan}</p>
@@ -68,6 +65,17 @@ const BillingSettings = async (props: Props) => {
             </div>
           ))}
         </div>
+        {plan !== 'STANDARD' && (
+          <div className="mt-6">
+            <CancelSubscriptionButton />
+            <p className="text-xs text-muted-foreground mt-2">
+              You will retain access until the end of your billing period.
+            </p>
+          </div>
+        )}
+        {plan !== 'STANDARD' && (
+          <ChangePlan currentPlan={plan as 'PRO' | 'ULTIMATE' | 'STANDARD'} />
+        )}
       </div>
     </div>
   )
