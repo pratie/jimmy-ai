@@ -13,12 +13,11 @@ import ChangePlan from './change-plan'
 type Props = {}
 
 const BillingSettings = async (props: Props) => {
-  const plan = await onGetSubscriptionPlan() || 'STANDARD'
+  const plan = await onGetSubscriptionPlan() || 'FREE'
   const planFeatures = pricingCards.find(
     (card) => card.title.toUpperCase() === plan?.toUpperCase()
   )?.features || []
 
-  console.log(planFeatures)
   return (
     <div className="grid grid-cols-1 lg:grid-cols-5 gap-10">
       <div className="lg:col-span-1">
@@ -27,11 +26,11 @@ const BillingSettings = async (props: Props) => {
           message="Add payment information, upgrade and modify your plan."
         />
       </div>
-      {plan === 'STANDARD' ? (
+      {plan === 'FREE' ? (
         <div className="lg:col-span-2 flex justify-start lg:justify-center ">
           <Modal
             title="Choose A Plan"
-            description="Tell us about yourself! What do you do? Let's tailor your experience so it best suits you."
+            description="Upgrade your plan to unlock more messages, domains, and features."
             trigger={
               <Card className="border-dashed bg-cream border-gray-400 w-full cursor-pointer h-[270px] flex justify-center items-center">
                 <CardContent className="flex gap-2 items-center">
@@ -65,7 +64,7 @@ const BillingSettings = async (props: Props) => {
             </div>
           ))}
         </div>
-        {plan !== 'STANDARD' && (
+        {plan !== 'FREE' && (
           <div className="mt-6">
             <CancelSubscriptionButton />
             <p className="text-xs text-muted-foreground mt-2">
@@ -73,8 +72,8 @@ const BillingSettings = async (props: Props) => {
             </p>
           </div>
         )}
-        {plan !== 'STANDARD' && (
-          <ChangePlan currentPlan={plan as 'PRO' | 'ULTIMATE' | 'STANDARD'} />
+        {plan !== 'FREE' && (
+          <ChangePlan currentPlan={plan as 'STARTER' | 'PRO' | 'BUSINESS'} />
         )}
       </div>
     </div>

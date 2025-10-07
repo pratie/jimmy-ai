@@ -1,18 +1,7 @@
 import NavBar from '@/components/navbar'
 import { Button } from '@/components/ui/button'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
-import { pricingCards } from '@/constants/landing-page'
-import clsx from 'clsx'
-import { Check } from 'lucide-react'
 import Image from 'next/image'
-import Link from 'next/link'
+import PricingSection from '@/components/landing/pricing-section'
 
 export default async function Home() {
   return (
@@ -178,78 +167,7 @@ export default async function Home() {
       </section>
 
       {/* Pricing Section */}
-      <section className="bg-transparent py-20 mt-20">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-text-primary mb-6">
-              Pricing That Scales With You
-            </h2>
-            <p className="text-text-secondary text-lg max-w-2xl mx-auto">
-              Simple, transparent pricing. No hidden fees. Choose the plan that&apos;s right for your business.
-            </p>
-          </div>
-
-          <div className="flex justify-center gap-6 flex-wrap px-4">
-            {pricingCards.map((card) => (
-              <Card
-                key={card.title}
-                className={clsx(
-                  'w-full max-w-[320px] sm:w-[320px] flex flex-col justify-between shadow-xl rounded-2xl overflow-hidden transition-all duration-300 hover:transform hover:scale-105 hover:shadow-2xl',
-                  {
-                    'bg-gradient-to-br from-pastel-pink/60 to-pastel-lavender/60 backdrop-blur-md border-3 border-interactive-pink/50 relative': card.title === 'Unlimited',
-                    'bg-pastel-cream/60 backdrop-blur-md border-2 border-pastel-lavender/50': card.title !== 'Unlimited',
-                  }
-                )}
-              >
-                {card.title === 'Unlimited' && (
-                  <div className="absolute top-0 right-0 bg-interactive-pink text-text-primary px-4 py-1 text-sm font-bold rounded-bl-lg shadow-md">
-                    ⭐ Most Popular
-                  </div>
-                )}
-
-                <CardHeader className="pb-4">
-                  <CardTitle className="text-2xl font-bold text-text-primary mb-2">{card.title}</CardTitle>
-                  <CardDescription className="text-text-secondary text-base">
-                    {pricingCards.find((c) => c.title === card.title)?.description}
-                  </CardDescription>
-                </CardHeader>
-
-                <CardContent className="pb-6">
-                  <div className="mb-6">
-                    <span className="text-5xl font-bold text-text-primary">{card.price}</span>
-                    <span className="text-text-muted text-lg ml-2">/ month</span>
-                  </div>
-                </CardContent>
-
-                <CardFooter className="flex flex-col items-start gap-6 pt-4 border-t-2 border-pastel-lavender/50">
-                  <div className="space-y-3 w-full">
-                    {card.features.map((feature) => (
-                      <div key={feature} className="flex items-center gap-3">
-                        <div className="w-5 h-5 rounded-full bg-interactive-pink/30 flex items-center justify-center flex-shrink-0">
-                          <Check className="w-3 h-3 text-text-primary" />
-                        </div>
-                        <p className="text-text-secondary text-sm">{feature}</p>
-                      </div>
-                    ))}
-                  </div>
-
-                  <Link
-                    href={`/dashboard?plan=${card.title}`}
-                    className={clsx(
-                      'w-full text-center font-bold py-3 px-4 rounded-xl transition-all duration-300',
-                      card.title === 'Unlimited'
-                        ? 'bg-interactive-pink text-text-primary hover:bg-interactive-pink/90 shadow-lg border-2 border-interactive-pink/40'
-                        : 'bg-pastel-sky/50 backdrop-blur-sm text-text-primary border-2 border-pastel-periwinkle hover:bg-pastel-sky/70'
-                    )}
-                  >
-                    Get Started
-                  </Link>
-                </CardFooter>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
+      <PricingSection />
     </main>
   )
 }

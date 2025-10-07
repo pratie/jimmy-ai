@@ -2,41 +2,56 @@
 
 import { client } from '@/lib/prisma'
 import { currentUser } from '@clerk/nextjs/server'
+import { getPlanLimits, getNextResetDate } from '@/lib/plans'
 
 // Dodo Payments Configuration
 const DODO_API_BASE = process.env.NEXT_PUBLIC_DODO_API_URL || 'https://test.dodopayments.com'
 const DODO_API_KEY = process.env.DODO_API_KEY
 
-// Plan to Dodo Product ID mapping
-const getPlanProductId = (item: 'STANDARD' | 'PRO' | 'ULTIMATE') => {
-  if (item == 'PRO') return process.env.DODO_PRODUCT_ID_PRO || 'pdt_eE8HNUK2QrjpADjwMAqav' // ICON AI - $19.99
-  if (item == 'ULTIMATE') return process.env.DODO_PRODUCT_ID_ULTIMATE || 'pdt_ULTIMATE_PLACEHOLDER' // $34.99
-  return null // STANDARD is free
+// Plan to Dodo Product ID mapping (defaults to monthly)
+const getPlanProductId = (item: 'FREE' | 'STARTER' | 'PRO' | 'BUSINESS', interval: 'MONTHLY' | 'YEARLY' = 'MONTHLY') => {
+  if (item === 'FREE') return null
+
+  // Yearly subscriptions
+  if (interval === 'YEARLY') {
+    if (item === 'STARTER') return process.env.DODO_PRODUCT_ID_STARTER_YEARLY || 'pdt_TEMGX6k2iUz4zNq1tNtA6'
+    if (item === 'PRO') return process.env.DODO_PRODUCT_ID_PRO_YEARLY || 'pdt_RrOvAZyElPoHftofvcg2d'
+    if (item === 'BUSINESS') return process.env.DODO_PRODUCT_ID_BUSINESS_YEARLY || 'pdt_dAXoky321LAd0qOJBX9up'
+  }
+
+  // Monthly subscriptions (default)
+  if (item === 'STARTER') return process.env.DODO_PRODUCT_ID_STARTER || 'pdt_H8UFvwsiedYbSFvkeTp3m'
+  if (item === 'PRO') return process.env.DODO_PRODUCT_ID_PRO || 'pdt_gfPZ5YvERGTr1bPgrrCPS'
+  if (item === 'BUSINESS') return process.env.DODO_PRODUCT_ID_BUSINESS || 'pdt_mKXy3ImVkBgEsXaKCoBAN'
+
+  return null
 }
 
 // Plan pricing (for display purposes)
-const setPlanAmount = (item: 'STANDARD' | 'PRO' | 'ULTIMATE') => {
-  if (item == 'PRO') return 1999 // $19.99 (in cents)
-  if (item == 'ULTIMATE') return 3499 // $34.99 (in cents)
-  return 0 // STANDARD is free
+const setPlanAmount = (item: 'FREE' | 'STARTER' | 'PRO' | 'BUSINESS') => {
+  if (item == 'STARTER') return 1900 // $19 (in cents)
+  if (item == 'PRO') return 4900 // $49 (in cents)
+  if (item == 'BUSINESS') return 9900 // $99 (in cents)
+  return 0 // FREE plan
 }
 
 // Create subscription payment link for platform plans
 export const onCreateSubscriptionPaymentLink = async (
-  plan: 'STANDARD' | 'PRO' | 'ULTIMATE'
+  plan: 'FREE' | 'STARTER' | 'PRO' | 'BUSINESS',
+  interval: 'MONTHLY' | 'YEARLY' = 'MONTHLY'
 ) => {
   try {
     const user = await currentUser()
     if (!user) throw new Error('User not authenticated')
 
-    if (plan === 'STANDARD') {
+    if (plan === 'FREE') {
       // Free plan - just update directly
-      return await onUpdateSubscription(plan)
+      return await onUpdateSubscription(plan, undefined, undefined, interval)
     }
 
-    const productId = getPlanProductId(plan)
+    const productId = getPlanProductId(plan, interval)
     if (!productId) {
-      throw new Error(`No product ID configured for plan: ${plan}`)
+      throw new Error(`No product ID configured for plan: ${plan} (${interval})`)
     }
 
     const response = await fetch(`${DODO_API_BASE}/subscriptions`, {
@@ -162,9 +177,10 @@ export const onCreateCustomerPaymentLink = async (
 
 // Update user subscription after successful payment
 export const onUpdateSubscription = async (
-  plan: 'STANDARD' | 'PRO' | 'ULTIMATE',
+  plan: 'FREE' | 'STARTER' | 'PRO' | 'BUSINESS',
   providerSubscriptionId?: string,
-  status?: string
+  status?: string,
+  billingInterval: 'MONTHLY' | 'YEARLY' = 'MONTHLY'
 ) => {
   try {
     const user = await currentUser()
@@ -179,14 +195,18 @@ export const onUpdateSubscription = async (
     if (!dbUser) throw new Error('User not found in database')
 
     // Update or create billing record directly
-    const credits = plan == 'PRO' ? 50 : plan == 'ULTIMATE' ? 500 : 10
+    const limits = getPlanLimits(plan)
+    const nextReset = getNextResetDate()
 
     const billing = await client.billings.upsert({
       where: { userId: dbUser.id },
       create: {
         userId: dbUser.id,
         plan,
-        credits,
+        messageCredits: limits.messageCredits,
+        messagesUsed: 0,
+        messagesResetAt: nextReset,
+        billingInterval,
         provider: 'dodo',
         providerSubscriptionId,
         status: status || 'active',
@@ -195,7 +215,10 @@ export const onUpdateSubscription = async (
       },
       update: {
         plan,
-        credits,
+        messageCredits: limits.messageCredits,
+        messagesUsed: 0,
+        messagesResetAt: nextReset,
+        billingInterval,
         provider: 'dodo',
         // Only set providerSubscriptionId if provided (avoid overwriting with undefined)
         ...(providerSubscriptionId ? { providerSubscriptionId } : {}),
@@ -304,7 +327,7 @@ export const onCancelSubscription = async ({ atPeriodEnd = true }: { atPeriodEnd
 
 // Change current user's subscription plan (no new checkout), using Dodo change-plan API
 export const onChangeSubscriptionPlan = async (
-  newPlan: 'PRO' | 'ULTIMATE',
+  newPlan: 'STARTER' | 'PRO' | 'BUSINESS',
   proration: 'prorated_immediately' | 'full_immediately' | 'difference_immediately' = 'prorated_immediately'
 ) => {
   try {
@@ -349,12 +372,12 @@ export const onChangeSubscriptionPlan = async (
     }
 
     // Update local billing record to reflect new plan immediately
-    const credits = newPlan == 'PRO' ? 50 : 500
+    const limits = getPlanLimits(newPlan)
     await client.billings.update({
       where: { userId: dbUser.id },
       data: {
         plan: newPlan,
-        credits,
+        messageCredits: limits.messageCredits,
         status: 'active',
         cancelAtPeriodEnd: false,
       },

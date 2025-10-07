@@ -13,7 +13,6 @@ export const onGetAllCustomers = async (id: string) => {
       select: {
         subscription: {
           select: {
-            credits: true,
             plan: true,
           },
         },
@@ -175,21 +174,7 @@ export const onBulkMailer = async (email: string[], campaignId: string) => {
         }
       })
 
-      const creditsUsed = await client.user.update({
-        where: {
-          clerkId: user.id,
-        },
-        data: {
-          subscription: {
-            update: {
-              credits: { decrement: email.length },
-            },
-          },
-        },
-      })
-      if (creditsUsed) {
-        return { status: 200, message: 'Campaign emails sent' }
-      }
+      return { status: 200, message: 'Campaign emails sent' }
     }
   } catch (error) {
     console.log(error)

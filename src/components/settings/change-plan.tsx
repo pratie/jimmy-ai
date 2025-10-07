@@ -11,21 +11,22 @@ import { Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 type Props = {
-  currentPlan: 'STANDARD' | 'PRO' | 'ULTIMATE'
+  currentPlan: 'FREE' | 'STARTER' | 'PRO' | 'BUSINESS'
 }
 
 const ChangePlan = ({ currentPlan }: Props) => {
   const { toast } = useToast()
   const [isPending, startTransition] = useTransition()
 
-  const [targetPlan, setTargetPlan] = useState<'PRO' | 'ULTIMATE'>(
-    currentPlan === 'PRO' ? 'ULTIMATE' : 'PRO'
+  const [targetPlan, setTargetPlan] = useState<'STARTER' | 'PRO' | 'BUSINESS'>(
+    currentPlan === 'STARTER' ? 'PRO' : currentPlan === 'PRO' ? 'BUSINESS' : 'STARTER'
   )
 
   const plansAvailable = useMemo(() => {
-    const items: { id: 'PRO' | 'ULTIMATE'; label: string; desc: string }[] = [
-      { id: 'PRO', label: 'Professional ($19.99/mo)', desc: 'Balanced features and price' },
-      { id: 'ULTIMATE', label: 'Unlimited ($34.99/mo)', desc: 'All features unlocked' },
+    const items: { id: 'STARTER' | 'PRO' | 'BUSINESS'; label: string; desc: string }[] = [
+      { id: 'STARTER', label: 'Starter ($19/mo)', desc: '2000 messages, 1 domain' },
+      { id: 'PRO', label: 'Pro ($49/mo)', desc: '5000 messages, 5 domains' },
+      { id: 'BUSINESS', label: 'Business ($99/mo)', desc: '10000 messages, unlimited domains' },
     ]
     return items
   }, [])
@@ -42,8 +43,8 @@ const ChangePlan = ({ currentPlan }: Props) => {
     })
   }
 
-  // Don’t render for free plan (handled elsewhere)
-  if (currentPlan === 'STANDARD') return null
+  // Don't render for free plan (handled elsewhere)
+  if (currentPlan === 'FREE') return null
 
   return (
     <Card className="mt-8">
@@ -57,7 +58,7 @@ const ChangePlan = ({ currentPlan }: Props) => {
           <RadioGroup
             className="space-y-3"
             value={targetPlan}
-            onValueChange={(v) => setTargetPlan(v as 'PRO' | 'ULTIMATE')}
+            onValueChange={(v) => setTargetPlan(v as 'STARTER' | 'PRO' | 'BUSINESS')}
           >
             {plansAvailable.map((p) => (
               <div key={p.id} className={cn('flex items-center justify-between rounded-md border p-3', targetPlan === p.id && 'border-primary')}>

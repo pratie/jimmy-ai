@@ -122,7 +122,8 @@ export const getUserPlanInfo = async () => {
           subscription: {
             select: {
               plan: true,
-              credits: true,
+              messageCredits: true,
+              messagesUsed: true,
             },
           },
         },
@@ -130,7 +131,8 @@ export const getUserPlanInfo = async () => {
       if (plan) {
         return {
           plan: plan.subscription?.plan,
-          credits: plan.subscription?.credits,
+          messageCredits: plan.subscription?.messageCredits,
+          messagesUsed: plan.subscription?.messagesUsed,
           domains: plan._count.domains,
         }
       }

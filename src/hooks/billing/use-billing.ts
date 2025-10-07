@@ -4,6 +4,7 @@ import {
   onCreateCustomerPaymentLink,
   onUpdateSubscription,
   onConnectDodoPayments,
+  onCancelSubscription,
 } from '@/actions/dodo'
 import { useToast } from '@/components/ui/use-toast'
 import { useRouter } from 'next/navigation'
@@ -99,16 +100,16 @@ export const useCompleteCustomerPayment = () => {
   return { onRedirectToPayment }
 }
 
-export const useSubscriptions = (plan: 'STANDARD' | 'PRO' | 'ULTIMATE') => {
+export const useSubscriptions = (plan: 'FREE' | 'STARTER' | 'PRO' | 'BUSINESS') => {
   const [loading, setLoading] = useState<boolean>(false)
-  const [payment, setPayment] = useState<'STANDARD' | 'PRO' | 'ULTIMATE'>(plan)
+  const [payment, setPayment] = useState<'FREE' | 'STARTER' | 'PRO' | 'BUSINESS'>(plan)
   const { toast } = useToast()
   const router = useRouter()
 
   const onUpdateToFreeTier = async () => {
     try {
       setLoading(true)
-      const free = await onUpdateSubscription('STANDARD')
+      const free = await onUpdateSubscription('FREE')
       if (free) {
         setLoading(false)
         toast({
@@ -123,7 +124,7 @@ export const useSubscriptions = (plan: 'STANDARD' | 'PRO' | 'ULTIMATE') => {
     }
   }
 
-  const onSetPayment = (payment: 'STANDARD' | 'PRO' | 'ULTIMATE') =>
+  const onSetPayment = (payment: 'FREE' | 'STARTER' | 'PRO' | 'BUSINESS') =>
     setPayment(payment)
 
   return {
@@ -134,15 +135,15 @@ export const useSubscriptions = (plan: 'STANDARD' | 'PRO' | 'ULTIMATE') => {
   }
 }
 
-export const useDodoSubscription = (payment: 'STANDARD' | 'PRO' | 'ULTIMATE') => {
+export const useDodoSubscription = (payment: 'FREE' | 'STARTER' | 'PRO' | 'BUSINESS') => {
   const [paymentLink, setPaymentLink] = useState<string>('')
   const [loadForm, setLoadForm] = useState<boolean>(false)
   const { toast } = useToast()
 
-  const onGetSubscriptionLink = async (plans: 'STANDARD' | 'PRO' | 'ULTIMATE') => {
+  const onGetSubscriptionLink = async (plans: 'FREE' | 'STARTER' | 'PRO' | 'BUSINESS') => {
     try {
       setLoadForm(true)
-      if (plans === 'STANDARD') {
+      if (plans === 'FREE') {
         // Free plan, no payment needed
         setLoadForm(false)
         return
@@ -173,14 +174,14 @@ export const useDodoSubscription = (payment: 'STANDARD' | 'PRO' | 'ULTIMATE') =>
 }
 
 export const useCompleteSubscriptionPayment = (
-  payment: 'STANDARD' | 'PRO' | 'ULTIMATE'
+  payment: 'FREE' | 'STARTER' | 'PRO' | 'BUSINESS'
 ) => {
   const { toast } = useToast()
 
   const onRedirectToSubscriptionPayment = (paymentLink: string) => {
-    if (payment === 'STANDARD') {
+    if (payment === 'FREE') {
       // Handle free plan upgrade directly
-      onUpdateSubscription('STANDARD').then((result) => {
+      onUpdateSubscription('FREE').then((result) => {
         if (result) {
           toast({
             title: 'Success',

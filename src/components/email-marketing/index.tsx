@@ -30,8 +30,7 @@ type Props = {
     createdAt: Date
   }[]
   subscription: {
-    plan: 'STANDARD' | 'PRO' | 'ULTIMATE'
-    credits: number
+    plan: 'FREE' | 'STARTER' | 'PRO' | 'BUSINESS'
   } | null
 }
 

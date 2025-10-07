@@ -6,11 +6,13 @@ import { extractEmailsFromString } from '@/lib/utils'
 import { truncateMarkdown } from '@/lib/firecrawl'
 import { buildSystemPrompt } from '@/lib/promptBuilder'
 import { searchKnowledgeBaseWithFallback, formatResultsForPrompt, hasTrainedEmbeddings } from '@/lib/vector-search'
+import { getPlanLimits, shouldResetCredits, getNextResetDate } from '@/lib/plans'
 import OpenAI from 'openai'
 
 // --- Minimal in-memory LRU cache for domain config ---
 type DomainConfig = {
   name: string
+  userId?: string | null
   chatBot: {
     mode: string | null
     brandTone: string | null
@@ -114,6 +116,7 @@ export async function POST(req: Request) {
         where: { id: domainId },
         select: {
           name: true,
+          userId: true,
           chatBot: {
             select: {
               mode: true,
@@ -135,6 +138,52 @@ export async function POST(req: Request) {
       cacheHit = true
       recordCacheStat(domainId, true)
       console.log('[Bot Stream]   └─ Domain query: 0ms (cache hit)')
+    }
+
+    // CHECK MESSAGE CREDITS BEFORE RESPONDING
+    if (chatBotDomain && chatBotDomain.userId) {
+      const billing = await client.billings.findUnique({
+        where: { userId: chatBotDomain.userId },
+        select: {
+          plan: true,
+          messageCredits: true,
+          messagesUsed: true,
+          messagesResetAt: true,
+        }
+      })
+
+      if (billing) {
+        // Check if credits should reset
+        if (shouldResetCredits(billing.messagesResetAt)) {
+          const limits = getPlanLimits(billing.plan)
+          await client.billings.update({
+            where: { userId: chatBotDomain.userId },
+            data: {
+              messagesUsed: 0,
+              messageCredits: limits.messageCredits,
+              messagesResetAt: getNextResetDate()
+            }
+          })
+          console.log('[Bot Stream] 🔄 Credits reset for new billing period')
+        } else {
+          // Check if user has credits remaining
+          if (billing.messagesUsed >= billing.messageCredits) {
+            console.log('[Bot Stream] ❌ Message limit reached')
+            return new Response(
+              JSON.stringify({
+                error: 'Message limit reached',
+                message: 'This chatbot has reached its monthly message limit. Please contact the website owner to upgrade their plan.',
+                limitReached: true,
+                plan: billing.plan
+              }),
+              {
+                status: 429,
+                headers: { 'Content-Type': 'application/json' }
+              }
+            )
+          }
+        }
+      }
     }
 
     const hasTrained = !!(chatBotDomain?.chatBot?.hasEmbeddings)
@@ -301,6 +350,16 @@ export async function POST(req: Request) {
           if (chatRoomId && fullResponse) {
             storeConversation(chatRoomId, fullResponse, 'assistant').catch((e) => {
               console.error('[Bot Stream] Failed to persist assistant message:', e)
+            })
+          }
+
+          // Increment message usage count
+          if (chatBotDomain?.userId && fullResponse) {
+            client.billings.update({
+              where: { userId: chatBotDomain.userId },
+              data: { messagesUsed: { increment: 1 } }
+            }).catch((e) => {
+              console.error('[Bot Stream] Failed to increment message count:', e)
             })
           }
 

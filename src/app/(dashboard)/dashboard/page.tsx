@@ -72,7 +72,8 @@ const Page = async (props: Props) => {
             </div>
             <PlanUsage
               plan={plan?.plan!}
-              credits={plan?.credits || 0}
+              messageCredits={plan?.messageCredits || 0}
+              messagesUsed={plan?.messagesUsed || 0}
               domains={plan?.domains || 0}
               clients={leads || 0}
             />
