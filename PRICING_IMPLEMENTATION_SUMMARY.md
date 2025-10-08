@@ -9,7 +9,7 @@ Successfully implemented a comprehensive message-based pricing system for Corinn
 
 ### FREE Plan
 - **Price**: $0
-- **Messages**: 100/month
+- **Messages**: 60/month
 - **Domains**: 1 AI chatbot
 - **Knowledge Base**: 1 MB
 - **Training Sources**: 5
@@ -22,7 +22,7 @@ Successfully implemented a comprehensive message-based pricing system for Corinn
 - **Messages**: 2,000/month
 - **Domains**: 1 AI chatbot
 - **Knowledge Base**: 20 MB
-- **Training Sources**: 50
+- **Training Sources**: 15
 - **History**: Unlimited
 
 ### PRO Plan
@@ -31,7 +31,7 @@ Successfully implemented a comprehensive message-based pricing system for Corinn
 - **Messages**: 5,000/month
 - **Domains**: 5 AI chatbots
 - **Knowledge Base**: 50 MB
-- **Training Sources**: 100
+- **Training Sources**: 50
 - **History**: Unlimited
 - **Extras**: Advanced analytics, Custom branding
 

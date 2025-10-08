@@ -6,13 +6,16 @@ import { RecursiveCharacterTextSplitter } from '@langchain/textsplitters'
  * Text splitter configuration for chatbot knowledge base
  *
  * Settings:
- * - 600 chars per chunk (good balance for chatbot context)
- * - 100 char overlap (preserves context at chunk boundaries)
+ * - 1000 chars per chunk (optimized for fewer chunks, better context)
+ * - 150 char overlap (preserves context at chunk boundaries)
  * - Smart separators (try splitting by paragraphs first, then sentences)
+ *
+ * OPTIMIZATION: Increased from 600 to 1000 to reduce chunk count by ~40%
+ * This significantly speeds up embedding generation while maintaining quality
  */
 export const textSplitter = new RecursiveCharacterTextSplitter({
-  chunkSize: 600,
-  chunkOverlap: 100,
+  chunkSize: 1000,
+  chunkOverlap: 150,
   separators: ['\n\n', '\n', '. ', '! ', '? ', '; ', ', ', ' '],
 })
 

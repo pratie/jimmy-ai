@@ -17,6 +17,16 @@ const nextConfig = {
       },
     ],
   },
+  webpack: (config, { isServer }) => {
+    // Handle canvas (required by pdf-parse-fork)
+    config.resolve.alias.canvas = false
+
+    if (isServer) {
+      config.externals = [...(config.externals || []), 'canvas']
+    }
+
+    return config
+  },
 }
 
 export default nextConfig

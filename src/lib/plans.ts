@@ -5,7 +5,7 @@ export type PlanType = 'FREE' | 'STARTER' | 'PRO' | 'BUSINESS'
 
 export const PLAN_LIMITS = {
   FREE: {
-    messageCredits: 100,
+    messageCredits: 60,
     domains: 1,
     knowledgeBaseMB: 1,
     trainingSources: 5,
@@ -15,14 +15,14 @@ export const PLAN_LIMITS = {
     messageCredits: 2000,
     domains: 1,
     knowledgeBaseMB: 20,
-    trainingSources: 50,
+    trainingSources: 15,
     conversationHistoryDays: Infinity,
   },
   PRO: {
     messageCredits: 5000,
     domains: 5,
     knowledgeBaseMB: 50,
-    trainingSources: 100,
+    trainingSources: 50,
     conversationHistoryDays: Infinity,
   },
   BUSINESS: {

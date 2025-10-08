@@ -38,7 +38,7 @@ export const onIntegrateDomain = async (domain: string, icon: string) => {
     if (!domainExists) {
       const plan = subscription?.subscription?.plan || 'FREE'
       const limits = getPlanLimits(plan)
-      const canAddDomain = limits.domains === Infinity || subscription._count.domains < limits.domains
+      const canAddDomain = limits.domains === Infinity || (subscription?._count.domains ?? 0) < limits.domains
 
       if (canAddDomain) {
         const newDomain = await client.user.update({
@@ -201,6 +201,8 @@ export const onGetCurrentDomainInfo = async (domain: string) => {
             icon: true,
             userId: true,
             products: true,
+            trainingSourcesUsed: true,
+            knowledgeBaseSizeMB: true,
             chatBot: {
               select: {
                 id: true,
