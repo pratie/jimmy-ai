@@ -117,6 +117,17 @@ body::before {
   }
 }
 
+/* Landing page clean gradient override (no grid look) */
+.landing-gradient {
+  background: linear-gradient(180deg, #f6fbf8 0%, #eef8f3 40%, #fafdfb 100%);
+}
+
+/* Hero subtle greenish radial glow */
+.landing-hero {
+  position: relative;
+  background-image: radial-gradient(900px 500px at 70% 20%, rgba(34, 197, 94, 0.12), rgba(255, 255, 255, 0) 65%);
+}
+
 .chat-bubble {
   background: #ffffff;
   padding: 16px 28px;

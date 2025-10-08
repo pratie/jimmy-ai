@@ -19,6 +19,19 @@ const config = {
     },
     extend: {
       colors: {
+        // Brand Palette (Landing page)
+        // Derived from provided screenshots
+        'brand-primary': '#0f172a',   // Dark navy for primary actions
+        'brand-secondary': '#f6f4ef', // Soft off-white for surfaces
+        'brand-accent': '#d97a5b',    // Accent highlight (salmon/coral)
+        'brand-info': '#5b50e6',      // Info purple
+        'brand-success': '#22c55e',   // Success green
+        'brand-warning': '#e24d4d',   // Warning (tomato red)
+        'brand-error': '#b91c1c',     // Error red (darker)
+        'brand-yellow': '#f59e0b',    // Amber accent for highlights
+        'brand-base-100': '#faf8f3',  // Lightest base
+        'brand-base-200': '#f3f0e8',  // Medium base
+        'brand-base-300': '#e7e2d6',  // Darkest base
         // Sauce AI Inspired - Mint Grid Theme
         'sauce-mint': '#d4f4f4',         // Light mint background
         'sauce-cyan': '#b8e6e6',         // Cyan grid lines
