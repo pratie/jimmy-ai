@@ -1,8 +1,19 @@
 import { client } from '@/lib/prisma'
 import { NextRequest, NextResponse } from 'next/server'
 import { Webhook } from 'standardwebhooks'
+import { PlanType } from '@/lib/plans'
 
 const webhook = new Webhook(process.env.DODO_WEBHOOK_SECRET!)
+
+// Map old Dodo plan names to new PlanType
+function mapDodoPlanToNew(dodoPlan: string): PlanType {
+  const mapping: Record<string, PlanType> = {
+    'STANDARD': 'STARTER',
+    'PRO': 'PRO',
+    'ULTIMATE': 'BUSINESS',
+  }
+  return mapping[dodoPlan] || 'STARTER'
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -64,7 +75,8 @@ async function handleSubscriptionActive(payload: any) {
     const { subscription_id, metadata, current_period_end } = payload.data || {}
     // Prefer metadata.userId (Clerk ID) if present
     const metadataUserId = metadata?.userId
-    const selectedPlan = (metadata?.plan as 'STANDARD' | 'PRO' | 'ULTIMATE') || 'PRO'
+    const dodoPlan = (metadata?.plan as string) || 'PRO'
+    const selectedPlan = mapDodoPlanToNew(dodoPlan)
 
     if (metadataUserId) {
       const dbUser = await client.user.findUnique({ where: { clerkId: metadataUserId }, select: { id: true } })
@@ -74,7 +86,6 @@ async function handleSubscriptionActive(payload: any) {
           create: {
             userId: dbUser.id,
             plan: selectedPlan,
-            credits: selectedPlan === 'PRO' ? 50 : selectedPlan === 'ULTIMATE' ? 500 : 10,
             provider: 'dodo',
             providerSubscriptionId: subscription_id,
             status: 'active',
@@ -83,7 +94,6 @@ async function handleSubscriptionActive(payload: any) {
           },
           update: {
             plan: selectedPlan,
-            credits: selectedPlan === 'PRO' ? 50 : selectedPlan === 'ULTIMATE' ? 500 : 10,
             provider: 'dodo',
             providerSubscriptionId: subscription_id,
             status: 'active',
@@ -129,14 +139,13 @@ async function handleSubscriptionCanceled(payload: any) {
     const { subscription_id } = payload.data || {}
     if (!subscription_id) return
 
-    // Downgrade to STANDARD on cancellation
+    // Downgrade to FREE on cancellation
     const billing = await client.billings.findFirst({ where: { providerSubscriptionId: subscription_id }, select: { userId: true } })
     if (billing?.userId) {
       await client.billings.update({
         where: { userId: billing.userId },
         data: {
-          plan: 'STANDARD',
-          credits: 10,
+          plan: 'FREE',
           status: 'canceled',
           cancelAtPeriodEnd: true,
         },

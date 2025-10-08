@@ -11,12 +11,19 @@ export const onScrapeWebsiteForDomain = async (domainId: string) => {
   try {
     console.log('[Firecrawl] Starting scrape for domain:', domainId)
 
-    // Get domain info
+    // Get domain info with plan limits
     const domain = await client.domain.findUnique({
       where: { id: domainId },
       select: {
         name: true,
-        chatBot: { select: { id: true } },
+        trainingSourcesUsed: true,
+        knowledgeBaseSizeMB: true,
+        chatBot: { select: { id: true, knowledgeBase: true } },
+        User: {
+          select: {
+            subscription: { select: { plan: true } }
+          }
+        }
       },
     })
 
@@ -26,6 +33,27 @@ export const onScrapeWebsiteForDomain = async (domainId: string) => {
 
     if (!domain.chatBot?.id) {
       return { status: 404, message: 'ChatBot not found for this domain' }
+    }
+
+    const plan = domain.User?.subscription?.plan || 'FREE'
+    const limits = getPlanLimits(plan)
+
+    // ENFORCEMENT: Check training sources limit (only if KB is empty or this is first scrape)
+    // Smart logic: Allow re-scraping same domain without counting as new source
+    const isFirstScrape = !domain.chatBot.knowledgeBase || domain.chatBot.knowledgeBase.trim().length === 0
+
+    if (isFirstScrape) {
+      const newSourceCount = domain.trainingSourcesUsed + 1
+      if (limits.trainingSources !== Infinity && newSourceCount > limits.trainingSources) {
+        return {
+          status: 400,
+          message: `Training sources limit reached. Your ${plan} plan allows ${limits.trainingSources} sources. You currently have ${domain.trainingSourcesUsed} sources. Please upgrade your plan to add more training sources.`,
+          upgradeRequired: true,
+          limit: limits.trainingSources,
+          current: domain.trainingSourcesUsed,
+          attempted: newSourceCount
+        }
+      }
     }
 
     // Update status to scraping
@@ -58,6 +86,23 @@ export const onScrapeWebsiteForDomain = async (domainId: string) => {
 
     console.log('[Firecrawl] Scrape successful! Markdown length:', result.data.markdown.length)
 
+    const sizeMB = result.data.markdown.length / (1024 * 1024)
+
+    // ENFORCEMENT: Check KB size limit
+    if (sizeMB > limits.knowledgeBaseMB) {
+      await client.chatBot.update({
+        where: { id: domain.chatBot.id },
+        data: { knowledgeBaseStatus: 'failed' },
+      })
+      return {
+        status: 400,
+        message: `Knowledge base size limit reached. Your ${plan} plan allows ${limits.knowledgeBaseMB} MB. This scrape would be ${sizeMB.toFixed(2)} MB. Please upgrade your plan.`,
+        upgradeRequired: true,
+        limit: limits.knowledgeBaseMB,
+        attempted: sizeMB
+      }
+    }
+
     // Store knowledge base
     await client.chatBot.update({
       where: { id: domain.chatBot.id },
@@ -68,13 +113,26 @@ export const onScrapeWebsiteForDomain = async (domainId: string) => {
       },
     })
 
+    // Update counters (increment source count only on first scrape, always update size)
+    await client.domain.update({
+      where: { id: domainId },
+      data: {
+        trainingSourcesUsed: isFirstScrape ? { increment: 1 } : domain.trainingSourcesUsed,
+        knowledgeBaseSizeMB: sizeMB  // Replace with actual size
+      }
+    })
+
     return {
       status: 200,
-      message: 'Website scraped successfully! Knowledge base updated.',
+      message: isFirstScrape
+        ? 'Website scraped successfully! Knowledge base created.'
+        : 'Website re-scraped successfully! Knowledge base updated.',
       data: {
         markdownLength: result.data.markdown.length,
+        sizeMB: sizeMB.toFixed(2),
         title: result.data.metadata.title,
         description: result.data.metadata.description,
+        isFirstScrape
       },
     }
   } catch (error: any) {
@@ -416,6 +474,7 @@ export const onUploadTextKnowledgeBase = async (domainId: string, text: string, 
       where: { id: domainId },
       select: {
         knowledgeBaseSizeMB: true,
+        trainingSourcesUsed: true,
         chatBot: { select: { id: true, knowledgeBase: true } },
         User: {
           select: {
@@ -431,6 +490,19 @@ export const onUploadTextKnowledgeBase = async (domainId: string, text: string, 
 
     const plan = domain.User?.subscription?.plan || 'FREE'
     const limits = getPlanLimits(plan)
+
+    // ENFORCEMENT: Check training sources limit (count as 1 source)
+    const newSourceCount = domain.trainingSourcesUsed + 1
+    if (limits.trainingSources !== Infinity && newSourceCount > limits.trainingSources) {
+      return {
+        status: 400,
+        message: `Training sources limit reached. Your ${plan} plan allows ${limits.trainingSources} sources. You currently have ${domain.trainingSourcesUsed} sources. Please upgrade your plan to add more training sources.`,
+        upgradeRequired: true,
+        limit: limits.trainingSources,
+        current: domain.trainingSourcesUsed,
+        attempted: newSourceCount
+      }
+    }
 
     // Validate content
     const validation = validateContent(text)
@@ -466,11 +538,12 @@ export const onUploadTextKnowledgeBase = async (domainId: string, text: string, 
       },
     })
 
-    // Update size counter
+    // Update counters (increment source count, replace size)
     await client.domain.update({
       where: { id: domainId },
       data: {
-        knowledgeBaseSizeMB: newSizeMB
+        trainingSourcesUsed: { increment: 1 },
+        knowledgeBaseSizeMB: newSizeMB  // Replace with actual size
       }
     })
 
@@ -676,12 +749,12 @@ export const onScrapeSelectedSources = async (
       },
     })
 
-    // Update counters
+    // Update counters (replace size since KB is replaced, increment sources)
     await client.domain.update({
       where: { id: domainId },
       data: {
         trainingSourcesUsed: { increment: scrapedContent.length },
-        knowledgeBaseSizeMB: { increment: totalSizeMB }
+        knowledgeBaseSizeMB: totalSizeMB  // Replace with actual size (KB is replaced, not appended)
       }
     })
 
@@ -825,11 +898,11 @@ export const onUploadPDFKnowledgeBase = async (
       },
     })
 
-    // Update counters
+    // Update counters (replace size with actual size, increment sources)
     await client.domain.update({
       where: { id: domainId },
       data: {
-        knowledgeBaseSizeMB: newSizeMB,
+        knowledgeBaseSizeMB: newSizeMB,  // Replace with actual size
         trainingSourcesUsed: { increment: 1 }
       }
     })
@@ -850,6 +923,69 @@ export const onUploadPDFKnowledgeBase = async (
     return {
       status: 500,
       message: error.message || 'Failed to process PDF file',
+    }
+  }
+}
+
+// Clear knowledge base content (keeps source counter to prevent abuse)
+export const onClearKnowledgeBase = async (domainId: string) => {
+  try {
+    console.log('[RAG] Clearing knowledge base for domain:', domainId)
+
+    const domain = await client.domain.findUnique({
+      where: { id: domainId },
+      select: {
+        trainingSourcesUsed: true,
+        chatBot: { select: { id: true } }
+      },
+    })
+
+    if (!domain?.chatBot?.id) {
+      return { status: 404, message: 'ChatBot not found' }
+    }
+
+    // Clear knowledge base content and embeddings
+    await client.chatBot.update({
+      where: { id: domain.chatBot.id },
+      data: {
+        knowledgeBase: null,
+        knowledgeBaseUpdatedAt: null,
+        knowledgeBaseStatus: 'pending',
+        embeddingStatus: 'not_started',
+        embeddingProgress: 0,
+        embeddingChunksTotal: null,
+        embeddingChunksProcessed: null,
+        embeddingCompletedAt: null,
+        hasEmbeddings: false,
+      },
+    })
+
+    // Delete all knowledge chunks (embeddings)
+    await client.knowledgeChunk.deleteMany({
+      where: { chatBotId: domain.chatBot.id }
+    })
+
+    // Reset KB size only (KEEP trainingSourcesUsed to prevent abuse)
+    await client.domain.update({
+      where: { id: domainId },
+      data: {
+        // trainingSourcesUsed: UNCHANGED (permanent counter, prevents abuse)
+        knowledgeBaseSizeMB: 0  // Reset size so user can re-train with same sources
+      }
+    })
+
+    return {
+      status: 200,
+      message: `Knowledge base cleared successfully! You have used ${domain.trainingSourcesUsed} training source(s). You can re-train with different content from the same sources.`,
+      data: {
+        trainingSourcesUsed: domain.trainingSourcesUsed
+      }
+    }
+  } catch (error: any) {
+    console.error('[RAG] Clear KB error:', error)
+    return {
+      status: 500,
+      message: error.message || 'Failed to clear knowledge base',
     }
   }
 }

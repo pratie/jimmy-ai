@@ -106,7 +106,7 @@ const EmailMarketing = ({ campaign, domains, subscription }: Props) => {
           </Modal>
           <Card className="p-2">
             <CardDescription className="font-bold">
-              {subscription?.credits} credits
+              {subscription?.plan || 'FREE'} Plan
             </CardDescription>
           </Card>
         </div>

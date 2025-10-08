@@ -2,9 +2,10 @@
 
 import React from 'react'
 import { PaymentForm } from './payment-form'
+import { PlanType } from '@/lib/plans'
 
 type DodoPaymentProps = {
-  payment: 'STANDARD' | 'PRO' | 'ULTIMATE'
+  payment: PlanType
 }
 
 export const DodoPayment = ({ payment }: DodoPaymentProps) => {

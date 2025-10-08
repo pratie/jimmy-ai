@@ -25,6 +25,8 @@ const DomainSettingsPage = async (
             chatBot={activeDomain.chatBot}
             id={activeDomain.id}
             name={activeDomain.name}
+            trainingSourcesUsed={activeDomain.trainingSourcesUsed}
+            knowledgeBaseSizeMB={activeDomain.knowledgeBaseSizeMB}
           />
           {/* Products section temporarily disabled - will be re-enabled in 2 weeks */}
           {/* <ProductTable

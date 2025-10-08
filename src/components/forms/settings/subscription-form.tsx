@@ -4,10 +4,11 @@ import { StripeElements } from '@/components/settings/stripe-elements'
 import SubscriptionCard from '@/components/settings/subscription-card'
 import { Button } from '@/components/ui/button'
 import { useSubscriptions } from '@/hooks/billing/use-billing'
+import { PlanType } from '@/lib/plans'
 import React from 'react'
 
 type Props = {
-  plan: 'STANDARD' | 'PRO' | 'ULTIMATE'
+  plan: PlanType
 }
 
 const SubscriptionForm = ({ plan }: Props) => {
@@ -19,34 +20,43 @@ const SubscriptionForm = ({ plan }: Props) => {
       <div className="flex flex-col gap-5">
         <div className="flex flex-col gap-3">
           <SubscriptionCard
-            title="STANDARD"
-            description="Perfect if you’re just getting started with Corinna AI"
+            title="FREE"
+            description="Perfect if you're just getting started with Corinna AI"
             price="0"
             payment={payment}
             onPayment={onSetPayment}
-            id="STANDARD"
+            id="FREE"
+          />
+
+          <SubscriptionCard
+            title="STARTER"
+            description="Perfect for small businesses and individuals"
+            price="19"
+            payment={payment}
+            onPayment={onSetPayment}
+            id="STARTER"
           />
 
           <SubscriptionCard
             title="PRO"
-            description="Perfect if you’re just getting started with Corinna AI"
-            price="19.99"
+            description="Advanced features for growing businesses"
+            price="49"
             payment={payment}
             onPayment={onSetPayment}
             id="PRO"
           />
 
           <SubscriptionCard
-            title="ULTIMATE"
-            description="Perfect if you’re just getting started with Corinna AI"
-            price="34.99"
+            title="BUSINESS"
+            description="Enterprise-grade solution with unlimited resources"
+            price="99"
             payment={payment}
             onPayment={onSetPayment}
-            id="ULTIMATE"
+            id="BUSINESS"
           />
         </div>
         <StripeElements payment={payment} />
-        {payment === 'STANDARD' && (
+        {payment === 'FREE' && (
           <Button onClick={onUpdateToFreeTier}>
             <Loader loading={loading}>Confirm</Loader>
           </Button>

@@ -5,9 +5,10 @@ import { useEffect, useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card'
 import { CheckCircle, Loader2 } from 'lucide-react'
 import { Button } from '../ui/button'
+import { PlanType } from '@/lib/plans'
 
 type Props = {
-  plan?: 'STANDARD' | 'PRO' | 'ULTIMATE'
+  plan?: PlanType
   subscriptionId?: string
   status?: string
 }
