@@ -32,15 +32,16 @@ const config = {
         'brand-base-100': '#faf8f3',  // Lightest base
         'brand-base-200': '#f3f0e8',  // Medium base
         'brand-base-300': '#e7e2d6',  // Darkest base
-        // Sauce AI Inspired - Mint Grid Theme
-        'sauce-mint': '#d4f4f4',         // Light mint background
-        'sauce-cyan': '#b8e6e6',         // Cyan grid lines
-        'sauce-purple': '#9333ea',       // Primary purple (buttons)
-        'sauce-purple-dark': '#7c3aed',  // Darker purple hover
-        'sauce-purple-light': '#a855f7', // Lighter purple
-        'sauce-black': '#0a0a0a',        // Bold text
-        'sauce-gray': '#525252',         // Secondary text
-        'sauce-grid': '#c5e8e8',         // Grid lines
+        // Map legacy "sauce-*" tokens to landing brand palette
+        // This keeps existing classnames working while unifying colors app-wide
+        'sauce-mint': '#f6f4ef',          // -> brand-secondary
+        'sauce-cyan': '#e7e2d6',          // -> brand-base-300 (borders)
+        'sauce-purple': '#d97a5b',        // -> brand-accent (coral)
+        'sauce-purple-dark': '#d97a5b',   // -> brand-accent (fallback)
+        'sauce-purple-light': '#d97a5b',  // -> brand-accent (fallback)
+        'sauce-black': '#0f172a',         // -> brand-primary (text)
+        'sauce-gray': '#0f172a',          // -> brand-primary (secondary text)
+        'sauce-grid': '#e7e2d6',          // -> brand-base-300 (grid lines)
 
         // Accent colors from logos
         'accent-red': '#ef4444',         // incident.io red
@@ -66,20 +67,20 @@ const config = {
         'interactive-blue': '#a7c7e7',
         'interactive-mint': '#b8ddd3',
 
-        // Legacy colors (keeping for compatibility)
-        cream: '#FFFAEB',
-        'notebook-yellow': '#FFFAEB',
-        'sketch-red': '#D63031',
-        'line-blue': '#B8D4E8',
-        gravel: '#4E4E4E',
-        iridium: '#3F3F3F',
-        orange: '#FFA947',
-        peach: '#FFE0BD',
-        platinum: '#E6E6E6',
-        ghost: '#CDCDCD',
-        grandis: '#FFC989',
-        porcelain: '#F1F1F1',
-        ironside: '#636363',
+        // Legacy colors (remapped to landing palette for consistency)
+        cream: '#faf8f3',                 // -> brand-base-100
+        'notebook-yellow': '#faf8f3',     // -> brand-base-100
+        'sketch-red': '#e24d4d',          // -> brand-warning
+        'line-blue': '#e7e2d6',           // -> brand-base-300
+        gravel: '#0f172a',                // -> brand-primary
+        iridium: '#0f172a',               // -> brand-primary
+        orange: '#d97a5b',                // -> brand-accent
+        peach: '#f6f4ef',                 // -> brand-secondary
+        platinum: '#e7e2d6',              // -> brand-base-300
+        ghost: '#e7e2d6',                 // -> brand-base-300
+        grandis: '#d97a5b',               // -> brand-accent
+        porcelain: '#f3f0e8',             // -> brand-base-200
+        ironside: '#0f172a',              // -> brand-primary
 
         // Shadcn theme colors
         border: 'hsl(var(--border))',

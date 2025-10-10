@@ -127,6 +127,7 @@ model Customer {
   Domain    Domain?             @relation(fields: [domainId], references: [id], onDelete: Cascade)
   questions CustomerResponses[]
 
+  @@unique([email, domainId], name: "email_domainId")
   @@index([domainId])
 }
 

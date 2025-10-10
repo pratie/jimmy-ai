@@ -7,7 +7,7 @@ img {
 }
 
 body {
-  background: #d4f4f4;
+  /* Background is driven by CSS variables via @apply bg-background below */
   background-attachment: fixed;
   position: relative;
   min-height: 100vh;
@@ -21,9 +21,10 @@ body::before {
   left: 0;
   right: 0;
   bottom: 0;
+  /* Subtle grid tinted with brand base color */
   background-image:
-    linear-gradient(to right, rgba(184, 230, 230, 0.3) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(184, 230, 230, 0.3) 1px, transparent 1px);
+    linear-gradient(to right, rgba(231, 226, 214, 0.3) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(231, 226, 214, 0.3) 1px, transparent 1px);
   background-size: 50px 50px;
   pointer-events: none;
   z-index: 0;
@@ -40,67 +41,69 @@ body::before {
 
 @layer base {
   :root {
-    /* Sauce AI Theme - Mint Grid with Purple Accents */
-    --background: 180 45% 95%;        /* sauce-mint #d4f4f4 */
-    --foreground: 0 0% 4%;            /* sauce-black #0a0a0a */
+    /* Unified theme using Landing Brand Palette */
+    /* Backgrounds and surfaces */
+    --background: 42 56% 97%;          /* brand-base-100 (#faf8f3) */
+    --foreground: 222 47% 11%;         /* brand-primary (#0f172a) */
 
-    --card: 0 0% 100%;                /* White cards for contrast */
-    --card-foreground: 0 0% 4%;       /* sauce-black */
+    --card: 0 0% 100%;                 /* white */
+    --card-foreground: 222 47% 11%;    /* brand-primary */
 
-    --popover: 0 0% 100%;             /* White popover */
-    --popover-foreground: 0 0% 4%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
 
-    --primary: 271 81% 56%;           /* sauce-purple #9333ea */
-    --primary-foreground: 0 0% 100%;  /* White text on purple */
+    /* Primary and accent */
+    --primary: 222 47% 11%;            /* brand-primary */
+    --primary-foreground: 0 0% 100%;   /* white on primary */
 
-    --secondary: 180 40% 90%;         /* Light cyan */
-    --secondary-foreground: 0 0% 4%;
+    --secondary: 42 44% 95%;           /* brand-secondary (#f6f4ef) */
+    --secondary-foreground: 222 47% 11%;
 
-    --muted: 180 30% 92%;             /* Muted mint */
-    --muted-foreground: 0 0% 32%;     /* sauce-gray */
+    --muted: 42 40% 94%;               /* brand-base-200 (#f3f0e8) */
+    --muted-foreground: 222 10% 40%;   /* subdued text derived from primary */
 
-    --accent: 271 91% 65%;            /* sauce-purple-light #a855f7 */
+    --accent: 16 64% 61%;              /* brand-accent (#d97a5b) */
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 84% 60%;         /* Red for errors */
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 180 30% 85%;            /* Soft cyan border */
-    --input: 0 0% 100%;               /* White input */
-    --ring: 271 81% 56%;              /* sauce-purple */
+    --border: 42 30% 85%;              /* brand-base-300 (#e7e2d6) */
+    --input: 0 0% 100%;
+    --ring: 222 47% 11%;               /* align ring with primary */
 
-    --radius: 0.75rem;                /* Rounded corners */
+    --radius: 0.75rem;                 /* Rounded corners */
   }
 
   .dark {
-    /* Dark mode - Keep mint grid concept */
-    --background: 180 15% 12%;        /* Dark teal/mint */
+    /* Dark mode tuned to brand primary */
+    --background: 222 30% 12%;
     --foreground: 0 0% 98%;
 
-    --card: 180 12% 15%;
+    --card: 222 25% 16%;
     --card-foreground: 0 0% 98%;
 
-    --popover: 180 12% 15%;
+    --popover: 222 25% 16%;
     --popover-foreground: 0 0% 98%;
 
-    --primary: 271 81% 56%;           /* sauce-purple */
+    --primary: 222 47% 11%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 180 12% 20%;
+    --secondary: 222 25% 18%;
     --secondary-foreground: 0 0% 98%;
 
-    --muted: 180 12% 18%;
+    --muted: 222 20% 20%;
     --muted-foreground: 0 0% 65%;
 
-    --accent: 271 91% 65%;            /* sauce-purple-light */
+    --accent: 16 64% 61%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 63% 31%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 180 15% 25%;
-    --input: 180 12% 18%;
-    --ring: 271 81% 56%;
+    --border: 222 20% 25%;
+    --input: 222 20% 20%;
+    --ring: 222 47% 11%;
   }
 }
 

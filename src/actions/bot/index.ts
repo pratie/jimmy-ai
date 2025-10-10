@@ -67,8 +67,6 @@ export const onGetCurrentChatBot = async (id: string) => {
   }
 }
 
-let customerEmail: string | undefined
-
 export const onAiChatBotAssistant = async (
   id: string,
   chat: { role: 'assistant' | 'user'; content: string }[],
@@ -77,6 +75,13 @@ export const onAiChatBotAssistant = async (
   anonymousId?: string // UUID from browser localStorage
 ) => {
   try {
+    // Extract email from message (local variable, not module-level)
+    let customerEmail: string | undefined
+    const extractedEmail = extractEmailsFromString(message)
+    if (extractedEmail) {
+      customerEmail = extractedEmail[0]
+    }
+
     const chatBotDomain = await client.domain.findUnique({
       where: {
         id,
@@ -102,11 +107,6 @@ export const onAiChatBotAssistant = async (
       },
     })
     if (chatBotDomain) {
-      const extractedEmail = extractEmailsFromString(message)
-      if (extractedEmail) {
-        customerEmail = extractedEmail[0]
-      }
-
       // RAG: Check if embeddings are trained, use vector search if available
       let knowledgeBase: string
       const hasTrained = await hasTrainedEmbeddings(id)
