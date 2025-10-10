@@ -20,7 +20,9 @@ const BreadCrumb = (props: Props) => {
   return (
     <div className="flex flex-col ">
       <div className="flex gap-5 items-center">
-        <h2 className="text-3xl font-bold capitalize">{page}</h2>
+        <h2 className="text-3xl font-bold capitalize relative after:block after:h-1 after:bg-gradient-to-r after:from-brand-accent after:to-brand-primary after:rounded-full after:mt-1 after:w-16">
+          {page}
+        </h2>
         {page === 'conversation' && chatRoom && (
           <Loader
             loading={loading}
@@ -34,7 +36,7 @@ const BreadCrumb = (props: Props) => {
           </Loader>
         )}
       </div>
-      <p className="text-gray-500 text-sm">
+      <p className="text-brand-primary/70 text-sm">
         {page == 'settings'
           ? 'Manage your account settings, preferences and integrations'
           : page == 'dashboard'

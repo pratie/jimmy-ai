@@ -32,10 +32,10 @@ const BillingSettings = async (props: Props) => {
             title="Choose A Plan"
             description="Upgrade your plan to unlock more messages, domains, and features."
             trigger={
-              <Card className="border-dashed bg-cream border-gray-400 w-full cursor-pointer h-[270px] flex justify-center items-center">
+              <Card className="border-dashed bg-cream border-brand-base-300 w-full cursor-pointer h-[270px] flex justify-center items-center">
                 <CardContent className="flex gap-2 items-center">
-                  <div className="rounded-full border-2 p-1">
-                    <Plus className="text-gray-400" />
+                  <div className="rounded-full border-2 p-1 border-brand-base-300">
+                    <Plus className="text-brand-primary/60" />
                   </div>
                   <CardDescription className="font-semibold">
                     Upgrade Plan

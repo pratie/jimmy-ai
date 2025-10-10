@@ -51,7 +51,7 @@ const CodeSnippet = ({ id }: Props) => {
       />
       <div className="bg-cream px-6 py-4 rounded-lg relative w-full overflow-x-auto">
         <Copy
-          className="absolute top-5 right-5 text-gray-400 cursor-pointer"
+          className="absolute top-5 right-5 text-brand-primary/60 hover:text-brand-primary cursor-pointer"
           onClick={() => {
             navigator.clipboard.writeText(snippet)
             toast({
@@ -61,7 +61,7 @@ const CodeSnippet = ({ id }: Props) => {
           }}
         />
         <pre className="whitespace-pre text-sm min-w-full">
-          <code className="text-gray-600">{snippet}</code>
+          <code className="text-brand-primary/70">{snippet}</code>
         </pre>
       </div>
     </div>

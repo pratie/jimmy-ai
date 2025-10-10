@@ -81,8 +81,8 @@ export const BotModeSelector = ({ domainId, currentMode }: BotModeSelectorProps)
                   p-4 rounded-lg border-2 cursor-pointer transition-all
                   ${
                     selectedMode === mode.value
-                      ? 'border-blue-500 bg-blue-50'
-                      : 'border-gray-200 hover:border-gray-300'
+                      ? 'border-brand-accent bg-brand-accent/10'
+                      : 'border-brand-base-300 hover:border-brand-base-300'
                   }
                 `}
                 onClick={() => setSelectedMode(mode.value)}
@@ -98,7 +98,7 @@ export const BotModeSelector = ({ domainId, currentMode }: BotModeSelectorProps)
                     <Label className="text-sm font-semibold cursor-pointer">
                       {mode.label}
                     </Label>
-                    <p className="text-xs text-gray-500 mt-1">{mode.description}</p>
+                    <p className="text-xs text-brand-primary/60 mt-1">{mode.description}</p>
                   </div>
                 </div>
               </div>

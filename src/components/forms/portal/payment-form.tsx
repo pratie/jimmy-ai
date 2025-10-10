@@ -14,11 +14,11 @@ export const CustomerPaymentForm = ({ paymentLink, loading }: CustomerPaymentFor
 
   return (
     <div className="flex flex-col">
-      <div className="mb-5 p-4 bg-blue-50 rounded-lg">
-        <p className="text-sm text-gray-600 mb-2">
+      <div className="mb-5 p-4 bg-brand-accent/10 rounded-lg">
+        <p className="text-sm text-brand-primary/70 mb-2">
           You will be redirected to Dodo Payments to complete your purchase securely.
         </p>
-        <p className="text-xs text-gray-500">
+        <p className="text-xs text-brand-primary/60">
           After payment, you&apos;ll be redirected back to continue.
         </p>
       </div>

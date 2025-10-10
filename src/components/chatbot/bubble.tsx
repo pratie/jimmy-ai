@@ -51,7 +51,7 @@ const Bubble = ({ message, createdAt }: Props) => {
         )}
       >
         {createdAt ? (
-          <div className="flex gap-2 text-xs text-gray-600">
+          <div className="flex gap-2 text-xs text-brand-primary/60">
             <p>
               {createdAt.getDate()} {getMonthName(createdAt.getMonth())}
             </p>
@@ -78,8 +78,8 @@ const Bubble = ({ message, createdAt }: Props) => {
             />
           </div>
         ) : image && imageError ? (
-          <div className="relative aspect-square bg-gray-100 flex items-center justify-center rounded">
-            <p className="text-xs text-gray-500">Image failed to load</p>
+          <div className="relative aspect-square bg-brand-base-200 flex items-center justify-center rounded">
+            <p className="text-xs text-brand-primary/60">Image failed to load</p>
           </div>
         ) : (
           <p className="text-sm">

@@ -81,7 +81,7 @@ export const BrandVoiceSettings = ({
                 id="language"
                 value={language}
                 onChange={(e) => setLanguage(e.target.value)}
-                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border-2 rounded-md border-brand-base-300 bg-white/95 text-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/40"
               >
                 {LANGUAGE_OPTIONS.map((lang) => (
                   <option key={lang.value} value={lang.value}>
@@ -100,7 +100,7 @@ export const BrandVoiceSettings = ({
                 onChange={(e) => setBrandTone(e.target.value)}
                 placeholder="e.g., friendly, concise"
               />
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-brand-primary/60">
                 Describe your brand voice in 2-3 words (e.g., professional, helpful)
               </p>
             </div>
@@ -117,8 +117,8 @@ export const BrandVoiceSettings = ({
                       px-3 py-1 text-xs rounded-full border transition-all
                       ${
                         brandTone === preset
-                          ? 'bg-blue-500 text-white border-blue-500'
-                          : 'bg-gray-100 text-gray-700 border-gray-300 hover:border-gray-400'
+                          ? 'bg-brand-accent text-white border-brand-accent'
+                          : 'bg-brand-base-100 text-brand-primary border-brand-base-300 hover:border-brand-base-300'
                       }
                     `}
                   >
