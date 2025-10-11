@@ -52,7 +52,7 @@ export default function RootLayout({
           <Script
             defer
             data-website-id="dfid_cz55NFPFEmpyBPQ1Q2FhE"
-            data-domain="bookmylead.app"
+            data-domain="www.bookmylead.app"
             src="https://datafa.st/js/script.js"
             strategy="afterInteractive"
           />
