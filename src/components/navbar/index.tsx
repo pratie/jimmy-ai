@@ -19,9 +19,23 @@ function NavBar() {
           height={0}
         />
       </div>
-      <ul className="gap-8 justify-between self-stretch my-auto text-sm leading-5 text-brand-primary/70 max-md:flex-wrap max-md:max-w-full font-normal hidden md:flex">
-        <li className="cursor-pointer hover:text-brand-primary hover:underline decoration-brand-accent decoration-2 underline-offset-4 transition-all">Features</li>
-        <li className="cursor-pointer hover:text-brand-primary hover:underline decoration-brand-accent decoration-2 underline-offset-4 transition-all">Pricing</li>
+      <ul className="gap-8 justify-between self-stretch my-auto text-sm leading-5 text-brand-primary/70 max-md:flex-wrap max-md:max-w-full font-normal hidden md:flex items-center">
+        <li>
+          <a
+            href="#features"
+            className="cursor-pointer hover:text-brand-primary hover:underline decoration-brand-accent decoration-2 underline-offset-4 transition-all"
+          >
+            Features
+          </a>
+        </li>
+        <li>
+          <a
+            href="#pricing"
+            className="cursor-pointer hover:text-brand-primary hover:underline decoration-brand-accent decoration-2 underline-offset-4 transition-all"
+          >
+            Pricing
+          </a>
+        </li>
       </ul>
       <Link
         href="/dashboard"

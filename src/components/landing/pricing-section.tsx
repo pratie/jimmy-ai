@@ -12,7 +12,7 @@ export default function PricingSection() {
   const [isYearly, setIsYearly] = useState(false)
 
   return (
-    <section className="bg-transparent py-20 mt-20">
+    <section id="pricing" className="bg-transparent py-20 mt-20">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-brand-primary mb-6">
