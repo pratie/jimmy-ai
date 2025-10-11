@@ -47,8 +47,8 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en" suppressHydrationWarning>
-        <head>
-          {/* DataFast Analytics */}
+        <body className={`${jakarta.className} landing-gradient min-h-screen`}>
+          {/* DataFast Analytics - Must be in body for Next.js Script component */}
           <Script
             defer
             data-website-id="dfid_cz55NFPFEmpyBPQ1Q2FhE"
@@ -56,8 +56,7 @@ export default function RootLayout({
             src="https://datafa.st/js/script.js"
             strategy="afterInteractive"
           />
-        </head>
-        <body className={`${jakarta.className} landing-gradient min-h-screen`}>
+
           <ThemeProvider
             attribute="class"
             defaultTheme="light"
