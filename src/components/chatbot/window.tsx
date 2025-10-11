@@ -124,6 +124,7 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
                   <Bubble
                     key={key}
                     message={chat}
+                    botIcon={botIcon}
                   />
                 ))}
                 {onResponding && <Responding />}
@@ -138,7 +139,7 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
                 <div className="flex justify-between">
                   <Input
                     {...register('content')}
-                    placeholder="Type your message..."
+                    placeholder={`Ask anything about ${domainName}...`}
                     className="focus-visible:ring-0 flex-1 p-0 focus-visible:ring-offset-0 bg-porcelain rounded-none outline-none border-none"
                   />
                   <Button
@@ -161,10 +162,10 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
             </div>
           </TabsContent>
 
-          <TabsContent value="helpdesk">
+          <TabsContent value="faqs">
             <div className="h-[485px] overflow-y-auto overflow-x-hidden p-4 flex flex-col gap-4">
               <div>
-                <CardTitle>Help Desk</CardTitle>
+                <CardTitle>FAQs</CardTitle>
                 <CardDescription>
                   Browse from a list of questions people usually ask.
                 </CardDescription>

@@ -103,8 +103,8 @@ const PortalSteps = ({
 
   return (
     <div className="flex flex-col items-center gap-3">
-      <h2 className="font-bold text-gray-600 text-4xl">Thank You</h2>
-      <p className="text-center">
+      <h2 className="font-bold text-brand-primary/80 text-4xl">Thank You</h2>
+      <p className="text-center text-brand-primary/70">
         Thank you for taking the time to fill in this form. We look forward to
         <br /> speaking to you soon.
       </p>

@@ -1,8 +1,19 @@
 import { client } from '@/lib/prisma'
 import { NextRequest, NextResponse } from 'next/server'
 import { Webhook } from 'standardwebhooks'
+import { PlanType } from '@/lib/plans'
 
 const webhook = new Webhook(process.env.DODO_WEBHOOK_SECRET!)
+
+// Map old Dodo plan names to new PlanType
+function mapDodoPlanToNew(dodoPlan: string): PlanType {
+  const mapping: Record<string, PlanType> = {
+    'STANDARD': 'STARTER',
+    'PRO': 'PRO',
+    'ULTIMATE': 'BUSINESS',
+  }
+  return mapping[dodoPlan] || 'STARTER'
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -29,6 +40,14 @@ export async function POST(request: NextRequest) {
         await handleSubscriptionRenewed(payload)
         break
 
+      case 'subscription.canceled':
+        await handleSubscriptionCanceled(payload)
+        break
+
+      case 'subscription.on_hold':
+        await handleSubscriptionOnHold(payload)
+        break
+
       case 'payment.succeeded':
         await handlePaymentSucceeded(payload)
         break
@@ -53,28 +72,47 @@ export async function POST(request: NextRequest) {
 
 async function handleSubscriptionActive(payload: any) {
   try {
-    const { customer, subscription_id } = payload.data
+    const { subscription_id, metadata, current_period_end } = payload.data || {}
+    // Prefer metadata.userId (Clerk ID) if present
+    const metadataUserId = metadata?.userId
+    const dodoPlan = (metadata?.plan as string) || 'PRO'
+    const selectedPlan = mapDodoPlanToNew(dodoPlan)
 
-    // Find user by email
-    const user = await client.user.findFirst({
-      where: {
-        // Assuming email is stored in fullname or we need to get it from Clerk
-        // This would need to be adjusted based on how you store user emails
+    if (metadataUserId) {
+      const dbUser = await client.user.findUnique({ where: { clerkId: metadataUserId }, select: { id: true } })
+      if (dbUser) {
+        await client.billings.upsert({
+          where: { userId: dbUser.id },
+          create: {
+            userId: dbUser.id,
+            plan: selectedPlan,
+            provider: 'dodo',
+            providerSubscriptionId: subscription_id,
+            status: 'active',
+            cancelAtPeriodEnd: false,
+            endsAt: current_period_end ? new Date(current_period_end) : null,
+          },
+          update: {
+            plan: selectedPlan,
+            provider: 'dodo',
+            providerSubscriptionId: subscription_id,
+            status: 'active',
+            cancelAtPeriodEnd: false,
+            endsAt: current_period_end ? new Date(current_period_end) : null,
+          },
+        })
+        return
       }
-    })
+    }
 
-    if (user) {
-      // Update subscription status
-      await client.billings.upsert({
-        where: { userId: user.id },
-        create: {
-          userId: user.id,
-          plan: 'PRO', // Default, should be determined from product_id
-          credits: 50,
-        },
-        update: {
-          plan: 'PRO',
-          credits: 50,
+    // Fallback: update by providerSubscriptionId if userId missing
+    if (subscription_id) {
+      await client.billings.updateMany({
+        where: { providerSubscriptionId: subscription_id },
+        data: {
+          status: 'active',
+          cancelAtPeriodEnd: false,
+          endsAt: current_period_end ? new Date(current_period_end) : null,
         },
       })
     }
@@ -85,11 +123,54 @@ async function handleSubscriptionActive(payload: any) {
 
 async function handleSubscriptionRenewed(payload: any) {
   try {
-    // Handle subscription renewal
-    console.log('Subscription renewed:', payload.data.subscription_id)
-    // Add logic to reset credits or update billing cycle
+    const { subscription_id, current_period_end } = payload.data || {}
+    console.log('Subscription renewed:', subscription_id)
+    await client.billings.updateMany({
+      where: { providerSubscriptionId: subscription_id },
+      data: { status: 'active', endsAt: current_period_end ? new Date(current_period_end) : undefined },
+    })
   } catch (error) {
     console.error('Error handling subscription.renewed:', error)
+  }
+}
+
+async function handleSubscriptionCanceled(payload: any) {
+  try {
+    const { subscription_id } = payload.data || {}
+    if (!subscription_id) return
+
+    // Downgrade to FREE on cancellation
+    const billing = await client.billings.findFirst({ where: { providerSubscriptionId: subscription_id }, select: { userId: true } })
+    if (billing?.userId) {
+      await client.billings.update({
+        where: { userId: billing.userId },
+        data: {
+          plan: 'FREE',
+          status: 'canceled',
+          cancelAtPeriodEnd: true,
+        },
+      })
+    } else {
+      await client.billings.updateMany({
+        where: { providerSubscriptionId: subscription_id },
+        data: { status: 'canceled', cancelAtPeriodEnd: true },
+      })
+    }
+  } catch (error) {
+    console.error('Error handling subscription.canceled:', error)
+  }
+}
+
+async function handleSubscriptionOnHold(payload: any) {
+  try {
+    const { subscription_id } = payload.data || {}
+    if (!subscription_id) return
+    await client.billings.updateMany({
+      where: { providerSubscriptionId: subscription_id },
+      data: { status: 'on_hold' },
+    })
+  } catch (error) {
+    console.error('Error handling subscription.on_hold:', error)
   }
 }
 

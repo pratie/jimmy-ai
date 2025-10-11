@@ -44,9 +44,9 @@ export default function SSOCallback() {
           </svg>
         </div>
         <div className="text-center">
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Authentication Error</h2>
-          <p className="text-gray-600 mb-4">{error}</p>
-          <p className="text-sm text-gray-500">Redirecting you back to sign in...</p>
+          <h2 className="text-xl font-semibold text-brand-primary mb-2">Authentication Error</h2>
+          <p className="text-brand-primary/70 mb-4">{error}</p>
+          <p className="text-sm text-brand-primary/60">Redirecting you back to sign in...</p>
         </div>
       </div>
     )
@@ -55,12 +55,12 @@ export default function SSOCallback() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center gap-4">
       <div className="flex flex-col items-center gap-4">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-primary"></div>
         <div className="text-center">
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">
+          <h2 className="text-xl font-semibold text-brand-primary mb-2">
             Completing authentication...
           </h2>
-          <p className="text-gray-600">Please wait while we sign you in</p>
+          <p className="text-brand-primary/70">Please wait while we sign you in</p>
         </div>
       </div>
       <AuthenticateWithRedirectCallback />

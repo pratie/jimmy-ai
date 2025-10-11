@@ -41,7 +41,7 @@ const ChatCard = ({
         <div className="flex justify-between w-full">
           <div>
             <div className="flex gap-5 items-center">
-              <CardDescription className="font-bold leading-none text-gray-600">
+              <CardDescription className="font-bold leading-none text-brand-primary/70">
                 {title}
               </CardDescription>
               {urgent && !seen && <UrgentIcon />}

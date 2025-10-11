@@ -60,19 +60,20 @@ const Page = async (props: Props) => {
           />
         </div>
         <div className="w-full py-10">
-          <div className="mx-auto max-w-5xl px-4 relative bg-white rounded-lg border border-sauce-cyan/40 shadow-sm p-6">
+          <div className="mx-auto max-w-5xl px-4 relative bg-white/90 backdrop-blur-sm rounded-lg border border-brand-base-300 shadow-sm p-6 pt-7">
             {/* Top accent bar */}
-            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-sauce-black via-sauce-gray to-sauce-black rounded-t-lg"></div>
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-brand-accent via-brand-primary to-brand-accent rounded-t-lg"></div>
 
-            <div className="mb-6 pt-2">
-              <h2 className="font-semibold text-xl text-sauce-black">Plan Usage</h2>
-              <p className="text-sm text-sauce-gray mt-1">
+            <div className="mb-6">
+              <h2 className="font-semibold text-xl text-brand-primary">Plan Usage</h2>
+              <p className="text-sm text-brand-primary/60 mt-1">
                 A detailed overview of your metrics, usage, customers and more
               </p>
             </div>
             <PlanUsage
               plan={plan?.plan!}
-              credits={plan?.credits || 0}
+              messageCredits={plan?.messageCredits || 0}
+              messagesUsed={plan?.messagesUsed || 0}
               domains={plan?.domains || 0}
               clients={leads || 0}
             />

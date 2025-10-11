@@ -5,9 +5,10 @@ import { useEffect, useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card'
 import { CheckCircle, Loader2 } from 'lucide-react'
 import { Button } from '../ui/button'
+import { PlanType } from '@/lib/plans'
 
 type Props = {
-  plan?: 'STANDARD' | 'PRO' | 'ULTIMATE'
+  plan?: PlanType
   subscriptionId?: string
   status?: string
 }
@@ -30,7 +31,7 @@ const PaymentSuccess = ({ plan, subscriptionId, status }: Props) => {
 
     setIsUpdating(true)
     try {
-      const result = await onUpdateSubscription(plan)
+      const result = await onUpdateSubscription(plan, subscriptionId, status)
       if (result?.status === 200) {
         setUpdateComplete(true)
         // Force refresh to show updated plan

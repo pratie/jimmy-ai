@@ -113,3 +113,67 @@ export const normalizeUrl = (domain: string): string => {
   }
   return `https://${domain}`
 }
+
+// Map Website: Discover all URLs from a website
+export interface FirecrawlMapOptions {
+  url: string
+  limit?: number
+  search?: string
+}
+
+export interface FirecrawlMapResponse {
+  success: boolean
+  links?: Array<{
+    url: string
+    title?: string
+    description?: string
+  }>
+  error?: string
+}
+
+export const mapWebsite = async (
+  options: FirecrawlMapOptions
+): Promise<FirecrawlMapResponse> => {
+  const apiKey = process.env.FIRECRAWL_API_KEY
+  const apiUrl = process.env.FIRECRAWL_API_URL || 'https://api.firecrawl.dev/v2'
+
+  if (!apiKey) {
+    throw new Error('FIRECRAWL_API_KEY not configured in environment variables')
+  }
+
+  try {
+    console.log('[Firecrawl Map] Discovering URLs for:', options.url)
+
+    const response = await fetch(`${apiUrl}/map`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        url: options.url,
+        limit: options.limit ?? 100, // Get up to 100 URLs
+        search: options.search,
+      }),
+    })
+
+    if (!response.ok) {
+      if (response.status === 402) {
+        throw new Error('Firecrawl payment required. Please upgrade your plan.')
+      }
+      if (response.status === 429) {
+        throw new Error('Rate limit exceeded. Please try again in a few minutes.')
+      }
+      const errorText = await response.text()
+      throw new Error(`Firecrawl Map API error (${response.status}): ${errorText}`)
+    }
+
+    const result = await response.json()
+    console.log('[Firecrawl Map] Discovered', result.links?.length || 0, 'URLs')
+
+    return result
+  } catch (error: any) {
+    console.error('[Firecrawl Map] Error:', error.message)
+    throw error
+  }
+}

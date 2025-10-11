@@ -23,10 +23,12 @@ const WelcomeMessage = dynamic(
   }
 )
 
+import { PlanType, getPlanLimits } from '@/lib/plans'
+
 type Props = {
   id: string
   name: string
-  plan: 'STANDARD' | 'PRO' | 'ULTIMATE'
+  plan: PlanType
   chatBot: {
     id: string
     icon: string | null
@@ -38,9 +40,11 @@ type Props = {
     brandTone: string | null
     language: string | null
   } | null
+  trainingSourcesUsed?: number
+  knowledgeBaseSizeMB?: number
 }
 
-const SettingsForm = ({ id, name, chatBot, plan }: Props) => {
+const SettingsForm = ({ id, name, chatBot, plan, trainingSourcesUsed, knowledgeBaseSizeMB }: Props) => {
   const {
     register,
     onUpdateSettings,
@@ -49,7 +53,10 @@ const SettingsForm = ({ id, name, chatBot, plan }: Props) => {
     deleting,
     loading,
   } = useSettings(id)
-  
+
+  // Get plan limits
+  const planLimits = getPlanLimits(plan)
+
   // Setup checklist state
   const [embedStatus, setEmbedStatus] = useState<'not_started' | 'processing' | 'completed' | 'failed'>('not_started')
   const [hasEmbeddings, setHasEmbeddings] = useState(false)
@@ -120,6 +127,11 @@ const SettingsForm = ({ id, name, chatBot, plan }: Props) => {
           knowledgeBase={chatBot?.knowledgeBase || null}
           status={chatBot?.knowledgeBaseStatus || null}
           updatedAt={chatBot?.knowledgeBaseUpdatedAt || null}
+          plan={plan}
+          trainingSourcesUsed={trainingSourcesUsed || 0}
+          trainingSourcesLimit={planLimits.trainingSources}
+          kbSizeMB={knowledgeBaseSizeMB || 0}
+          kbSizeLimit={planLimits.knowledgeBaseMB}
         />
       </div>
 

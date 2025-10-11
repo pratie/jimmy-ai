@@ -25,20 +25,24 @@ model User {
 }
 
 model Domain {
-  id              String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name            String
-  icon            String
-  userId          String?           @db.Uuid
-  campaignId      String?           @db.Uuid
-  chatBot         ChatBot?
-  chatRooms       ChatRoom[]
-  customer        Customer[]
-  Campaign        Campaign?         @relation(fields: [campaignId], references: [id])
-  User            User?             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  filterQuestions FilterQuestions[]
-  helpdesk        HelpDesk[]
-  knowledgeChunks KnowledgeChunk[]
-  products        Product[]
+  id                  String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name                String
+  icon                String
+  userId              String?           @db.Uuid
+  campaignId          String?           @db.Uuid
+  knowledgeBaseSizeMB Float             @default(0)
+  trainingSourcesUsed Int               @default(0)
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @default(now()) @updatedAt
+  chatBot             ChatBot?
+  chatRooms           ChatRoom[]
+  customer            Customer[]
+  Campaign            Campaign?         @relation(fields: [campaignId], references: [id])
+  User                User?             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  filterQuestions     FilterQuestions[]
+  helpdesk            HelpDesk[]
+  knowledgeChunks     KnowledgeChunk[]
+  products            Product[]
 
   @@index([userId])
   @@index([campaignId])
@@ -69,11 +73,21 @@ model ChatBot {
 }
 
 model Billings {
-  id      String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  plan    Plans   @default(STANDARD)
-  credits Int     @default(10)
-  userId  String? @unique @db.Uuid
-  User    User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                     String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  plan                   Plans           @default(FREE)
+  messageCredits         Int             @default(100)
+  messagesUsed           Int             @default(0)
+  messagesResetAt        DateTime        @default(now())
+  billingInterval        BillingInterval @default(MONTHLY)
+  userId                 String?         @unique @db.Uuid
+  User                   User?           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  provider               String?
+  providerSubscriptionId String?         @unique
+  status                 String?
+  cancelAtPeriodEnd      Boolean?        @default(false)
+  endsAt                 DateTime?
+  createdAt              DateTime        @default(now())
+  updatedAt              DateTime        @default(now()) @updatedAt
 }
 
 model HelpDesk {
@@ -113,6 +127,7 @@ model Customer {
   Domain    Domain?             @relation(fields: [domainId], references: [id], onDelete: Cascade)
   questions CustomerResponses[]
 
+  @@unique([email, domainId], name: "email_domainId")
   @@index([domainId])
 }
 
@@ -197,7 +212,6 @@ model KnowledgeChunk {
   @@index([domainId])
   @@index([chatBotId])
   @@index([sourceType])
-  @@index([embedding], map: "knowledge_chunk_embedding_idx")
 }
 
 model Account {
@@ -235,9 +249,15 @@ model VerificationToken {
 }
 
 enum Plans {
-  STANDARD
+  FREE
+  STARTER
   PRO
-  ULTIMATE
+  BUSINESS
+}
+
+enum BillingInterval {
+  MONTHLY
+  YEARLY
 }
 
 enum Role {

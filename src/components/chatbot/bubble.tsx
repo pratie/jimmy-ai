@@ -12,12 +12,14 @@ type Props = {
     link?: string
   }
   createdAt?: Date
+  botIcon?: string | null
 }
 
-const Bubble = ({ message, createdAt }: Props) => {
+const Bubble = ({ message, createdAt, botIcon }: Props) => {
   let d = new Date()
   const image = extractUUIDFromString(message.content)
   const [imageError, setImageError] = useState(false)
+  const [botAvatarError, setBotAvatarError] = useState(false)
   console.log(message.link)
 
   return (
@@ -29,11 +31,17 @@ const Bubble = ({ message, createdAt }: Props) => {
     >
       {message.role == 'assistant' ? (
         <Avatar className="w-5 h-5">
-          <AvatarImage
-            src="https://github.com/shadcn.png"
-            alt="@shadcn"
-          />
-          <AvatarFallback>CN</AvatarFallback>
+          {botIcon && !botAvatarError ? (
+            <AvatarImage
+              src={getKieImageUrl(botIcon)}
+              alt="Bot"
+              onError={() => setBotAvatarError(true)}
+            />
+          ) : (
+            <AvatarFallback className="bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold text-[8px]">
+              AI
+            </AvatarFallback>
+          )}
         </Avatar>
       ) : (
         <Avatar className="w-5 h-5">
@@ -51,7 +59,7 @@ const Bubble = ({ message, createdAt }: Props) => {
         )}
       >
         {createdAt ? (
-          <div className="flex gap-2 text-xs text-gray-600">
+          <div className="flex gap-2 text-xs text-brand-primary/60">
             <p>
               {createdAt.getDate()} {getMonthName(createdAt.getMonth())}
             </p>
@@ -78,8 +86,8 @@ const Bubble = ({ message, createdAt }: Props) => {
             />
           </div>
         ) : image && imageError ? (
-          <div className="relative aspect-square bg-gray-100 flex items-center justify-center rounded">
-            <p className="text-xs text-gray-500">Image failed to load</p>
+          <div className="relative aspect-square bg-brand-base-200 flex items-center justify-center rounded">
+            <p className="text-xs text-brand-primary/60">Image failed to load</p>
           </div>
         ) : (
           <p className="text-sm">

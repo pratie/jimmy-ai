@@ -14,6 +14,7 @@ type SIDE_BAR_MENU_PROPS = {
   path: string
 }
 
+// Primary menu items (top priority - shown first)
 export const SIDE_BAR_MENU: SIDE_BAR_MENU_PROPS[] = [
   {
     label: 'Dashboard',
@@ -25,17 +26,15 @@ export const SIDE_BAR_MENU: SIDE_BAR_MENU_PROPS[] = [
     icon: <ChatIcon />,
     path: 'conversation',
   },
-  // Integrations temporarily hidden - will be re-enabled later
-  // {
-  //   label: 'Integrations',
-  //   icon: <IntegrationsIcon />,
-  //   path: 'integration',
-  // },
   {
     label: 'Settings',
     icon: <SettingsIcon />,
     path: 'settings',
   },
+]
+
+// Secondary menu items (lower priority - shown at bottom)
+export const SIDE_BAR_MENU_SECONDARY: SIDE_BAR_MENU_PROPS[] = [
   {
     label: 'Appointments',
     icon: <CalIcon />,
@@ -96,7 +95,7 @@ export const BOT_TABS_MENU: TABS_MENU_PROPS[] = [
     icon: <ChatIcon />,
   },
   {
-    label: 'helpdesk',
+    label: 'faqs',
     icon: <HelpDeskIcon />,
   },
 ]

@@ -1,41 +1,39 @@
 import React from 'react'
 import { ProgressBar } from '../progress'
+import { getPlanLimits } from '@/lib/plans'
 
 type PlanUsageProps = {
-  plan: 'STANDARD' | 'PRO' | 'ULTIMATE'
-  credits: number
+  plan: 'FREE' | 'STARTER' | 'PRO' | 'BUSINESS'
+  messageCredits: number
+  messagesUsed: number
   domains: number
   clients: number
 }
 
 export const PlanUsage = ({
   plan,
-  credits,
+  messageCredits,
+  messagesUsed,
   domains,
   clients,
 }: PlanUsageProps) => {
-  const planLimits = {
-    STANDARD: { credits: 10, domains: 1, contacts: 10 },
-    PRO: { credits: 50, domains: 2, contacts: 50 },
-    ULTIMATE: { credits: 500, domains: 100, contacts: 500 },
-  }
-
-  const limits = planLimits[plan] || planLimits.STANDARD
+  const limits = getPlanLimits(plan)
+  const messagesRemaining = messageCredits - messagesUsed
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
       <ProgressBar
-        end={limits.credits}
-        label="Email Credits"
-        credits={credits}
+        end={messageCredits}
+        label="Messages"
+        credits={messagesRemaining}
       />
       <ProgressBar
-        end={limits.domains}
+        end={limits.domains === Infinity ? domains + 10 : limits.domains}
         label="Domains"
         credits={domains}
       />
       <ProgressBar
-        end={limits.contacts}
+        end={clients + 10}
         label="Contacts"
         credits={clients}
       />

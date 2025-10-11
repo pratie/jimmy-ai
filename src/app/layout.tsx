@@ -20,7 +20,7 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en" suppressHydrationWarning>
-        <body className={jakarta.className}>
+        <body className={`${jakarta.className} landing-gradient min-h-screen`}>
           <ThemeProvider
             attribute="class"
             defaultTheme="light"

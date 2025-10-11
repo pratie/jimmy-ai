@@ -6,11 +6,13 @@ import { extractEmailsFromString } from '@/lib/utils'
 import { truncateMarkdown } from '@/lib/firecrawl'
 import { buildSystemPrompt } from '@/lib/promptBuilder'
 import { searchKnowledgeBaseWithFallback, formatResultsForPrompt, hasTrainedEmbeddings } from '@/lib/vector-search'
+import { getPlanLimits, shouldResetCredits, getNextResetDate } from '@/lib/plans'
 import OpenAI from 'openai'
 
 // --- Minimal in-memory LRU cache for domain config ---
 type DomainConfig = {
   name: string
+  userId?: string | null
   chatBot: {
     mode: string | null
     brandTone: string | null
@@ -114,6 +116,7 @@ export async function POST(req: Request) {
         where: { id: domainId },
         select: {
           name: true,
+          userId: true,
           chatBot: {
             select: {
               mode: true,
@@ -135,6 +138,52 @@ export async function POST(req: Request) {
       cacheHit = true
       recordCacheStat(domainId, true)
       console.log('[Bot Stream]   └─ Domain query: 0ms (cache hit)')
+    }
+
+    // CHECK MESSAGE CREDITS BEFORE RESPONDING
+    if (chatBotDomain && chatBotDomain.userId) {
+      const billing = await client.billings.findUnique({
+        where: { userId: chatBotDomain.userId },
+        select: {
+          plan: true,
+          messageCredits: true,
+          messagesUsed: true,
+          messagesResetAt: true,
+        }
+      })
+
+      if (billing) {
+        // Check if credits should reset
+        if (shouldResetCredits(billing.messagesResetAt)) {
+          const limits = getPlanLimits(billing.plan)
+          await client.billings.update({
+            where: { userId: chatBotDomain.userId },
+            data: {
+              messagesUsed: 0,
+              messageCredits: limits.messageCredits,
+              messagesResetAt: getNextResetDate()
+            }
+          })
+          console.log('[Bot Stream] 🔄 Credits reset for new billing period')
+        } else {
+          // Check if user has credits remaining
+          if (billing.messagesUsed >= billing.messageCredits) {
+            console.log('[Bot Stream] ❌ Message limit reached')
+            return new Response(
+              JSON.stringify({
+                error: 'Message limit reached',
+                message: 'This chatbot has reached its monthly message limit. Please contact the website owner to upgrade their plan.',
+                limitReached: true,
+                plan: billing.plan
+              }),
+              {
+                status: 429,
+                headers: { 'Content-Type': 'application/json' }
+              }
+            )
+          }
+        }
+      }
     }
 
     const hasTrained = !!(chatBotDomain?.chatBot?.hasEmbeddings)
@@ -171,9 +220,180 @@ export async function POST(req: Request) {
     }
     console.log(`[Bot Stream] ✅ RAG retrieval took: ${Date.now() - ragStartTime}ms`)
 
-    // Handle anonymous conversations
+    // ═══════════════════════════════════════════════════════════
+    // CONVERSATION STATE MANAGEMENT: Handle both customer & anonymous users
+    // ═══════════════════════════════════════════════════════════
     let chatRoomId: string | undefined
+    let isLiveMode = false
+
+    if (customerEmail) {
+      // ──────────────────────────────────────────────────────────
+      // CUSTOMER FLOW: Email provided (new or returning customer)
+      // ──────────────────────────────────────────────────────────
+      console.log('[Bot Stream] 📧 Customer email detected:', customerEmail)
+
+      try {
+        // 1. Find existing customer first
+        let customer = await client.customer.findFirst({
+          where: {
+            email: customerEmail,
+            domainId: domainId
+          },
+          select: {
+            id: true,
+            chatRoom: {
+              select: {
+                id: true,
+                live: true,
+                mailed: true
+              }
+            }
+          }
+        })
+
+        // 2. Create customer if doesn't exist (with proper error handling for race conditions)
+        if (!customer) {
+          try {
+            customer = await client.customer.create({
+              data: {
+                email: customerEmail,
+                domainId: domainId
+              },
+              select: {
+                id: true,
+                chatRoom: {
+                  select: {
+                    id: true,
+                    live: true,
+                    mailed: true
+                  }
+                }
+              }
+            })
+          } catch (createError: any) {
+            // Handle race condition: another request created the customer simultaneously
+            if (createError.code === 'P2002') {
+              console.log('[Bot Stream] 🔄 Race condition detected - customer created by concurrent request')
+              // Retry findFirst to get the customer that was just created
+              customer = await client.customer.findFirst({
+                where: {
+                  email: customerEmail,
+                  domainId: domainId
+                },
+                select: {
+                  id: true,
+                  chatRoom: {
+                    select: {
+                      id: true,
+                      live: true,
+                      mailed: true
+                    }
+                  }
+                }
+              })
+            } else {
+              throw createError
+            }
+          }
+        }
+
+        if (!customer) {
+          throw new Error('Failed to create or find customer')
+        }
+
+        console.log('[Bot Stream] ✅ Customer found/created:', customer.id)
+
+        // 3. Check for anonymous history to link
+        if (anonymousId) {
+          const anonymousChatRoom = await client.chatRoom.findFirst({
+            where: {
+              anonymousId: anonymousId,
+              domainId: domainId,
+              customerId: null
+            },
+            select: {
+              id: true,
+              live: true
+            }
+          })
+
+          if (anonymousChatRoom) {
+            console.log('[Bot Stream] 🔗 Linking anonymous chat history:', anonymousChatRoom.id)
+
+            // Link anonymous chat to customer (atomic update)
+            await client.chatRoom.update({
+              where: { id: anonymousChatRoom.id },
+              data: {
+                customerId: customer.id,
+                anonymousId: null
+              }
+            })
+
+            chatRoomId = anonymousChatRoom.id
+            isLiveMode = anonymousChatRoom.live
+          }
+        }
+
+        // 4. Get or create customer chat room (if no anonymous history linked)
+        if (!chatRoomId) {
+          if (customer.chatRoom && customer.chatRoom.length > 0) {
+            // Returning customer - use existing chat room
+            chatRoomId = customer.chatRoom[0].id
+            isLiveMode = customer.chatRoom[0].live
+            console.log('[Bot Stream] 🔄 Returning customer, using existing chat room:', chatRoomId)
+          } else {
+            // New customer - create chat room
+            const newChatRoom = await client.chatRoom.create({
+              data: {
+                customerId: customer.id,
+                domainId: domainId
+              },
+              select: {
+                id: true,
+                live: true
+              }
+            })
+            chatRoomId = newChatRoom.id
+            isLiveMode = newChatRoom.live
+            console.log('[Bot Stream] 🆕 New customer, created chat room:', chatRoomId)
+          }
+        }
+
+        // 5. Store user message
+        await storeConversation(chatRoomId, message, 'user')
+
+        // 6. Check if live mode is active
+        if (isLiveMode) {
+          console.log('[Bot Stream] 👤 Live mode active - human agent will respond')
+          return new Response(
+            JSON.stringify({
+              error: 'Live mode active',
+              live: true,
+              chatRoom: chatRoomId
+            }),
+            {
+              status: 200,
+              headers: { 'Content-Type': 'application/json' }
+            }
+          )
+        }
+
+      } catch (error: any) {
+        console.error('[Bot Stream] ❌ Customer handling error:', error)
+
+        // Fallback: Continue with anonymous flow if customer creation fails
+        // This prevents total failure - conversation still works
+        console.log('[Bot Stream] ⚠️  Falling back to anonymous mode due to error')
+        customerEmail = undefined // Clear email to trigger anonymous flow below
+      }
+    }
+
     if (!customerEmail && anonymousId) {
+      // ──────────────────────────────────────────────────────────
+      // ANONYMOUS FLOW: No email provided yet
+      // ──────────────────────────────────────────────────────────
+      console.log('[Bot Stream] 👤 Anonymous user:', anonymousId)
+
       let anonymousChatRoom = await client.chatRoom.findFirst({
         where: {
           anonymousId: anonymousId,
@@ -197,15 +417,18 @@ export async function POST(req: Request) {
             live: true,
           },
         })
+        console.log('[Bot Stream] 🆕 Created anonymous chat room:', anonymousChatRoom.id)
       }
 
       chatRoomId = anonymousChatRoom.id
+      isLiveMode = anonymousChatRoom.live
 
       // Store user message
       await storeConversation(chatRoomId, message, 'user')
 
       // If live mode, don't stream AI response
-      if (anonymousChatRoom.live) {
+      if (isLiveMode) {
+        console.log('[Bot Stream] 👤 Live mode active - human agent will respond')
         return new Response(
           JSON.stringify({
             error: 'Live mode active',
@@ -301,6 +524,16 @@ export async function POST(req: Request) {
           if (chatRoomId && fullResponse) {
             storeConversation(chatRoomId, fullResponse, 'assistant').catch((e) => {
               console.error('[Bot Stream] Failed to persist assistant message:', e)
+            })
+          }
+
+          // Increment message usage count
+          if (chatBotDomain?.userId && fullResponse) {
+            client.billings.update({
+              where: { userId: chatBotDomain.userId },
+              data: { messagesUsed: { increment: 1 } }
+            }).catch((e) => {
+              console.error('[Bot Stream] Failed to increment message count:', e)
             })
           }
 

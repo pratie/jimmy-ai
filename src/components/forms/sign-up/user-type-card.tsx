@@ -43,15 +43,15 @@ const UserTypeCard = ({
               <User
                 size={30}
                 className={cn(
-                  userType == value ? 'text-primary' : 'text-gray-400'
+                  userType == value ? 'text-primary' : 'text-brand-primary/40'
                 )}
               />
             </Card>
             <div className="">
-              <CardDescription className="text-iridium">
+              <CardDescription className="text-brand-primary">
                 {title}
               </CardDescription>
-              <CardDescription className="text-gray-400">
+              <CardDescription className="text-brand-primary/60">
                 {text}
               </CardDescription>
             </div>

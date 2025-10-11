@@ -79,7 +79,7 @@ const UploadButton = ({ errors, label, register, onUploadComplete }: Props) => {
         <div className="flex gap-2 items-center">
           <Label
             htmlFor={inputId}
-            className="flex gap-2 p-3 rounded-lg bg-muted text-gray-600 cursor-pointer font-semibold text-sm items-center hover:bg-muted/80 transition-colors"
+            className="flex gap-2 p-3 rounded-lg bg-muted text-brand-primary/80 cursor-pointer font-semibold text-sm items-center hover:bg-muted/80 transition-colors"
           >
             <Input
               {...inputRegister}
@@ -130,14 +130,14 @@ const UploadButton = ({ errors, label, register, onUploadComplete }: Props) => {
           )}
         </div>
 
-        <p className="text-sm text-gray-400">
+        <p className="text-sm text-brand-primary/50">
           Recommended size is 300px * 300px, size less than 2MB
         </p>
 
         {/* Image Preview */}
         {previewUrl && selectedFile && (
-          <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-            <div className="relative w-16 h-16 rounded-lg overflow-hidden border-2 border-gray-200">
+          <div className="flex items-start gap-3 p-3 bg-brand-base-100 rounded-lg">
+            <div className="relative w-16 h-16 rounded-lg overflow-hidden border-2 border-brand-base-300">
               <Image
                 src={previewUrl}
                 alt="Preview"
@@ -146,17 +146,17 @@ const UploadButton = ({ errors, label, register, onUploadComplete }: Props) => {
               />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-gray-900 truncate">
+              <p className="text-sm font-medium text-brand-primary truncate">
                 {selectedFile.name}
               </p>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-brand-primary/60">
                 {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
               </p>
             </div>
             <button
               type="button"
               onClick={clearSelection}
-              className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
+              className="p-1 text-brand-primary/60 hover:text-brand-primary transition-colors"
             >
               <X size={16} />
             </button>

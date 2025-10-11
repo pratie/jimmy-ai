@@ -41,7 +41,7 @@ const Modal = ({
                   alt="Corinna"
                 />
               </div>
-              <div className="text-gray-400">
+              <div className="text-brand-primary/60">
                 <ArrowLeft size={20} />
                 <ArrowRight size={20} />
               </div>

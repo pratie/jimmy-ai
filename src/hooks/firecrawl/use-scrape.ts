@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useToast } from '@/components/ui/use-toast'
-import { onScrapeWebsiteForDomain, onUpdateKnowledgeBase, onTrainChatbot, onUploadTextKnowledgeBase, onGetEmbeddingStatus } from '@/actions/firecrawl'
+import { onScrapeWebsiteForDomain, onUpdateKnowledgeBase, onTrainChatbot, onUploadTextKnowledgeBase, onGetEmbeddingStatus, onDiscoverTrainingSources, onScrapeSelectedSources } from '@/actions/firecrawl'
 import { useRouter } from 'next/navigation'
 
 export const useScrapeWebsite = () => {
@@ -209,4 +209,104 @@ export const useUploadText = () => {
   }
 
   return { onUpload, loading }
+}
+
+export const useDiscoverSources = () => {
+  const [loading, setLoading] = useState(false)
+  const [urls, setUrls] = useState<Array<{ url: string; title?: string; description?: string }>>([])
+  const [limit, setLimit] = useState(5)
+  const [remaining, setRemaining] = useState(5)
+  const [plan, setPlan] = useState<string>('FREE')
+  const { toast } = useToast()
+
+  const onDiscover = async (domainId: string) => {
+    try {
+      setLoading(true)
+
+      toast({
+        title: 'Discovering URLs',
+        description: 'Finding all pages on your website...',
+      })
+
+      const result = await onDiscoverTrainingSources(domainId)
+
+      if (result.status === 200 && result.data) {
+        setUrls(result.data.urls)
+        setLimit(result.data.limit)
+        setRemaining(result.data.remaining)
+        setPlan(result.data.plan)
+
+        toast({
+          title: 'URLs Discovered!',
+          description: `Found ${result.data.urls.length} pages. You can select up to ${result.data.remaining === Infinity ? 'unlimited' : result.data.remaining} more sources.`,
+        })
+
+        return result.data
+      } else {
+        toast({
+          title: 'Error',
+          description: result.message,
+          variant: 'destructive',
+        })
+        return null
+      }
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to discover URLs',
+        variant: 'destructive',
+      })
+      return null
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return { onDiscover, urls, limit, remaining, plan, loading }
+}
+
+export const useScrapeSelected = () => {
+  const [loading, setLoading] = useState(false)
+  const { toast } = useToast()
+  const router = useRouter()
+
+  const onScrapeSelected = async (domainId: string, selectedUrls: string[]) => {
+    try {
+      setLoading(true)
+
+      toast({
+        title: 'Scraping Sources',
+        description: `Scraping ${selectedUrls.length} selected pages...`,
+      })
+
+      const result = await onScrapeSelectedSources(domainId, selectedUrls)
+
+      if (result.status === 200) {
+        toast({
+          title: 'Success!',
+          description: result.message,
+        })
+        router.refresh()
+        return true
+      } else {
+        toast({
+          title: result.upgradeRequired ? 'Upgrade Required' : 'Error',
+          description: result.message,
+          variant: 'destructive',
+        })
+        return false
+      }
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to scrape sources',
+        variant: 'destructive',
+      })
+      return false
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return { onScrapeSelected, loading }
 }
