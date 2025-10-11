@@ -12,12 +12,14 @@ type Props = {
     link?: string
   }
   createdAt?: Date
+  botIcon?: string | null
 }
 
-const Bubble = ({ message, createdAt }: Props) => {
+const Bubble = ({ message, createdAt, botIcon }: Props) => {
   let d = new Date()
   const image = extractUUIDFromString(message.content)
   const [imageError, setImageError] = useState(false)
+  const [botAvatarError, setBotAvatarError] = useState(false)
   console.log(message.link)
 
   return (
@@ -29,11 +31,17 @@ const Bubble = ({ message, createdAt }: Props) => {
     >
       {message.role == 'assistant' ? (
         <Avatar className="w-5 h-5">
-          <AvatarImage
-            src="https://github.com/shadcn.png"
-            alt="@shadcn"
-          />
-          <AvatarFallback>CN</AvatarFallback>
+          {botIcon && !botAvatarError ? (
+            <AvatarImage
+              src={getKieImageUrl(botIcon)}
+              alt="Bot"
+              onError={() => setBotAvatarError(true)}
+            />
+          ) : (
+            <AvatarFallback className="bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold text-[8px]">
+              AI
+            </AvatarFallback>
+          )}
         </Avatar>
       ) : (
         <Avatar className="w-5 h-5">

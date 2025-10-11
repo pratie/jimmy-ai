@@ -1,4 +1,4 @@
-import { SIDE_BAR_MENU } from '@/constants/menu'
+import { SIDE_BAR_MENU, SIDE_BAR_MENU_SECONDARY } from '@/constants/menu'
 import { LogOut, Menu, User } from 'lucide-react'
 import Image from 'next/image'
 import React, { useState } from 'react'
@@ -59,7 +59,15 @@ const MaxMenu = ({ current, domains, onExpand, onSignOut, user }: Props) => {
           ))}
           <DomainMenu domains={domains} />
         </div>
-        <div className="flex flex-col">
+        <div className="flex flex-col gap-3">
+          {SIDE_BAR_MENU_SECONDARY.map((menu, key) => (
+            <MenuItem
+              size="max"
+              {...menu}
+              key={`secondary-${key}`}
+              current={current}
+            />
+          ))}
           {user && (
             <div className="relative">
               <button

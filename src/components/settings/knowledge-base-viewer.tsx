@@ -5,34 +5,22 @@ import ReactMarkdown from 'react-markdown'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Textarea } from '@/components/ui/textarea'
+import { Input } from '@/components/ui/input'
 import { Progress } from '@/components/ui/progress'
 import { Badge } from '@/components/ui/badge'
 import {
   RefreshCw, FileText, AlertCircle, Loader2, Edit, Save, X, Brain,
-  Sparkles, Upload, CheckCircle2, CircleDashed, Link2, FileUp,
-  Info, HelpCircle, ArrowRight, Database, Zap
+  Upload, CheckCircle2, CircleDashed, Link2, FileUp,
+  HelpCircle, ArrowRight, Database, Eye, ChevronDown, ChevronUp
 } from 'lucide-react'
-import { useScrapeWebsite, useUpdateKnowledgeBase, useTrainChatbot, useUploadText } from '@/hooks/firecrawl/use-scrape'
+import { useScrapeWebsite, useUpdateKnowledgeBase, useTrainChatbot, useUploadText, useScrapeSelected } from '@/hooks/firecrawl/use-scrape'
 import { TrainingSourcesSelector } from './training-sources-selector'
 import { formatDistanceToNow } from 'date-fns'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog'
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+// Dialog imports removed (no longer used in simplified KB UI)
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 
 type Props = {
   domainId: string
@@ -60,17 +48,19 @@ const KnowledgeBaseViewerV2 = ({
   kbSizeLimit = 1,
 }: Props) => {
   const [showFull, setShowFull] = useState(false)
+  const [showContent, setShowContent] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
   const [editedMarkdown, setEditedMarkdown] = useState(knowledgeBase || '')
-  const [uploadDialogOpen, setUploadDialogOpen] = useState(false)
   const [uploadText, setUploadText] = useState('')
+  const [singleUrl, setSingleUrl] = useState('')
   const [appendMode, setAppendMode] = useState(true)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [fileError, setFileError] = useState<string | null>(null)
 
   const { onScrape, loading: scraping } = useScrapeWebsite()
+  const { onScrapeSelected, loading: scrapingSelected } = useScrapeSelected()
   const { onUpdate, loading: updating } = useUpdateKnowledgeBase()
-  const { onTrain, loading: training, progress, status: trainingStatus, counts, hasEmbeddings, completedAt, kbUpdatedAt } = useTrainChatbot()
+  const { onTrain, loading: training, progress, status: trainingStatus, hasEmbeddings, completedAt } = useTrainChatbot()
   const { onUpload, loading: uploading } = useUploadText()
 
   // Update edited markdown when knowledge base changes
@@ -97,8 +87,14 @@ const KnowledgeBaseViewerV2 = ({
     const isTxt = file.type === 'text/plain' || file.name.toLowerCase().endsWith('.txt')
     const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')
 
-    if (!isTxt && !isPdf) {
-      setFileError('Only .txt and .pdf files are supported')
+    // For now, only .txt is supported in UI
+    if (isPdf) {
+      setFileError('PDF upload coming soon. Please upload a .txt file for now.')
+      return
+    }
+
+    if (!isTxt) {
+      setFileError('Only .txt files are supported at the moment')
       return
     }
 
@@ -123,18 +119,17 @@ const KnowledgeBaseViewerV2 = ({
   }
 
   const handleTextUpload = async () => {
-    if (selectedFile?.type === 'application/pdf' || selectedFile?.name.toLowerCase().endsWith('.pdf')) {
-      // TODO: Handle PDF upload
-      setFileError('PDF upload will be implemented in next update')
-      return
-    }
-
     await onUpload(domainId, uploadText, appendMode)
     setUploadText('')
-    setUploadDialogOpen(false)
     setSelectedFile(null)
     setFileError(null)
     setAppendMode(true)
+  }
+
+  const handleScrapeSingle = async () => {
+    if (!singleUrl || singleUrl.trim().length < 5) return
+    await onScrapeSelected(domainId, [singleUrl.trim()])
+    setSingleUrl('')
   }
 
   // Calculate limits
@@ -270,187 +265,162 @@ const KnowledgeBaseViewerV2 = ({
             </div>
           </div>
 
-          {/* Onboarding Steps */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Info className="w-4 h-4" />
-              <span>Choose one or more ways to add content:</span>
-            </div>
+          {/* Tab-based Training Methods */}
+          <Tabs defaultValue="websites" className="w-full">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="websites" className="flex items-center gap-2">
+                <Link2 className="w-4 h-4" />
+                Websites
+              </TabsTrigger>
+              <TabsTrigger value="text" className="flex items-center gap-2">
+                <FileText className="w-4 h-4" />
+                Text
+              </TabsTrigger>
+              <TabsTrigger value="file" className="flex items-center gap-2">
+                <FileUp className="w-4 h-4" />
+                File Upload
+              </TabsTrigger>
+            </TabsList>
 
-            <Tabs defaultValue="sources" className="w-full">
-              <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="sources">
-                  <Link2 className="w-4 h-4 mr-2" />
-                  Select Pages
-                </TabsTrigger>
-                <TabsTrigger value="quick">
-                  <Zap className="w-4 h-4 mr-2" />
-                  Quick Scrape
-                </TabsTrigger>
-                <TabsTrigger value="upload">
-                  <Upload className="w-4 h-4 mr-2" />
-                  Upload Files
-                </TabsTrigger>
-              </TabsList>
+            {/* Websites Tab */}
+            <TabsContent value="websites" className="space-y-4 mt-4">
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-muted-foreground">Add content from websites</p>
+                <Badge variant="secondary">
+                  {sourcesRemaining === Infinity ? 'Unlimited' : `${sourcesRemaining} left`}
+                </Badge>
+              </div>
 
-              <TabsContent value="sources" className="space-y-4 mt-4">
-                <div className="p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                  <div className="flex gap-3">
-                    <div className="flex-shrink-0">
-                      <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
-                        <Sparkles className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <h4 className="font-semibold text-sm">Recommended: Select Specific Pages</h4>
-                      <p className="text-sm text-muted-foreground">
-                        Discover all pages on your website and choose exactly which ones to train on.
-                        Perfect for controlling what your chatbot learns.
-                      </p>
-                      <ul className="text-xs text-muted-foreground space-y-1 ml-4 list-disc">
-                        <li>See all available pages before scraping</li>
-                        <li>Select only relevant content (e.g., skip /admin, /cart)</li>
-                        <li>Your {plan} plan allows up to {trainingSourcesLimit === Infinity ? 'unlimited' : trainingSourcesLimit} sources</li>
-                      </ul>
-                    </div>
+              <div className="space-y-4 p-6 rounded-lg border bg-white/90 backdrop-blur-sm">
+                <div className="space-y-2">
+                  <Label className="text-sm font-semibold">Collect Multiple Links</Label>
+                  <p className="text-xs text-muted-foreground mb-2">Discover and select multiple pages from your website</p>
+                  <TrainingSourcesSelector domainId={domainId} />
+                </div>
+
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-white px-2 text-muted-foreground">Or</span>
                   </div>
                 </div>
-                <TrainingSourcesSelector domainId={domainId} />
-              </TabsContent>
 
-              <TabsContent value="quick" className="space-y-4 mt-4">
-                <div className="p-4 bg-muted/50 rounded-lg">
-                  <div className="space-y-2">
-                    <h4 className="font-semibold text-sm">Quick Website Scrape</h4>
-                    <p className="text-sm text-muted-foreground">
-                      Automatically scrape the homepage of <span className="font-semibold">{domainName}</span>.
-                      Fast, but only captures one page.
-                    </p>
-                  </div>
-                </div>
-                <Button onClick={() => onScrape(domainId)} disabled={scraping} size="lg" className="w-full">
-                  <FileText className="w-4 h-4 mr-2" />
-                  Scrape Homepage Now
-                </Button>
-              </TabsContent>
-
-              <TabsContent value="upload" className="space-y-4 mt-4">
-                <div className="p-4 bg-muted/50 rounded-lg">
-                  <div className="space-y-2">
-                    <h4 className="font-semibold text-sm">Upload Custom Content</h4>
-                    <p className="text-sm text-muted-foreground">
-                      Upload .txt or .pdf files with product info, FAQs, documentation, or any custom content.
-                    </p>
-                    <ul className="text-xs text-muted-foreground space-y-1 ml-4 list-disc">
-                      <li>Supported: .txt (plain text), .pdf (with text)</li>
-                      <li>Max file size: 10 MB</li>
-                      <li>Each file counts as 1 training source</li>
-                    </ul>
-                  </div>
-                </div>
-                <Dialog open={uploadDialogOpen} onOpenChange={setUploadDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button variant="outline" size="lg" className="w-full">
-                      <Upload className="w-4 h-4 mr-2" />
-                      Upload File
+                <div className="space-y-2">
+                  <Label className="text-sm font-semibold">Scrape Single URL</Label>
+                  <p className="text-xs text-muted-foreground mb-2">Add content from a specific page</p>
+                  <div className="flex gap-2">
+                    <Input
+                      type="url"
+                      placeholder="https://example.com/page"
+                      value={singleUrl}
+                      onChange={(e) => setSingleUrl(e.target.value)}
+                      className="flex-1"
+                    />
+                    <Button onClick={handleScrapeSingle} disabled={!singleUrl || scrapingSelected}>
+                      {scrapingSelected ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <RefreshCw className="w-4 h-4 mr-2" />}
+                      Scrape
                     </Button>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-2xl">
-                    <DialogHeader>
-                      <DialogTitle>Upload Content</DialogTitle>
-                      <DialogDescription>
-                        Add .txt or .pdf files to your chatbot&apos;s knowledge base
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="space-y-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="file-upload">Select File</Label>
-                        <div className="flex items-center gap-2">
-                          <input
-                            id="file-upload"
-                            type="file"
-                            accept=".txt,.pdf,text/plain,application/pdf"
-                            onChange={handleFileChange}
-                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium"
-                          />
-                        </div>
-                        {selectedFile && (
-                          <div className="flex items-center gap-2 text-sm">
-                            <FileUp className="w-4 h-4 text-green-600" />
-                            <span className="text-muted-foreground">
-                              {selectedFile.name} ({(selectedFile.size / 1024).toFixed(0)} KB)
-                            </span>
-                          </div>
-                        )}
-                        {fileError && (
-                          <p className="text-sm text-destructive flex items-center gap-2">
-                            <AlertCircle className="w-4 h-4" />
-                            {fileError}
-                          </p>
-                        )}
-                      </div>
+                  </div>
+                </div>
+              </div>
+            </TabsContent>
 
-                      {selectedFile?.type === 'text/plain' && (
-                        <>
-                          <Textarea
-                            placeholder="File content will appear here..."
-                            value={uploadText}
-                            onChange={(e) => setUploadText(e.target.value)}
-                            className="min-h-[250px] font-mono text-sm"
-                          />
-                          <p className="text-xs text-muted-foreground">
-                            {uploadText.length.toLocaleString()} characters
-                          </p>
-                        </>
-                      )}
+            {/* Text Tab */}
+            <TabsContent value="text" className="space-y-4 mt-4">
+              <p className="text-sm text-muted-foreground">Paste or type text directly</p>
 
-                      <div className="flex items-center gap-2">
-                        <Switch
-                          id="append-mode"
-                          checked={appendMode}
-                          onCheckedChange={setAppendMode}
-                          disabled={!knowledgeBase}
-                        />
-                        <Label htmlFor="append-mode" className="text-sm">
-                          {knowledgeBase ? 'Append to existing content' : 'Append (no existing content yet)'}
-                        </Label>
-                      </div>
+              <div className="space-y-4 p-6 rounded-lg border bg-white/90 backdrop-blur-sm">
+                <Textarea
+                  placeholder="Paste your content here... (minimum 50 characters)"
+                  value={uploadText}
+                  onChange={(e) => setUploadText(e.target.value)}
+                  className="min-h-[300px] font-mono text-sm"
+                />
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Switch id="append-mode-text-empty" checked={appendMode} onCheckedChange={setAppendMode} />
+                    <Label htmlFor="append-mode-text-empty" className="text-sm">Append to existing content</Label>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {uploadText.length} / 50 minimum characters
+                  </p>
+                </div>
+                <div className="flex justify-end">
+                  <Button onClick={handleTextUpload} disabled={uploading || uploadText.trim().length < 50} size="lg">
+                    {uploading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
+                    Save Text
+                  </Button>
+                </div>
+              </div>
+            </TabsContent>
+
+            {/* File Upload Tab */}
+            <TabsContent value="file" className="space-y-4 mt-4">
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-muted-foreground">Upload .txt files (PDF coming soon)</p>
+                <Badge variant="outline" className="text-xs">10MB max</Badge>
+              </div>
+
+              <div className="space-y-4 p-6 rounded-lg border bg-white/90 backdrop-blur-sm">
+                <div className="space-y-2">
+                  <Label className="text-sm font-semibold">Select File</Label>
+                  <input
+                    id="file-upload-empty"
+                    type="file"
+                    accept=".txt,text/plain"
+                    onChange={handleFileChange}
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                  />
+                  {selectedFile && (
+                    <div className="flex items-center gap-2 text-sm mt-2 p-2 bg-green-50 dark:bg-green-950/20 rounded border border-green-200">
+                      <FileUp className="w-4 h-4 text-green-600" />
+                      <span className="font-medium">{selectedFile.name}</span>
+                      <span className="text-muted-foreground">({(selectedFile.size / 1024).toFixed(0)} KB)</span>
                     </div>
-                    <DialogFooter>
+                  )}
+                  {fileError && (
+                    <p className="text-sm text-destructive mt-2 p-2 bg-destructive/10 rounded">{fileError}</p>
+                  )}
+                </div>
+
+                {selectedFile?.type === 'text/plain' && (
+                  <>
+                    <div className="space-y-2">
+                      <Label className="text-sm font-semibold">Preview & Edit</Label>
+                      <Textarea
+                        value={uploadText}
+                        onChange={(e) => setUploadText(e.target.value)}
+                        className="min-h-[200px] font-mono text-sm"
+                      />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Switch id="append-mode-file-empty" checked={appendMode} onCheckedChange={setAppendMode} />
+                      <Label htmlFor="append-mode-file-empty" className="text-sm">Append to existing content</Label>
+                    </div>
+                    <div className="flex justify-end gap-2">
                       <Button
                         variant="outline"
                         onClick={() => {
-                          setUploadDialogOpen(false)
                           setUploadText('')
                           setSelectedFile(null)
                           setFileError(null)
                         }}
                         disabled={uploading}
                       >
-                        Cancel
+                        Clear
                       </Button>
-                      <Button
-                        onClick={handleTextUpload}
-                        disabled={uploading || !selectedFile || (selectedFile.type === 'text/plain' && uploadText.length < 50)}
-                      >
-                        {uploading ? (
-                          <>
-                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                            Uploading...
-                          </>
-                        ) : (
-                          <>
-                            <Upload className="w-4 h-4 mr-2" />
-                            Upload
-                          </>
-                        )}
+                      <Button onClick={handleTextUpload} disabled={uploading || !selectedFile} size="lg">
+                        {uploading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Upload className="w-4 h-4 mr-2" />}
+                        Upload File
                       </Button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
-              </TabsContent>
-            </Tabs>
-          </div>
+                    </div>
+                  </>
+                )}
+              </div>
+            </TabsContent>
+          </Tabs>
         </CardContent>
       </Card>
     )
@@ -580,80 +550,191 @@ const KnowledgeBaseViewerV2 = ({
           </div>
         </div>
 
-        {/* Quick Actions */}
-        <div className="flex gap-2 flex-wrap">
-          <TrainingSourcesSelector domainId={domainId} />
-          <Dialog open={uploadDialogOpen} onOpenChange={setUploadDialogOpen}>
-            <DialogTrigger asChild>
-              <Button variant="outline">
-                <Upload className="w-4 h-4 mr-2" />
-                Add More Content
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-2xl">
-              <DialogHeader>
-                <DialogTitle>Add More Content</DialogTitle>
-                <DialogDescription>
-                  Upload additional .txt or .pdf files
-                </DialogDescription>
-              </DialogHeader>
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="file-upload-2">Select File</Label>
-                  <input
-                    id="file-upload-2"
-                    type="file"
-                    accept=".txt,.pdf,text/plain,application/pdf"
-                    onChange={handleFileChange}
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium"
-                  />
-                  {selectedFile && (
-                    <div className="flex items-center gap-2 text-sm">
-                      <FileUp className="w-4 h-4 text-green-600" />
-                      <span>{selectedFile.name} ({(selectedFile.size / 1024).toFixed(0)} KB)</span>
-                    </div>
-                  )}
-                  {fileError && (
-                    <p className="text-sm text-destructive">{fileError}</p>
-                  )}
+        {/* Tab-based Training Methods */}
+        <Tabs defaultValue="websites" className="w-full">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="websites" className="flex items-center gap-2">
+              <Link2 className="w-4 h-4" />
+              Websites
+            </TabsTrigger>
+            <TabsTrigger value="text" className="flex items-center gap-2">
+              <FileText className="w-4 h-4" />
+              Text
+            </TabsTrigger>
+            <TabsTrigger value="file" className="flex items-center gap-2">
+              <FileUp className="w-4 h-4" />
+              File Upload
+            </TabsTrigger>
+          </TabsList>
+
+          {/* Websites Tab */}
+          <TabsContent value="websites" className="space-y-4 mt-4">
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-muted-foreground">Add more content from websites</p>
+              <Badge variant="secondary">
+                {sourcesRemaining === Infinity ? 'Unlimited' : `${sourcesRemaining} left`}
+              </Badge>
+            </div>
+
+            <div className="space-y-4 p-6 rounded-lg border bg-white/90 backdrop-blur-sm">
+              <div className="space-y-2">
+                <Label className="text-sm font-semibold">Collect Multiple Links</Label>
+                <p className="text-xs text-muted-foreground mb-2">Discover and select multiple pages from your website</p>
+                <TrainingSourcesSelector domainId={domainId} />
+              </div>
+
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t" />
                 </div>
-
-                {selectedFile?.type === 'text/plain' && (
-                  <Textarea
-                    value={uploadText}
-                    onChange={(e) => setUploadText(e.target.value)}
-                    className="min-h-[200px] font-mono text-sm"
-                  />
-                )}
-
-                <div className="flex items-center gap-2">
-                  <Switch id="append-2" checked={appendMode} onCheckedChange={setAppendMode} />
-                  <Label htmlFor="append-2">Append to existing content</Label>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-white px-2 text-muted-foreground">Or</span>
                 </div>
               </div>
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setUploadDialogOpen(false)}>Cancel</Button>
-                <Button onClick={handleTextUpload} disabled={uploading || !selectedFile}>
-                  {uploading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Upload className="w-4 h-4 mr-2" />}
-                  Upload
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        </div>
 
-        {/* Content Preview */}
-        <div className="prose prose-sm dark:prose-invert max-w-none p-4 bg-muted/20 rounded-lg border max-h-[400px] overflow-y-auto">
-          <ReactMarkdown>{displayText}</ReactMarkdown>
-          {!showFull && knowledgeBase.length > 1000 && (
-            <Button variant="link" onClick={() => setShowFull(true)} className="mt-2">
-              Show More <ArrowRight className="w-4 h-4 ml-1" />
-            </Button>
-          )}
-          {showFull && (
-            <Button variant="link" onClick={() => setShowFull(false)} className="mt-2">
-              Show Less
-            </Button>
+              <div className="space-y-2">
+                <Label className="text-sm font-semibold">Scrape Single URL</Label>
+                <p className="text-xs text-muted-foreground mb-2">Add content from a specific page</p>
+                <div className="flex gap-2">
+                  <Input
+                    type="url"
+                    placeholder="https://example.com/page"
+                    value={singleUrl}
+                    onChange={(e) => setSingleUrl(e.target.value)}
+                    className="flex-1"
+                  />
+                  <Button onClick={handleScrapeSingle} disabled={!singleUrl || scrapingSelected}>
+                    {scrapingSelected ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <RefreshCw className="w-4 h-4 mr-2" />}
+                    Scrape
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* Text Tab */}
+          <TabsContent value="text" className="space-y-4 mt-4">
+            <p className="text-sm text-muted-foreground">Paste or type additional text</p>
+
+            <div className="space-y-4 p-6 rounded-lg border bg-white/90 backdrop-blur-sm">
+              <Textarea
+                placeholder="Paste your content here... (minimum 50 characters)"
+                value={uploadText}
+                onChange={(e) => setUploadText(e.target.value)}
+                className="min-h-[300px] font-mono text-sm"
+              />
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Switch id="append-mode-text-active" checked={appendMode} onCheckedChange={setAppendMode} />
+                  <Label htmlFor="append-mode-text-active" className="text-sm">Append to existing content</Label>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {uploadText.length} / 50 minimum characters
+                </p>
+              </div>
+              <div className="flex justify-end">
+                <Button onClick={handleTextUpload} disabled={uploading || uploadText.trim().length < 50} size="lg">
+                  {uploading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
+                  Save Text
+                </Button>
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* File Upload Tab */}
+          <TabsContent value="file" className="space-y-4 mt-4">
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-muted-foreground">Upload .txt files (PDF coming soon)</p>
+              <Badge variant="outline" className="text-xs">10MB max</Badge>
+            </div>
+
+            <div className="space-y-4 p-6 rounded-lg border bg-white/90 backdrop-blur-sm">
+              <div className="space-y-2">
+                <Label className="text-sm font-semibold">Select File</Label>
+                <input
+                  id="file-upload-active"
+                  type="file"
+                  accept=".txt,text/plain"
+                  onChange={handleFileChange}
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                />
+                {selectedFile && (
+                  <div className="flex items-center gap-2 text-sm mt-2 p-2 bg-green-50 dark:bg-green-950/20 rounded border border-green-200">
+                    <FileUp className="w-4 h-4 text-green-600" />
+                    <span className="font-medium">{selectedFile.name}</span>
+                    <span className="text-muted-foreground">({(selectedFile.size / 1024).toFixed(0)} KB)</span>
+                  </div>
+                )}
+                {fileError && (
+                  <p className="text-sm text-destructive mt-2 p-2 bg-destructive/10 rounded">{fileError}</p>
+                )}
+              </div>
+
+              {selectedFile?.type === 'text/plain' && (
+                <>
+                  <div className="space-y-2">
+                    <Label className="text-sm font-semibold">Preview & Edit</Label>
+                    <Textarea
+                      value={uploadText}
+                      onChange={(e) => setUploadText(e.target.value)}
+                      className="min-h-[200px] font-mono text-sm"
+                    />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Switch id="append-mode-file-active" checked={appendMode} onCheckedChange={setAppendMode} />
+                    <Label htmlFor="append-mode-file-active" className="text-sm">Append to existing content</Label>
+                  </div>
+                  <div className="flex justify-end gap-2">
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setUploadText('')
+                        setSelectedFile(null)
+                        setFileError(null)
+                      }}
+                      disabled={uploading}
+                    >
+                      Clear
+                    </Button>
+                    <Button onClick={handleTextUpload} disabled={uploading || !selectedFile} size="lg">
+                      {uploading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Upload className="w-4 h-4 mr-2" />}
+                      Upload File
+                    </Button>
+                  </div>
+                </>
+              )}
+            </div>
+          </TabsContent>
+        </Tabs>
+
+        {/* Content Preview - Collapsible */}
+        <div className="space-y-2">
+          <Button
+            variant="outline"
+            onClick={() => setShowContent(!showContent)}
+            className="w-full justify-between"
+          >
+            <span className="flex items-center gap-2">
+              <Eye className="w-4 h-4" />
+              {showContent ? 'Hide' : 'View'} Knowledge Base Content
+            </span>
+            {showContent ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+          </Button>
+
+          {showContent && (
+            <div className="prose prose-sm dark:prose-invert max-w-none p-4 bg-muted/20 rounded-lg border max-h-[400px] overflow-y-auto">
+              <ReactMarkdown>{displayText}</ReactMarkdown>
+              {!showFull && knowledgeBase.length > 1000 && (
+                <Button variant="link" onClick={() => setShowFull(true)} className="mt-2">
+                  Show More <ArrowRight className="w-4 h-4 ml-1" />
+                </Button>
+              )}
+              {showFull && (
+                <Button variant="link" onClick={() => setShowFull(false)} className="mt-2">
+                  Show Less
+                </Button>
+              )}
+            </div>
           )}
         </div>
       </CardContent>

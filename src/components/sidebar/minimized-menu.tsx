@@ -1,4 +1,4 @@
-import { SIDE_BAR_MENU } from '@/constants/menu'
+import { SIDE_BAR_MENU, SIDE_BAR_MENU_SECONDARY } from '@/constants/menu'
 
 import React, { useState } from 'react'
 
@@ -56,7 +56,15 @@ export const MinMenu = ({
             domains={domains}
           />
         </div>
-        <div className="flex flex-col items-center">
+        <div className="flex flex-col items-center gap-3">
+          {SIDE_BAR_MENU_SECONDARY.map((menu, key) => (
+            <MenuItem
+              size="min"
+              {...menu}
+              key={`secondary-${key}`}
+              current={current}
+            />
+          ))}
           {user && (
             <div className="relative">
               <button

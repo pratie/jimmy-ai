@@ -18,9 +18,9 @@ const BreadCrumb = (props: Props) => {
     realtime,
   } = useSideBar()
   return (
-    <div className="flex flex-col ">
+    <div className="flex flex-col">
       <div className="flex gap-5 items-center">
-        <h2 className="text-3xl font-bold capitalize relative after:block after:h-1 after:bg-gradient-to-r after:from-brand-accent after:to-brand-primary after:rounded-full after:mt-1 after:w-16">
+        <h2 className="text-2xl font-bold capitalize relative after:block after:h-0.5 after:bg-gradient-to-r after:from-brand-accent after:to-brand-primary after:rounded-full after:mt-0.5 after:w-12">
           {page}
         </h2>
         {page === 'conversation' && chatRoom && (
@@ -36,19 +36,21 @@ const BreadCrumb = (props: Props) => {
           </Loader>
         )}
       </div>
-      <p className="text-brand-primary/70 text-sm">
-        {page == 'settings'
-          ? 'Manage your account settings, preferences and integrations'
-          : page == 'dashboard'
-          ? 'A detailed overview of your metrics, usage, customers and more'
-          : page == 'appointment'
-          ? 'View and edit all your appointments'
-          : page == 'email-marketing'
-          ? 'Send bulk emails to your customers'
-          : page == 'integration'
-          ? 'Connect third-party applications into Icon AI'
-          : 'Modify domain settings, change chatbot options, enter sales questions and train your bot to do what you want it to.'}
-      </p>
+      {page !== 'conversation' && (
+        <p className="text-brand-primary/60 text-xs mt-0.5">
+          {page == 'settings'
+            ? 'Manage your account settings, preferences and integrations'
+            : page == 'dashboard'
+            ? 'A detailed overview of your metrics, usage, customers and more'
+            : page == 'appointment'
+            ? 'View and edit all your appointments'
+            : page == 'email-marketing'
+            ? 'Send bulk emails to your customers'
+            : page == 'integration'
+            ? 'Connect third-party applications into Icon AI'
+            : 'Modify domain settings, change chatbot options, enter sales questions and train your bot to do what you want it to.'}
+        </p>
+      )}
     </div>
   )
 }

@@ -14,24 +14,24 @@ const DashboardCard = ({ icon, title, value, sales, percentage }: Props) => {
       {/* Top accent bar */}
       <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-brand-accent via-brand-primary to-brand-accent rounded-t-lg"></div>
 
-      <div className="bg-white/90 backdrop-blur-sm border border-brand-base-300 rounded-lg shadow-sm hover:shadow-md transition-all p-5 pt-6">
-        <div className="flex items-start justify-between mb-4">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-lg bg-brand-accent/10 flex items-center justify-center text-brand-accent">
+      <div className="bg-white/90 backdrop-blur-sm border border-brand-base-300 rounded-lg shadow-sm hover:shadow-md transition-all p-6 pt-7">
+        <div className="flex items-start justify-between mb-3">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-brand-accent/20 to-brand-primary/10 flex items-center justify-center text-brand-accent border border-brand-accent/20">
               {icon}
             </div>
-            <h3 className="font-medium text-sm text-brand-primary/70">{title}</h3>
+            <h3 className="font-medium text-sm text-brand-primary/60">{title}</h3>
           </div>
         </div>
 
-        <div className="flex items-end gap-2">
-          <p className="font-bold text-3xl text-brand-primary">
+        <div className="flex items-end gap-2 mt-4">
+          <p className="font-bold text-4xl text-brand-primary tracking-tight">
             {sales && '$'}
             {value}
           </p>
           {percentage !== undefined && percentage > 0 && (
-            <span className="text-xs text-accent-green font-semibold mb-1 bg-accent-green/10 px-2 py-0.5 rounded">
-              {percentage}%
+            <span className="text-xs text-emerald-600 font-semibold mb-2 bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-200">
+              +{percentage}%
             </span>
           )}
         </div>
