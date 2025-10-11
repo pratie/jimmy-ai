@@ -12,7 +12,7 @@ export default async function Home() {
       <section className="relative overflow-hidden landing-hero">
                 <div className="relative flex items-center justify-center flex-col pt-24 md:pt-[80px] gap-6 px-4">
           <span className="text-brand-primary bg-brand-secondary backdrop-blur-sm px-6 py-3 rounded-full text-sm font-semibold border-2 border-brand-base-300 shadow-sm">
-            ✨ Transform Your Business with AI
+            ✨ No Credit Card Required to Start
           </span>
 
           <div className="text-center space-y-6">
