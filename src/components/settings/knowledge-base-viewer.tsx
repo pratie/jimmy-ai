@@ -483,26 +483,6 @@ const KnowledgeBaseViewerV2 = ({
               {kbSizeMB.toFixed(2)} MB • {knowledgeBase.length.toLocaleString()} characters •{' '}
               {updatedAt && `Updated ${formatDistanceToNow(new Date(updatedAt), { addSuffix: true })}`}
             </CardDescription>
-
-            {/* Progress Steps */}
-            <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
-              <div className={`flex items-center gap-2 rounded-md border px-3 py-2 ${step1Complete ? 'bg-green-50 dark:bg-green-950/20 border-green-200' : 'bg-muted/30'}`}>
-                <CheckCircle2 className="w-4 h-4 text-green-600" />
-                <span className="font-medium">Content Added</span>
-              </div>
-              <div className="flex items-center gap-2 rounded-md border bg-blue-50 dark:bg-blue-950/20 border-blue-200 px-3 py-2">
-                <Link2 className="w-4 h-4 text-blue-600" />
-                <span className="font-medium">Add More Sources</span>
-              </div>
-              <div className={`flex items-center gap-2 rounded-md border px-3 py-2 ${step3Complete ? 'bg-green-50 dark:bg-green-950/20 border-green-200' : 'bg-muted/30'}`}>
-                {step3Complete ? (
-                  <CheckCircle2 className="w-4 h-4 text-green-600" />
-                ) : (
-                  <CircleDashed className="w-4 h-4 text-muted-foreground" />
-                )}
-                <span className="font-medium">Train AI</span>
-              </div>
-            </div>
           </div>
 
           <div className="flex gap-2 flex-wrap">
