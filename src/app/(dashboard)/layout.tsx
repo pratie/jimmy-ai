@@ -43,7 +43,7 @@ const OwnerLayout = async ({ children }: Props) => {
             domains={authenticated.domain}
             user={authenticated.user}
           />
-          <div className="w-full h-screen flex flex-col pl-0 md:pl-20 lg:pl-24 overflow-x-hidden">
+          <div className="w-full h-screen flex flex-col pl-[60px] md:pl-20 lg:pl-24 overflow-x-hidden">
             {children}
           </div>
         </div>
