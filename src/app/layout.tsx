@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { ClerkProvider } from '@clerk/nextjs'
 import { Plus_Jakarta_Sans } from 'next/font/google'
+import Script from 'next/script'
 import './globals.css'
 import { Toaster } from '@/components/ui/toaster'
 import { ThemeProvider } from '@/context/them-provider'
@@ -46,6 +47,16 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en" suppressHydrationWarning>
+        <head>
+          {/* DataFast Analytics */}
+          <Script
+            defer
+            data-website-id="dfid_cz55NFPFEmpyBPQ1Q2FhE"
+            data-domain="bookmylead.app"
+            src="https://datafa.st/js/script.js"
+            strategy="afterInteractive"
+          />
+        </head>
         <body className={`${jakarta.className} landing-gradient min-h-screen`}>
           <ThemeProvider
             attribute="class"
