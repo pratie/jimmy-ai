@@ -172,7 +172,7 @@ export default async function Home() {
               </div>
               <h3 className="text-xl font-bold text-brand-primary mb-3">Real-Time Analytics</h3>
               <p className="text-brand-primary/70 mb-4">
-                Track every lead, conversation, and conversion in real-time. See what's working, optimize what's not, and watch your revenue grow. Data-driven decisions made simple.
+                Track every lead, conversation, and conversion in real-time. See what&apos;s working, optimize what&apos;s not, and watch your revenue grow. Data-driven decisions made simple.
               </p>
               <p className="text-brand-primary font-semibold bg-brand-accent/20 px-3 py-1 rounded-lg inline-block">
                 Full visibility into your revenue pipeline
