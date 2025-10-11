@@ -7,7 +7,6 @@ import { truncateMarkdown } from '@/lib/firecrawl'
 import { buildSystemPrompt } from '@/lib/promptBuilder'
 import { searchKnowledgeBaseWithFallback, formatResultsForPrompt, hasTrainedEmbeddings } from '@/lib/vector-search'
 import { getPlanLimits, shouldResetCredits, getNextResetDate } from '@/lib/plans'
-import OpenAI from 'openai'
 
 // --- Minimal in-memory LRU cache for domain config ---
 type DomainConfig = {
@@ -63,12 +62,6 @@ function setDomainInCache(domainId: string, value: DomainConfig) {
   }
   domainCache.set(domainId, { value, expires: Date.now() + DOMAIN_CACHE_TTL_MS })
 }
-
-const openai = new OpenAI({
-  apiKey: process.env.OPEN_AI_KEY,
-  timeout: 30000,
-  maxRetries: 2,
-})
 
 export const maxDuration = 30
 
@@ -460,20 +453,24 @@ export async function POST(req: Request) {
     })
     console.log(`[Bot Stream] ✅ Prompt building took: ${Date.now() - promptStartTime}ms`)
 
-    // Create streaming completion
-    console.log('[Bot Stream] 🤖 Calling OpenAI API...')
+    // Create streaming completion using AI SDK 5
+    console.log('[Bot Stream] 🤖 Calling AI SDK 5 (OpenAI)...')
     const llmStartTime = Date.now()
-    const stream = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
+
+    const { streamText } = await import('ai')
+    const { openai: openaiProvider } = await import('@ai-sdk/openai')
+
+    const result = streamText({
+      model: openaiProvider('gpt-4o-mini'),
       messages: [
         { role: 'system', content: systemPrompt },
         ...chat,
         { role: 'user', content: message },
       ],
-      stream: true,
+      temperature: 0.7,
     })
 
-    // Create readable stream for response
+    // Create readable stream for response with metrics tracking
     const encoder = new TextEncoder()
     let fullResponse = ''
 
@@ -484,24 +481,24 @@ export async function POST(req: Request) {
           let tokenCount = 0
           let ttft = 0
 
-          for await (const chunk of stream) {
-            const content = chunk.choices[0]?.delta?.content || ''
-            if (content) {
+          // Process AI SDK 5 text stream
+          for await (const chunk of result.textStream) {
+            if (chunk) {
               if (!firstTokenTime) {
                 firstTokenTime = Date.now()
                 console.log(`[Bot Stream] ⚡ First token received in: ${firstTokenTime - llmStartTime}ms (TTFT - Time To First Token)`)
               }
               tokenCount++
-              fullResponse += content
-              // Send as Server-Sent Events format
-              controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content })}\n\n`))
+              fullResponse += chunk
+              // Send as Server-Sent Events format (same format as before)
+              controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content: chunk })}\n\n`))
             }
           }
 
           const totalTime = Date.now() - startTime
           const streamTime = Date.now() - llmStartTime
           ttft = (firstTokenTime ?? llmStartTime) - llmStartTime
-          console.log(`[Bot Stream] ✅ Stream completed: ${tokenCount} tokens in ${streamTime}ms`)
+          console.log(`[Bot Stream] ✅ Stream completed: ${tokenCount} tokens in ${streamTime}ms (AI SDK 5)`)
           console.log(`[Bot Stream] 📊 Total request time: ${totalTime}ms`)
 
           // Small metrics line

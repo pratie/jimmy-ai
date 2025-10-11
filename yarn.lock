@@ -2,6 +2,14 @@
 # yarn lockfile v1
 
 
+"@ai-sdk/anthropic@^2.0.27":
+  version "2.0.27"
+  resolved "https://registry.npmjs.org/@ai-sdk/anthropic/-/anthropic-2.0.27.tgz"
+  integrity sha512-tGXdWNs+dMZLsn6yVroz9PqPZbCY6kqwGl/xxFVxJWDrTPGj3+1t1vE7pzTZ3vDOiG05iVC7wzlXwV2Or650YA==
+  dependencies:
+    "@ai-sdk/provider" "2.0.0"
+    "@ai-sdk/provider-utils" "3.0.12"
+
 "@ai-sdk/gateway@1.0.39":
   version "1.0.39"
   resolved "https://registry.npmjs.org/@ai-sdk/gateway/-/gateway-1.0.39.tgz"
