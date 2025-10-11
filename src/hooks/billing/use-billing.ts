@@ -135,12 +135,18 @@ export const useSubscriptions = (plan: 'FREE' | 'STARTER' | 'PRO' | 'BUSINESS') 
   }
 }
 
-export const useDodoSubscription = (payment: 'FREE' | 'STARTER' | 'PRO' | 'BUSINESS') => {
+export const useDodoSubscription = (
+  payment: 'FREE' | 'STARTER' | 'PRO' | 'BUSINESS',
+  interval: 'MONTHLY' | 'YEARLY' = 'MONTHLY'
+) => {
   const [paymentLink, setPaymentLink] = useState<string>('')
   const [loadForm, setLoadForm] = useState<boolean>(false)
   const { toast } = useToast()
 
-  const onGetSubscriptionLink = async (plans: 'FREE' | 'STARTER' | 'PRO' | 'BUSINESS') => {
+  const onGetSubscriptionLink = async (
+    plans: 'FREE' | 'STARTER' | 'PRO' | 'BUSINESS',
+    billingInterval: 'MONTHLY' | 'YEARLY'
+  ) => {
     try {
       setLoadForm(true)
       if (plans === 'FREE') {
@@ -149,7 +155,7 @@ export const useDodoSubscription = (payment: 'FREE' | 'STARTER' | 'PRO' | 'BUSIN
         return
       }
 
-      const result = await onCreateSubscriptionPaymentLink(plans)
+      const result = await onCreateSubscriptionPaymentLink(plans, billingInterval)
       if (result && 'paymentLink' in result) {
         setLoadForm(false)
         setPaymentLink(result.paymentLink)
@@ -166,9 +172,9 @@ export const useDodoSubscription = (payment: 'FREE' | 'STARTER' | 'PRO' | 'BUSIN
   }
 
   useEffect(() => {
-    onGetSubscriptionLink(payment)
+    onGetSubscriptionLink(payment, interval)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [payment])
+  }, [payment, interval])
 
   return { paymentLink, loadForm }
 }

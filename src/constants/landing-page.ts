@@ -38,7 +38,7 @@ export const pricingCards = [
     highlight: 'Everything in Pro, plus',
     features: ['10,000 messages/month', 'Unlimited AI chatbots', '200 MB knowledge base', 'Unlimited training sources', '24/7 Premium support', 'Custom integrations', 'White label options'],
     priceId: 'pdt_mKXy3ImVkBgEsXaKCoBAN',
-    yearlyPrice: '$585',
+    yearlyPrice: '$708',
     yearlyPriceId: 'pdt_dAXoky321LAd0qOJBX9up',
   },
 ]

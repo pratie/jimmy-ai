@@ -8,10 +8,11 @@ import { PlanType } from '@/lib/plans'
 
 type PaymentFormProps = {
   plan: PlanType
+  interval?: 'MONTHLY' | 'YEARLY'
 }
 
-export const PaymentForm = ({ plan }: PaymentFormProps) => {
-  const { paymentLink, loadForm } = useDodoSubscription(plan)
+export const PaymentForm = ({ plan, interval = 'MONTHLY' }: PaymentFormProps) => {
+  const { paymentLink, loadForm } = useDodoSubscription(plan, interval)
   const { onRedirectToSubscriptionPayment } = useCompleteSubscriptionPayment(plan)
 
   return (
@@ -34,7 +35,7 @@ export const PaymentForm = ({ plan }: PaymentFormProps) => {
           <p className="text-xs text-brand-primary/60">
             • 3-day free trial included
             • Cancel anytime
-            • Monthly billing
+            • {interval === 'YEARLY' ? 'Annual billing' : 'Monthly billing'}
           </p>
         </div>
       )}

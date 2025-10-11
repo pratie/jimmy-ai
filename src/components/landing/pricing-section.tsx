@@ -47,8 +47,15 @@ export default function PricingSection() {
 
         <div className="flex justify-center gap-6 flex-wrap px-4">
           {pricingCards.map((card) => {
-            const displayPrice = isYearly && card.yearlyPrice ? card.yearlyPrice : card.price
-            const displayDuration = isYearly ? 'year' : card.duration
+            // Calculate monthly equivalent for yearly plans
+            const yearlyPriceNum = card.yearlyPrice ? parseInt(card.yearlyPrice.replace('$', '')) : 0
+            const monthlyPriceNum = card.price ? parseInt(card.price.replace('$', '')) : 0
+            const monthlyEquivalent = yearlyPriceNum > 0 ? Math.floor(yearlyPriceNum / 12) : monthlyPriceNum
+
+            // Calculate savings percentage
+            const savingsPercent = monthlyPriceNum > 0
+              ? Math.round(((monthlyPriceNum * 12 - yearlyPriceNum) / (monthlyPriceNum * 12)) * 100)
+              : 0
 
             return (
               <Card
@@ -74,10 +81,36 @@ export default function PricingSection() {
                 </CardHeader>
 
                 <CardContent className="pb-6">
-                  <div className="mb-6">
-                    <span className="text-5xl font-bold text-brand-primary">{displayPrice}</span>
-                    {displayDuration && <span className="text-brand-primary/60 text-lg ml-2">/ {displayDuration}</span>}
-                  </div>
+                  {isYearly && card.yearlyPrice ? (
+                    // Yearly pricing display with psychology
+                    <div className="mb-6">
+                      <div className="flex items-baseline gap-2 mb-2">
+                        <span className="text-5xl font-bold text-brand-primary">${monthlyEquivalent}</span>
+                        <span className="text-brand-primary/60 text-lg">/ month</span>
+                      </div>
+                      {card.price !== '$0' && (
+                        <>
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-brand-primary/40 text-sm line-through">{card.price}/month</span>
+                            <span className="text-xs bg-green-500/20 text-green-700 dark:text-green-400 px-2 py-0.5 rounded-full font-semibold">
+                              Save {savingsPercent}%
+                            </span>
+                          </div>
+                          <p className="text-brand-primary/60 text-sm">
+                            Billed {card.yearlyPrice} annually
+                          </p>
+                        </>
+                      )}
+                    </div>
+                  ) : (
+                    // Monthly pricing display
+                    <div className="mb-6">
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-5xl font-bold text-brand-primary">{card.price}</span>
+                        {card.duration && <span className="text-brand-primary/60 text-lg">/ {card.duration}</span>}
+                      </div>
+                    </div>
+                  )}
                 </CardContent>
 
                 <CardFooter className="flex flex-col items-start gap-6 pt-4 border-t-2 border-brand-base-300">

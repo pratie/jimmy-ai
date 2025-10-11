@@ -6,10 +6,11 @@ import { PlanType } from '@/lib/plans'
 
 type DodoPaymentProps = {
   payment: PlanType
+  interval?: 'MONTHLY' | 'YEARLY'
 }
 
-export const DodoPayment = ({ payment }: DodoPaymentProps) => {
-  return <PaymentForm plan={payment} />
+export const DodoPayment = ({ payment, interval = 'MONTHLY' }: DodoPaymentProps) => {
+  return <PaymentForm plan={payment} interval={interval} />
 }
 
 // Keep the old export name for backward compatibility

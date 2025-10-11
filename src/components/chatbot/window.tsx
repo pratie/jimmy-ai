@@ -127,7 +127,7 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
                     botIcon={botIcon}
                   />
                 ))}
-                {onResponding && <Responding />}
+                {onResponding && <Responding botIcon={botIcon} />}
               </div>
               <form
                 onSubmit={(e) => {
