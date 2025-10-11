@@ -32,13 +32,15 @@ export default async function Home() {
             </Button>
           </div>
 
-          <div className="mt-12 relative">
-                        <Image
+          <div className="mt-12 relative w-full max-w-4xl">
+            <Image
               src="/images/app-ui.png"
               width={800}
               height={600}
               alt="AI Agent Dashboard"
-              className="max-w-4xl object-contain relative z-10 drop-shadow-2xl rounded-2xl border-4 border-brand-base-300 bg-white/50 backdrop-blur-sm p-2"
+              className="w-full h-auto object-contain relative z-10 drop-shadow-2xl rounded-2xl border-4 border-brand-base-300 bg-white/50 backdrop-blur-sm p-2"
+              priority
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 800px"
             />
           </div>
         </div>
