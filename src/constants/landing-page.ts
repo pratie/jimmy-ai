@@ -5,7 +5,7 @@ export const pricingCards = [
     price: '$0',
     duration: '',
     highlight: 'Key features',
-    features: ['60 messages/month', '1 AI chatbot', '1 MB knowledge base', '5 training sources', '30-day conversation history'],
+    features: ['100 messages/month', '1 AI chatbot', '1 MB knowledge base', '5 training sources', '30-day conversation history'],
     priceId: '',
   },
   {
