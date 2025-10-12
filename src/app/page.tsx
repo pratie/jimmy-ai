@@ -270,7 +270,7 @@ export default async function Home() {
               </div>
               <h3 className="text-xl font-bold text-brand-primary mb-3">Smooth lead capture</h3>
               <p className="text-brand-primary/70 leading-relaxed">
-                Visitors chat anonymously first. AI gently collects emails when they're ready. Full conversation history saved. No awkward "sign up" pop-ups.
+                Visitors chat anonymously first. AI gently collects emails when they&apos;re ready. Full conversation history saved. No awkward sign-up pop-ups.
               </p>
             </div>
 
