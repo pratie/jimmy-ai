@@ -54,7 +54,7 @@ export default async function Home() {
                 <div className="w-5 h-5 rounded-full bg-green-500/20 flex items-center justify-center">
                   <Check className="w-3 h-3 text-green-600 dark:text-green-400" strokeWidth={3} />
                 </div>
-                <span className="text-sm md:text-base font-medium">Responds in under 1 second</span>
+                <span className="text-sm md:text-base font-medium">Responds in under 10 seconds</span>
               </div>
             </div>
 
