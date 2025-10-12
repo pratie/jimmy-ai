@@ -13,7 +13,7 @@ import { useForm } from 'react-hook-form'
 
 // Generate or retrieve anonymous user ID
 const getAnonymousId = (): string => {
-  const STORAGE_KEY = 'corinna_anonymous_id'
+  const STORAGE_KEY = 'bookmylead_anonymous_id'
 
   if (typeof window === 'undefined') return ''
 

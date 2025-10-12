@@ -1,7 +1,7 @@
 export const pricingCards = [
   {
     title: 'Free',
-    description: 'Perfect for trying out Corinna AI',
+    description: 'Perfect for trying out BookmyLead',
     price: '$0',
     duration: '',
     highlight: 'Key features',
