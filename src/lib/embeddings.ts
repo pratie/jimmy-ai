@@ -1,10 +1,11 @@
 // src/lib/embeddings.ts
 // OpenAI Embeddings for RAG - text-embedding-3-small
 import OpenAI from 'openai'
+import { devLog, devError } from '@/lib/utils'
 
 // Create OpenAI client (same setup as your chatbot)
 const openai = new OpenAI({
-  apiKey: process.env.OPEN_AI_KEY,
+  apiKey: process.env.OPENAI_API_KEY,
 })
 
 /**
@@ -21,7 +22,7 @@ export async function generateEmbedding(text: string): Promise<number[]> {
       throw new Error('Cannot generate embedding for empty text')
     }
 
-    console.log('[Embeddings] Generating single embedding...')
+    devLog('[Embeddings] Generating single embedding...')
 
     const response = await openai.embeddings.create({
       model: 'text-embedding-3-small',
@@ -31,10 +32,10 @@ export async function generateEmbedding(text: string): Promise<number[]> {
 
     const embedding = response.data[0].embedding
 
-    console.log(`[Embeddings] ✅ Generated single embedding (${embedding.length} dimensions)`)
+    devLog(`[Embeddings] ✅ Generated single embedding (${embedding.length} dimensions)`)
     return embedding
   } catch (error) {
-    console.error('[Embeddings] Error generating single embedding:', error)
+    devError('[Embeddings] Error generating single embedding:', error)
     throw error
   }
 }
@@ -59,7 +60,7 @@ export async function generateEmbeddings(texts: string[]): Promise<number[][]> {
       throw new Error('All texts are empty after cleaning')
     }
 
-    console.log(`[Embeddings] Generating batch of ${inputs.length} embeddings...`)
+    devLog(`[Embeddings] Generating batch of ${inputs.length} embeddings...`)
 
     const response = await openai.embeddings.create({
       model: 'text-embedding-3-small',
@@ -69,10 +70,10 @@ export async function generateEmbeddings(texts: string[]): Promise<number[][]> {
 
     const embeddings = response.data.map((item) => item.embedding)
 
-    console.log(`[Embeddings] ✅ Generated ${embeddings.length} embeddings (${embeddings[0].length} dimensions each)`)
+    devLog(`[Embeddings] ✅ Generated ${embeddings.length} embeddings (${embeddings[0].length} dimensions each)`)
     return embeddings
   } catch (error) {
-    console.error('[Embeddings] Error generating batch embeddings:', error)
+    devError('[Embeddings] Error generating batch embeddings:', error)
     throw error
   }
 }

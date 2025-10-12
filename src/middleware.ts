@@ -12,7 +12,9 @@ const isPublicRoute = createRouteMatcher([
   '/api/dodo/webhook',
   '/api/dodo(.*)',
   // Allow public chatbot streaming + related bot APIs
-  '/api/bot(.*)'
+  '/api/bot(.*)',
+  // Public upload proxy for chatbot image uploads
+  '/api/upload'
 ])
 
 export default clerkMiddleware(async (auth, req) => {

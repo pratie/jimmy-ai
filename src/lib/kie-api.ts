@@ -1,9 +1,8 @@
-// KIE API Client for file uploads
-// Replaces UploadCare functionality
+// KIE API Client for file uploads (Client-Safe Version)
+// Uses server-side proxy to protect API keys
 
 interface KieApiResponse {
   success: boolean
-  code: number
   msg: string
   data?: {
     fileName: string
@@ -28,18 +27,6 @@ interface UploadResult {
   error: string | null
 }
 
-// KIE API Base URL
-const KIE_API_BASE_URL = 'https://kieai.redpandaai.co'
-
-// Get KIE API key from environment
-const getKieApiKey = (): string => {
-  const apiKey = process.env.KIE_API_KEY || process.env.NEXT_PUBLIC_KIE_API_KEY
-  if (!apiKey) {
-    throw new Error('KIE_API_KEY is not configured in environment variables')
-  }
-  return apiKey
-}
-
 // Convert file to base64
 const fileToBase64 = (file: File): Promise<string> => {
   return new Promise((resolve, reject) => {
@@ -53,7 +40,7 @@ const fileToBase64 = (file: File): Promise<string> => {
   })
 }
 
-// Upload file using KIE API Base64 endpoint
+// Upload file using server-side proxy (protects API key)
 export const uploadFile = async (file: File, uploadPath: string = 'images/chatbot'): Promise<UploadResult> => {
   try {
     // Validate file size (2MB limit)
@@ -71,7 +58,6 @@ export const uploadFile = async (file: File, uploadPath: string = 'images/chatbo
 
     // Generate unique filename with timestamp
     const timestamp = Date.now()
-    const fileExtension = file.name.split('.').pop() || 'jpg'
     const fileName = `${timestamp}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`
 
     const requestBody = {
@@ -80,11 +66,11 @@ export const uploadFile = async (file: File, uploadPath: string = 'images/chatbo
       fileName
     }
 
-    const response = await fetch(`${KIE_API_BASE_URL}/api/file-base64-upload`, {
+    // Call our server-side proxy instead of KIE API directly
+    const response = await fetch('/api/upload', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${getKieApiKey()}`
       },
       body: JSON.stringify(requestBody)
     })
@@ -105,7 +91,7 @@ export const uploadFile = async (file: File, uploadPath: string = 'images/chatbo
       }
     }
   } catch (error) {
-    console.error('KIE API upload failed:', error)
+    console.error('Upload failed:', error)
     return {
       success: false,
       data: null,
@@ -114,52 +100,7 @@ export const uploadFile = async (file: File, uploadPath: string = 'images/chatbo
   }
 }
 
-// Upload file from URL using KIE API URL endpoint
-export const uploadFileFromUrl = async (
-  fileUrl: string,
-  uploadPath: string = 'images/chatbot',
-  fileName?: string
-): Promise<UploadResult> => {
-  try {
-    const requestBody = {
-      fileUrl,
-      uploadPath,
-      ...(fileName && { fileName })
-    }
-
-    const response = await fetch(`${KIE_API_BASE_URL}/api/file-url-upload`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${getKieApiKey()}`
-      },
-      body: JSON.stringify(requestBody)
-    })
-
-    const result: KieApiResponse = await response.json()
-
-    if (result.success && result.data) {
-      return {
-        success: true,
-        data: result.data,
-        error: null
-      }
-    } else {
-      return {
-        success: false,
-        data: null,
-        error: result.msg || 'Upload failed'
-      }
-    }
-  } catch (error) {
-    console.error('KIE API URL upload failed:', error)
-    return {
-      success: false,
-      data: null,
-      error: error instanceof Error ? error.message : 'Upload failed'
-    }
-  }
-}
+// Note: uploadFileFromUrl removed - use server actions for URL uploads to keep API key secure
 
 // Get image URL (replaces getUploadCareUrl)
 // For KIE API, the downloadUrl is already the full URL
@@ -199,12 +140,6 @@ export const validateKieImage = async (url: string): Promise<boolean> => {
   }
 }
 
-// Check if KIE API is properly configured
-export const isKieApiConfigured = (): boolean => {
-  return !!(process.env.KIE_API_KEY || process.env.NEXT_PUBLIC_KIE_API_KEY)
-}
-
 // For backward compatibility - alias functions to match UploadCare names
 export const getUploadCareUrl = getKieImageUrl
 export const validateUploadCareImage = validateKieImage
-export const isUploadCareConfigured = isKieApiConfigured

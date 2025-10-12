@@ -1,7 +1,5 @@
 import { type ClassValue, clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
-import PusherClient from 'pusher-js'
-import PusherServer from 'pusher'
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -13,20 +11,9 @@ export const extractUUIDFromString = (url: string) => {
   )
 }
 
-export const pusherServer = new PusherServer({
-  appId: process.env.NEXT_PUBLIC_PUSHER_APP_ID as string,
-  key: process.env.NEXT_PUBLIC_PUSHER_APP_KEY as string,
-  secret: process.env.NEXT_PUBLIC_PUSHER_APP_SECRET as string,
-  cluster: process.env.NEXT_PUBLIC_PUSHER_APP_CLUSTOR as string,
-  useTLS: true,
-})
-
-export const pusherClient = new PusherClient(
-  process.env.NEXT_PUBLIC_PUSHER_APP_KEY as string,
-  {
-    cluster: process.env.NEXT_PUBLIC_PUSHER_APP_CLUSTOR as string,
-  }
-)
+// ⚠️ Pusher has been moved to separate files for security:
+// - Server: import { pusherServer } from '@/lib/pusher-server' (server actions only)
+// - Client: import { pusherClient } from '@/lib/pusher-client' (client components)
 
 // Send dimension updates to parent window
 // Note: Uses wildcard '*' origin because iframe can be embedded on any customer domain
@@ -67,4 +54,29 @@ export const getMonthName = (month: number) => {
     : month == 11
     ? 'Nov'
     : month == 12 && 'Dec'
+}
+
+// Production-safe logging utilities
+// In production, these prevent PII (emails, domain names, etc.) from being logged
+const isProd = process.env.NODE_ENV === 'production'
+
+export const devLog = (...args: any[]) => {
+  if (!isProd) {
+    console.log(...args)
+  }
+}
+
+export const devError = (...args: any[]) => {
+  if (!isProd) {
+    console.error(...args)
+  } else {
+    // In production, only log generic error messages without PII
+    console.error('An error occurred. Enable development mode for details.')
+  }
+}
+
+export const devWarn = (...args: any[]) => {
+  if (!isProd) {
+    console.warn(...args)
+  }
 }

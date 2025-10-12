@@ -1,7 +1,7 @@
 'use server'
 
 import { client } from '@/lib/prisma'
-import { extractEmailsFromString, extractURLfromString } from '@/lib/utils'
+import { extractEmailsFromString, extractURLfromString, devLog, devError } from '@/lib/utils'
 import { truncateMarkdown } from '@/lib/firecrawl'
 import { buildSystemPrompt } from '@/lib/promptBuilder'
 import { onRealTimeChat } from '../conversation'
@@ -11,7 +11,7 @@ import OpenAi from 'openai'
 import { searchKnowledgeBaseWithFallback, formatResultsForPrompt, hasTrainedEmbeddings } from '@/lib/vector-search'
 
 const openai = new OpenAi({
-  apiKey: process.env.OPEN_AI_KEY,
+  apiKey: process.env.OPENAI_API_KEY,
   timeout: 30000, // 30 second timeout to prevent long waits
   maxRetries: 2, // Retry failed requests twice
 })
@@ -63,7 +63,7 @@ export const onGetCurrentChatBot = async (id: string) => {
       return chatbot
     }
   } catch (error) {
-    console.log(error)
+    devError('[Bot] Error fetching chatbot:', error)
   }
 }
 
@@ -112,11 +112,11 @@ export const onAiChatBotAssistant = async (
       const hasTrained = await hasTrainedEmbeddings(id)
 
       if (hasTrained) {
-        console.log('[Bot] Using RAG vector search for knowledge retrieval')
+        devLog('[Bot] Using RAG vector search for knowledge retrieval')
         const searchResults = await searchKnowledgeBaseWithFallback(message, id, 5)
         knowledgeBase = formatResultsForPrompt(searchResults)
       } else {
-        console.log('[Bot] Using fallback: truncated knowledge base')
+        devLog('[Bot] Using fallback: truncated knowledge base')
         knowledgeBase = chatBotDomain.chatBot?.knowledgeBase
           ? truncateMarkdown(chatBotDomain.chatBot.knowledgeBase, 12000)
           : 'No knowledge base available yet. Please ask the customer to provide more details about their inquiry.'
@@ -165,7 +165,7 @@ export const onAiChatBotAssistant = async (
             author
           )
         } catch (error) {
-          console.error('[Bot] Anonymous chat error:', error)
+          devError('[Bot] Anonymous chat error:', error)
           return {
             response: {
               role: 'assistant',
@@ -244,6 +244,7 @@ export const onAiChatBotAssistant = async (
             },
           ],
           model: 'gpt-4o-mini',
+          max_tokens: 800, // Limit response length to control costs and latency
         })
 
         if (chatCompletion) {
@@ -354,7 +355,7 @@ export const onAiChatBotAssistant = async (
           }
 
           if (newCustomer) {
-            console.log('new customer made, linked anonymous history:', anonymousChatRoomId)
+            devLog('[Bot] New customer created, linked anonymous history')
             const response = {
               role: 'assistant',
               content: `Welcome aboard ${
@@ -442,6 +443,7 @@ export const onAiChatBotAssistant = async (
             },
           ],
           model: 'gpt-4o-mini',
+          max_tokens: 800, // Limit response length to control costs and latency
         })
 
         if (chatCompletion.choices[0].message.content?.includes('(realtime)')) {
@@ -534,7 +536,7 @@ export const onAiChatBotAssistant = async (
           return { response }
         }
       }
-      console.log('No customer')
+      devLog('[Bot] No customer email provided')
 
       const systemPromptNoEmail = buildSystemPrompt({
         businessName: chatBotDomain.name,
@@ -563,6 +565,7 @@ export const onAiChatBotAssistant = async (
           },
         ],
         model: 'gpt-4o-mini',
+        max_tokens: 800, // Limit response length to control costs and latency
       })
 
       if (chatCompletion) {
@@ -575,6 +578,6 @@ export const onAiChatBotAssistant = async (
       }
     }
   } catch (error) {
-    console.log(error)
+    devError('[Bot] Error in chatbot assistant:', error)
   }
 }

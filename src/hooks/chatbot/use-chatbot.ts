@@ -1,5 +1,6 @@
 import { onAiChatBotAssistant, onGetCurrentChatBot } from '@/actions/bot'
-import { postToParent, pusherClient } from '@/lib/utils'
+import { postToParent } from '@/lib/utils'
+import { pusherClient } from '@/lib/pusher-client'
 import { uploadFile } from '@/lib/kie-api'
 import {
   ChatBotMessageProps,

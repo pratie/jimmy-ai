@@ -2,7 +2,7 @@
 // Route: /api/bot/stream
 
 import { client } from '@/lib/prisma'
-import { extractEmailsFromString } from '@/lib/utils'
+import { extractEmailsFromString, devLog, devError } from '@/lib/utils'
 import { truncateMarkdown } from '@/lib/firecrawl'
 import { buildSystemPrompt } from '@/lib/promptBuilder'
 import { searchKnowledgeBaseWithFallback, formatResultsForPrompt, hasTrainedEmbeddings } from '@/lib/vector-search'
@@ -65,7 +65,7 @@ function setDomainInCache(domainId: string, value: DomainConfig) {
 }
 
 const openai = new OpenAI({
-  apiKey: process.env.OPEN_AI_KEY,
+  apiKey: process.env.OPENAI_API_KEY,
   timeout: 30000,
   maxRetries: 2,
 })
@@ -89,7 +89,7 @@ export async function POST(req: Request) {
   try {
     const { domainId, chat, message, anonymousId } = await req.json()
 
-    console.log('[Bot Stream] ⏱️  Request started:', { domainId, messageLength: message?.length, anonymousId })
+    devLog('[Bot Stream] ⏱️  Request started')
 
     if (!domainId || !message || !Array.isArray(chat)) {
       return new Response(JSON.stringify({ error: 'Invalid request format' }), {
@@ -133,11 +133,11 @@ export async function POST(req: Request) {
         setDomainInCache(domainId, chatBotDomain)
       }
       recordCacheStat(domainId, false)
-      console.log(`[Bot Stream]   └─ Domain query: ${Date.now() - dbQueryStart}ms`)
+      devLog(`[Bot Stream]   └─ Domain query: ${Date.now() - dbQueryStart}ms`)
     } else {
       cacheHit = true
       recordCacheStat(domainId, true)
-      console.log('[Bot Stream]   └─ Domain query: 0ms (cache hit)')
+      devLog('[Bot Stream]   └─ Domain query: 0ms (cache hit)')
     }
 
     // CHECK MESSAGE CREDITS BEFORE RESPONDING
@@ -164,11 +164,11 @@ export async function POST(req: Request) {
               messagesResetAt: getNextResetDate()
             }
           })
-          console.log('[Bot Stream] 🔄 Credits reset for new billing period')
+          devLog('[Bot Stream] 🔄 Credits reset for new billing period')
         } else {
           // Check if user has credits remaining
           if (billing.messagesUsed >= billing.messageCredits) {
-            console.log('[Bot Stream] ❌ Message limit reached')
+            devLog('[Bot Stream] ❌ Message limit reached')
             return new Response(
               JSON.stringify({
                 error: 'Message limit reached',
@@ -188,7 +188,7 @@ export async function POST(req: Request) {
 
     const hasTrained = !!(chatBotDomain?.chatBot?.hasEmbeddings)
 
-    console.log(`[Bot Stream] ✅ Parallel queries took: ${Date.now() - parallelStartTime}ms (max of both)`)    
+    devLog(`[Bot Stream] ✅ Parallel queries took: ${Date.now() - parallelStartTime}ms (max of both)`)    
 
     if (!chatBotDomain) {
       return new Response(JSON.stringify({ error: 'Chatbot not found' }), {
@@ -202,13 +202,13 @@ export async function POST(req: Request) {
     let knowledgeBase: string
 
     if (hasTrained) {
-      console.log('[Bot Stream] 🔍 Using RAG vector search')
+      devLog('[Bot Stream] 🔍 Using RAG vector search')
       const vectorSearchStart = Date.now()
       const searchResults = await searchKnowledgeBaseWithFallback(message, domainId, 5)
-      console.log(`[Bot Stream] ✅ Vector search took: ${Date.now() - vectorSearchStart}ms (found ${searchResults.length} chunks)`)
+      devLog(`[Bot Stream] ✅ Vector search took: ${Date.now() - vectorSearchStart}ms (found ${searchResults.length} chunks)`)
       knowledgeBase = formatResultsForPrompt(searchResults)
     } else {
-      console.log('[Bot Stream] ⚠️  Using fallback: fetching truncated knowledge base (no embeddings trained)')
+      devLog('[Bot Stream] ⚠️  Using fallback: fetching truncated knowledge base (no embeddings trained)')
       // Only fetch knowledgeBase when embeddings aren't trained (rare case)
       const kbData = await client.chatBot.findUnique({
         where: { domainId: domainId },
@@ -218,7 +218,7 @@ export async function POST(req: Request) {
         ? truncateMarkdown(kbData.knowledgeBase, 12000)
         : 'No knowledge base available yet. Please ask the customer to provide more details about their inquiry.'
     }
-    console.log(`[Bot Stream] ✅ RAG retrieval took: ${Date.now() - ragStartTime}ms`)
+    devLog(`[Bot Stream] ✅ RAG retrieval took: ${Date.now() - ragStartTime}ms`)
 
     // ═══════════════════════════════════════════════════════════
     // CONVERSATION STATE MANAGEMENT: Handle both customer & anonymous users
@@ -230,7 +230,7 @@ export async function POST(req: Request) {
       // ──────────────────────────────────────────────────────────
       // CUSTOMER FLOW: Email provided (new or returning customer)
       // ──────────────────────────────────────────────────────────
-      console.log('[Bot Stream] 📧 Customer email detected:', customerEmail)
+      devLog('[Bot Stream] 📧 Customer email detected')
 
       try {
         // 1. Find existing customer first
@@ -273,7 +273,7 @@ export async function POST(req: Request) {
           } catch (createError: any) {
             // Handle race condition: another request created the customer simultaneously
             if (createError.code === 'P2002') {
-              console.log('[Bot Stream] 🔄 Race condition detected - customer created by concurrent request')
+              devLog('[Bot Stream] 🔄 Race condition detected - customer created by concurrent request')
               // Retry findFirst to get the customer that was just created
               customer = await client.customer.findFirst({
                 where: {
@@ -301,7 +301,7 @@ export async function POST(req: Request) {
           throw new Error('Failed to create or find customer')
         }
 
-        console.log('[Bot Stream] ✅ Customer found/created:', customer.id)
+        devLog('[Bot Stream] ✅ Customer found/created')
 
         // 3. Check for anonymous history to link
         if (anonymousId) {
@@ -318,7 +318,7 @@ export async function POST(req: Request) {
           })
 
           if (anonymousChatRoom) {
-            console.log('[Bot Stream] 🔗 Linking anonymous chat history:', anonymousChatRoom.id)
+            devLog('[Bot Stream] 🔗 Linking anonymous chat history')
 
             // Link anonymous chat to customer (atomic update)
             await client.chatRoom.update({
@@ -340,7 +340,7 @@ export async function POST(req: Request) {
             // Returning customer - use existing chat room
             chatRoomId = customer.chatRoom[0].id
             isLiveMode = customer.chatRoom[0].live
-            console.log('[Bot Stream] 🔄 Returning customer, using existing chat room:', chatRoomId)
+            devLog('[Bot Stream] 🔄 Returning customer, using existing chat room')
           } else {
             // New customer - create chat room
             const newChatRoom = await client.chatRoom.create({
@@ -355,7 +355,7 @@ export async function POST(req: Request) {
             })
             chatRoomId = newChatRoom.id
             isLiveMode = newChatRoom.live
-            console.log('[Bot Stream] 🆕 New customer, created chat room:', chatRoomId)
+            devLog('[Bot Stream] 🆕 New customer, created chat room')
           }
         }
 
@@ -364,7 +364,7 @@ export async function POST(req: Request) {
 
         // 6. Check if live mode is active
         if (isLiveMode) {
-          console.log('[Bot Stream] 👤 Live mode active - human agent will respond')
+          devLog('[Bot Stream] 👤 Live mode active - human agent will respond')
           return new Response(
             JSON.stringify({
               error: 'Live mode active',
@@ -379,11 +379,11 @@ export async function POST(req: Request) {
         }
 
       } catch (error: any) {
-        console.error('[Bot Stream] ❌ Customer handling error:', error)
+        devError('[Bot Stream] ❌ Customer handling error:', error)
 
         // Fallback: Continue with anonymous flow if customer creation fails
         // This prevents total failure - conversation still works
-        console.log('[Bot Stream] ⚠️  Falling back to anonymous mode due to error')
+        devLog('[Bot Stream] ⚠️  Falling back to anonymous mode due to error')
         customerEmail = undefined // Clear email to trigger anonymous flow below
       }
     }
@@ -392,7 +392,7 @@ export async function POST(req: Request) {
       // ──────────────────────────────────────────────────────────
       // ANONYMOUS FLOW: No email provided yet
       // ──────────────────────────────────────────────────────────
-      console.log('[Bot Stream] 👤 Anonymous user:', anonymousId)
+      devLog('[Bot Stream] 👤 Anonymous user')
 
       let anonymousChatRoom = await client.chatRoom.findFirst({
         where: {
@@ -417,7 +417,7 @@ export async function POST(req: Request) {
             live: true,
           },
         })
-        console.log('[Bot Stream] 🆕 Created anonymous chat room:', anonymousChatRoom.id)
+        devLog('[Bot Stream] 🆕 Created anonymous chat room')
       }
 
       chatRoomId = anonymousChatRoom.id
@@ -428,7 +428,7 @@ export async function POST(req: Request) {
 
       // If live mode, don't stream AI response
       if (isLiveMode) {
-        console.log('[Bot Stream] 👤 Live mode active - human agent will respond')
+        devLog('[Bot Stream] 👤 Live mode active - human agent will respond')
         return new Response(
           JSON.stringify({
             error: 'Live mode active',
@@ -458,10 +458,10 @@ export async function POST(req: Request) {
       portalBaseUrl: `${process.env.NEXT_PUBLIC_APP_URL}/portal/${domainId}`,
       customerId: '',
     })
-    console.log(`[Bot Stream] ✅ Prompt building took: ${Date.now() - promptStartTime}ms`)
+    devLog(`[Bot Stream] ✅ Prompt building took: ${Date.now() - promptStartTime}ms`)
 
     // Create streaming completion
-    console.log('[Bot Stream] 🤖 Calling OpenAI API...')
+    devLog('[Bot Stream] 🤖 Calling OpenAI API...')
     const llmStartTime = Date.now()
     const stream = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
@@ -471,6 +471,7 @@ export async function POST(req: Request) {
         { role: 'user', content: message },
       ],
       stream: true,
+      max_tokens: 800, // Limit response length to control costs and latency (~3-4 paragraphs)
     })
 
     // Create readable stream for response
@@ -489,7 +490,7 @@ export async function POST(req: Request) {
             if (content) {
               if (!firstTokenTime) {
                 firstTokenTime = Date.now()
-                console.log(`[Bot Stream] ⚡ First token received in: ${firstTokenTime - llmStartTime}ms (TTFT - Time To First Token)`)
+                devLog(`[Bot Stream] ⚡ First token received in: ${firstTokenTime - llmStartTime}ms (TTFT - Time To First Token)`)
               }
               tokenCount++
               fullResponse += content
@@ -501,15 +502,14 @@ export async function POST(req: Request) {
           const totalTime = Date.now() - startTime
           const streamTime = Date.now() - llmStartTime
           ttft = (firstTokenTime ?? llmStartTime) - llmStartTime
-          console.log(`[Bot Stream] ✅ Stream completed: ${tokenCount} tokens in ${streamTime}ms`)
-          console.log(`[Bot Stream] 📊 Total request time: ${totalTime}ms`)
+          devLog(`[Bot Stream] ✅ Stream completed: ${tokenCount} tokens in ${streamTime}ms`)
+          devLog(`[Bot Stream] 📊 Total request time: ${totalTime}ms`)
 
-          // Small metrics line
+          // Metrics (safe - no PII, only timing data)
           const stats = domainCacheStats.get(domainId) || { hits: 0, misses: 0 }
           const globalRatio = (cacheHits + cacheMisses) > 0 ? (cacheHits / (cacheHits + cacheMisses)) : 0
           const domainRatio = (stats.hits + stats.misses) > 0 ? (stats.hits / (stats.hits + stats.misses)) : 0
-          console.log('[Metrics] domainId=%s cache=%s ttftMs=%d streamMs=%d totalMs=%d domainHits=%d domainMisses=%d domainHitRatio=%.2f globalHitRatio=%.2f',
-            domainId,
+          devLog('[Metrics] cache=%s ttftMs=%d streamMs=%d totalMs=%d domainHits=%d domainMisses=%d domainHitRatio=%.2f globalHitRatio=%.2f',
             cacheHit ? 'hit' : 'miss',
             ttft,
             streamTime,
@@ -523,7 +523,7 @@ export async function POST(req: Request) {
           // Store complete AI response (background, do not block request end)
           if (chatRoomId && fullResponse) {
             storeConversation(chatRoomId, fullResponse, 'assistant').catch((e) => {
-              console.error('[Bot Stream] Failed to persist assistant message:', e)
+              devError('[Bot Stream] Failed to persist assistant message:', e)
             })
           }
 
@@ -533,14 +533,14 @@ export async function POST(req: Request) {
               where: { userId: chatBotDomain.userId },
               data: { messagesUsed: { increment: 1 } }
             }).catch((e) => {
-              console.error('[Bot Stream] Failed to increment message count:', e)
+              devError('[Bot Stream] Failed to increment message count:', e)
             })
           }
 
           controller.enqueue(encoder.encode('data: [DONE]\n\n'))
           controller.close()
         } catch (error) {
-          console.error('[Bot Stream] ❌ Stream error:', error)
+          devError('[Bot Stream] ❌ Stream error:', error)
           controller.error(error)
         }
       },
@@ -554,7 +554,7 @@ export async function POST(req: Request) {
       },
     })
   } catch (error: any) {
-    console.error('[Bot Stream] Error:', error)
+    devError('[Bot Stream] Error:', error)
     return new Response(JSON.stringify({ error: error.message || 'Failed to generate response' }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },

@@ -1,11 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import Image from 'next/image'
-import { uploadFile, uploadFileFromUrl, isKieApiConfigured } from '@/lib/kie-api'
+import { uploadFile } from '@/lib/kie-api'
 
 export default function TestUploadPage() {
-  const [isConfigured, setIsConfigured] = useState<boolean | null>(null)
+  // Using server-side upload proxy; no client key required
   const [uploadedFiles, setUploadedFiles] = useState<Array<{
     fileName: string
     downloadUrl: string
@@ -13,7 +13,7 @@ export default function TestUploadPage() {
     mimeType: string
   }>>([])
   const [isUploading, setIsUploading] = useState(false)
-  const [uploadFromUrl, setUploadFromUrl] = useState('')
+  
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -38,33 +38,7 @@ export default function TestUploadPage() {
     }
   }
 
-  const handleUrlUpload = async () => {
-    if (!uploadFromUrl.trim()) return
-
-    setIsUploading(true)
-    try {
-      const result = await uploadFileFromUrl(uploadFromUrl, 'images/test')
-
-      if (result.success && result.data) {
-        setUploadedFiles(prev => [...prev, result.data!])
-        setUploadFromUrl('')
-        console.log('✅ URL upload successful:', result.data)
-      } else {
-        console.error('❌ URL upload failed:', result.error)
-        alert(`URL upload failed: ${result.error}`)
-      }
-    } catch (error) {
-      console.error('❌ URL upload error:', error)
-      alert('URL upload error occurred')
-    } finally {
-      setIsUploading(false)
-    }
-  }
-
-  // Check configuration on client side only
-  useEffect(() => {
-    setIsConfigured(isKieApiConfigured())
-  }, [])
+  // No client-side configuration required when using server proxy
 
   const clearUploads = () => {
     setUploadedFiles([])
@@ -74,16 +48,14 @@ export default function TestUploadPage() {
     <div className="p-8 max-w-4xl mx-auto">
       <h1 className="text-3xl font-bold mb-6 text-gray-900">KIE API Upload Test</h1>
 
-      {/* Configuration Status */}
+      {/* Info */}
       <div className="mb-8 p-4 rounded-lg bg-gray-50 border border-gray-200">
-        <h2 className="text-lg font-semibold mb-2 text-gray-900">Configuration Status:</h2>
+        <h2 className="text-lg font-semibold mb-2 text-gray-900">Upload Configuration</h2>
         <p className="text-gray-700">
-          KIE API Configured: <span className="font-bold">
-            {isConfigured === null ? '⏳ Checking...' : isConfigured ? '✅ Yes' : '❌ No'}
-          </span>
+          Using server-side upload proxy (no client key required)
         </p>
         <p className="text-sm text-gray-600 mt-1">
-          API Endpoint: <code className="bg-gray-100 px-2 py-1 rounded">https://kieai.redpandaai.co</code>
+          API Endpoint: <code className="bg-gray-100 px-2 py-1 rounded">/api/upload</code>
         </p>
       </div>
 
@@ -104,32 +76,7 @@ export default function TestUploadPage() {
         </div>
       </div>
 
-      {/* URL Upload Section */}
-      <div className="mb-8 p-6 border border-gray-200 rounded-lg">
-        <h2 className="text-xl font-semibold mb-4 text-gray-800">URL Upload</h2>
-        <div className="space-y-4">
-          <div className="flex gap-2">
-            <input
-              type="url"
-              value={uploadFromUrl}
-              onChange={(e) => setUploadFromUrl(e.target.value)}
-              placeholder="https://example.com/image.jpg"
-              disabled={isUploading}
-              className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50"
-            />
-            <button
-              onClick={handleUrlUpload}
-              disabled={isUploading || !uploadFromUrl.trim()}
-              className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Upload
-            </button>
-          </div>
-          <p className="text-sm text-gray-500">
-            Enter a direct URL to an image to upload via KIE API (URL method)
-          </p>
-        </div>
-      </div>
+      {/* URL Upload Section (removed to avoid exposing server key). Use server actions instead. */}
 
       {/* Upload Status */}
       {isUploading && (

@@ -2,6 +2,7 @@
 // Vector similarity search using Supabase pgvector
 import { generateEmbedding } from './embeddings'
 import { client } from './prisma'
+import { devLog, devError } from './utils'
 
 export interface SearchResult {
   id: string
@@ -28,7 +29,7 @@ export async function searchKnowledgeBase(
   threshold: number = 0.65
 ): Promise<SearchResult[]> {
   try {
-    console.log(`[RAG] Searching for: "${query.substring(0, 100)}..."`)
+    devLog(`[RAG] Searching knowledge base...`)
 
     // Step 1: Convert user query to embedding vector
     const embedding = await generateEmbedding(query)
@@ -44,18 +45,18 @@ export async function searchKnowledgeBase(
       )
     `
 
-    console.log(`[RAG] ✅ Found ${results.length} relevant chunks`)
+    devLog(`[RAG] ✅ Found ${results.length} relevant chunks`)
 
-    // Log similarity scores for debugging
+    // Log similarity scores for debugging (only in dev - no PII)
     if (results.length > 0) {
       results.forEach((r, i) => {
-        console.log(`[RAG]   ${i + 1}. Similarity: ${(r.similarity * 100).toFixed(1)}% - "${r.content.substring(0, 50)}..."`)
+        devLog(`[RAG]   ${i + 1}. Similarity: ${(r.similarity * 100).toFixed(1)}%`)
       })
     }
 
     return results
   } catch (error) {
-    console.error('[RAG] Vector search error:', error)
+    devError('[RAG] Vector search error:', error)
     // Return empty array on error (chatbot will fall back to raw knowledge base)
     return []
   }
@@ -74,7 +75,7 @@ export async function searchKnowledgeBaseWithFallback(
   const results = await searchKnowledgeBase(query, domainId, limit, 0.3)
 
   if (results.length === 0) {
-    console.log('[RAG] No results found with 0.3 threshold - will use fallback knowledge base')
+    devLog('[RAG] No results found - will use fallback knowledge base')
   }
 
   return results
@@ -107,7 +108,7 @@ export async function getKnowledgeChunkCount(domainId: string): Promise<number> 
     })
     return count
   } catch (error) {
-    console.error('[RAG] Error getting chunk count:', error)
+    devError('[RAG] Error getting chunk count:', error)
     return 0
   }
 }
