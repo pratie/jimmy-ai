@@ -51,7 +51,7 @@ export default function RootLayout({
           {/* DataFast Analytics - Must be in body for Next.js Script component */}
           <Script
             defer
-            data-website-id="dfid_9YAU28igY5TsqALGjyimY"
+            data-website-id="68eaf4123d3dccc2e466bf8c"
             data-domain="www.bookmylead.app"
             src="https://datafa.st/js/script.js"
             strategy="afterInteractive"
