@@ -132,7 +132,7 @@ export default async function Home() {
                 </div>
                 <h3 className="text-2xl font-bold text-brand-primary mb-4">Train your AI</h3>
                 <p className="text-brand-primary/70 text-base leading-relaxed">
-                  Just paste your website URL, upload PDFs, or add FAQs. Advanced AI learns your entire business in seconds—understands context, not just keywords.
+                  Just paste your website URL, upload PDFs, or add FAQs. Advanced AI learns your entire business in seconds. Understands context, not just keywords.
                 </p>
               </div>
             </div>
@@ -210,7 +210,7 @@ export default async function Home() {
               </div>
               <h3 className="text-xl font-bold text-brand-primary mb-3">Smart knowledge search</h3>
               <p className="text-brand-primary/70 leading-relaxed">
-                Advanced AI understands context like a human. Finds the right answers from your docs instantly—no wrong info, no making things up.
+                Advanced AI understands context like a human. Finds the right answers from your docs instantly. No wrong info, no making things up.
               </p>
             </div>
 
@@ -270,7 +270,7 @@ export default async function Home() {
               </div>
               <h3 className="text-xl font-bold text-brand-primary mb-3">Smooth lead capture</h3>
               <p className="text-brand-primary/70 leading-relaxed">
-                Visitors chat anonymously first. AI gently collects emails when they're ready. Full conversation history saved—no awkward "sign up" pop-ups.
+                Visitors chat anonymously first. AI gently collects emails when they're ready. Full conversation history saved. No awkward "sign up" pop-ups.
               </p>
             </div>
 
@@ -282,7 +282,7 @@ export default async function Home() {
               </div>
               <h3 className="text-xl font-bold text-brand-primary mb-3">Lightning-fast responses</h3>
               <p className="text-brand-primary/70 leading-relaxed">
-                Replies in under 1 second. Advanced streaming tech makes it feel instant—keeps visitors engaged instead of waiting.
+                Replies in under 10 seconds. Advanced streaming tech makes it feel instant and keeps visitors engaged instead of waiting.
               </p>
             </div>
           </div>
