@@ -23,15 +23,25 @@ export const metadata: Metadata = {
     maximumScale: 5,
     userScalable: true,
   },
+  icons: {
+    icon: [
+      { url: '/icon.svg', type: 'image/svg+xml' },
+      { url: '/images/logo.svg', type: 'image/svg+xml' }
+    ],
+    apple: '/apple-icon.svg',
+    shortcut: '/images/logo.svg',
+  },
   openGraph: {
     title: 'BookmyLead AI - AI Agent Trained on Your Company Data',
     description: 'Deploy an AI agent trained on your company data to capture leads 24/7, answer questions instantly, and close deals while you sleep.',
     type: 'website',
+    images: [{ url: '/images/logo.svg' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'BookmyLead AI - AI Agent Trained on Your Company Data',
     description: 'Deploy an AI agent trained on your company data to capture leads 24/7, answer questions instantly, and close deals while you sleep.',
+    images: ['/images/logo.svg'],
   },
   robots: {
     index: true,
