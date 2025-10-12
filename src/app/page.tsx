@@ -18,15 +18,15 @@ export default async function Home() {
             {/* Main Headline */}
             <div className="text-center space-y-6 max-w-5xl">
               <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold text-brand-primary leading-[1.1] tracking-tight">
-                AI agents that turn
+                AI trained on
                 <br />
                 <span className="bg-gradient-to-r from-[#f59e0b] via-[#ec4899] to-[#6366f1]" style={{WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text'}}>
-                  visitors into customers
+                  your actual business
                 </span>
               </h1>
 
               <p className="text-brand-primary/70 text-xl md:text-2xl max-w-3xl mx-auto leading-relaxed font-medium">
-                Train an AI agent on your company data. It captures leads, answers questions, and books meetings 24/7—while you focus on growing your business.
+                Trained on your website & docs. Answers, qualifies, and books meetings automatically.
               </p>
             </div>
 
@@ -49,6 +49,12 @@ export default async function Home() {
                   <Check className="w-3 h-3 text-green-600 dark:text-green-400" strokeWidth={3} />
                 </div>
                 <span className="text-sm md:text-base font-medium">100 messages free</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-5 h-5 rounded-full bg-green-500/20 flex items-center justify-center">
+                  <Check className="w-3 h-3 text-green-600 dark:text-green-400" strokeWidth={3} />
+                </div>
+                <span className="text-sm md:text-base font-medium">Responds in under 1 second</span>
               </div>
             </div>
 
@@ -89,8 +95,8 @@ export default async function Home() {
               <div className="text-brand-primary/70 text-sm md:text-base font-medium">Always available</div>
             </div>
             <div className="text-center">
-              <div className="text-4xl md:text-6xl font-extrabold text-brand-primary mb-2">70%</div>
-              <div className="text-brand-primary/70 text-sm md:text-base font-medium">Fewer support tickets</div>
+              <div className="text-4xl md:text-6xl font-extrabold text-brand-primary mb-2">&lt;1s</div>
+              <div className="text-brand-primary/70 text-sm md:text-base font-medium">Response time</div>
             </div>
             <div className="text-center">
               <div className="text-4xl md:text-6xl font-extrabold text-brand-primary mb-2">&lt;2min</div>
@@ -126,7 +132,7 @@ export default async function Home() {
                 </div>
                 <h3 className="text-2xl font-bold text-brand-primary mb-4">Train your AI</h3>
                 <p className="text-brand-primary/70 text-base leading-relaxed">
-                  Upload your website URL, documents, or FAQs. Our AI learns everything about your business in seconds.
+                  Just paste your website URL, upload PDFs, or add FAQs. Advanced AI learns your entire business in seconds—understands context, not just keywords.
                 </p>
               </div>
             </div>
@@ -144,7 +150,7 @@ export default async function Home() {
                 </div>
                 <h3 className="text-2xl font-bold text-brand-primary mb-4">Customize</h3>
                 <p className="text-brand-primary/70 text-base leading-relaxed">
-                  Set your brand voice, colors, and behavior. Choose between sales mode, support mode, or FAQ mode.
+                  Pick your brand voice, colors, and AI personality. Choose: Sales mode (close deals), Support mode (help customers), Lead Qualifier, or FAQ mode (strict answers only).
                 </p>
               </div>
             </div>
@@ -202,9 +208,9 @@ export default async function Home() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-bold text-brand-primary mb-3">Trained on your data</h3>
+              <h3 className="text-xl font-bold text-brand-primary mb-3">Smart knowledge search</h3>
               <p className="text-brand-primary/70 leading-relaxed">
-                Answers questions with your company knowledge. Handles objections, shares pricing, and closes deals.
+                Advanced AI understands context like a human. Finds the right answers from your docs instantly—no wrong info, no making things up.
               </p>
             </div>
 
@@ -255,6 +261,30 @@ export default async function Home() {
                 Manage multiple websites from one dashboard. Each with its own AI trained on specific data.
               </p>
             </div>
+
+            <div className="bg-white dark:bg-black/40 p-8 rounded-3xl border-2 border-brand-base-300 hover:border-brand-accent/60 transition-all duration-300 hover:shadow-xl">
+              <div className="w-12 h-12 bg-brand-accent/20 rounded-xl flex items-center justify-center mb-5">
+                <svg className="w-6 h-6 text-brand-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-bold text-brand-primary mb-3">Smooth lead capture</h3>
+              <p className="text-brand-primary/70 leading-relaxed">
+                Visitors chat anonymously first. AI gently collects emails when they're ready. Full conversation history saved—no awkward "sign up" pop-ups.
+              </p>
+            </div>
+
+            <div className="bg-white dark:bg-black/40 p-8 rounded-3xl border-2 border-brand-base-300 hover:border-brand-info/60 transition-all duration-300 hover:shadow-xl">
+              <div className="w-12 h-12 bg-brand-info/20 rounded-xl flex items-center justify-center mb-5">
+                <svg className="w-6 h-6 text-brand-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-bold text-brand-primary mb-3">Lightning-fast responses</h3>
+              <p className="text-brand-primary/70 leading-relaxed">
+                Replies in under 1 second. Advanced streaming tech makes it feel instant—keeps visitors engaged instead of waiting.
+              </p>
+            </div>
           </div>
         </div>
       </section>
@@ -267,7 +297,7 @@ export default async function Home() {
               Ready to grow on autopilot?
             </h2>
             <p className="text-brand-primary/70 text-lg md:text-xl mb-10 max-w-2xl mx-auto">
-              Join hundreds of founders using AI agents to capture more leads, close more deals, and scale faster.
+              Join small business owners using smart AI to capture qualified leads, close deals faster, and grow without hiring support teams.
             </p>
             <Link href="/auth/sign-up">
               <Button size="lg" className="bg-brand-primary hover:bg-brand-primary/90 text-white font-bold px-12 py-7 text-xl rounded-2xl shadow-2xl transition-all duration-300 transform hover:scale-105">
