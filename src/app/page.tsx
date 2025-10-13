@@ -12,12 +12,12 @@ export default async function Home() {
 
       {/* Hero Section */}
       <section className="relative overflow-hidden">
-        <div className="container mx-auto px-4">
-          <div className="relative flex items-center justify-center flex-col pt-24 md:pt-32 pb-16 gap-8">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="relative flex items-center justify-center flex-col pt-20 md:pt-28 lg:pt-32 pb-12 md:pb-16 gap-6 md:gap-8">
 
             {/* Main Headline */}
-            <div className="text-center space-y-6 max-w-5xl">
-              <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold text-brand-primary leading-[1.1] tracking-tight">
+            <div className="text-center space-y-5 md:space-y-6 max-w-4xl">
+              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-semibold text-brand-primary leading-[1.15] tracking-tight">
                 Integrate AI Chatbot
                 <br />
                 <span className="bg-gradient-to-r from-[#f59e0b] via-[#ec4899] to-[#6366f1]" style={{WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text'}}>
@@ -25,55 +25,43 @@ export default async function Home() {
                 </span>
               </h1>
 
-              <p className="text-brand-primary/70 text-xl md:text-2xl max-w-3xl mx-auto leading-relaxed font-medium">
+              <p className="text-brand-primary/65 text-base sm:text-lg md:text-xl max-w-2xl mx-auto leading-relaxed font-normal">
                 Train on your website & docs. Your AI assistant answers questions, qualifies leads, and books meetings automatically.
               </p>
             </div>
 
             {/* Trust Indicators */}
-            <div className="flex flex-wrap items-center justify-center gap-6 md:gap-8 text-brand-primary/80">
+            <div className="flex flex-wrap items-center justify-center gap-4 md:gap-6 text-brand-primary/75 mt-2">
               <div className="flex items-center gap-2">
-                <div className="w-5 h-5 rounded-full bg-green-500/20 flex items-center justify-center">
-                  <Check className="w-3 h-3 text-green-600 dark:text-green-400" strokeWidth={3} />
-                </div>
-                <span className="text-sm md:text-base font-medium">No credit card required</span>
+                <Check className="w-4 h-4 text-green-600 dark:text-green-400" strokeWidth={2.5} />
+                <span className="text-sm font-normal">No credit card required</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-5 h-5 rounded-full bg-green-500/20 flex items-center justify-center">
-                  <Check className="w-3 h-3 text-green-600 dark:text-green-400" strokeWidth={3} />
-                </div>
-                <span className="text-sm md:text-base font-medium">Setup in under 2 minutes</span>
+                <Check className="w-4 h-4 text-green-600 dark:text-green-400" strokeWidth={2.5} />
+                <span className="text-sm font-normal">Setup in 2 minutes</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-5 h-5 rounded-full bg-green-500/20 flex items-center justify-center">
-                  <Check className="w-3 h-3 text-green-600 dark:text-green-400" strokeWidth={3} />
-                </div>
-                <span className="text-sm md:text-base font-medium">100 messages free</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-5 h-5 rounded-full bg-green-500/20 flex items-center justify-center">
-                  <Check className="w-3 h-3 text-green-600 dark:text-green-400" strokeWidth={3} />
-                </div>
-                <span className="text-sm md:text-base font-medium">Responds in under 10 seconds</span>
+                <Check className="w-4 h-4 text-green-600 dark:text-green-400" strokeWidth={2.5} />
+                <span className="text-sm font-normal">100 messages free</span>
               </div>
             </div>
 
             {/* CTA Button */}
-            <Link href="/auth/sign-up">
-              <Button size="lg" className="bg-brand-primary hover:bg-brand-primary/90 text-white font-bold px-12 py-7 text-xl rounded-2xl shadow-2xl transition-all duration-300 transform hover:scale-105 border-2 border-brand-primary hover:shadow-brand-primary/50">
+            <Link href="/auth/sign-up" className="mt-2">
+              <Button size="lg" className="bg-brand-primary hover:bg-brand-primary/90 text-white font-semibold px-10 py-6 text-lg rounded-xl shadow-lg transition-all duration-200 hover:shadow-xl hover:-translate-y-0.5">
                 Start for free →
               </Button>
             </Link>
 
             {/* Dashboard Preview */}
-            <div className="mt-12 relative w-full max-w-6xl">
-              <div className="absolute inset-0 bg-gradient-to-r from-brand-accent/20 via-brand-info/20 to-brand-success/20 blur-3xl -z-10"></div>
+            <div className="mt-10 md:mt-16 relative w-full max-w-5xl">
+              <div className="absolute inset-0 bg-gradient-to-r from-brand-accent/15 via-brand-info/15 to-brand-success/15 blur-3xl -z-10"></div>
               <Image
                 src="/images/app-ui.png"
                 width={1200}
                 height={800}
                 alt="BookmyLead AI Dashboard"
-                className="w-full h-auto object-contain relative z-10 drop-shadow-2xl rounded-3xl border-4 border-brand-base-300/50 bg-white/80 dark:bg-black/40 backdrop-blur-sm p-3"
+                className="w-full h-auto object-contain relative z-10 shadow-2xl rounded-2xl border border-brand-base-300/40 bg-white/70 dark:bg-black/30 backdrop-blur-sm p-2"
                 priority
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 1200px"
               />
