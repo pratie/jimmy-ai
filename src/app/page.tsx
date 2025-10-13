@@ -18,15 +18,15 @@ export default async function Home() {
             {/* Main Headline */}
             <div className="text-center space-y-6 max-w-5xl">
               <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold text-brand-primary leading-[1.1] tracking-tight">
-                AI trained on
+                Integrate AI Chatbot
                 <br />
                 <span className="bg-gradient-to-r from-[#f59e0b] via-[#ec4899] to-[#6366f1]" style={{WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text'}}>
-                  your actual business
+                  into your website in minutes
                 </span>
               </h1>
 
               <p className="text-brand-primary/70 text-xl md:text-2xl max-w-3xl mx-auto leading-relaxed font-medium">
-                Trained on your website & docs. Answers, qualifies, and books meetings automatically.
+                Train on your website & docs. Your AI assistant answers questions, qualifies leads, and books meetings automatically.
               </p>
             </div>
 
