@@ -207,7 +207,24 @@ export const onOwnerSendMessage = async (
       },
     })
 
-    if (chat) {
+    if (chat && chat.message.length > 0) {
+      const newMessage = chat.message[0]
+
+      // Broadcast message to user's chatbot via Pusher
+      console.log(`[Pusher] Broadcasting to channel: ${chatroom}`)
+      console.log(`[Pusher] Message:`, newMessage.message)
+      console.log(`[Pusher] Role:`, newMessage.role)
+
+      await pusherServer.trigger(chatroom, 'realtime-mode', {
+        chat: {
+          message: newMessage.message,
+          id: newMessage.id,
+          role: newMessage.role,
+        },
+      })
+
+      console.log(`[Pusher] ✅ Broadcast successful`)
+
       return chat
     }
   } catch (error) {

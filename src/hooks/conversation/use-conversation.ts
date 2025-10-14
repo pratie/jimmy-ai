@@ -153,13 +153,17 @@ export const useChatWindow = () => {
     if (!chatRoom) return
 
     const handler = (data: any) => {
+      console.log('[Dashboard] 📨 Pusher message received:', data)
+      console.log('[Dashboard] ✅ Adding message to chat')
       setChats((prev) => [...prev, data.chat])
     }
 
+    console.log(`[Dashboard] 🔌 Subscribing to Pusher channel: ${chatRoom}`)
     const channel = pusherClient.subscribe(chatRoom)
     channel.bind('realtime-mode', handler)
 
     return () => {
+      console.log(`[Dashboard] 🔌 Unsubscribing from Pusher channel: ${chatRoom}`)
       channel.unbind('realtime-mode', handler)
       pusherClient.unsubscribe(chatRoom)
     }
@@ -179,17 +183,11 @@ export const useChatWindow = () => {
         values.content,
         'assistant'
       )
-      //WIP: Remove this line
-      if (message) {
-        //remove this
-        // setChats((prev) => [...prev, message.message[0]])
 
-        await onRealTimeChat(
-          chatRoom!,
-          message.message[0].message,
-          message.message[0].id,
-          'assistant'
-        )
+      // onOwnerSendMessage now handles Pusher broadcasting internally
+      // No need to manually call onRealTimeChat anymore
+      if (message) {
+        console.log('[Dashboard] Message sent and broadcasted via Pusher:', message.message[0])
       }
     } catch (error) {
       console.log(error)

@@ -9,6 +9,8 @@ import { clerkClient } from '@clerk/nextjs/server'
 import { onMailer } from '../mailer'
 import OpenAi from 'openai'
 import { searchKnowledgeBaseWithFallback, formatResultsForPrompt, hasTrainedEmbeddings } from '@/lib/vector-search'
+import { CONVERSATION_FUNCTION, type ConversationAction } from '@/lib/function-schema'
+import { handleConversationActions, type ActionContext } from '@/lib/action-handler'
 
 const openai = new OpenAi({
   apiKey: process.env.OPENAI_API_KEY,
@@ -244,19 +246,56 @@ export const onAiChatBotAssistant = async (
             },
           ],
           model: 'gpt-4o-mini',
+          tools: [
+            {
+              type: 'function',
+              function: CONVERSATION_FUNCTION,
+            },
+          ],
+          tool_choice: 'auto',
           max_tokens: 800, // Limit response length to control costs and latency
         })
 
         if (chatCompletion) {
+          let responseContent = chatCompletion.choices[0].message.content || ''
+
+          // Process function calling if present
+          const toolCall = chatCompletion.choices[0].message.tool_calls?.[0]
+          if (toolCall?.function?.arguments) {
+            try {
+              const functionCall: ConversationAction = JSON.parse(toolCall.function.arguments)
+              devLog(`[Bot] Function call detected: ${functionCall.actions.join(', ')}`)
+
+              const actionContext: ActionContext = {
+                chatRoomId: anonymousChatRoom.id,
+                domainId: id,
+                customerId: undefined,
+                userMessage: message,
+                appointmentUrl: '',
+                paymentUrl: '',
+              }
+
+              const actionResult = await handleConversationActions(
+                functionCall.actions,
+                functionCall.message,
+                actionContext
+              )
+
+              responseContent = actionResult.finalMessage
+            } catch (error) {
+              devError('[Bot] Failed to process function call:', error)
+            }
+          }
+
           const response = {
             role: 'assistant',
-            content: chatCompletion.choices[0].message.content,
+            content: responseContent,
           }
 
           // Store AI response
           await onStoreConversations(
             anonymousChatRoom.id,
-            `${response.content}`,
+            responseContent,
             'assistant'
           )
 
@@ -443,93 +482,55 @@ export const onAiChatBotAssistant = async (
             },
           ],
           model: 'gpt-4o-mini',
+          tools: [
+            {
+              type: 'function',
+              function: CONVERSATION_FUNCTION,
+            },
+          ],
+          tool_choice: 'auto',
           max_tokens: 800, // Limit response length to control costs and latency
         })
 
-        if (chatCompletion.choices[0].message.content?.includes('(realtime)')) {
-          const realtime = await client.chatRoom.update({
-            where: {
-              id: checkCustomer?.customer[0].chatRoom[0].id,
-            },
-            data: {
-              live: true,
-            },
-          })
+        // Process function calling actions
+        let responseContent = chatCompletion.choices[0].message.content || ''
+        const toolCall = chatCompletion.choices[0].message.tool_calls?.[0]
 
-          if (realtime) {
-            const response = {
-              role: 'assistant',
-              content: chatCompletion.choices[0].message.content.replace(
-                '(realtime)',
-                ''
-              ),
+        if (toolCall?.function?.arguments) {
+          try {
+            const functionCall: ConversationAction = JSON.parse(toolCall.function.arguments)
+            devLog(`[Bot] Function call detected: ${functionCall.actions.join(', ')}`)
+
+            const actionContext: ActionContext = {
+              chatRoomId: checkCustomer?.customer[0].chatRoom[0].id || '',
+              domainId: id,
+              customerId: checkCustomer?.customer[0].id,
+              userMessage: message,
+              appointmentUrl: `${process.env.NEXT_PUBLIC_APP_URL}/portal/${id}/appointment/${checkCustomer?.customer[0].id}`,
+              paymentUrl: `${process.env.NEXT_PUBLIC_APP_URL}/portal/${id}/payment/${checkCustomer?.customer[0].id}`,
             }
 
-            await onStoreConversations(
-              checkCustomer?.customer[0].chatRoom[0].id!,
-              response.content,
-              'assistant'
+            const actionResult = await handleConversationActions(
+              functionCall.actions,
+              functionCall.message,
+              actionContext
             )
 
-            return { response }
-          }
-        }
-        if (chat[chat.length - 1].content.includes('(complete)')) {
-          const firstUnansweredQuestion =
-            await client.customerResponses.findFirst({
-              where: {
-                customerId: checkCustomer?.customer[0].id,
-                answered: null,
-              },
-              select: {
-                id: true,
-              },
-              orderBy: {
-                question: 'asc',
-              },
-            })
-          if (firstUnansweredQuestion) {
-            await client.customerResponses.update({
-              where: {
-                id: firstUnansweredQuestion.id,
-              },
-              data: {
-                answered: message,
-              },
-            })
+            responseContent = actionResult.finalMessage
+          } catch (error) {
+            devError('[Bot] Failed to process function call:', error)
           }
         }
 
         if (chatCompletion) {
-          const generatedLink = extractURLfromString(
-            chatCompletion.choices[0].message.content as string
-          )
-
-          if (generatedLink) {
-            const link = generatedLink[0]
-            const response = {
-              role: 'assistant',
-              content: `Great! you can follow the link to proceed`,
-              link: link.slice(0, -1),
-            }
-
-            await onStoreConversations(
-              checkCustomer?.customer[0].chatRoom[0].id!,
-              `${response.content} ${response.link}`,
-              'assistant'
-            )
-
-            return { response }
-          }
-
           const response = {
             role: 'assistant',
-            content: chatCompletion.choices[0].message.content,
+            content: responseContent,
           }
 
           await onStoreConversations(
             checkCustomer?.customer[0].chatRoom[0].id!,
-            `${response.content}`,
+            responseContent,
             'assistant'
           )
 
@@ -565,13 +566,50 @@ export const onAiChatBotAssistant = async (
           },
         ],
         model: 'gpt-4o-mini',
+        tools: [
+          {
+            type: 'function',
+            function: CONVERSATION_FUNCTION,
+          },
+        ],
+        tool_choice: 'auto',
         max_tokens: 800, // Limit response length to control costs and latency
       })
 
       if (chatCompletion) {
+        let responseContent = chatCompletion.choices[0].message.content || ''
+
+        // Process function calling if present
+        const toolCall = chatCompletion.choices[0].message.tool_calls?.[0]
+        if (toolCall?.function?.arguments) {
+          try {
+            const functionCall: ConversationAction = JSON.parse(toolCall.function.arguments)
+            devLog(`[Bot] Function call detected: ${functionCall.actions.join(', ')}`)
+
+            const actionContext: ActionContext = {
+              chatRoomId: '',
+              domainId: id,
+              customerId: undefined,
+              userMessage: message,
+              appointmentUrl: '',
+              paymentUrl: '',
+            }
+
+            const actionResult = await handleConversationActions(
+              functionCall.actions,
+              functionCall.message,
+              actionContext
+            )
+
+            responseContent = actionResult.finalMessage
+          } catch (error) {
+            devError('[Bot] Failed to process function call:', error)
+          }
+        }
+
         const response = {
           role: 'assistant',
-          content: chatCompletion.choices[0].message.content,
+          content: responseContent,
         }
 
         return { response }

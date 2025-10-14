@@ -7,6 +7,8 @@ import { truncateMarkdown } from '@/lib/firecrawl'
 import { buildSystemPrompt } from '@/lib/promptBuilder'
 import { searchKnowledgeBaseWithFallback, formatResultsForPrompt, hasTrainedEmbeddings } from '@/lib/vector-search'
 import { getPlanLimits, shouldResetCredits, getNextResetDate } from '@/lib/plans'
+import { CONVERSATION_FUNCTION, type ConversationAction } from '@/lib/function-schema'
+import { handleConversationActions, type ActionContext } from '@/lib/action-handler'
 import OpenAI from 'openai'
 
 // --- Minimal in-memory LRU cache for domain config ---
@@ -367,12 +369,11 @@ export async function POST(req: Request) {
           devLog('[Bot Stream] 👤 Live mode active - human agent will respond')
           return new Response(
             JSON.stringify({
-              error: 'Live mode active',
               live: true,
               chatRoom: chatRoomId
             }),
             {
-              status: 200,
+              status: 202,
               headers: { 'Content-Type': 'application/json' }
             }
           )
@@ -431,12 +432,11 @@ export async function POST(req: Request) {
         devLog('[Bot Stream] 👤 Live mode active - human agent will respond')
         return new Response(
           JSON.stringify({
-            error: 'Live mode active',
             live: true,
             chatRoom: chatRoomId
           }),
           {
-            status: 200,
+            status: 202,
             headers: { 'Content-Type': 'application/json' },
           }
         )
@@ -460,7 +460,7 @@ export async function POST(req: Request) {
     })
     devLog(`[Bot Stream] ✅ Prompt building took: ${Date.now() - promptStartTime}ms`)
 
-    // Create streaming completion
+    // Create streaming completion with function calling
     devLog('[Bot Stream] 🤖 Calling OpenAI API...')
     const llmStartTime = Date.now()
     const stream = await openai.chat.completions.create({
@@ -470,6 +470,13 @@ export async function POST(req: Request) {
         ...chat,
         { role: 'user', content: message },
       ],
+      tools: [
+        {
+          type: 'function',
+          function: CONVERSATION_FUNCTION,
+        },
+      ],
+      tool_choice: 'auto',
       stream: true,
       max_tokens: 800, // Limit response length to control costs and latency (~3-4 paragraphs)
     })
@@ -477,6 +484,7 @@ export async function POST(req: Request) {
     // Create readable stream for response
     const encoder = new TextEncoder()
     let fullResponse = ''
+    let toolCallArgs = ''
 
     const readableStream = new ReadableStream({
       async start(controller) {
@@ -486,7 +494,10 @@ export async function POST(req: Request) {
           let ttft = 0
 
           for await (const chunk of stream) {
-            const content = chunk.choices[0]?.delta?.content || ''
+            const delta = chunk.choices[0]?.delta
+
+            // Handle regular content streaming
+            const content = delta?.content || ''
             if (content) {
               if (!firstTokenTime) {
                 firstTokenTime = Date.now()
@@ -496,6 +507,11 @@ export async function POST(req: Request) {
               fullResponse += content
               // Send as Server-Sent Events format
               controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content })}\n\n`))
+            }
+
+            // Accumulate tool call arguments (streamed in chunks)
+            if (delta?.tool_calls?.[0]?.function?.arguments) {
+              toolCallArgs += delta.tool_calls[0].function.arguments
             }
           }
 
@@ -520,15 +536,55 @@ export async function POST(req: Request) {
             globalRatio
           )
 
+          // Process function calling actions
+          let finalMessage = fullResponse
+          if (toolCallArgs) {
+            try {
+              const functionCall: ConversationAction = JSON.parse(toolCallArgs)
+              devLog(`[Bot Stream] 🔧 Function call detected: ${functionCall.actions.join(', ')}`)
+
+              // Get customer ID if available
+              let customerId: string | undefined
+              if (customerEmail && chatRoomId) {
+                const chatRoom = await client.chatRoom.findUnique({
+                  where: { id: chatRoomId },
+                  select: { customerId: true }
+                })
+                customerId = chatRoom?.customerId || undefined
+              }
+
+              const actionContext: ActionContext = {
+                chatRoomId: chatRoomId || '',
+                domainId,
+                customerId,
+                userMessage: message,
+                appointmentUrl: '', // TODO: Get from domain settings
+                paymentUrl: '', // TODO: Get from domain settings
+              }
+
+              const actionResult = await handleConversationActions(
+                functionCall.actions,
+                functionCall.message,
+                actionContext
+              )
+
+              finalMessage = actionResult.finalMessage
+              devLog('[Bot Stream] ✅ Actions processed successfully')
+            } catch (error) {
+              devError('[Bot Stream] ❌ Failed to process function call:', error)
+              // Continue with original message if action processing fails
+            }
+          }
+
           // Store complete AI response (background, do not block request end)
-          if (chatRoomId && fullResponse) {
-            storeConversation(chatRoomId, fullResponse, 'assistant').catch((e) => {
+          if (chatRoomId && finalMessage) {
+            storeConversation(chatRoomId, finalMessage, 'assistant').catch((e) => {
               devError('[Bot Stream] Failed to persist assistant message:', e)
             })
           }
 
           // Increment message usage count
-          if (chatBotDomain?.userId && fullResponse) {
+          if (chatBotDomain?.userId && finalMessage) {
             client.billings.update({
               where: { userId: chatBotDomain.userId },
               data: { messagesUsed: { increment: 1 } }

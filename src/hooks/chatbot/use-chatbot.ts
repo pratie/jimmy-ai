@@ -247,10 +247,17 @@ export const useChatBot = (options?: UseChatBotOptions) => {
         })
 
         if (!streamResponse.ok) {
+          console.log('[Chatbot] ⚠️ Non-200 response:', streamResponse.status)
           const errorData = await streamResponse.json()
+          console.log('[Chatbot] Response data:', errorData)
 
           // Check if live mode is active
           if (errorData.live) {
+            console.log('[Chatbot] 🔴 LIVE MODE ACTIVATED')
+            console.log('[Chatbot] Setting onRealTime:', {
+              chatroom: errorData.chatRoom,
+              mode: errorData.live
+            })
             setOnAiTyping(false)
             setOnRealTime((prev) => ({
               ...prev,
@@ -371,8 +378,11 @@ export const useRealTime = (
     counterRef.current = 1
 
     const handler = (data: any) => {
-      console.log('✅', data)
+      console.log('[Chatbot] 📨 Pusher message received:', data)
+      console.log('[Chatbot] Counter:', counterRef.current)
+
       if (counterRef.current !== 1) {
+        console.log('[Chatbot] ✅ Adding message to chat:', data.chat)
         setChats((prev) => [
           ...prev,
           {
@@ -380,14 +390,18 @@ export const useRealTime = (
             content: data.chat.message,
           },
         ])
+      } else {
+        console.log('[Chatbot] ⚠️ Skipping first message (counter = 1)')
       }
       counterRef.current += 1
     }
 
+    console.log(`[Chatbot] 🔌 Subscribing to Pusher channel: ${chatRoom}`)
     pusherClient.subscribe(chatRoom)
     pusherClient.bind('realtime-mode', handler)
 
     return () => {
+      console.log(`[Chatbot] 🔌 Unsubscribing from Pusher channel: ${chatRoom}`)
       pusherClient.unbind('realtime-mode', handler)
       pusherClient.unsubscribe(chatRoom)
     }
