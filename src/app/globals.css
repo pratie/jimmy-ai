@@ -41,69 +41,101 @@ body::before {
 
 @layer base {
   :root {
-    /* Unified theme using Landing Brand Palette */
-    /* Backgrounds and surfaces */
-    --background: 42 56% 97%;          /* brand-base-100 (#faf8f3) */
-    --foreground: 222 47% 11%;         /* brand-primary (#0f172a) */
+    /* Neobrutalism + Ronit.io Light Mode */
+    --background: 0 0% 100%;           /* #ffffff - white */
+    --foreground: 0 0% 0%;             /* #000 - black */
 
     --card: 0 0% 100%;                 /* white */
-    --card-foreground: 222 47% 11%;    /* brand-primary */
+    --card-foreground: 0 0% 0%;        /* black */
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
+    --popover-foreground: 0 0% 0%;
 
-    /* Primary and accent */
-    --primary: 222 47% 11%;            /* brand-primary */
-    --primary-foreground: 0 0% 100%;   /* white on primary */
+    /* Primary - using main turquoise for accents */
+    --primary: 168 95% 72%;            /* #76fbd9 - turquoise */
+    --primary-foreground: 0 0% 0%;     /* black on turquoise */
 
-    --secondary: 42 44% 95%;           /* brand-secondary (#f6f4ef) */
-    --secondary-foreground: 222 47% 11%;
+    --secondary: 0 0% 96%;             /* light gray */
+    --secondary-foreground: 0 0% 0%;
 
-    --muted: 42 40% 94%;               /* brand-base-200 (#f3f0e8) */
-    --muted-foreground: 222 10% 40%;   /* subdued text derived from primary */
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 40%;
 
-    --accent: 16 64% 61%;              /* brand-accent (#d97a5b) */
-    --accent-foreground: 0 0% 100%;
+    --accent: 168 95% 72%;             /* turquoise accent */
+    --accent-foreground: 0 0% 0%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 42 30% 85%;              /* brand-base-300 (#e7e2d6) */
+    --border: 0 0% 0%;                 /* black borders */
     --input: 0 0% 100%;
-    --ring: 222 47% 11%;               /* align ring with primary */
+    --ring: 168 95% 72%;               /* turquoise ring */
 
-    --radius: 0.75rem;                 /* Rounded corners */
+    --radius: 0.3125rem;               /* 5px - Neobrutalism base */
+
+    /* Neobrutalism shadow offsets */
+    --boxShadowX: 4px;
+    --boxShadowY: 4px;
+    --reverseBoxShadowX: -4px;
+    --reverseBoxShadowY: -4px;
   }
 
   .dark {
-    /* Dark mode tuned to brand primary */
-    --background: 222 30% 12%;
-    --foreground: 0 0% 98%;
+    /* Neobrutalism Dark Mode (#212121) */
+    --background: 0 0% 13%;            /* #212121 */
+    --foreground: 45 13% 93%;          /* #eeefe9 */
 
-    --card: 222 25% 16%;
-    --card-foreground: 0 0% 98%;
+    --card: 0 0% 13%;
+    --card-foreground: 45 13% 93%;
 
-    --popover: 222 25% 16%;
-    --popover-foreground: 0 0% 98%;
+    --popover: 0 0% 13%;
+    --popover-foreground: 45 13% 93%;
 
-    --primary: 222 47% 11%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 168 95% 72%;            /* turquoise stays same */
+    --primary-foreground: 0 0% 0%;
 
-    --secondary: 222 25% 18%;
-    --secondary-foreground: 0 0% 98%;
+    --secondary: 0 0% 20%;
+    --secondary-foreground: 45 13% 93%;
 
-    --muted: 222 20% 20%;
+    --muted: 0 0% 20%;
     --muted-foreground: 0 0% 65%;
 
-    --accent: 16 64% 61%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 168 95% 72%;             /* turquoise */
+    --accent-foreground: 0 0% 0%;
 
     --destructive: 0 63% 31%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 222 20% 25%;
-    --input: 222 20% 20%;
-    --ring: 222 47% 11%;
+    --border: 0 0% 0%;                 /* keep black borders */
+    --input: 0 0% 13%;
+    --ring: 168 95% 72%;
+  }
+}
+
+/* Neobrutalism utility classes */
+@layer utilities {
+  .shadow-shadow {
+    box-shadow: 4px 4px 0px 0px #000;
+  }
+
+  .shadow-light {
+    box-shadow: 4px 4px 0px 0px #000;
+  }
+
+  .shadow-dark {
+    box-shadow: 4px 4px 0px 0px #000;
+  }
+
+  .rounded-base {
+    border-radius: 5px;
+  }
+
+  .translate-boxShadow {
+    transform: translate(4px, 4px);
+  }
+
+  .hover\:translate-boxShadow:hover {
+    transform: translate(4px, 4px);
   }
 }
 

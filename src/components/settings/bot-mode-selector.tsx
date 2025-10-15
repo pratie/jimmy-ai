@@ -78,11 +78,11 @@ export const BotModeSelector = ({ domainId, currentMode }: BotModeSelectorProps)
               <div
                 key={mode.value}
                 className={`
-                  p-4 rounded-lg border-2 cursor-pointer transition-all
+                  p-4 rounded-base border-2 cursor-pointer transition-all
                   ${
                     selectedMode === mode.value
-                      ? 'border-brand-accent bg-brand-accent/10'
-                      : 'border-brand-base-300 hover:border-brand-base-300'
+                      ? 'border-main bg-main/10 shadow-shadow'
+                      : 'border-border hover:shadow-shadow hover:translate-x-1 hover:translate-y-1'
                   }
                 `}
                 onClick={() => setSelectedMode(mode.value)}

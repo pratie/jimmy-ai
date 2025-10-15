@@ -48,7 +48,7 @@ export default async function Home() {
 
             {/* CTA Button */}
             <Link href="/auth/sign-up" className="mt-2">
-              <Button size="lg" className="bg-brand-primary hover:bg-brand-primary/90 text-white font-semibold px-10 py-6 text-lg rounded-xl shadow-lg transition-all duration-200 hover:shadow-xl hover:-translate-y-0.5">
+              <Button size="lg" className="bg-main text-black font-heading px-10 py-6 text-lg border-2 border-border shadow-shadow hover:translate-x-1 hover:translate-y-1 hover:shadow-none">
                 Start for free →
               </Button>
             </Link>
@@ -288,7 +288,7 @@ export default async function Home() {
               Join small business owners using smart AI to capture qualified leads, close deals faster, and grow without hiring support teams.
             </p>
             <Link href="/auth/sign-up">
-              <Button size="lg" className="bg-brand-primary hover:bg-brand-primary/90 text-white font-bold px-12 py-7 text-xl rounded-2xl shadow-2xl transition-all duration-300 transform hover:scale-105">
+              <Button size="lg" className="bg-main text-black font-heading px-12 py-7 text-xl border-2 border-border shadow-shadow hover:translate-x-1 hover:translate-y-1 hover:shadow-none">
                 Start for free →
               </Button>
             </Link>

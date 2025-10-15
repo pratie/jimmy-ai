@@ -42,13 +42,13 @@ const MaxMenu = ({ current, domains, onExpand, onSignOut, user }: Props) => {
           height={0}
         />
         <Menu
-          className="cursor-pointer animate-fade-in opacity-0 delay-300 fill-mode-forwards text-brand-primary/70 hover:text-brand-primary"
+          className="cursor-pointer animate-fade-in opacity-0 delay-300 fill-mode-forwards text-text/70 hover:text-text dark:text-darkText/70 dark:hover:text-darkText"
           onClick={onExpand}
         />
       </div>
       <div className="animate-fade-in opacity-0 delay-300 fill-mode-forwards flex flex-col justify-between h-full pt-10">
         <div className="flex flex-col">
-          <p className="text-xs text-brand-primary/60 mb-3">MENU</p>
+          <p className="text-xs text-text/60 mb-3 font-heading dark:text-darkText/60">MENU</p>
           {SIDE_BAR_MENU.map((menu, key) => (
             <MenuItem
               size="max"
@@ -72,35 +72,35 @@ const MaxMenu = ({ current, domains, onExpand, onSignOut, user }: Props) => {
             <div className="relative">
               <button
                 onClick={() => setShowDropdown(!showDropdown)}
-                className="flex items-center gap-2 px-2 py-2 w-full hover:bg-brand-base-100 rounded-lg transition-colors"
+                className="flex items-center gap-2 px-2 py-2 w-full hover:bg-bg rounded-base transition-all border-2 border-transparent hover:border-border hover:shadow-[2px_2px_0px_0px_#000]"
               >
-                <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-brand-accent to-brand-primary">
-                  <User className="w-5 h-5 text-white" />
+                <div className="flex items-center justify-center w-10 h-10 rounded-full bg-main border-2 border-border shadow-[2px_2px_0px_0px_#000]">
+                  <User className="w-5 h-5 text-black" />
                 </div>
                 <div className="flex flex-col overflow-hidden flex-1 text-left">
-                  <p className="text-sm font-medium text-brand-primary truncate">
+                  <p className="text-sm font-heading text-text truncate dark:text-darkText">
                     {user.fullname}
                   </p>
-                  <p className="text-xs text-brand-primary/70 truncate">
+                  <p className="text-xs text-text/70 truncate dark:text-darkText/70">
                     {user.email}
                   </p>
                 </div>
               </button>
               {showDropdown && (
-                <div className="absolute bottom-full left-0 right-0 mb-2 bg-white/95 backdrop-blur-sm border border-brand-base-300 rounded-lg shadow-lg overflow-hidden">
-                  <div className="px-4 py-3 border-b border-brand-base-300/60">
-                    <p className="text-sm font-medium text-brand-primary">{user.fullname}</p>
-                    <p className="text-xs text-brand-primary/70">{user.email}</p>
+                <div className="absolute bottom-full left-0 right-0 mb-2 bg-bg border-2 border-border rounded-base shadow-shadow overflow-hidden dark:bg-darkBg">
+                  <div className="px-4 py-3 border-b-2 border-border">
+                    <p className="text-sm font-heading text-text dark:text-darkText">{user.fullname}</p>
+                    <p className="text-xs text-text/70 dark:text-darkText/70">{user.email}</p>
                   </div>
                   <button
                     onClick={() => {
                       setShowDropdown(false)
                       onSignOut()
                     }}
-                    className="flex items-center gap-2 px-4 py-2 w-full hover:bg-brand-base-100 transition-colors text-left"
+                    className="flex items-center gap-2 px-4 py-2 w-full hover:bg-main transition-all text-left font-base"
                   >
-                    <LogOut className="w-4 h-4 text-brand-primary/80" />
-                    <span className="text-sm text-brand-primary/90">Sign out</span>
+                    <LogOut className="w-4 h-4 text-text/80 dark:text-darkText/80" />
+                    <span className="text-sm text-text/90 dark:text-darkText/90">Sign out</span>
                   </button>
                 </div>
               )}

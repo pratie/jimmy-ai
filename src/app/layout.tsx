@@ -1,15 +1,17 @@
 import type { Metadata } from 'next'
 import { ClerkProvider } from '@clerk/nextjs'
-import { Plus_Jakarta_Sans } from 'next/font/google'
+import { Space_Grotesk } from 'next/font/google'
 import Script from 'next/script'
 import './globals.css'
 import { Toaster } from '@/components/ui/toaster'
 import { ThemeProvider } from '@/context/them-provider'
 
-const jakarta = Plus_Jakarta_Sans({
+const spaceGrotesk = Space_Grotesk({
   subsets: ['latin'],
   display: 'swap',
   preload: true,
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-space-grotesk',
 })
 
 export const metadata: Metadata = {
@@ -57,7 +59,7 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en" suppressHydrationWarning>
-        <body className={`${jakarta.className} landing-gradient min-h-screen`}>
+        <body className={`${spaceGrotesk.className} landing-gradient min-h-screen`}>
           {/* DataFast Analytics - Must be in body for Next.js Script component */}
           <Script
             defer

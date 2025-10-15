@@ -60,13 +60,10 @@ const Page = async (props: Props) => {
           />
         </div>
         <div className="w-full py-10">
-          <div className="mx-auto max-w-5xl px-4 relative bg-white/90 backdrop-blur-sm rounded-lg border border-brand-base-300 shadow-sm p-6 pt-7">
-            {/* Top accent bar */}
-            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-brand-accent via-brand-primary to-brand-accent rounded-t-lg"></div>
-
+          <div className="mx-auto max-w-5xl px-4 relative bg-bg dark:bg-darkBg rounded-base border-2 border-border shadow-shadow p-6">
             <div className="mb-6">
-              <h2 className="font-semibold text-xl text-brand-primary">Plan Usage</h2>
-              <p className="text-sm text-brand-primary/60 mt-1">
+              <h2 className="font-heading text-xl text-text dark:text-darkText">Plan Usage</h2>
+              <p className="text-sm text-text/70 dark:text-darkText/70 mt-1">
                 A detailed overview of your metrics, usage, customers and more
               </p>
             </div>

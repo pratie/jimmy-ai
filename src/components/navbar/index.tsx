@@ -39,7 +39,7 @@ function NavBar() {
       </ul>
       <Link
         href="/dashboard"
-        className="px-4 py-2.5 rounded-md bg-brand-primary text-white font-bold hover:bg-brand-primary/90 transition-all border border-brand-primary"
+        className="px-4 py-2.5 rounded-base bg-main text-black font-heading border-2 border-border shadow-shadow hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all"
       >
         Start Automating Now
       </Link>

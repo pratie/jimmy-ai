@@ -18,9 +18,26 @@ const config = {
       },
     },
     extend: {
+      width: {
+        container: '1400px',
+      },
       colors: {
-        // Brand Palette (Landing page)
-        // Derived from provided screenshots
+        // Neobrutalism Colors (from ronit.io)
+        main: '#76fbd9',              // Turquoise accent
+        mainAccent: '#76fbd9',
+        overlay: 'rgba(0,0,0,0.8)',
+
+        // Light mode
+        bg: '#ffffff',
+        text: '#000',
+
+        // Dark mode
+        darkBg: '#212121',
+        darkText: '#eeefe9',
+        darkBorder: '#000',
+        secondaryBlack: '#212121',
+
+        // Brand Palette (Landing page) - Keep for backward compatibility
         'brand-primary': '#0f172a',   // Dark navy for primary actions
         'brand-secondary': '#f6f4ef', // Soft off-white for surfaces
         'brand-accent': '#d97a5b',    // Accent highlight (salmon/coral)
@@ -82,8 +99,8 @@ const config = {
         porcelain: '#f3f0e8',             // -> brand-base-200
         ironside: '#0f172a',              // -> brand-primary
 
-        // Shadcn theme colors
-        border: 'hsl(var(--border))',
+        // Shadcn theme colors (hybrid with Neobrutalism)
+        border: '#000',  // Neobrutalism uses solid black borders
         input: 'hsl(var(--input))',
         ring: 'hsl(var(--ring))',
         background: 'hsl(var(--background))',
@@ -118,9 +135,28 @@ const config = {
         },
       },
       borderRadius: {
+        base: '5px',  // Neobrutalism border radius
         lg: 'var(--radius)',
         md: 'calc(var(--radius) - 2px)',
         sm: 'calc(var(--radius) - 4px)',
+      },
+      boxShadow: {
+        light: '4px 4px 0px 0px #000',
+        dark: '4px 4px 0px 0px #000',
+        shadow: '4px 4px 0px 0px #000',  // Neobrutalism shadow
+      },
+      translate: {
+        boxShadowX: '4px',
+        boxShadowY: '4px',
+        reverseBoxShadowX: '-4px',
+        reverseBoxShadowY: '-4px',
+      },
+      fontWeight: {
+        base: '500',
+        heading: '700',
+      },
+      fontFamily: {
+        sans: ['var(--font-space-grotesk)', 'Space Grotesk', 'system-ui', 'sans-serif'],
       },
       keyframes: {
         'accordion-down': {
@@ -147,6 +183,14 @@ const config = {
           from: { opacity: '0' },
           to: { opacity: '1' },
         },
+        marquee: {
+          '0%': { transform: 'translateX(0%)' },
+          '100%': { transform: 'translateX(-100%)' },
+        },
+        marquee2: {
+          '0%': { transform: 'translateX(100%)' },
+          '100%': { transform: 'translateX(0%)' },
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
@@ -155,6 +199,12 @@ const config = {
         'open-sidebar': 'open-sidebar 0.2s ease-out',
         'close-sidebar': 'close-sidebar 0.2s ease-out',
         'fade-in': 'fade-in 0.2s ease-out',
+        marquee: 'marquee 15s linear infinite',
+        marquee2: 'marquee2 15s linear infinite',
+      },
+      screens: {
+        w900: { raw: '(max-width: 900px)' },
+        w500: { raw: '(max-width: 500px)' },
       },
     },
   },

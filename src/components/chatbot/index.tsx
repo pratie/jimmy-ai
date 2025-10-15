@@ -65,12 +65,12 @@ const AiChatBot = (props: Props) => {
         />
       )}
       {loading ? (
-        <div className="rounded-full relative shadow-md w-20 h-20 flex items-center justify-center bg-brand-accent animate-pulse">
-          <div className="w-8 h-8 border-4 border-brand-base-300 border-t-brand-primary rounded-full animate-spin" />
+        <div className="rounded-full relative w-20 h-20 flex items-center justify-center bg-main border-2 border-border shadow-shadow animate-pulse">
+          <div className="w-8 h-8 border-4 border-border border-t-main rounded-full animate-spin" />
         </div>
       ) : (
         <div
-          className="rounded-full relative cursor-pointer shadow-md w-20 h-20 flex items-center justify-center bg-brand-accent"
+          className="rounded-full relative cursor-pointer w-20 h-20 flex items-center justify-center bg-main border-2 border-border shadow-shadow hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all"
           onClick={onOpenChatBot}
         >
           {((currentBot?.chatBot?.icon || currentBot?.icon) && !iconError) ? (

@@ -61,16 +61,16 @@ export default function PricingSection() {
               <Card
                 key={card.title}
                 className={clsx(
-                  'w-full max-w-[320px] sm:w-[320px] flex flex-col justify-between shadow-xl rounded-2xl overflow-hidden transition-all duration-300 hover:transform hover:scale-105 hover:shadow-2xl',
+                  'w-full max-w-[320px] sm:w-[320px] flex flex-col justify-between rounded-base overflow-hidden transition-all',
                   {
-                    'bg-brand-base-100 backdrop-blur-md border-3 border-brand-accent/40 relative':
+                    'bg-bg border-2 border-main shadow-shadow hover:translate-x-1 hover:translate-y-1 hover:shadow-none relative':
                       card.title === 'Business',
-                    'bg-brand-base-100 backdrop-blur-md border-2 border-brand-base-300': card.title !== 'Business',
+                    'bg-bg border-2 border-border shadow-shadow hover:translate-x-1 hover:translate-y-1 hover:shadow-none': card.title !== 'Business',
                   }
                 )}
               >
                 {card.title === 'Business' && (
-                  <div className="absolute top-0 right-0 bg-brand-primary text-white px-4 py-1 text-sm font-bold rounded-bl-lg shadow-md">
+                  <div className="absolute top-0 right-0 bg-main text-black px-4 py-1 text-sm font-heading border-2 border-border border-t-0 border-r-0 rounded-bl-base shadow-[2px_2px_0px_0px_#000]">
                     ⭐ Most Popular
                   </div>
                 )}
@@ -128,10 +128,10 @@ export default function PricingSection() {
                   <Link
                     href={`/dashboard?plan=${card.title}`}
                     className={clsx(
-                      'w-full text-center font-bold py-3 px-4 rounded-xl transition-all duration-300',
+                      'w-full text-center font-heading py-3 px-4 rounded-base transition-all border-2',
                       card.title === 'Business'
-                        ? 'bg-brand-primary text-white hover:bg-brand-primary/90 shadow-lg border-2 border-brand-primary'
-                        : 'bg-brand-secondary backdrop-blur-sm text-brand-primary border-2 border-brand-base-300 hover:bg-brand-base-200'
+                        ? 'bg-main text-black border-border shadow-shadow hover:translate-x-1 hover:translate-y-1 hover:shadow-none'
+                        : 'bg-bg text-text border-border shadow-shadow hover:translate-x-1 hover:translate-y-1 hover:shadow-none'
                     )}
                   >
                     Get Started
