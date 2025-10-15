@@ -77,9 +77,25 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
     ref
   ) => {
     const [avatarError, setAvatarError] = useState(false)
+    const [showJump, setShowJump] = useState(false)
+
+    // Toggle jump-to-latest button based on scroll position
+    React.useEffect(() => {
+      const el = (ref as any)?.current as HTMLDivElement | null
+      if (!el) return
+      const onScroll = () => {
+        const threshold = 120
+        const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight <= threshold
+        setShowJump(!nearBottom)
+      }
+      onScroll()
+      el.addEventListener('scroll', onScroll)
+      return () => el.removeEventListener('scroll', onScroll)
+    }, [ref])
+
     console.log(errors)
     return (
-      <div className={(responsive ? 'h-full w-full max-w-none' : 'h-[620px] w-[420px]') + ' flex flex-col bg-white rounded-2xl border shadow-xl overflow-hidden'}>
+      <div className={(responsive ? 'h-full w-full max-w-none' : 'h-[620px] w-[420px]') + ' relative flex flex-col min-h-0 bg-white rounded-2xl border shadow-xl overflow-hidden'}>
         <div className="flex justify-between px-4 pt-4">
           <div className="flex gap-2">
             <Avatar className="w-20 h-20">
@@ -139,13 +155,13 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
         >
           <TabsContent value="chat">
             <Separator orientation="horizontal" />
-            <div className="flex flex-col h-full">
+            <div className="flex flex-col h-full min-h-0">
               <div
                 style={{
                   background: theme || '',
                   color: textColor || '',
                 }}
-                className="px-3 flex flex-1 min-h-[300px] flex-col py-5 gap-3 chat-window overflow-y-auto"
+                className="px-3 flex flex-1 min-h-[300px] flex-col py-5 gap-3 chat-window overflow-y-auto overscroll-contain scroll-smooth"
                 ref={ref}
               >
                 {chats.map((chat, key) => (
@@ -183,6 +199,19 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
                 </Label>
               </form>
             </div>
+            {showJump && (
+              <button
+                type="button"
+                onClick={() => {
+                  const el = (ref as any)?.current as HTMLDivElement | null
+                  if (el) el.scroll({ top: el.scrollHeight, behavior: 'smooth' })
+                }}
+                className="absolute bottom-20 right-4 z-20 rounded-full bg-main text-black px-3 py-1.5 text-xs border border-border shadow-md flex items-center gap-1"
+              >
+                <ChevronDown className="w-4 h-4" />
+                Jump to latest
+              </button>
+            )}
           </TabsContent>
 
           <TabsContent value="faqs">
