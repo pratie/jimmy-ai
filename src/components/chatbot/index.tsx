@@ -5,6 +5,7 @@ import { BotWindow } from './window'
 import { cn } from '@/lib/utils'
 import { getKieImageUrl } from '@/lib/kie-api'
 import Image from 'next/image'
+import { X } from 'lucide-react'
 import { BotIcon } from '@/icons/bot-icon'
 
 type Props = {}
@@ -45,7 +46,7 @@ const AiChatBot = (props: Props) => {
   }, [currentBot?.chatBot?.icon])
 
   return (
-    <div className="h-screen flex flex-col justify-end items-end gap-4">
+    <div className="h-screen relative flex flex-col justify-end items-end">
       {botOpened && (
         <BotWindow
           errors={errors}
@@ -69,7 +70,7 @@ const AiChatBot = (props: Props) => {
         <div className="rounded-full relative w-20 h-20 flex items-center justify-center bg-main border-2 border-border shadow-shadow animate-pulse">
           <div className="w-8 h-8 border-4 border-border border-t-main rounded-full animate-spin" />
         </div>
-      ) : (
+      ) : !botOpened ? (
         <div
           className="rounded-full relative cursor-pointer w-20 h-20 flex items-center justify-center bg-main border-2 border-border shadow-shadow hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all"
           onClick={onOpenChatBot}
@@ -86,6 +87,15 @@ const AiChatBot = (props: Props) => {
             <BotIcon />
           )}
         </div>
+      ) : (
+        <button
+          aria-label="Close chat"
+          title="Close"
+          onClick={onOpenChatBot}
+          className="rounded-full w-16 h-16 flex items-center justify-center bg-main border-2 border-border shadow-shadow hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all absolute bottom-0 right-0 z-10"
+        >
+          <X className="w-7 h-7" />
+        </button>
       )}
     </div>
   )
