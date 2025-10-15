@@ -13,7 +13,7 @@ import Bubble from './bubble'
 import { Responding } from './responding'
 import { Input } from '../ui/input'
 import { Button } from '../ui/button'
-import { Paperclip, Send } from 'lucide-react'
+import { Paperclip, Send, X } from 'lucide-react'
 import { Label } from '../ui/label'
 import { CardDescription, CardTitle } from '../ui/card'
 import Accordion from '../accordian'
@@ -30,6 +30,8 @@ type Props = {
   textColor?: string | null
   help?: boolean
   botIcon?: string | null
+  responsive?: boolean
+  onClose?: () => void
   realtimeMode:
     | {
         chatroom: string
@@ -69,13 +71,15 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
       theme,
       help,
       botIcon,
+      responsive,
+      onClose,
     },
     ref
   ) => {
     const [avatarError, setAvatarError] = useState(false)
     console.log(errors)
     return (
-      <div className="h-[670px] w-[450px] flex flex-col bg-white rounded-xl mr-[80px] border-[1px] overflow-hidden">
+      <div className={(responsive ? 'h-full w-full max-w-none' : 'h-[620px] w-[420px]') + ' flex flex-col bg-white rounded-2xl border shadow-xl overflow-hidden'}>
         <div className="flex justify-between px-4 pt-4">
           <div className="flex gap-2">
             <Avatar className="w-20 h-20">
@@ -104,6 +108,16 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
               )}
             </div>
           </div>
+          {onClose && (
+            <button
+              type="button"
+              aria-label="Close chat"
+              onClick={onClose}
+              className="h-8 w-8 inline-flex items-center justify-center rounded-full hover:bg-muted transition"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          )}
         </div>
         <TabsMenu
           triggers={BOT_TABS_MENU}
