@@ -13,7 +13,9 @@ const CodeSnippet = ({ id }: Props) => {
   const appUrl = (process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000').replace(/\/$/, '')
 
   // Smallest embed: one‑tag script loader (recommended)
-  const snippet = `<script defer src="${appUrl}/embed.min.js" id="${id}" data-app-origin="${appUrl}"></script>`
+  const [margin, setMargin] = React.useState(24)
+  const [size, setSize] = React.useState<'sm'|'md'>('md')
+  const snippet = `<script defer src="${appUrl}/embed.min.js" id="${id}" data-app-origin="${appUrl}" data-margin="${margin}" data-size="${size}"></script>`
 
   return (
     <div className="mt-10 flex flex-col gap-5 items-start">
@@ -21,7 +23,28 @@ const CodeSnippet = ({ id }: Props) => {
         label="Code snippet"
         message="Paste this in <head> (defer) or before </body> on your site."
       />
-      <div className="bg-cream px-6 py-4 rounded-lg relative w-full overflow-x-auto">
+      <div className="w-full flex items-center gap-3">
+        <label className="text-sm">Margin</label>
+        <select
+          className="border rounded-md px-2 py-1 text-sm"
+          value={margin}
+          onChange={(e)=>setMargin(parseInt(e.target.value))}
+        >
+          <option value={24}>24 px</option>
+          <option value={32}>32 px</option>
+          <option value={48}>48 px</option>
+        </select>
+        <label className="text-sm">Bubble</label>
+        <select
+          className="border rounded-md px-2 py-1 text-sm"
+          value={size}
+          onChange={(e)=>setSize(e.target.value as 'sm'|'md')}
+        >
+          <option value="sm">Small</option>
+          <option value="md">Medium</option>
+        </select>
+      </div>
+      <div className="bg-cream px-6 py-4 rounded-lg relative w-full overflow-x-auto mt-3">
         <Copy
           className="absolute top-5 right-5 text-brand-primary/60 hover:text-brand-primary cursor-pointer"
           onClick={() => {

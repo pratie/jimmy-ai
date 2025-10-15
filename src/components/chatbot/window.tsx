@@ -13,7 +13,7 @@ import Bubble from './bubble'
 import { Responding } from './responding'
 import { Input } from '../ui/input'
 import { Button } from '../ui/button'
-import { Paperclip, Send, X } from 'lucide-react'
+import { Paperclip, Send, X, ChevronDown } from 'lucide-react'
 import { Label } from '../ui/label'
 import { CardDescription, CardTitle } from '../ui/card'
 import Accordion from '../accordian'
@@ -108,16 +108,30 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
               )}
             </div>
           </div>
-          {onClose && (
-            <button
-              type="button"
-              aria-label="Close chat"
-              onClick={onClose}
-              className="h-8 w-8 inline-flex items-center justify-center rounded-full hover:bg-muted transition"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          )}
+          <div className="flex items-center gap-1">
+            {onClose && (
+              <button
+                type="button"
+                aria-label="Minimize chat"
+                onClick={onClose}
+                className="h-8 w-8 inline-flex items-center justify-center rounded-full hover:bg-muted transition"
+                title="Minimize"
+              >
+                <ChevronDown className="w-5 h-5" />
+              </button>
+            )}
+            {onClose && (
+              <button
+                type="button"
+                aria-label="Close chat"
+                onClick={onClose}
+                className="h-8 w-8 inline-flex items-center justify-center rounded-full hover:bg-muted transition"
+                title="Close"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            )}
+          </div>
         </div>
         <TabsMenu
           triggers={BOT_TABS_MENU}
@@ -131,7 +145,7 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
                   background: theme || '',
                   color: textColor || '',
                 }}
-                className="px-3 flex h-[400px] flex-col py-5 gap-3 chat-window overflow-y-auto"
+                className="px-3 flex flex-1 min-h-[300px] flex-col py-5 gap-3 chat-window overflow-y-auto"
                 ref={ref}
               >
                 {chats.map((chat, key) => (
@@ -148,21 +162,16 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
                   e.preventDefault()
                   onChat()
                 }}
-                className="flex px-3 py-1 flex-col flex-1 bg-porcelain"
+                className="flex px-3 py-3 items-center gap-2 bg-porcelain border-t"
               >
-                <div className="flex justify-between">
-                  <Input
-                    {...register('content')}
-                    placeholder={`Ask anything about ${domainName}...`}
-                    className="focus-visible:ring-0 flex-1 p-0 focus-visible:ring-offset-0 bg-porcelain rounded-none outline-none border-none"
-                  />
-                  <Button
-                    type="submit"
-                    className="mt-3"
-                  >
-                    <Send />
-                  </Button>
-                </div>
+                <Input
+                  {...register('content')}
+                  placeholder={`Ask anything about ${domainName}...`}
+                  className="focus-visible:ring-0 flex-1 min-h-[44px] focus-visible:ring-offset-0 bg-porcelain rounded-md outline-none"
+                />
+                <Button type="submit" className="shrink-0" aria-label="Send">
+                  <Send />
+                </Button>
                 <Label htmlFor="bot-image">
                   <Paperclip />
                   <Input
