@@ -83,11 +83,12 @@ export const useChatBot = (options?: UseChatBotOptions) => {
   >(undefined)
 
   const onScrollToBottom = () => {
-    messageWindowRef.current?.scroll({
-      top: messageWindowRef.current.scrollHeight,
-      left: 0,
-      behavior: 'smooth',
-    })
+    const el = messageWindowRef.current
+    if (!el) return
+    const threshold = 80
+    const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight <= threshold
+    if (!nearBottom) return
+    el.scroll({ top: el.scrollHeight, left: 0, behavior: 'smooth' })
   }
 
   useEffect(() => {
