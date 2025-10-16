@@ -200,19 +200,7 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
                 </Label>
               </form>
             </div>
-            {showJump && (
-              <button
-                type="button"
-                onClick={() => {
-                  const el = (ref as any)?.current as HTMLDivElement | null
-                  if (el) el.scroll({ top: el.scrollHeight, behavior: 'smooth' })
-                }}
-                className="absolute bottom-20 right-4 z-20 rounded-full bg-main text-black px-3 py-1.5 text-xs border border-border shadow-md flex items-center gap-1"
-              >
-                <ChevronDown className="w-4 h-4" />
-                Jump to latest
-              </button>
-            )}
+            {/* Jump button rendered at Tabs wrapper level below */}
           </TabsContent>
 
           <TabsContent value="faqs">
