@@ -154,7 +154,7 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
             triggers={BOT_TABS_MENU}
             className="bg-transparent border-[1px] border-border mx-2 mb-2 h-full flex flex-col min-h-0"
           >
-          <TabsContent value="chat">
+          <TabsContent value="chat" className="flex flex-col h-full min-h-0">
             <Separator orientation="horizontal" />
             <div className="flex flex-col h-full min-h-0">
               <div
@@ -179,7 +179,7 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
                   e.preventDefault()
                   onChat()
                 }}
-                className="flex px-3 py-3 items-center gap-2 bg-porcelain border-t"
+                className="flex px-3 py-3 items-center gap-2 bg-porcelain border-t shrink-0"
               >
                 <Input
                   {...register('content')}
@@ -203,7 +203,7 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
             {/* Jump button rendered at Tabs wrapper level below */}
           </TabsContent>
 
-          <TabsContent value="faqs">
+          <TabsContent value="faqs" className="flex flex-col h-full min-h-0">
             <div className="h-full overflow-y-auto overflow-x-hidden p-4 flex flex-col gap-4">
               <div>
                 <CardTitle>FAQs</CardTitle>

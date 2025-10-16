@@ -175,6 +175,8 @@ export const useChatBot = (options?: UseChatBotOptions) => {
   const onStartChatting = handleSubmit(async (values) => {
     console.log('ALL VALUES', values)
     const anonymousId = getAnonymousId()
+    // Always snap to bottom on user send
+    { const el = messageWindowRef.current; if (el) setTimeout(() => el.scroll({ top: el.scrollHeight, behavior: 'smooth' }), 0) }
 
     if (values.image?.length) {
       console.log('IMAGE FROM ', values.image[0])
@@ -194,6 +196,7 @@ export const useChatBot = (options?: UseChatBotOptions) => {
             content: uploaded.downloadUrl,
           },
         ])
+        { const el = messageWindowRef.current; if (el) setTimeout(() => el.scroll({ top: el.scrollHeight, behavior: 'smooth' }), 0) }
       }
 
       console.log('🟡 RESPONSE FROM KIE', uploaded.downloadUrl)
@@ -208,6 +211,8 @@ export const useChatBot = (options?: UseChatBotOptions) => {
 
       if (response) {
         setOnAiTyping(false)
+        { const el = messageWindowRef.current; if (el) setTimeout(() => el.scroll({ top: el.scrollHeight, behavior: 'smooth' }), 0) }
+        { const el = messageWindowRef.current; if (el) setTimeout(() => el.scroll({ top: el.scrollHeight, behavior: 'smooth' }), 0) }
         if (response.live) {
           setOnRealTime((prev) => ({
             ...prev,
@@ -216,6 +221,7 @@ export const useChatBot = (options?: UseChatBotOptions) => {
           }))
         } else {
           setOnChats((prev: any) => [...prev, response.response])
+          { const el = messageWindowRef.current; if (el) setTimeout(() => el.scroll({ top: el.scrollHeight, behavior: 'smooth' }), 0) }
         }
       }
     }
@@ -230,6 +236,7 @@ export const useChatBot = (options?: UseChatBotOptions) => {
             content: values.content,
           },
         ])
+        { const el = messageWindowRef.current; if (el) setTimeout(() => el.scroll({ top: el.scrollHeight, behavior: 'smooth' }), 0) }
       }
 
       setOnAiTyping(true)
@@ -274,6 +281,8 @@ export const useChatBot = (options?: UseChatBotOptions) => {
 
         // Create assistant message placeholder
         setOnChats((prev: any) => [...prev, { role: 'assistant', content: '' }])
+        { const el = messageWindowRef.current; if (el) setTimeout(() => el.scroll({ top: el.scrollHeight, behavior: 'smooth' }), 0) }
+        { const el = messageWindowRef.current; if (el) setTimeout(() => el.scroll({ top: el.scrollHeight, behavior: 'smooth' }), 0) }
 
         while (true) {
           const { done, value } = await reader.read()
