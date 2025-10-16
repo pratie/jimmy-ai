@@ -83,7 +83,7 @@ const AiChatBot = (props: Props) => {
         </div>
       ) : !botOpened ? (
         <div
-          className="rounded-full relative cursor-pointer w-16 h-16 flex items-center justify-center bg-main border-2 border-border shadow-shadow hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all"
+          className="rounded-full overflow-hidden relative cursor-pointer w-16 h-16 flex items-center justify-center bg-white border-2 border-border shadow-xl hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all"
           onClick={onOpenChatBot}
         >
           {((currentBot?.chatBot?.icon || currentBot?.icon) && !iconError) ? (
@@ -91,6 +91,7 @@ const AiChatBot = (props: Props) => {
               src={getKieImageUrl(currentBot?.chatBot?.icon || currentBot?.icon || '')}
               alt="bot"
               fill
+              className="object-cover rounded-full"
               onError={() => setIconError(true)}
               onLoad={() => setIconError(false)}
             />

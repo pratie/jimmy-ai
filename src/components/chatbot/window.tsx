@@ -96,9 +96,9 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
     console.log(errors)
     return (
       <div className={(responsive ? 'h-full w-full max-w-none' : 'h-[620px] w-[420px]') + ' relative flex flex-col min-h-0 bg-white rounded-2xl border shadow-xl overflow-hidden'}>
-        <div className="flex justify-between px-4 pt-4">
+        <div className="flex justify-between px-4 py-3">
           <div className="flex gap-2">
-            <Avatar className="w-20 h-20">
+            <Avatar className="w-16 h-16">
               {botIcon && !avatarError ? (
                 <AvatarImage
                   src={getKieImageUrl(botIcon)}
@@ -149,10 +149,11 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
             )}
           </div>
         </div>
-        <TabsMenu
-          triggers={BOT_TABS_MENU}
-          className=" bg-transparent border-[1px] border-border m-2"
-        >
+        <div className="flex-1 min-h-0 relative">
+          <TabsMenu
+            triggers={BOT_TABS_MENU}
+            className="bg-transparent border-[1px] border-border mx-2 mb-2 h-full flex flex-col min-h-0"
+          >
           <TabsContent value="chat">
             <Separator orientation="horizontal" />
             <div className="flex flex-col h-full min-h-0">
@@ -161,7 +162,7 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
                   background: theme || '',
                   color: textColor || '',
                 }}
-                className="px-3 flex flex-1 min-h-[300px] flex-col py-5 gap-3 chat-window overflow-y-auto overscroll-contain scroll-smooth"
+                className="px-3 flex flex-1 min-h-[300px] flex-col py-3 gap-3 chat-window overflow-y-auto overscroll-contain scroll-smooth"
                 ref={ref}
               >
                 {chats.map((chat, key) => (
@@ -215,7 +216,7 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
           </TabsContent>
 
           <TabsContent value="faqs">
-            <div className="h-[485px] overflow-y-auto overflow-x-hidden p-4 flex flex-col gap-4">
+            <div className="h-full overflow-y-auto overflow-x-hidden p-4 flex flex-col gap-4">
               <div>
                 <CardTitle>FAQs</CardTitle>
                 <CardDescription>
@@ -233,7 +234,21 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
               ))}
             </div>
           </TabsContent>
-        </TabsMenu>
+          </TabsMenu>
+          {showJump && (
+            <button
+              type="button"
+              onClick={() => {
+                const el = (ref as any)?.current as HTMLDivElement | null
+                if (el) el.scroll({ top: el.scrollHeight, behavior: 'smooth' })
+              }}
+              className="absolute bottom-20 right-4 z-20 rounded-full bg-main text-black px-3 py-1.5 text-xs border border-border shadow-md flex items-center gap-1"
+            >
+              <ChevronDown className="w-4 h-4" />
+              Jump to latest
+            </button>
+          )}
+        </div>
       </div>
     )
   }
