@@ -164,13 +164,13 @@ body::before {
 }
 
 .chat-bubble {
-  background: #ffffff;
-  padding: 16px 28px;
-  border-radius: 18px;
-  border-bottom-left-radius: 4px;
+  background: #f3f4f6; /* gray-100 */
+  padding: 10px 14px;
+  border-radius: 12px;
+  border-bottom-left-radius: 6px;
   display: inline-block;
-  box-shadow: 0 2px 12px rgba(147, 51, 234, 0.15);
-  border: 2px solid rgba(184, 230, 230, 0.4);
+  box-shadow: none;
+  border: 1px solid #e5e7eb; /* gray-200 */
 }
 .typing {
   align-items: center;
@@ -179,12 +179,12 @@ body::before {
 }
 .typing .dot {
   animation: mercuryTypingAnimation 1.8s infinite ease-in-out;
-  background-color: #9333ea;
+  background-color: #9ca3af; /* slate-400 */
   border-radius: 50%;
-  height: 7px;
+  height: 6px;
   margin-right: 4px;
   vertical-align: middle;
-  width: 7px;
+  width: 6px;
   display: inline-block;
 }
 .typing .dot:nth-child(1) {
@@ -203,15 +203,15 @@ body::before {
 @keyframes mercuryTypingAnimation {
   0% {
     transform: translateY(0px);
-    background-color: #9333ea;
+    background-color: #9ca3af; /* slate-400 */
   }
   28% {
-    transform: translateY(-7px);
-    background-color: #a855f7;
+    transform: translateY(-6px);
+    background-color: #cbd5e1; /* slate-300 */
   }
   44% {
     transform: translateY(0px);
-    background-color: #7c3aed;
+    background-color: #94a3b8; /* slate-400 slightly darker */
   }
 }
 

@@ -20,7 +20,7 @@ const Bubble = ({ message, createdAt, botIcon }: Props) => {
   const image = extractUUIDFromString(message.content)
   const [imageError, setImageError] = useState(false)
   const [botAvatarError, setBotAvatarError] = useState(false)
-  console.log(message.link)
+  //
 
   return (
     <div
@@ -38,7 +38,7 @@ const Bubble = ({ message, createdAt, botIcon }: Props) => {
               onError={() => setBotAvatarError(true)}
             />
           ) : (
-            <AvatarFallback className="bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold text-[8px]">
+            <AvatarFallback className="bg-blue-500 text-white font-bold text-[8px]">
               AI
             </AvatarFallback>
           )}
@@ -52,14 +52,19 @@ const Bubble = ({ message, createdAt, botIcon }: Props) => {
       )}
       <div
         className={cn(
-          'flex flex-col gap-1.5 min-w-[100px] max-w-[280px] p-2.5 rounded-lg',
+          'flex flex-col gap-1.5 min-w-[100px] max-w-[320px] p-3 rounded-lg',
           message.role == 'assistant'
-            ? 'bg-gray-100 rounded-bl-none'
-            : 'bg-yellow-100 rounded-br-none'
+            ? 'bg-gray-100 text-gray-900 rounded-bl-none'
+            : 'bg-blue-500 text-white rounded-br-none'
         )}
       >
         {createdAt ? (
-          <div className="flex gap-2 text-xs text-brand-primary/60">
+          <div
+            className={cn(
+              'flex gap-2 text-[11px]',
+              message.role == 'assistant' ? 'text-gray-500' : 'text-blue-100'
+            )}
+          >
             <p>
               {createdAt.getDate()} {getMonthName(createdAt.getMonth())}
             </p>
@@ -69,7 +74,12 @@ const Bubble = ({ message, createdAt, botIcon }: Props) => {
             </p>
           </div>
         ) : (
-          <p className="text-xs">
+          <p
+            className={cn(
+              'text-[11px]',
+              message.role == 'assistant' ? 'text-gray-500' : 'text-blue-100'
+            )}
+          >
             {`${d.getHours()}:${d.getMinutes()} ${
               d.getHours() > 12 ? 'pm' : 'am'
             }`}
@@ -94,7 +104,10 @@ const Bubble = ({ message, createdAt, botIcon }: Props) => {
             {message.content.replace('(complete)', ' ')}
             {message.link && (
               <a
-                className="underline font-bold pl-2 inline-block"
+                className={cn(
+                  'underline font-semibold pl-2 inline-block',
+                  message.role == 'assistant' ? 'text-gray-700' : 'text-white'
+                )}
                 href={message.link}
                 target="_blank"
                 rel="noopener noreferrer"

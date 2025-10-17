@@ -19,7 +19,7 @@ export const Responding = ({ botIcon }: RespondingProps) => {
             onError={() => setAvatarError(true)}
           />
         ) : (
-          <AvatarFallback className="bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold text-[10px]">
+          <AvatarFallback className="bg-blue-500 text-white font-bold text-[10px]">
             AI
           </AvatarFallback>
         )}

@@ -13,6 +13,7 @@ type Props = {
 const ChatbotPreview = ({ domainId }: Props) => {
   const {
     register,
+    watch,
     onStartChatting,
     onAiTyping,
     messageWindowRef,
@@ -50,6 +51,7 @@ const ChatbotPreview = ({ domainId }: Props) => {
                 textColor={currentBot?.chatBot?.textColor}
                 chats={onChats}
                 register={register}
+                watch={watch}
                 onChat={onStartChatting}
                 onResponding={onAiTyping}
                 botIcon={currentBot?.chatBot?.icon || currentBot?.icon || null}
@@ -67,4 +69,3 @@ const ChatbotPreview = ({ domainId }: Props) => {
 }
 
 export default ChatbotPreview
-

@@ -44,6 +44,7 @@ export const useChatBot = (options?: UseChatBotOptions) => {
     register,
     handleSubmit,
     reset,
+    watch,
     formState: { errors },
   } = useForm<ChatBotMessageProps>({
     resolver: zodResolver(ChatBotMessageSchema),
@@ -351,6 +352,7 @@ export const useChatBot = (options?: UseChatBotOptions) => {
     onStartChatting,
     onChats,
     register,
+    watch,
     onAiTyping,
     messageWindowRef,
     currentBot,

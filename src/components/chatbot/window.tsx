@@ -1,6 +1,6 @@
 import { ChatBotMessageProps } from '@/schemas/conversation.schema'
 import React, { forwardRef, useState } from 'react'
-import { UseFormRegister } from 'react-hook-form'
+import { UseFormRegister, UseFormWatch } from 'react-hook-form'
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'
 import RealTimeMode from './real-time'
 import { getKieImageUrl } from '@/lib/kie-api'
@@ -18,6 +18,7 @@ import { Label } from '../ui/label'
 type Props = {
   errors: any
   register: UseFormRegister<ChatBotMessageProps>
+  watch?: UseFormWatch<ChatBotMessageProps>
   chats: { role: 'assistant' | 'user'; content: string; link?: string }[]
   onChat(): void
   onResponding: boolean
@@ -56,6 +57,7 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
     {
       errors,
       register,
+      watch,
       chats,
       onChat,
       onResponding,
@@ -74,6 +76,10 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
   ) => {
     const [avatarError, setAvatarError] = useState(false)
     const [showJump, setShowJump] = useState(false)
+    const contentValue = watch ? (watch('content') as string | undefined) : undefined
+    const imageValue = watch ? (watch('image') as any) : undefined
+    const hasImage = !!(imageValue && imageValue.length > 0)
+    const canSend = !!(contentValue && contentValue.trim().length > 0) || hasImage
 
     // Toggle jump-to-latest button based on scroll position
     React.useEffect(() => {
@@ -92,7 +98,7 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
     console.log(errors)
     return (
       <div className={cn(
-        'relative flex flex-col bg-white rounded-2xl border shadow-xl overflow-hidden',
+        'relative flex flex-col bg-white rounded-xl border border-gray-300 shadow-sm overflow-hidden',
         responsive ? 'h-full w-full max-w-none' : 'h-[520px] w-[360px] sm:h-[600px] sm:w-[380px] md:h-[620px] md:w-[420px]'
       )}>
         {/* Fixed Header */}
@@ -106,7 +112,7 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
                   onError={() => setAvatarError(true)}
                 />
               ) : (
-                <AvatarFallback className="bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold text-sm">
+                <AvatarFallback className="bg-blue-500 text-white font-bold text-sm">
                   AI
                 </AvatarFallback>
               )}
@@ -115,7 +121,10 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
               <h3 className="text-sm font-semibold leading-tight">
                 {domainName || 'Assistant'}
               </h3>
-              <p className="text-xs text-gray-500">Online</p>
+              <p className="text-xs text-gray-500 flex items-center gap-1">
+                <span className="inline-block w-1.5 h-1.5 rounded-full bg-green-500" aria-hidden="true" />
+                Online
+              </p>
               {realtimeMode?.mode && (
                 <RealTimeMode
                   setChats={setChat}
@@ -140,12 +149,18 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
         </div>
         {/* Tabs and content area - proper flex layout */}
         <Tabs defaultValue="chat" className="flex-1 flex flex-col min-h-0">
-          <TabsList className="mx-2 mt-1 mb-0 grid w-[calc(100%-1rem)] grid-cols-2">
-            <TabsTrigger value="chat" className="flex items-center gap-1">
+          <TabsList className="mx-2 mt-1 mb-0 grid w-[calc(100%-1rem)] grid-cols-2 bg-transparent border-b">
+            <TabsTrigger
+              value="chat"
+              className="flex items-center justify-center gap-1 rounded-none border-b-2 border-transparent data-[state=active]:border-blue-600 data-[state=active]:text-blue-600 text-gray-600"
+            >
               <MessageCircle className="w-4 h-4" />
               Chat
             </TabsTrigger>
-            <TabsTrigger value="faqs" className="flex items-center gap-1">
+            <TabsTrigger
+              value="faqs"
+              className="flex items-center justify-center gap-1 rounded-none border-b-2 border-transparent data-[state=active]:border-blue-600 data-[state=active]:text-blue-600 text-gray-600"
+            >
               <HelpCircle className="w-4 h-4" />
               FAQs
             </TabsTrigger>
@@ -155,10 +170,10 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
             {/* Messages area - takes all available space */}
             <div
               style={{
-                background: theme || '',
-                color: textColor || '',
+                // Keep textColor for accessibility while avoiding glassy backgrounds
+                color: textColor || undefined,
               }}
-              className="flex-1 overflow-y-auto px-3 py-2"
+              className="flex-1 overflow-y-auto px-4 py-3 bg-white"
               ref={ref}
             >
               <div className="flex flex-col gap-2">
@@ -184,11 +199,12 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
               <Input
                 {...register('content')}
                 placeholder={`Type a message...`}
-                className="flex-1 h-[40px] bg-gray-50 border border-gray-200 rounded-lg px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="flex-1 h-[40px] bg-white border border-gray-300 rounded-lg px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
               <button
                 type="submit"
-                className="shrink-0 h-[40px] w-[40px] rounded-lg bg-blue-500 hover:bg-blue-600 text-white flex items-center justify-center transition-colors"
+                className="shrink-0 h-[40px] w-[40px] rounded-lg bg-blue-500 hover:bg-blue-600 disabled:bg-blue-300 disabled:cursor-not-allowed text-white flex items-center justify-center transition-colors"
+                disabled={!canSend}
                 aria-label="Send"
               >
                 <Send className="w-4 h-4" />

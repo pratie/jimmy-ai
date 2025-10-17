@@ -3,7 +3,7 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  background: transparent !important;
+  /* Do NOT force transparent background globally to avoid washing out UI */
 }
 
 html,

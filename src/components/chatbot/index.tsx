@@ -17,6 +17,7 @@ const AiChatBot = (props: Props) => {
     botOpened,
     onChats,
     register,
+    watch,
     onStartChatting,
     onAiTyping,
     messageWindowRef,
@@ -27,20 +28,7 @@ const AiChatBot = (props: Props) => {
     errors,
   } = useChatBot()
 
-  // Debug logging for icon
-  useEffect(() => {
-    console.log('🤖 Current bot data:', {
-      currentBot,
-      hasIcon: !!currentBot?.chatBot?.icon,
-      iconValue: currentBot?.chatBot?.icon,
-      iconError,
-      loading
-    })
-    if (currentBot?.chatBot?.icon) {
-      console.log('🖼️ Icon URL:', getKieImageUrl(currentBot.chatBot.icon))
-    }
-  }, [currentBot, iconError, loading])
-
+  // Reset icon error when icon changes
   useEffect(() => {
     setIconError(false)
   }, [currentBot?.chatBot?.icon])
@@ -61,6 +49,7 @@ const AiChatBot = (props: Props) => {
             textColor={currentBot?.chatBot?.textColor}
             chats={onChats}
             register={register}
+            watch={watch}
             onChat={onStartChatting}
             onResponding={onAiTyping}
             botIcon={currentBot?.chatBot?.icon || currentBot?.icon || null}
@@ -69,12 +58,12 @@ const AiChatBot = (props: Props) => {
         </div>
       )}
         {loading ? (
-        <div className="rounded-full relative w-20 h-20 flex items-center justify-center bg-main border-2 border-border shadow-shadow animate-pulse pointer-events-auto m-6">
-          <div className="w-8 h-8 border-4 border-border border-t-main rounded-full animate-spin" />
+        <div className="rounded-full relative w-16 h-16 flex items-center justify-center bg-white border border-gray-200 shadow-md pointer-events-auto m-6">
+          <div className="w-6 h-6 border-2 border-gray-300 border-t-blue-500 rounded-full animate-spin" />
         </div>
       ) : !botOpened ? (
         <div
-          className="rounded-full overflow-hidden relative cursor-pointer w-16 h-16 flex items-center justify-center bg-white border-2 border-border shadow-xl hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all pointer-events-auto m-6"
+          className="rounded-full overflow-hidden relative cursor-pointer w-16 h-16 flex items-center justify-center bg-white border border-gray-300 shadow-sm hover:shadow-md transition-shadow pointer-events-auto m-6"
           onClick={onOpenChatBot}
         >
           {((currentBot?.chatBot?.icon || currentBot?.icon) && !iconError) ? (
