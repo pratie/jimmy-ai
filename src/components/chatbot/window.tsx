@@ -4,20 +4,12 @@ import { UseFormRegister } from 'react-hook-form'
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'
 import RealTimeMode from './real-time'
 import { getKieImageUrl } from '@/lib/kie-api'
-import TabsMenu from '../tabs/intex'
-import { BOT_TABS_MENU } from '@/constants/menu'
-import ChatIcon from '@/icons/chat-icon'
-import { TabsContent } from '../ui/tabs'
-import { Separator } from '../ui/separator'
+import { cn } from '@/lib/utils'
 import Bubble from './bubble'
 import { Responding } from './responding'
 import { Input } from '../ui/input'
-import { Button } from '../ui/button'
 import { Paperclip, Send, X, ChevronDown } from 'lucide-react'
 import { Label } from '../ui/label'
-import { CardDescription, CardTitle } from '../ui/card'
-import Accordion from '../accordian'
-import UploadButton from '../upload-button'
 
 type Props = {
   errors: any
@@ -95,10 +87,14 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
 
     console.log(errors)
     return (
-      <div className={(responsive ? 'h-full w-full max-w-none' : 'h-[620px] w-[420px]') + ' relative flex flex-col min-h-0 bg-white rounded-2xl border shadow-xl overflow-hidden'}>
-        <div className="flex justify-between px-4 py-3">
-          <div className="flex gap-2">
-            <Avatar className="w-16 h-16">
+      <div className={cn(
+        'relative flex flex-col bg-white rounded-2xl border shadow-xl overflow-hidden',
+        responsive ? 'h-full w-full max-w-none' : 'h-[520px] w-[360px] sm:h-[600px] sm:w-[380px] md:h-[620px] md:w-[420px]'
+      )}>
+        {/* Fixed Header */}
+        <div className="flex justify-between items-center px-4 py-2.5 border-b bg-white shrink-0">
+          <div className="flex gap-3 items-center">
+            <Avatar className="w-10 h-10">
               {botIcon && !avatarError ? (
                 <AvatarImage
                   src={getKieImageUrl(botIcon)}
@@ -106,16 +102,16 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
                   onError={() => setAvatarError(true)}
                 />
               ) : (
-                <AvatarFallback className="bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold text-xl">
+                <AvatarFallback className="bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold text-sm">
                   AI
                 </AvatarFallback>
               )}
             </Avatar>
-            <div className="flex items-start flex-col">
-              <h3 className="text-lg font-bold leading-none">
-                {domainName || 'Sales Rep'}
+            <div className="flex flex-col">
+              <h3 className="text-sm font-semibold leading-tight">
+                {domainName || 'Assistant'}
               </h3>
-              <p className="text-sm text-muted-foreground">Chat Assistant</p>
+              <p className="text-xs text-gray-500">Online</p>
               {realtimeMode?.mode && (
                 <RealTimeMode
                   setChats={setChat}
@@ -124,119 +120,90 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
               )}
             </div>
           </div>
-          <div className="flex items-center gap-1">
-            {onClose && (
-              <button
-                type="button"
-                aria-label="Minimize chat"
-                onClick={onClose}
-                className="h-8 w-8 inline-flex items-center justify-center rounded-full hover:bg-muted transition"
-                title="Minimize"
-              >
-                <ChevronDown className="w-5 h-5" />
-              </button>
-            )}
+          <div className="flex items-center">
             {onClose && (
               <button
                 type="button"
                 aria-label="Close chat"
                 onClick={onClose}
-                className="h-8 w-8 inline-flex items-center justify-center rounded-full hover:bg-muted transition"
+                className="h-8 w-8 inline-flex items-center justify-center rounded-full hover:bg-gray-100 transition"
                 title="Close"
               >
-                <X className="w-5 h-5" />
+                <X className="w-5 h-5 text-gray-500" />
               </button>
             )}
           </div>
         </div>
-        <div className="flex-1 min-h-0 relative">
-          <TabsMenu
-            triggers={BOT_TABS_MENU}
-            className="bg-transparent border-[1px] border-border mx-2 mb-2 h-full flex flex-col min-h-0"
+        {/* Messages area and input - proper flex layout without tabs for now */}
+        <div className="flex-1 flex flex-col min-h-0">
+          {/* Messages area - takes all available space */}
+          <div
+            style={{
+              background: theme || '',
+              color: textColor || '',
+            }}
+            className="flex-1 overflow-y-auto px-4 py-3"
+            ref={ref}
           >
-          <TabsContent value="chat" className="flex flex-col h-full min-h-0">
-            <Separator orientation="horizontal" />
-            <div className="flex flex-col h-full min-h-0">
-              <div
-                style={{
-                  background: theme || '',
-                  color: textColor || '',
-                }}
-                className="px-3 flex flex-1 min-h-[300px] flex-col py-3 gap-3 chat-window overflow-y-auto overscroll-contain scroll-smooth"
-                ref={ref}
-              >
-                {chats.map((chat, key) => (
-                  <Bubble
-                    key={key}
-                    message={chat}
-                    botIcon={botIcon}
-                  />
-                ))}
-                {onResponding && <Responding botIcon={botIcon} />}
-              </div>
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault()
-                  onChat()
-                }}
-                className="flex px-3 py-3 items-center gap-2 bg-porcelain border-t shrink-0"
-              >
-                <Input
-                  {...register('content')}
-                  placeholder={`Ask anything about ${domainName}...`}
-                  className="focus-visible:ring-0 flex-1 min-h-[44px] focus-visible:ring-offset-0 bg-porcelain rounded-md outline-none"
-                />
-                <Button type="submit" className="shrink-0" aria-label="Send">
-                  <Send />
-                </Button>
-                <Label htmlFor="bot-image">
-                  <Paperclip />
-                  <Input
-                    {...register('image')}
-                    type="file"
-                    id="bot-image"
-                    className="hidden"
-                  />
-                </Label>
-              </form>
-            </div>
-            {/* Jump button rendered at Tabs wrapper level below */}
-          </TabsContent>
-
-          <TabsContent value="faqs" className="flex flex-col h-full min-h-0">
-            <div className="h-full overflow-y-auto overflow-x-hidden p-4 flex flex-col gap-4">
-              <div>
-                <CardTitle>FAQs</CardTitle>
-                <CardDescription>
-                  Browse from a list of questions people usually ask.
-                </CardDescription>
-              </div>
-              <Separator orientation="horizontal" />
-
-              {helpdesk.map((desk) => (
-                <Accordion
-                  key={desk.id}
-                  trigger={desk.question}
-                  content={desk.answer}
+            <div className="flex flex-col gap-3">
+              {chats.map((chat, key) => (
+                <Bubble
+                  key={key}
+                  message={chat}
+                  botIcon={botIcon}
                 />
               ))}
+              {onResponding && <Responding botIcon={botIcon} />}
             </div>
-          </TabsContent>
-          </TabsMenu>
-          {showJump && (
+          </div>
+
+          {/* Fixed Input Form - always at bottom */}
+          <form
+            onSubmit={(e) => {
+              e.preventDefault()
+              onChat()
+            }}
+            className="flex px-3 py-3 items-center gap-2 bg-white border-t shrink-0"
+          >
+            <Input
+              {...register('content')}
+              placeholder={`Type a message...`}
+              className="flex-1 h-[40px] bg-gray-50 border border-gray-200 rounded-lg px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
             <button
-              type="button"
-              onClick={() => {
-                const el = (ref as any)?.current as HTMLDivElement | null
-                if (el) el.scroll({ top: el.scrollHeight, behavior: 'smooth' })
-              }}
-              className="absolute bottom-20 right-4 z-20 rounded-full bg-main text-black px-3 py-1.5 text-xs border border-border shadow-md flex items-center gap-1"
+              type="submit"
+              className="shrink-0 h-[40px] w-[40px] rounded-lg bg-blue-500 hover:bg-blue-600 text-white flex items-center justify-center transition-colors"
+              aria-label="Send"
             >
-              <ChevronDown className="w-4 h-4" />
-              Jump to latest
+              <Send className="w-4 h-4" />
             </button>
-          )}
+            <Label htmlFor="bot-image" className="cursor-pointer">
+              <div className="h-[40px] w-[40px] rounded-lg border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-colors">
+                <Paperclip className="w-5 h-5 text-gray-500" />
+              </div>
+              <Input
+                {...register('image')}
+                type="file"
+                id="bot-image"
+                className="hidden"
+              />
+            </Label>
+          </form>
         </div>
+
+        {showJump && (
+          <button
+            type="button"
+            onClick={() => {
+              const el = (ref as any)?.current as HTMLDivElement | null
+              if (el) el.scroll({ top: el.scrollHeight, behavior: 'smooth' })
+            }}
+            className="absolute bottom-16 right-4 z-20 rounded-full bg-white text-gray-700 px-3 py-1.5 text-sm border border-gray-300 shadow-lg flex items-center gap-1 hover:bg-gray-50 transition"
+          >
+            <ChevronDown className="w-4 h-4" />
+            <span>Jump to latest</span>
+          </button>
+        )}
       </div>
     )
   }

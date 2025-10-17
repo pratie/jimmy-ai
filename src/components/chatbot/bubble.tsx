@@ -52,10 +52,10 @@ const Bubble = ({ message, createdAt, botIcon }: Props) => {
       )}
       <div
         className={cn(
-          'flex flex-col gap-3 min-w-[200px] max-w-[300px] p-4 rounded-t-md',
+          'flex flex-col gap-2 min-w-[100px] max-w-[280px] p-3 rounded-lg',
           message.role == 'assistant'
-            ? 'bg-muted rounded-r-md'
-            : 'bg-grandis rounded-l-md'
+            ? 'bg-gray-100 rounded-bl-none'
+            : 'bg-yellow-100 rounded-br-none'
         )}
       >
         {createdAt ? (
@@ -90,11 +90,11 @@ const Bubble = ({ message, createdAt, botIcon }: Props) => {
             <p className="text-xs text-brand-primary/60">Image failed to load</p>
           </div>
         ) : (
-          <p className="text-sm">
+          <p className="text-sm break-words whitespace-pre-wrap">
             {message.content.replace('(complete)', ' ')}
             {message.link && (
               <a
-                className="underline font-bold pl-2"
+                className="underline font-bold pl-2 inline-block"
                 href={message.link}
                 target="_blank"
                 rel="noopener noreferrer"
