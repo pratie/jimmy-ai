@@ -5,10 +5,14 @@ import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'
 import RealTimeMode from './real-time'
 import { getKieImageUrl } from '@/lib/kie-api'
 import { cn } from '@/lib/utils'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs'
+import { Separator } from '../ui/separator'
+import { CardDescription, CardTitle } from '../ui/card'
+import Accordion from '../accordian'
 import Bubble from './bubble'
 import { Responding } from './responding'
 import { Input } from '../ui/input'
-import { Paperclip, Send, X, ChevronDown } from 'lucide-react'
+import { Paperclip, Send, X, ChevronDown, MessageCircle, HelpCircle } from 'lucide-react'
 import { Label } from '../ui/label'
 
 type Props = {
@@ -92,9 +96,9 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
         responsive ? 'h-full w-full max-w-none' : 'h-[520px] w-[360px] sm:h-[600px] sm:w-[380px] md:h-[620px] md:w-[420px]'
       )}>
         {/* Fixed Header */}
-        <div className="flex justify-between items-center px-4 py-2.5 border-b bg-white shrink-0">
-          <div className="flex gap-3 items-center">
-            <Avatar className="w-10 h-10">
+        <div className="flex justify-between items-center px-3 py-2 border-b bg-white shrink-0">
+          <div className="flex gap-2 items-center">
+            <Avatar className="w-9 h-9">
               {botIcon && !avatarError ? (
                 <AvatarImage
                   src={getKieImageUrl(botIcon)}
@@ -134,62 +138,103 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
             )}
           </div>
         </div>
-        {/* Messages area and input - proper flex layout without tabs for now */}
-        <div className="flex-1 flex flex-col min-h-0">
-          {/* Messages area - takes all available space */}
-          <div
-            style={{
-              background: theme || '',
-              color: textColor || '',
-            }}
-            className="flex-1 overflow-y-auto px-4 py-3"
-            ref={ref}
-          >
-            <div className="flex flex-col gap-3">
-              {chats.map((chat, key) => (
-                <Bubble
-                  key={key}
-                  message={chat}
-                  botIcon={botIcon}
-                />
-              ))}
-              {onResponding && <Responding botIcon={botIcon} />}
-            </div>
-          </div>
+        {/* Tabs and content area - proper flex layout */}
+        <Tabs defaultValue="chat" className="flex-1 flex flex-col min-h-0">
+          <TabsList className="mx-2 mt-1 mb-0 grid w-[calc(100%-1rem)] grid-cols-2">
+            <TabsTrigger value="chat" className="flex items-center gap-1">
+              <MessageCircle className="w-4 h-4" />
+              Chat
+            </TabsTrigger>
+            <TabsTrigger value="faqs" className="flex items-center gap-1">
+              <HelpCircle className="w-4 h-4" />
+              FAQs
+            </TabsTrigger>
+          </TabsList>
 
-          {/* Fixed Input Form - always at bottom */}
-          <form
-            onSubmit={(e) => {
-              e.preventDefault()
-              onChat()
-            }}
-            className="flex px-3 py-3 items-center gap-2 bg-white border-t shrink-0"
-          >
-            <Input
-              {...register('content')}
-              placeholder={`Type a message...`}
-              className="flex-1 h-[40px] bg-gray-50 border border-gray-200 rounded-lg px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-            <button
-              type="submit"
-              className="shrink-0 h-[40px] w-[40px] rounded-lg bg-blue-500 hover:bg-blue-600 text-white flex items-center justify-center transition-colors"
-              aria-label="Send"
+          <TabsContent value="chat" className="flex-1 flex flex-col min-h-0 m-0">
+            {/* Messages area - takes all available space */}
+            <div
+              style={{
+                background: theme || '',
+                color: textColor || '',
+              }}
+              className="flex-1 overflow-y-auto px-3 py-2"
+              ref={ref}
             >
-              <Send className="w-4 h-4" />
-            </button>
-            <Label htmlFor="bot-image" className="cursor-pointer">
-              <div className="h-[40px] w-[40px] rounded-lg border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-colors">
-                <Paperclip className="w-5 h-5 text-gray-500" />
+              <div className="flex flex-col gap-2">
+                {chats.map((chat, key) => (
+                  <Bubble
+                    key={key}
+                    message={chat}
+                    botIcon={botIcon}
+                  />
+                ))}
+                {onResponding && <Responding botIcon={botIcon} />}
               </div>
+            </div>
+
+            {/* Fixed Input Form - always at bottom */}
+            <form
+              onSubmit={(e) => {
+                e.preventDefault()
+                onChat()
+              }}
+              className="flex px-2 py-2 items-center gap-2 bg-white border-t shrink-0"
+            >
               <Input
-                {...register('image')}
-                type="file"
-                id="bot-image"
-                className="hidden"
+                {...register('content')}
+                placeholder={`Type a message...`}
+                className="flex-1 h-[40px] bg-gray-50 border border-gray-200 rounded-lg px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
-            </Label>
-          </form>
-        </div>
+              <button
+                type="submit"
+                className="shrink-0 h-[40px] w-[40px] rounded-lg bg-blue-500 hover:bg-blue-600 text-white flex items-center justify-center transition-colors"
+                aria-label="Send"
+              >
+                <Send className="w-4 h-4" />
+              </button>
+              <Label htmlFor="bot-image" className="cursor-pointer">
+                <div className="h-[40px] w-[40px] rounded-lg border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-colors">
+                  <Paperclip className="w-5 h-5 text-gray-500" />
+                </div>
+                <Input
+                  {...register('image')}
+                  type="file"
+                  id="bot-image"
+                  className="hidden"
+                />
+              </Label>
+            </form>
+          </TabsContent>
+
+          <TabsContent value="faqs" className="flex-1 overflow-y-auto m-0 p-3">
+            <div className="space-y-4">
+              <div>
+                <CardTitle className="text-lg">Frequently Asked Questions</CardTitle>
+                <CardDescription className="text-sm mt-1">
+                  Find quick answers to common questions
+                </CardDescription>
+              </div>
+              <Separator />
+              <div className="space-y-3">
+                {helpdesk && helpdesk.length > 0 ? (
+                  helpdesk.map((desk) => (
+                    <Accordion
+                      key={desk.id}
+                      trigger={desk.question}
+                      content={desk.answer}
+                    />
+                  ))
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    <HelpCircle className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                    <p className="text-sm">No FAQs available yet</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </TabsContent>
+        </Tabs>
 
         {showJump && (
           <button

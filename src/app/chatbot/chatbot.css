@@ -1,0 +1,70 @@
+/* Reset all defaults for chatbot iframe page */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  background: transparent !important;
+}
+
+html,
+body {
+  margin: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+/* Force transparency on the root element */
+:root {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+/* Remove any default backgrounds from Next.js wrappers */
+#__next,
+#__next > div,
+.layout,
+.app,
+main,
+body > div {
+  padding: 0 !important;
+  margin: 0 !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  height: 100%;
+  width: 100%;
+}
+
+/* Ensure no semi-transparent overlays */
+body::before,
+body::after,
+html::before,
+html::after {
+  display: none !important;
+}
+
+/* Position the widget properly */
+.chat-widget-wrapper {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  max-height: calc(100vh - 32px);
+  max-width: calc(100vw - 32px);
+  z-index: 9999;
+}
+
+/* Remove any transform gaps */
+.chat-widget,
+.chat-overlay {
+  transform: none !important;
+  top: auto !important;
+}
+
+/* Ensure iframe (when embedded) has no gaps */
+iframe.bml-chat-frame {
+  margin: 0 !important;
+  background: transparent;
+}

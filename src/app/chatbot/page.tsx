@@ -1,5 +1,6 @@
 import AiChatBot from '@/components/chatbot'
 import React from 'react'
+import './chatbot.css'
 
 type Props = {}
 

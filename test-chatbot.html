@@ -36,40 +36,8 @@
         }
     </style>
 
-    <!-- Corinna AI Chatbot Embed Code -->
-    <script>
-        const iframe = document.createElement("iframe");
-
-        const iframeStyles = (styleString) => {
-            const style = document.createElement('style');
-            style.textContent = styleString;
-            document.head.append(style);
-        }
-
-        iframeStyles(`
-            .chat-frame {
-                position: fixed;
-                bottom: 50px;
-                right: 50px;
-                border: none;
-                z-index: 1000;
-                border-radius: 10px;
-                box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-            }
-        `)
-
-        iframe.src = "http://localhost:3000/chatbot"
-        iframe.classList.add('chat-frame')
-        document.body.appendChild(iframe)
-
-        window.addEventListener("message", (e) => {
-            if(e.origin !== "http://localhost:3000") return null
-            let dimensions = JSON.parse(e.data)
-            iframe.width = dimensions.width
-            iframe.height = dimensions.height
-            iframe.contentWindow.postMessage("38418718-bf2e-41a3-a7a2-119ca454bbcb", "http://localhost:3000/")
-        })
-    </script>
+    <!-- Corinna AI Chatbot Widget Embed Code -->
+    <script defer src="http://localhost:3000/embed.min.js" id="625e2bf4-7fcb-4db7-ba68-69e2c45b101b" data-app-origin="http://localhost:3000" data-margin="24" data-size="md"></script>
 </head>
 <body>
     <div class="container">
