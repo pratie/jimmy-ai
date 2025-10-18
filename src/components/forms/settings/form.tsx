@@ -13,6 +13,7 @@ import KnowledgeBaseViewer from '@/components/settings/knowledge-base-viewer'
 import { BotModeSelector } from '@/components/settings/bot-mode-selector'
 import { BrandVoiceSettings } from '@/components/settings/brand-voice-settings'
 import { onGetEmbeddingStatus } from '@/actions/firecrawl'
+import AppearanceSettings from './appearance'
 import { CheckCircle2, CircleDashed, ExternalLink } from 'lucide-react'
 import HelpDesk from './help-desk'
 
@@ -39,6 +40,7 @@ type Props = {
     mode: string | null
     brandTone: string | null
     language: string | null
+    theme?: any | null
   } | null
   trainingSourcesUsed?: number
   knowledgeBaseSizeMB?: number
@@ -176,7 +178,9 @@ const SettingsForm = ({ id, name, chatBot, plan, trainingSourcesUsed, knowledgeB
             <EditChatbotIcon chatBot={chatBot} register={register} errors={errors} />
             <WelcomeMessage message={chatBot?.welcomeMessage!} register={register} errors={errors} />
           </div>
-          <div className="col-span-1"></div>
+          <div className="col-span-1">
+            <AppearanceSettings domainId={id} current={chatBot?.theme as any} />
+          </div>
         </div>
       </div>
 

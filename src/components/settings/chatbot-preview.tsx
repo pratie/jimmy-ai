@@ -49,6 +49,7 @@ const ChatbotPreview = ({ domainId }: Props) => {
                 help={currentBot?.chatBot?.helpdesk}
                 theme={currentBot?.chatBot?.background}
                 textColor={currentBot?.chatBot?.textColor}
+                themeConfig={currentBot?.chatBot?.theme as any}
                 chats={onChats}
                 register={register}
                 watch={watch}

@@ -138,6 +138,7 @@ export const onGetAllAccountDomains = async () => {
                 background: true,
                 icon: true,
                 textColor: true,
+                theme: true,
                 helpdesk: true,
               },
             },
@@ -214,6 +215,7 @@ export const onGetCurrentDomainInfo = async (domain: string) => {
                 mode: true,
                 brandTone: true,
                 language: true,
+                theme: true,
               },
             },
           },
@@ -391,6 +393,33 @@ export const onUpdateWelcomeMessage = async (
     if (update) {
       return { status: 200, message: 'Welcome message updated' }
     }
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+export const onUpdateTheme = async (
+  domainId: string,
+  theme: Record<string, any>
+) => {
+  try {
+    const update = await client.domain.update({
+      where: { id: domainId },
+      data: {
+        chatBot: {
+          update: {
+            data: {
+              theme: theme as any,
+            },
+          },
+        },
+      },
+    })
+
+    if (update) {
+      return { status: 200, message: 'Appearance updated' }
+    }
+    return { status: 400, message: 'Oops! something went wrong' }
   } catch (error) {
     console.log(error)
   }

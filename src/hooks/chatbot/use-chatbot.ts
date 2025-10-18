@@ -59,6 +59,7 @@ export const useChatBot = (options?: UseChatBotOptions) => {
           welcomeMessage: string | null
           background: string | null
           textColor: string | null
+          theme?: any | null
           helpdesk: boolean
         } | null
         helpdesk: {

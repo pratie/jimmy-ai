@@ -54,6 +54,7 @@ model ChatBot {
   icon                     String?
   background               String?
   textColor                String?
+  theme                    Json?
   helpdesk                 Boolean          @default(false)
   domainId                 String?          @unique @db.Uuid
   knowledgeBase            String?

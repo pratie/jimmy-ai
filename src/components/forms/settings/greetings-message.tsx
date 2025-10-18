@@ -20,7 +20,7 @@ const GreetingsMessage = ({
         label="Greeting message"
         message="Customize your welcome message"
       />
-      <div className="lg:w-[500px]">
+      <div className="w-full max-w-[420px] md:max-w-[460px] md:pr-6">
         <FormGenerator
           placeholder={message}
           inputType="textarea"

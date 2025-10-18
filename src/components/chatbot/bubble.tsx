@@ -13,9 +13,15 @@ type Props = {
   }
   createdAt?: Date
   botIcon?: string | null
+  theme?: {
+    userBg?: string
+    userText?: string
+    botBg?: string
+    botText?: string
+  }
 }
 
-const Bubble = ({ message, createdAt, botIcon }: Props) => {
+const Bubble = ({ message, createdAt, botIcon, theme }: Props) => {
   let d = new Date()
   const image = extractUUIDFromString(message.content)
   const [imageError, setImageError] = useState(false)
@@ -53,10 +59,18 @@ const Bubble = ({ message, createdAt, botIcon }: Props) => {
       <div
         className={cn(
           'flex flex-col gap-1.5 min-w-[100px] max-w-[320px] p-3 rounded-lg',
-          message.role == 'assistant'
-            ? 'bg-gray-100 text-gray-900 rounded-bl-none'
-            : 'bg-blue-500 text-white rounded-br-none'
+          message.role == 'assistant' ? 'rounded-bl-none' : 'rounded-br-none'
         )}
+        style={{
+          backgroundColor:
+            message.role === 'assistant'
+              ? theme?.botBg || '#f3f4f6'
+              : theme?.userBg || '#2563eb',
+          color:
+            message.role === 'assistant'
+              ? theme?.botText || '#111827'
+              : theme?.userText || '#ffffff',
+        }}
       >
         {createdAt ? (
           <div
@@ -104,10 +118,7 @@ const Bubble = ({ message, createdAt, botIcon }: Props) => {
             {message.content.replace('(complete)', ' ')}
             {message.link && (
               <a
-                className={cn(
-                  'underline font-semibold pl-2 inline-block',
-                  message.role == 'assistant' ? 'text-gray-700' : 'text-white'
-                )}
+                className={cn('underline font-semibold pl-2 inline-block')}
                 href={message.link}
                 target="_blank"
                 rel="noopener noreferrer"

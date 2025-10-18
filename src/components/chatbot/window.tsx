@@ -25,6 +25,7 @@ type Props = {
   domainName: string
   theme?: string | null
   textColor?: string | null
+  themeConfig?: any
   help?: boolean
   botIcon?: string | null
   responsive?: boolean
@@ -66,6 +67,7 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
       realtimeMode,
       setChat,
       textColor,
+      themeConfig,
       theme,
       help,
       botIcon,
@@ -80,6 +82,24 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
     const imageValue = watch ? (watch('image') as any) : undefined
     const hasImage = !!(imageValue && imageValue.length > 0)
     const canSend = !!(contentValue && contentValue.trim().length > 0) || hasImage
+
+    const THEME_DEFAULT = {
+      primary: '#2563EB',
+      surface: '#FFFFFF',
+      text: '#111827',
+      headerBg: '#FFFFFF',
+      headerText: '#111827',
+      userBubbleBg: '#2563EB',
+      userBubbleText: '#FFFFFF',
+      botBubbleBg: '#F3F4F6',
+      botBubbleText: '#111827',
+      inputBg: '#FFFFFF',
+      inputBorder: '#D1D5DB',
+      accent: '#2563EB',
+      radius: 10,
+      shadow: 'sm' as 'none' | 'sm',
+    }
+    const t = { ...THEME_DEFAULT, ...(themeConfig || {}) }
 
     // Toggle jump-to-latest button based on scroll position
     React.useEffect(() => {
@@ -97,12 +117,21 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
 
     console.log(errors)
     return (
-      <div className={cn(
-        'relative flex flex-col bg-white rounded-xl border border-gray-300 shadow-sm overflow-hidden',
+      <div
+        className={cn(
+        'relative flex flex-col overflow-hidden',
         responsive ? 'h-full w-full max-w-none' : 'h-[520px] w-[360px] sm:h-[600px] sm:w-[380px] md:h-[620px] md:w-[420px]'
-      )}>
+      )}
+        style={{
+          backgroundColor: t.surface,
+          color: t.text,
+          borderRadius: t.radius,
+          boxShadow: t.shadow === 'sm' ? '0 1px 2px rgba(0,0,0,0.06)' : 'none',
+          border: '1px solid #D1D5DB'
+        }}
+      >
         {/* Fixed Header */}
-        <div className="flex justify-between items-center px-3 py-2 border-b bg-white shrink-0">
+        <div className="flex justify-between items-center px-3 py-2 border-b shrink-0" style={{ backgroundColor: t.headerBg, color: t.headerText }}>
           <div className="flex gap-2 items-center">
             <Avatar className="w-9 h-9">
               {botIcon && !avatarError ? (
@@ -169,11 +198,8 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
           <TabsContent value="chat" className="flex-1 flex flex-col min-h-0 m-0">
             {/* Messages area - takes all available space */}
             <div
-              style={{
-                // Keep textColor for accessibility while avoiding glassy backgrounds
-                color: textColor || undefined,
-              }}
-              className="flex-1 overflow-y-auto px-4 py-3 bg-white"
+              style={{ color: textColor || t.text, backgroundColor: t.surface }}
+              className="flex-1 overflow-y-auto px-4 py-3"
               ref={ref}
             >
               <div className="flex flex-col gap-2">
@@ -182,6 +208,12 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
                     key={key}
                     message={chat}
                     botIcon={botIcon}
+                    theme={{
+                      userBg: t.userBubbleBg,
+                      userText: t.userBubbleText,
+                      botBg: t.botBubbleBg,
+                      botText: t.botBubbleText,
+                    }}
                   />
                 ))}
                 {onResponding && <Responding botIcon={botIcon} />}
@@ -199,7 +231,8 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
               <Input
                 {...register('content')}
                 placeholder={`Type a message...`}
-                className="flex-1 h-[40px] bg-white border border-gray-300 rounded-lg px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="flex-1 h-[40px] rounded-lg px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                style={{ backgroundColor: t.inputBg, border: `1px solid ${t.inputBorder}`, color: t.text }}
               />
               <button
                 type="submit"

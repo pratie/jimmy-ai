@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat Widget - No White Gutter Test</title>
+  <style>
+    /* Test page background to clearly see any white gaps */
+    body {
+      margin: 0;
+      padding: 50px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+
+    h1 {
+      color: white;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .content {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    }
+
+    /* CRITICAL: Force the iframe to be transparent with no borders/shadows */
+    iframe.bml-chat-frame {
+      background: transparent !important;
+      border: 0 !important;
+      box-shadow: none !important;
+    }
+
+    /* Alternative selector if the class changes */
+    iframe[src*="localhost:3000/chatbot"],
+    iframe[src*="bookmylead.app/chatbot"] {
+      background: transparent !important;
+      border: 0 !important;
+      box-shadow: none !important;
+    }
+  </style>
+</head>
+<body>
+  <h1>Chat Widget Embed - Zero Gutter Test</h1>
+
+  <div class="content">
+    <h2>Testing Transparent Iframe Embed</h2>
+    <p>This page has a purple gradient background to easily spot any white gaps around the chat widget.</p>
+
+    <h3>Key Configuration:</h3>
+    <ul>
+      <li>✅ data-margin="0" - No outer spacing from embed script</li>
+      <li>✅ Iframe forced transparent via CSS</li>
+      <li>✅ Chat window positioned with its own margin (24px from edge)</li>
+      <li>✅ Background transparent in iframe document</li>
+    </ul>
+
+    <h3>Expected Result:</h3>
+    <p>The chat widget should appear in the bottom-right corner with:</p>
+    <ul>
+      <li>NO white rectangle around it</li>
+      <li>Purple gradient visible right up to the chat window border</li>
+      <li>Only the chat window itself has white background</li>
+      <li>Chat window maintains its black border and rounded corners</li>
+    </ul>
+
+    <h3>Troubleshooting:</h3>
+    <p>If you still see white gaps:</p>
+    <ol>
+      <li>Open DevTools → Inspect the iframe element</li>
+      <li>Check Computed Styles → background should be "transparent"</li>
+      <li>Check the iframe's parent container for padding/background</li>
+      <li>Verify the chatbot page CSS has transparent backgrounds</li>
+    </ol>
+  </div>
+
+  <!-- Embed script with data-margin="0" to prevent outer spacing -->
+  <script
+    defer
+    src="http://localhost:3000/embed.min.js"
+    id="625e2bf4-7fcb-4db7-ba68-69e2c45b101b"
+    data-app-origin="http://localhost:3000"
+    data-margin="0"
+    data-size="md">
+  </script>
+
+  <script>
+    // Optional: Log when the widget loads
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        const iframe = document.querySelector('iframe.bml-chat-frame');
+        if (iframe) {
+          console.log('✅ Widget iframe found');
+          console.log('Background:', window.getComputedStyle(iframe).background);
+          console.log('Border:', window.getComputedStyle(iframe).border);
+          console.log('Box Shadow:', window.getComputedStyle(iframe).boxShadow);
+        } else {
+          console.log('⚠️ Widget iframe not found yet');
+        }
+      }, 2000);
+    });
+  </script>
+</body>
+</html>
