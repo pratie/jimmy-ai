@@ -7,7 +7,7 @@ import { Check } from 'lucide-react'
 
 export default async function Home() {
   return (
-    <main className="landing-gradient min-h-screen">
+    <main className="min-h-screen">
       <NavBar />
 
       {/* Hero Section */}
@@ -55,7 +55,6 @@ export default async function Home() {
 
             {/* Dashboard Preview */}
             <div className="mt-10 md:mt-16 relative w-full max-w-5xl">
-              <div className="absolute inset-0 bg-gradient-to-r from-brand-accent/15 via-brand-info/15 to-brand-success/15 blur-3xl -z-10"></div>
               <Image
                 src="/images/app-ui.png"
                 width={1200}

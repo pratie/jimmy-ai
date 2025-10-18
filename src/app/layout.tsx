@@ -1,17 +1,16 @@
 import type { Metadata } from 'next'
 import { ClerkProvider } from '@clerk/nextjs'
-import { Space_Grotesk } from 'next/font/google'
+import { Cuprum } from 'next/font/google'
 import Script from 'next/script'
 import './globals.css'
 import { Toaster } from '@/components/ui/toaster'
 import { ThemeProvider } from '@/context/them-provider'
 
-const spaceGrotesk = Space_Grotesk({
+const cuprum = Cuprum({
   subsets: ['latin'],
   display: 'swap',
   preload: true,
-  weight: ['400', '500', '600', '700'],
-  variable: '--font-space-grotesk',
+  weight: ['400', '700'],
 })
 
 export const metadata: Metadata = {
@@ -59,7 +58,7 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en" suppressHydrationWarning>
-        <body className={`${spaceGrotesk.className} landing-gradient min-h-screen`}>
+        <body className={`${cuprum.className} min-h-screen`}>
           {/* DataFast Analytics - Must be in body for Next.js Script component */}
           <Script
             defer
