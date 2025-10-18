@@ -36,7 +36,7 @@ const AiChatBot = (props: Props) => {
   return (
     <div className="fixed inset-0 flex flex-col justify-end items-end p-0 pointer-events-none bg-transparent">
       {botOpened && (
-        <div className="relative pointer-events-auto m-6 bg-transparent">
+        <div className="relative pointer-events-auto bg-transparent">
           <BotWindow
             errors={errors}
             setChat={setOnChats}
@@ -59,12 +59,12 @@ const AiChatBot = (props: Props) => {
         </div>
       )}
         {loading ? (
-        <div className="rounded-full relative w-16 h-16 flex items-center justify-center bg-white border border-gray-200 shadow-md pointer-events-auto m-6">
+        <div className="rounded-full relative w-16 h-16 flex items-center justify-center bg-white border border-gray-200 shadow-md pointer-events-auto">
           <div className="w-6 h-6 border-2 border-gray-300 border-t-blue-500 rounded-full animate-spin" />
         </div>
       ) : !botOpened ? (
         <div
-          className="rounded-full overflow-hidden relative cursor-pointer w-16 h-16 flex items-center justify-center bg-white border border-gray-300 shadow-sm hover:shadow-md transition-shadow pointer-events-auto m-6"
+          className="rounded-full overflow-hidden relative cursor-pointer w-16 h-16 flex items-center justify-center bg-white border border-gray-300 shadow-sm hover:shadow-md transition-shadow pointer-events-auto"
           onClick={onOpenChatBot}
         >
           {((currentBot?.chatBot?.icon || currentBot?.icon) && !iconError) ? (
