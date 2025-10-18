@@ -14,6 +14,9 @@ import { Responding } from './responding'
 import { Input } from '../ui/input'
 import { Paperclip, Send, X, ChevronDown, MessageCircle, HelpCircle } from 'lucide-react'
 import { Label } from '../ui/label'
+import { Cuprum } from 'next/font/google'
+
+const cuprum = Cuprum({ subsets: ['latin'], weight: ['400', '700'] })
 
 type Props = {
   errors: any
@@ -120,6 +123,7 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
       <div
         className={cn(
         'relative flex flex-col overflow-hidden',
+        cuprum.className,
         responsive ? 'h-full w-full max-w-none' : 'h-[520px] w-[360px] sm:h-[600px] sm:w-[380px] md:h-[620px] md:w-[420px]'
       )}
         style={{
