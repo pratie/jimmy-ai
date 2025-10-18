@@ -14,6 +14,7 @@ const cuprum = Cuprum({
 })
 
 export const metadata: Metadata = {
+  metadataBase: new URL((process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000').replace(/\/$/, '')),
   title: 'BookmyLead AI - AI Agent Trained on Your Company Data',
   description: 'Deploy an AI agent trained on your company data to capture leads 24/7, answer questions instantly, and close deals while you sleep. Turn visitors into customers automatically.',
   keywords: ['AI chatbot', 'AI agent', 'lead generation', 'customer support automation', 'conversational AI', 'business automation', 'BookmyLead AI'],
@@ -36,13 +37,20 @@ export const metadata: Metadata = {
     title: 'BookmyLead AI - AI Agent Trained on Your Company Data',
     description: 'Deploy an AI agent trained on your company data to capture leads 24/7, answer questions instantly, and close deals while you sleep.',
     type: 'website',
-    images: [{ url: '/images/logo.svg' }],
+    images: [
+      {
+        url: '/images/social_graph_img.png',
+        width: 1200,
+        height: 630,
+        alt: 'BookMyLead · Website AI Assistant',
+      },
+    ],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'BookmyLead AI - AI Agent Trained on Your Company Data',
     description: 'Deploy an AI agent trained on your company data to capture leads 24/7, answer questions instantly, and close deals while you sleep.',
-    images: ['/images/logo.svg'],
+    images: ['/images/social_graph_img.png'],
   },
   robots: {
     index: true,
