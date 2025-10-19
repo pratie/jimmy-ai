@@ -7,6 +7,7 @@ import { getKieImageUrl } from '@/lib/kie-api'
 import Image from 'next/image'
 import { X } from 'lucide-react'
 import { BotIcon } from '@/icons/bot-icon'
+import { Loader } from '@/components/loader'
 
 type Props = {}
 
@@ -37,32 +38,33 @@ const AiChatBot = (props: Props) => {
     <div className="fixed inset-0 flex flex-col justify-end items-end p-0 pointer-events-none bg-transparent">
       {botOpened && (
         <div className="relative pointer-events-auto bg-transparent">
-          <BotWindow
-            errors={errors}
-            setChat={setOnChats}
-            realtimeMode={onRealTime}
-            helpdesk={currentBot?.helpdesk!}
-            domainName={currentBot?.name!}
-            ref={messageWindowRef}
-            help={currentBot?.chatBot?.helpdesk}
-            theme={currentBot?.chatBot?.background}
-            textColor={currentBot?.chatBot?.textColor}
-            themeConfig={currentBot?.chatBot?.theme as any}
-            chats={onChats}
-            register={register}
-            watch={watch}
-            onChat={onStartChatting}
-            onResponding={onAiTyping}
-            botIcon={currentBot?.chatBot?.icon || currentBot?.icon || null}
-            onClose={onOpenChatBot}
-          />
+          {/* Defer loading spinner to the chat window area */}
+          <Loader loading={loading}>
+            <BotWindow
+              errors={errors}
+              setChat={setOnChats}
+              realtimeMode={onRealTime}
+              helpdesk={currentBot?.helpdesk || []}
+              domainName={currentBot?.name || 'Assistant'}
+              ref={messageWindowRef}
+              help={currentBot?.chatBot?.helpdesk}
+              theme={currentBot?.chatBot?.background}
+              textColor={currentBot?.chatBot?.textColor}
+              themeConfig={currentBot?.chatBot?.theme as any}
+              chats={onChats}
+              register={register}
+              watch={watch}
+              onChat={onStartChatting}
+              onResponding={onAiTyping}
+              botIcon={currentBot?.chatBot?.icon || currentBot?.icon || null}
+              onClose={onOpenChatBot}
+            />
+          </Loader>
         </div>
       )}
-        {loading ? (
-        <div className="rounded-full relative w-16 h-16 flex items-center justify-center bg-white border border-gray-200 shadow-md pointer-events-auto">
-          <div className="w-6 h-6 border-2 border-gray-300 border-t-blue-500 rounded-full animate-spin" />
-        </div>
-      ) : !botOpened ? (
+
+      {/* Always show the bubble promptly, even while loading */}
+      {!botOpened && (
         <div
           className="rounded-full overflow-hidden relative cursor-pointer w-16 h-16 flex items-center justify-center bg-white border border-gray-300 shadow-sm hover:shadow-md transition-shadow pointer-events-auto"
           onClick={onOpenChatBot}
@@ -80,7 +82,7 @@ const AiChatBot = (props: Props) => {
             <BotIcon />
           )}
         </div>
-      ) : null}
+      )}
     </div>
   )
 }

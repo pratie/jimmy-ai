@@ -1,5 +1,13 @@
 import ChatbotPreview from '@/components/settings/chatbot-preview'
 import { redirect } from 'next/navigation'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  robots: {
+    index: false,
+    follow: false,
+  },
+}
 
 export default async function PreviewPage({
   params,

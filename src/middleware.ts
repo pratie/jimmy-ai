@@ -7,6 +7,8 @@ const isPublicRoute = createRouteMatcher([
   '/portal(.*)',
   '/images(.*)',
   '/chatbot',
+  // Public preview so you can share a link
+  '/preview(.*)',
   // Make blogs public for SEO
   '/blogs(.*)',
   '/favicon\\.ico',
