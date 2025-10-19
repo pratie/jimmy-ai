@@ -1,9 +1,16 @@
+import type { Metadata } from 'next'
 import NavBar from '@/components/navbar'
 import { Button } from '@/components/ui/button'
 import Image from 'next/image'
 import Link from 'next/link'
 import PricingSection from '@/components/landing/pricing-section'
 import { Check } from 'lucide-react'
+
+export const metadata: Metadata = {
+  alternates: {
+    canonical: '/',
+  },
+}
 
 export default async function Home() {
   return (

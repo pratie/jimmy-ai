@@ -36,6 +36,14 @@ function NavBar() {
             Pricing
           </a>
         </li>
+        <li>
+          <Link
+            href="/blogs"
+            className="cursor-pointer hover:text-brand-primary hover:underline decoration-brand-accent decoration-2 underline-offset-4 transition-all"
+          >
+            Blog
+          </Link>
+        </li>
       </ul>
       <Link
         href="/dashboard"

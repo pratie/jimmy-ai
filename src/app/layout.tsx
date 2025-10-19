@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { ClerkProvider } from '@clerk/nextjs'
 import { Cuprum } from 'next/font/google'
 import Script from 'next/script'
@@ -21,12 +21,6 @@ export const metadata: Metadata = {
   description: 'Deploy an AI agent trained on your company data to capture leads 24/7, answer questions instantly, and close deals while you sleep. Turn visitors into customers automatically.',
   keywords: ['AI chatbot', 'AI agent', 'lead generation', 'customer support automation', 'conversational AI', 'business automation', 'BookmyLead AI'],
   authors: [{ name: 'BookmyLead AI' }],
-  viewport: {
-    width: 'device-width',
-    initialScale: 1,
-    maximumScale: 5,
-    userScalable: true,
-  },
   icons: {
     icon: [
       { url: '/icon.svg', type: 'image/svg+xml' },
@@ -60,6 +54,13 @@ export const metadata: Metadata = {
   },
 }
 
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  userScalable: true,
+}
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -77,6 +78,35 @@ export default function RootLayout({
             src="https://datafa.st/js/script.js"
             strategy="afterInteractive"
           />
+
+          {/* Organization JSON-LD */}
+          <Script id="ld-organization" type="application/ld+json" strategy="afterInteractive">
+            {JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'Organization',
+              name: 'BookmyLead AI',
+              url: APP_URL,
+              logo: `${APP_URL}/images/logo.svg`,
+            })}
+          </Script>
+
+          {/* SoftwareApplication (SaaS) JSON-LD */}
+          <Script id="ld-software" type="application/ld+json" strategy="afterInteractive">
+            {JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'SoftwareApplication',
+              name: 'BookmyLead AI',
+              applicationCategory: 'BusinessApplication',
+              operatingSystem: 'Web',
+              url: APP_URL,
+              offers: {
+                '@type': 'Offer',
+                price: '0',
+                priceCurrency: 'USD',
+                description: 'Free trial available',
+              },
+            })}
+          </Script>
 
           <ThemeProvider
             attribute="class"
