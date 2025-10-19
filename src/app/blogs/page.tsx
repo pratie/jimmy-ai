@@ -40,6 +40,46 @@ const posts = [
     href: '/blogs/how-to-train-an-ai-website-chatbot-on-your-docs',
     read: '10 min',
   },
+  {
+    slug: 'ai-chatbot-for-website',
+    title: 'AI Chatbot for Website: Complete Guide (2025)',
+    description:
+      'Add an AI chatbot to your website in minutes. Improve conversions, qualify leads, and automate support with BookmyLead AI.',
+    href: '/blogs/ai-chatbot-for-website',
+    read: '10 min',
+  },
+  {
+    slug: 'no-code-ai-chatbot',
+    title: 'No‑Code AI Chatbot: Launch in Minutes',
+    description:
+      'Create a no‑code AI chatbot that understands your content. Customize, embed, and measure performance with BookmyLead AI.',
+    href: '/blogs/no-code-ai-chatbot',
+    read: '8 min',
+  },
+  {
+    slug: 'customer-support-ai',
+    title: 'Customer Support AI: Reduce Tickets, Delight Customers',
+    description:
+      'Automate first‑line support with an AI assistant trained on your docs. Learn setup, guardrails, and KPIs.',
+    href: '/blogs/customer-support-ai',
+    read: '9 min',
+  },
+  {
+    slug: '24-7-ai-support',
+    title: '24/7 AI Support: Always‑On Helpdesk for Your Website',
+    description:
+      'Deliver instant answers day and night. Configure guardrails, live handoff, and reporting with BookmyLead AI.',
+    href: '/blogs/24-7-ai-support',
+    read: '7 min',
+  },
+  {
+    slug: 'chatbot-trained-on-your-data',
+    title: 'Chatbot Trained on Your Data: Accurate, On‑Brand Answers',
+    description:
+      'Use retrieval‑augmented generation to ground responses in your content. Learn setup and best practices.',
+    href: '/blogs/chatbot-trained-on-your-data',
+    read: '9 min',
+  },
 ]
 
 export default function BlogIndex() {
@@ -79,4 +119,3 @@ export default function BlogIndex() {
     </main>
   )
 }
-
