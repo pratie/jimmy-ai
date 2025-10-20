@@ -11,6 +11,8 @@ export default function robots(): MetadataRoute.Robots {
         disallow: [
           '/api/',
           '/portal/',
+          '/preview/',
+          '/debug-domains',
           '/test-',
           '/_next/',
         ],
@@ -20,4 +22,3 @@ export default function robots(): MetadataRoute.Robots {
     host: APP_URL.replace(/^https?:\/\//, ''),
   }
 }
-

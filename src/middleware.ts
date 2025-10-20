@@ -12,6 +12,9 @@ const isPublicRoute = createRouteMatcher([
   // Make blogs public for SEO
   '/blogs(.*)',
   '/favicon\\.ico',
+  // SEO metadata routes must be public
+  '/robots\\.txt',
+  '/sitemap\\.xml',
   '/api/webhooks(.*)',
   '/api/dodo/webhook',
   '/api/dodo(.*)',
