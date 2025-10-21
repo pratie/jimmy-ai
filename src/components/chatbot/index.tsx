@@ -57,6 +57,7 @@ const AiChatBot = (props: Props) => {
               onChat={onStartChatting}
               onResponding={onAiTyping}
               botIcon={currentBot?.chatBot?.icon || currentBot?.icon || null}
+              showBranding={Boolean(currentBot?.showBranding)}
               onClose={onOpenChatBot}
             />
           </Loader>

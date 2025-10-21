@@ -33,6 +33,7 @@ type Props = {
   botIcon?: string | null
   responsive?: boolean
   onClose?: () => void
+  showBranding?: boolean
   realtimeMode:
     | {
         chatroom: string
@@ -76,6 +77,7 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
       botIcon,
       responsive,
       onClose,
+      showBranding,
     },
     ref
   ) => {
@@ -288,6 +290,24 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
             </div>
           </TabsContent>
         </Tabs>
+
+        {showBranding && (
+          <div
+            className="shrink-0 border-t px-2 py-1.5 text-center"
+            style={{ backgroundColor: t.surface }}
+          >
+            <a
+              href="https://www.bookmylead.app/?utm_source=widget&utm_medium=free_badge&utm_campaign=virality"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center gap-1 text-[11px] leading-4 text-gray-400 hover:text-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded"
+              aria-label="Powered by BookmyLead – Get your AI assistant"
+            >
+              <span>Powered by BookmyLead</span>
+              <span aria-hidden="true">• Free Plan</span>
+            </a>
+          </div>
+        )}
 
         {showJump && (
           <button

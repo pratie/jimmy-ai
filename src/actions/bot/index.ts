@@ -46,6 +46,16 @@ export const onGetCurrentChatBot = async (id: string) => {
         helpdesk: true,
         name: true,
         icon: true,
+        // Used to determine branding gate by plan
+        User: {
+          select: {
+            subscription: {
+              select: {
+                plan: true,
+              },
+            },
+          },
+        },
         chatBot: {
           select: {
             id: true,
@@ -61,7 +71,14 @@ export const onGetCurrentChatBot = async (id: string) => {
     })
 
     if (chatbot) {
-      return chatbot
+      // Determine if we should show attribution badge
+      // Default to true if no subscription found (treat as FREE)
+      const plan = chatbot.User?.subscription?.plan || 'FREE'
+      const showBranding = plan === 'FREE'
+
+      // Avoid leaking nested User object to client; return only needed fields + flag
+      const { User, ...rest } = chatbot as any
+      return { ...rest, showBranding }
     }
   } catch (error) {
     devError('[Bot] Error fetching chatbot:', error)
