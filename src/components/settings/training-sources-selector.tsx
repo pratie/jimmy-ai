@@ -147,12 +147,9 @@ export const TrainingSourcesSelector = ({ domainId }: Props) => {
               </div>
             </ScrollArea>
 
-            {/* Sticky action bar at the bottom, always visible */}
-            <div className="sticky bottom-0 z-20 -mx-6 px-6 pb-2">
-              <div className="pointer-events-none relative h-4 -mb-4">
-                <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent" />
-              </div>
-              <div className="flex flex-col sm:flex-row gap-2 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 pt-2">
+            {/* Action bar pinned after scrollable list (no overlay issues) */}
+            <div className="shrink-0 pt-2">
+              <div className="flex flex-col sm:flex-row gap-2">
                 <Button
                   variant="outline"
                   className="flex-1"
