@@ -72,15 +72,17 @@ export const TrainingSourcesSelector = ({ domainId }: Props) => {
       </DialogTrigger>
 
       <DialogContent className="max-w-2xl max-h-[80vh]">
-        <DialogHeader>
-          <DialogTitle>Select Training Sources</DialogTitle>
-          <DialogDescription>
-            Choose which pages to scrape and train your chatbot on.
-          </DialogDescription>
-          <Badge variant="secondary" className="mt-2">
-            {plan} Plan: {remaining === Infinity ? 'Unlimited' : `${remaining} remaining`} of {limit === Infinity ? 'unlimited' : limit} sources
-          </Badge>
-        </DialogHeader>
+        {/* Make the content a column layout so we can keep actions visible */}
+        <div className="flex flex-col gap-3 max-h-[76vh] min-h-0">
+          <DialogHeader className="sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 rounded-md">
+            <DialogTitle>Select Training Sources</DialogTitle>
+            <DialogDescription>
+              Choose which pages to scrape and train your chatbot on.
+            </DialogDescription>
+            <Badge variant="secondary" className="mt-2 w-fit">
+              {plan} Plan: {remaining === Infinity ? 'Unlimited' : `${remaining} remaining`} of {limit === Infinity ? 'unlimited' : limit} sources
+            </Badge>
+          </DialogHeader>
 
         {discovering && (
           <div className="flex flex-col items-center justify-center py-12 gap-4">
@@ -100,7 +102,7 @@ export const TrainingSourcesSelector = ({ domainId }: Props) => {
 
         {!discovering && urls.length > 0 && (
           <>
-            <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
+            <div className="flex items-center justify-between p-3 bg-muted rounded-lg sticky top-[70px] z-10">
               <div className="text-sm">
                 <span className="font-medium">{selectedUrls.length}</span> of{' '}
                 <span className="font-medium">{urls.length}</span> pages selected
@@ -110,8 +112,8 @@ export const TrainingSourcesSelector = ({ domainId }: Props) => {
               )}
             </div>
 
-            <ScrollArea className="h-[400px] pr-4">
-              <div className="space-y-2">
+            <ScrollArea className="flex-1 min-h-0 pr-3">
+              <div className="space-y-2 pb-16">
                 {urls.map((urlData) => {
                   const isSelected = selectedUrls.includes(urlData.url)
                   const canSelect = canSelectMore || isSelected
@@ -145,32 +147,39 @@ export const TrainingSourcesSelector = ({ domainId }: Props) => {
               </div>
             </ScrollArea>
 
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                className="flex-1"
-                onClick={() => setSelectedUrls([])}
-                disabled={selectedUrls.length === 0}
-              >
-                Clear Selection
-              </Button>
-              <Button
-                className="flex-1"
-                onClick={handleScrape}
-                disabled={selectedUrls.length === 0 || scraping}
-              >
-                {scraping ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Scraping...
-                  </>
-                ) : (
-                  `Scrape ${selectedUrls.length} Source${selectedUrls.length !== 1 ? 's' : ''}`
-                )}
-              </Button>
+            {/* Sticky action bar at the bottom, always visible */}
+            <div className="sticky bottom-0 z-20 -mx-6 px-6 pb-2">
+              <div className="pointer-events-none relative h-4 -mb-4">
+                <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent" />
+              </div>
+              <div className="flex flex-col sm:flex-row gap-2 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 pt-2">
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => setSelectedUrls([])}
+                  disabled={selectedUrls.length === 0}
+                >
+                  Clear Selection
+                </Button>
+                <Button
+                  className="flex-1"
+                  onClick={handleScrape}
+                  disabled={selectedUrls.length === 0 || scraping}
+                >
+                  {scraping ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Scraping...
+                    </>
+                  ) : (
+                    `Scrape ${selectedUrls.length} Source${selectedUrls.length !== 1 ? 's' : ''}`
+                  )}
+                </Button>
+              </div>
             </div>
           </>
         )}
+        </div>
       </DialogContent>
     </Dialog>
   )
