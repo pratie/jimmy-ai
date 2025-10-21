@@ -52,6 +52,20 @@ export const TrainingSourcesSelector = ({ domainId }: Props) => {
     }
   }
 
+  const handleSelectAll = () => {
+    if (!urls.length) return
+    // Select up to the remaining allowed items
+    if (remaining === Infinity) {
+      setSelectedUrls(urls.map((u) => u.url))
+      return
+    }
+    const already = new Set(selectedUrls)
+    const notSelected = urls.map((u) => u.url).filter((u) => !already.has(u))
+    const slots = Math.max(0, (remaining as number) - selectedUrls.length)
+    if (slots <= 0) return
+    setSelectedUrls([...selectedUrls, ...notSelected.slice(0, slots)])
+  }
+
   const canSelectMore = remaining === Infinity || selectedUrls.length < remaining
 
   return (
@@ -107,9 +121,19 @@ export const TrainingSourcesSelector = ({ domainId }: Props) => {
                 <span className="font-medium">{selectedUrls.length}</span> of{' '}
                 <span className="font-medium">{urls.length}</span> pages selected
               </div>
-              {!canSelectMore && (
-                <Badge variant="destructive">Limit reached</Badge>
-              )}
+              <div className="flex items-center gap-2">
+                {!canSelectMore && (
+                  <Badge variant="destructive">Limit reached</Badge>
+                )}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleSelectAll}
+                  disabled={!canSelectMore || urls.length === 0}
+                >
+                  Select All
+                </Button>
+              </div>
             </div>
 
             <ScrollArea className="flex-1 min-h-0 pr-3">
