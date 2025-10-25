@@ -276,7 +276,7 @@ export default async function Home() {
               </div>
               <h3 className="text-xl font-bold text-brand-primary mb-3">Instant responses that feel human</h3>
               <p className="text-brand-primary/70 leading-relaxed">
-                Sub-second response times keep customers engaged. Advanced AI streaming makes conversations feel natural—not robotic. Your visitors won't know they're talking to AI.
+                Sub-second response times keep customers engaged. Advanced AI streaming makes conversations feel natural—not robotic. Your visitors won&apos;t know they&apos;re talking to AI.
               </p>
             </div>
           </div>
