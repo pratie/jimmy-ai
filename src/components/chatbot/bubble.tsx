@@ -114,8 +114,12 @@ const Bubble = ({ message, createdAt, botIcon, theme }: Props) => {
             <p className="text-xs text-brand-primary/60">Image failed to load</p>
           </div>
         ) : (
-          <p className="text-sm break-words whitespace-pre-wrap">
-            {message.content.replace('(complete)', ' ')}
+          <div className="text-sm break-words whitespace-pre-wrap">
+            <span
+              dangerouslySetInnerHTML={{
+                __html: message.content.replace('(complete)', ' ')
+              }}
+            />
             {message.link && (
               <a
                 className={cn('underline font-semibold pl-2 inline-block')}
@@ -126,7 +130,7 @@ const Bubble = ({ message, createdAt, botIcon, theme }: Props) => {
                 Your Link
               </a>
             )}
-          </p>
+          </div>
         )}
       </div>
     </div>
