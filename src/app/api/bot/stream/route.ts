@@ -18,6 +18,9 @@ type DomainConfig = {
     brandTone: string | null
     language: string | null
     hasEmbeddings: boolean | null
+    llmModel?: string | null
+    llmTemperature?: number | null
+    modePrompts?: any | null
   } | null
 }
 
@@ -123,6 +126,9 @@ export async function POST(req: Request) {
               brandTone: true,
               language: true,
               hasEmbeddings: true,
+              llmModel: true,
+              llmTemperature: true,
+              modePrompts: true,
             },
           },
         },
@@ -457,20 +463,50 @@ export async function POST(req: Request) {
       paymentUrl: '',
       portalBaseUrl: `${process.env.NEXT_PUBLIC_APP_URL}/portal/${domainId}`,
       customerId: '',
+      customModeBlocks: (chatBotDomain.chatBot?.modePrompts as any) || undefined,
     })
     devLog(`[Bot Stream] ✅ Prompt building took: ${Date.now() - promptStartTime}ms`)
+
+    // Prepare OpenAI request data
+    const llmModel = chatBotDomain.chatBot?.llmModel || 'gpt-4o-mini'
+    const llmTemperature = (typeof chatBotDomain.chatBot?.llmTemperature === 'number') ? chatBotDomain.chatBot?.llmTemperature as number : 0.7
+    const messages = [
+      { role: 'system', content: systemPrompt },
+      ...chat,
+      { role: 'user', content: message },
+    ]
+
+    // ═══════════════════════════════════════════════════════════
+    // 🔍 DEBUG: LOG COMPLETE LLM REQUEST DATA
+    // ═══════════════════════════════════════════════════════════
+    if (process.env.DEBUG_LLM === 'true') {
+      console.log('\n' + '='.repeat(80))
+      console.log('📤 OPENAI API REQUEST')
+      console.log('='.repeat(80))
+      console.log('Model:', llmModel)
+      console.log('Temperature:', llmTemperature)
+      console.log('Max Tokens:', 800)
+      console.log('Stream:', true)
+      console.log('\n' + '-'.repeat(80))
+      console.log('MESSAGES:')
+      console.log('-'.repeat(80))
+      messages.forEach((msg, idx) => {
+        console.log(`\n[Message ${idx + 1}] Role: ${msg.role}`)
+        console.log('-'.repeat(80))
+        console.log(msg.content)
+        console.log('-'.repeat(80))
+      })
+      console.log('\n' + '='.repeat(80) + '\n')
+    }
 
     // Create streaming completion
     devLog('[Bot Stream] 🤖 Calling OpenAI API...')
     const llmStartTime = Date.now()
     const stream = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [
-        { role: 'system', content: systemPrompt },
-        ...chat,
-        { role: 'user', content: message },
-      ],
+      model: llmModel,
+      messages: messages as any,
       stream: true,
+      temperature: llmTemperature,
       max_tokens: 800, // Limit response length to control costs and latency (~3-4 paragraphs)
     })
 
@@ -504,6 +540,25 @@ export async function POST(req: Request) {
           ttft = (firstTokenTime ?? llmStartTime) - llmStartTime
           devLog(`[Bot Stream] ✅ Stream completed: ${tokenCount} tokens in ${streamTime}ms`)
           devLog(`[Bot Stream] 📊 Total request time: ${totalTime}ms`)
+
+          // ═══════════════════════════════════════════════════════════
+          // 🔍 DEBUG: LOG COMPLETE LLM RESPONSE
+          // ═══════════════════════════════════════════════════════════
+          if (process.env.DEBUG_LLM === 'true') {
+            console.log('\n' + '='.repeat(80))
+            console.log('📥 OPENAI API RESPONSE')
+            console.log('='.repeat(80))
+            console.log('Tokens:', tokenCount)
+            console.log('TTFT (Time to First Token):', ttft, 'ms')
+            console.log('Stream Duration:', streamTime, 'ms')
+            console.log('Total Duration:', totalTime, 'ms')
+            console.log('\n' + '-'.repeat(80))
+            console.log('COMPLETE RESPONSE:')
+            console.log('-'.repeat(80))
+            console.log(fullResponse)
+            console.log('-'.repeat(80))
+            console.log('='.repeat(80) + '\n')
+          }
 
           // Metrics (safe - no PII, only timing data)
           const stats = domainCacheStats.get(domainId) || { hits: 0, misses: 0 }

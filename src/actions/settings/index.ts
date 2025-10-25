@@ -216,6 +216,9 @@ export const onGetCurrentDomainInfo = async (domain: string) => {
                 brandTone: true,
                 language: true,
                 theme: true,
+                llmModel: true,
+                llmTemperature: true,
+                modePrompts: true,
               },
             },
           },
@@ -365,6 +368,58 @@ export const onUpdateBrandVoice = async (
       return { status: 200, message: 'Brand voice updated' }
     }
     return { status: 400, message: 'Oops! something went wrong' }
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+// Update LLM provider configuration for a domain's chatbot
+export const onUpdateLlmConfig = async (
+  model: string,
+  temperature: number,
+  domainId: string
+) => {
+  try {
+    const update = await client.domain.update({
+      where: { id: domainId },
+      data: {
+        chatBot: {
+          update: {
+            data: {
+              llmModel: model,
+              llmTemperature: temperature,
+            },
+          },
+        },
+      },
+    })
+    if (update) return { status: 200, message: 'LLM settings updated' }
+    return { status: 400, message: 'Failed to update LLM settings' }
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+// Update per-mode prompt overrides
+export const onUpdateModePrompts = async (
+  modePrompts: Record<string, string>,
+  domainId: string
+) => {
+  try {
+    const update = await client.domain.update({
+      where: { id: domainId },
+      data: {
+        chatBot: {
+          update: {
+            data: {
+              modePrompts: modePrompts as any,
+            },
+          },
+        },
+      },
+    })
+    if (update) return { status: 200, message: 'Mode prompts saved' }
+    return { status: 400, message: 'Failed to save mode prompts' }
   } catch (error) {
     console.log(error)
   }

@@ -120,6 +120,9 @@ export const onAiChatBotAssistant = async (
             mode: true,
             brandTone: true,
             language: true,
+            llmModel: true,
+            llmTemperature: true,
+            modePrompts: true,
           },
         },
       },
@@ -247,6 +250,7 @@ export const onAiChatBotAssistant = async (
           paymentUrl: '',
           portalBaseUrl: `${process.env.NEXT_PUBLIC_APP_URL}/portal/${id}`,
           customerId: '',
+          customModeBlocks: (chatBotDomain.chatBot?.modePrompts as any) || undefined,
         })
 
         const chatCompletion = await openai.chat.completions.create({
@@ -261,7 +265,8 @@ export const onAiChatBotAssistant = async (
               content: message,
             },
           ],
-          model: 'gpt-4o-mini',
+          model: chatBotDomain.chatBot?.llmModel || 'gpt-4o-mini',
+          temperature: (typeof chatBotDomain.chatBot?.llmTemperature === 'number') ? (chatBotDomain.chatBot?.llmTemperature as number) : 0.7,
           max_tokens: 800, // Limit response length to control costs and latency
         })
 
@@ -446,6 +451,7 @@ export const onAiChatBotAssistant = async (
           paymentUrl: `${process.env.NEXT_PUBLIC_APP_URL}/portal/${id}/payment/${checkCustomer?.customer[0].id}`,
           portalBaseUrl: `${process.env.NEXT_PUBLIC_APP_URL}/portal/${id}`,
           customerId: checkCustomer?.customer[0].id || '',
+          customModeBlocks: (chatBotDomain.chatBot?.modePrompts as any) || undefined,
         })
 
         const chatCompletion = await openai.chat.completions.create({
@@ -460,7 +466,8 @@ export const onAiChatBotAssistant = async (
               content: message,
             },
           ],
-          model: 'gpt-4o-mini',
+          model: chatBotDomain.chatBot?.llmModel || 'gpt-4o-mini',
+          temperature: (typeof chatBotDomain.chatBot?.llmTemperature === 'number') ? (chatBotDomain.chatBot?.llmTemperature as number) : 0.7,
           max_tokens: 800, // Limit response length to control costs and latency
         })
 
@@ -568,6 +575,7 @@ export const onAiChatBotAssistant = async (
         paymentUrl: '',
         portalBaseUrl: `${process.env.NEXT_PUBLIC_APP_URL}/portal/${id}`,
         customerId: '',
+        customModeBlocks: (chatBotDomain.chatBot?.modePrompts as any) || undefined,
       })
 
       const chatCompletion = await openai.chat.completions.create({
@@ -582,7 +590,8 @@ export const onAiChatBotAssistant = async (
             content: message,
           },
         ],
-        model: 'gpt-4o-mini',
+        model: chatBotDomain.chatBot?.llmModel || 'gpt-4o-mini',
+        temperature: (typeof chatBotDomain.chatBot?.llmTemperature === 'number') ? (chatBotDomain.chatBot?.llmTemperature as number) : 0.7,
         max_tokens: 800, // Limit response length to control costs and latency
       })
 

@@ -63,6 +63,10 @@ model ChatBot {
   mode                     String?          @default("SALES")
   brandTone                String?          @default("friendly, concise")
   language                 String?          @default("en")
+  // Advanced AI settings
+  llmModel                 String?          @default("gpt-4o-mini")
+  llmTemperature           Float?           @default(0.7)
+  modePrompts              Json?
   embeddingStatus          String?          @default("not_started")
   embeddingProgress        Int?             @default(0)
   embeddingChunksTotal     Int?

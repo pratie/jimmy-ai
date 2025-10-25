@@ -139,7 +139,15 @@ const SettingsForm = ({ id, name, chatBot, plan, trainingSourcesUsed, knowledgeB
 
       {/* AI Mode & Brand Voice Settings */}
       <div className="flex flex-col gap-2.5 mt-5 rounded-lg border border-sauce-cyan/40 bg-white px-4 py-3.5 shadow-sm">
-        <h2 id="ai-behavior" className="font-semibold text-lg text-sauce-black">AI Behavior Settings</h2>
+        <div className="flex items-center justify-between">
+          <h2 id="ai-behavior" className="font-semibold text-lg text-sauce-black">AI Behavior Settings</h2>
+          <a
+            href={`/settings/${name}/advanced`}
+            className="text-xs underline text-sauce-black hover:text-sauce-purple"
+          >
+            Advanced settings ↗
+          </a>
+        </div>
         <div className="grid md:grid-cols-2 gap-6 mt-1">
           <div className="col-span-1">
             <BotModeSelector
