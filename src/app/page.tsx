@@ -25,15 +25,15 @@ export default async function Home() {
             {/* Main Headline */}
             <div className="text-center space-y-5 md:space-y-6 max-w-4xl">
               <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-semibold text-brand-primary leading-[1.15] tracking-tight">
-                Integrate AI Chatbot
+                Turn Website Visitors Into
                 <br />
-                <span className="bg-gradient-to-r from-[#f59e0b] via-[#ec4899] to-[#6366f1]" style={{WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text'}}>
-                  into your website in minutes
+                <span className="bg-main px-4 py-2 rounded-base border-2 border-border inline-block mt-3 text-black">
+                  Paying Customers 24/7
                 </span>
               </h1>
 
               <p className="text-brand-primary/65 text-base sm:text-lg md:text-xl max-w-2xl mx-auto leading-relaxed font-normal">
-                Train on your website & docs. Your AI assistant answers questions, qualifies leads, and books meetings automatically.
+                AI-powered chatbot for e-commerce, agencies, and SMBs. Answer customer questions instantly, recover abandoned carts, qualify leads, and close sales while you sleep.
               </p>
             </div>
 
@@ -41,15 +41,15 @@ export default async function Home() {
             <div className="flex flex-wrap items-center justify-center gap-4 md:gap-6 text-brand-primary/75 mt-2">
               <div className="flex items-center gap-2">
                 <Check className="w-4 h-4 text-green-600 dark:text-green-400" strokeWidth={2.5} />
-                <span className="text-sm font-normal">No credit card required</span>
+                <span className="text-sm font-normal">Free forever plan</span>
               </div>
               <div className="flex items-center gap-2">
                 <Check className="w-4 h-4 text-green-600 dark:text-green-400" strokeWidth={2.5} />
-                <span className="text-sm font-normal">Setup in 2 minutes</span>
+                <span className="text-sm font-normal">Live in 5 minutes</span>
               </div>
               <div className="flex items-center gap-2">
                 <Check className="w-4 h-4 text-green-600 dark:text-green-400" strokeWidth={2.5} />
-                <span className="text-sm font-normal">100 messages free</span>
+                <span className="text-sm font-normal">No coding needed</span>
               </div>
             </div>
 
@@ -81,20 +81,20 @@ export default async function Home() {
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12 max-w-5xl mx-auto">
             <div className="text-center">
-              <div className="text-4xl md:text-6xl font-extrabold text-brand-primary mb-2">3.2x</div>
-              <div className="text-brand-primary/70 text-sm md:text-base font-medium">Conversion increase</div>
+              <div className="text-4xl md:text-6xl font-extrabold text-brand-primary mb-2">67%</div>
+              <div className="text-brand-primary/70 text-sm md:text-base font-medium">Higher conversion rate</div>
+            </div>
+            <div className="text-center">
+              <div className="text-4xl md:text-6xl font-extrabold text-brand-primary mb-2">40%</div>
+              <div className="text-brand-primary/70 text-sm md:text-base font-medium">Fewer cart abandonments</div>
             </div>
             <div className="text-center">
               <div className="text-4xl md:text-6xl font-extrabold text-brand-primary mb-2">24/7</div>
-              <div className="text-brand-primary/70 text-sm md:text-base font-medium">Always available</div>
+              <div className="text-brand-primary/70 text-sm md:text-base font-medium">Customer support</div>
             </div>
             <div className="text-center">
-              <div className="text-4xl md:text-6xl font-extrabold text-brand-primary mb-2">&lt;1s</div>
-              <div className="text-brand-primary/70 text-sm md:text-base font-medium">Response time</div>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl md:text-6xl font-extrabold text-brand-primary mb-2">&lt;2min</div>
-              <div className="text-brand-primary/70 text-sm md:text-base font-medium">Setup time</div>
+              <div className="text-4xl md:text-6xl font-extrabold text-brand-primary mb-2">5min</div>
+              <div className="text-brand-primary/70 text-sm md:text-base font-medium">To go live</div>
             </div>
           </div>
         </div>
@@ -105,10 +105,10 @@ export default async function Home() {
         <div className="container mx-auto px-4">
           <div className="text-center mb-20">
             <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold text-brand-primary mb-6">
-              How it works
+              From zero to selling in 3 simple steps
             </h2>
             <p className="text-brand-primary/70 text-lg md:text-xl max-w-3xl mx-auto leading-relaxed">
-              Get your AI agent up and running in minutes. No technical knowledge required.
+              Launch your AI sales assistant in minutes. No developers, no complex setup, no hassle.
             </p>
           </div>
 
@@ -124,9 +124,9 @@ export default async function Home() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                   </svg>
                 </div>
-                <h3 className="text-2xl font-bold text-brand-primary mb-4">Train your AI</h3>
+                <h3 className="text-2xl font-bold text-brand-primary mb-4">Train on your products & FAQs</h3>
                 <p className="text-brand-primary/70 text-base leading-relaxed">
-                  Just paste your website URL, upload PDFs, or add FAQs. Advanced AI learns your entire business in seconds. Understands context, not just keywords.
+                  Upload your product catalog, pricing, shipping policies, and FAQs. Our AI learns everything about your business in seconds—from product specs to return policies.
                 </p>
               </div>
             </div>
@@ -142,9 +142,9 @@ export default async function Home() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
                   </svg>
                 </div>
-                <h3 className="text-2xl font-bold text-brand-primary mb-4">Customize</h3>
+                <h3 className="text-2xl font-bold text-brand-primary mb-4">Match your brand</h3>
                 <p className="text-brand-primary/70 text-base leading-relaxed">
-                  Pick your brand voice, colors, and AI personality. Choose: Sales mode (close deals), Support mode (help customers), Lead Qualifier, or FAQ mode (strict answers only).
+                  Customize colors, tone, and chat widget to match your brand. Choose Sales mode to close deals, Support mode for customer help, or FAQ mode for instant answers.
                 </p>
               </div>
             </div>
@@ -160,9 +160,9 @@ export default async function Home() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                   </svg>
                 </div>
-                <h3 className="text-2xl font-bold text-brand-primary mb-4">Deploy & grow</h3>
+                <h3 className="text-2xl font-bold text-brand-primary mb-4">Go live & start selling</h3>
                 <p className="text-brand-primary/70 text-base leading-relaxed">
-                  Copy one line of code to your website. Your AI agent starts capturing leads immediately.
+                  Add one line of code to your Shopify, WordPress, or any website. Your AI starts converting visitors into customers immediately—no app installation required.
                 </p>
               </div>
             </div>
@@ -175,10 +175,10 @@ export default async function Home() {
         <div className="container mx-auto px-4">
           <div className="text-center mb-20">
             <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold text-brand-primary mb-6">
-              Everything you need to succeed
+              Built for growing businesses
             </h2>
             <p className="text-brand-primary/70 text-lg md:text-xl max-w-3xl mx-auto">
-              Built for founders who want results, not complexity
+              Everything you need to sell more, support better, and scale faster
             </p>
           </div>
 
@@ -190,9 +190,9 @@ export default async function Home() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-bold text-brand-primary mb-3">24/7 lead capture</h3>
+              <h3 className="text-xl font-bold text-brand-primary mb-3">Recover abandoned carts</h3>
               <p className="text-brand-primary/70 leading-relaxed">
-                Never miss another opportunity. Your AI works around the clock to qualify leads and schedule meetings.
+                Proactively engage shoppers before they leave. Answer objections, offer help, and guide them to checkout—automatically reducing cart abandonment by up to 40%.
               </p>
             </div>
 
@@ -202,9 +202,9 @@ export default async function Home() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-bold text-brand-primary mb-3">Smart knowledge search</h3>
+              <h3 className="text-xl font-bold text-brand-primary mb-3">Answer product questions instantly</h3>
               <p className="text-brand-primary/70 leading-relaxed">
-                Advanced AI understands context like a human. Finds the right answers from your docs instantly. No wrong info, no making things up.
+                Your AI knows every product detail, shipping policy, and return procedure. Gives accurate answers in seconds—like your best salesperson, but available 24/7.
               </p>
             </div>
 
@@ -214,9 +214,9 @@ export default async function Home() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-bold text-brand-primary mb-3">Appointment booking</h3>
+              <h3 className="text-xl font-bold text-brand-primary mb-3">Book consultations automatically</h3>
               <p className="text-brand-primary/70 leading-relaxed">
-                Automatically syncs with your calendar. Books meetings instantly without the back-and-forth emails.
+                Perfect for agencies and service businesses. AI qualifies prospects, books discovery calls, and syncs with your calendar—no back-and-forth emails needed.
               </p>
             </div>
 
@@ -226,9 +226,9 @@ export default async function Home() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-bold text-brand-primary mb-3">Live chat handoff</h3>
+              <h3 className="text-xl font-bold text-brand-primary mb-3">Seamless human handoff</h3>
               <p className="text-brand-primary/70 leading-relaxed">
-                AI handles simple questions. When it needs you, it hands off seamlessly with full conversation history.
+                AI handles 80% of questions automatically. For complex issues, it notifies your team and hands off with full context—no repeated questions for customers.
               </p>
             </div>
 
@@ -238,9 +238,9 @@ export default async function Home() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-bold text-brand-primary mb-3">Real-time analytics</h3>
+              <h3 className="text-xl font-bold text-brand-primary mb-3">Track every sale & lead</h3>
               <p className="text-brand-primary/70 leading-relaxed">
-                See every conversation, track conversion rates, and optimize your AI with actionable insights.
+                See which conversations turned into sales, what questions customers ask most, and where to optimize. All conversations saved and searchable.
               </p>
             </div>
 
@@ -250,9 +250,9 @@ export default async function Home() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
                 </svg>
               </div>
-              <h3 className="text-xl font-bold text-brand-primary mb-3">Multi-domain support</h3>
+              <h3 className="text-xl font-bold text-brand-primary mb-3">Scale across multiple stores</h3>
               <p className="text-brand-primary/70 leading-relaxed">
-                Manage multiple websites from one dashboard. Each with its own AI trained on specific data.
+                Perfect for agencies managing client sites or businesses with multiple brands. One dashboard to rule them all—each AI trained on specific products and policies.
               </p>
             </div>
 
@@ -262,9 +262,9 @@ export default async function Home() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-bold text-brand-primary mb-3">Smooth lead capture</h3>
+              <h3 className="text-xl font-bold text-brand-primary mb-3">Qualify leads while they browse</h3>
               <p className="text-brand-primary/70 leading-relaxed">
-                Visitors chat anonymously first. AI gently collects emails when they&apos;re ready. Full conversation history saved. No awkward sign-up pop-ups.
+                AI engages visitors naturally, asks qualifying questions, and captures emails at the right moment. No aggressive popups—just helpful conversations that convert.
               </p>
             </div>
 
@@ -274,9 +274,9 @@ export default async function Home() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-bold text-brand-primary mb-3">Lightning-fast responses</h3>
+              <h3 className="text-xl font-bold text-brand-primary mb-3">Instant responses that feel human</h3>
               <p className="text-brand-primary/70 leading-relaxed">
-                Replies in under 10 seconds. Advanced streaming tech makes it feel instant and keeps visitors engaged instead of waiting.
+                Sub-second response times keep customers engaged. Advanced AI streaming makes conversations feel natural—not robotic. Your visitors won't know they're talking to AI.
               </p>
             </div>
           </div>
@@ -288,18 +288,18 @@ export default async function Home() {
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center bg-gradient-to-br from-brand-accent/10 via-brand-info/10 to-brand-success/10 rounded-3xl p-12 md:p-16 border-2 border-brand-base-300">
             <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold text-brand-primary mb-6">
-              Ready to grow on autopilot?
+              Start converting more visitors today
             </h2>
             <p className="text-brand-primary/70 text-lg md:text-xl mb-10 max-w-2xl mx-auto">
-              Join small business owners using smart AI to capture qualified leads, close deals faster, and grow without hiring support teams.
+              Join 500+ e-commerce stores, agencies, and SMBs using AI to boost sales, reduce support costs, and scale without adding headcount.
             </p>
             <Link href="/auth/sign-up">
               <Button size="lg" className="bg-main text-black font-heading px-12 py-7 text-xl border-2 border-border shadow-shadow hover:translate-x-1 hover:translate-y-1 hover:shadow-none">
-                Start for free →
+                Get started free →
               </Button>
             </Link>
             <p className="text-brand-primary/60 text-sm mt-6">
-              No credit card required • Setup in 2 minutes • 100 messages free
+              Free forever plan • Live in 5 minutes • No credit card needed
             </p>
           </div>
         </div>

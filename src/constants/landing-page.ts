@@ -1,7 +1,7 @@
 export const pricingCards = [
   {
     title: 'Free',
-    description: 'Perfect for trying out BookmyLead',
+    description: 'Perfect for testing & small sites',
     price: '$0',
     duration: '',
     highlight: 'Key features',
@@ -10,7 +10,7 @@ export const pricingCards = [
   },
   {
     title: 'Starter',
-    description: 'For small businesses',
+    description: 'For growing online stores',
     price: '$19',
     duration: 'month',
     highlight: 'Everything in Free, plus',
@@ -21,7 +21,7 @@ export const pricingCards = [
   },
   {
     title: 'Pro',
-    description: 'For growing businesses',
+    description: 'For agencies & multiple brands',
     price: '$49',
     duration: 'month',
     highlight: 'Everything in Starter, plus',
@@ -32,7 +32,7 @@ export const pricingCards = [
   },
   {
     title: 'Business',
-    description: 'The ultimate solution',
+    description: 'For high-volume enterprises',
     price: '$99',
     duration: 'month',
     highlight: 'Everything in Pro, plus',
