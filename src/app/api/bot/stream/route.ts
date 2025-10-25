@@ -80,6 +80,12 @@ function removeMarkdownBold(text: string): string {
   return text.replace(/\*\*/g, '')
 }
 
+// Helper to convert markdown links to HTML anchor tags
+function convertMarkdownLinksToHtml(text: string): string {
+  // Match [text](url) pattern and convert to <a href="url" target="_blank" rel="noopener noreferrer">text</a>
+  return text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-blue-500 hover:text-blue-600 underline">$1</a>')
+}
+
 // Helper to store conversations
 async function storeConversation(id: string, message: string, role: 'assistant' | 'user') {
   await client.chatRoom.update({
@@ -535,8 +541,9 @@ export async function POST(req: Request) {
               }
               tokenCount++
               fullResponse += content
-              // Remove markdown bold syntax before sending to client
-              const cleanContent = removeMarkdownBold(content)
+              // Process markdown: remove bold and convert links to HTML
+              let cleanContent = removeMarkdownBold(content)
+              cleanContent = convertMarkdownLinksToHtml(cleanContent)
               // Send as Server-Sent Events format
               controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content: cleanContent })}\n\n`))
             }
@@ -584,8 +591,9 @@ export async function POST(req: Request) {
 
           // Store complete AI response (background, do not block request end)
           if (chatRoomId && fullResponse) {
-            // Clean markdown bold before storing in database
-            const cleanFullResponse = removeMarkdownBold(fullResponse)
+            // Clean markdown: remove bold and convert links to HTML
+            let cleanFullResponse = removeMarkdownBold(fullResponse)
+            cleanFullResponse = convertMarkdownLinksToHtml(cleanFullResponse)
             storeConversation(chatRoomId, cleanFullResponse, 'assistant').catch((e) => {
               devError('[Bot Stream] Failed to persist assistant message:', e)
             })

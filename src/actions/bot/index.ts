@@ -21,6 +21,12 @@ function removeMarkdownBold(text: string): string {
   return text.replace(/\*\*/g, '')
 }
 
+// Helper to convert markdown links to HTML anchor tags
+function convertMarkdownLinksToHtml(text: string): string {
+  // Match [text](url) pattern and convert to <a href="url" target="_blank" rel="noopener noreferrer">text</a>
+  return text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-blue-500 hover:text-blue-600 underline">$1</a>')
+}
+
 export const onStoreConversations = async (
   id: string,
   message: string,
@@ -276,7 +282,8 @@ export const onAiChatBotAssistant = async (
         })
 
         if (chatCompletion) {
-          const cleanContent = removeMarkdownBold(chatCompletion.choices[0].message.content || '')
+          let cleanContent = removeMarkdownBold(chatCompletion.choices[0].message.content || '')
+          cleanContent = convertMarkdownLinksToHtml(cleanContent)
           const response = {
             role: 'assistant',
             content: cleanContent,
@@ -488,9 +495,10 @@ export const onAiChatBotAssistant = async (
           })
 
           if (realtime) {
-            const cleanContent = removeMarkdownBold(
+            let cleanContent = removeMarkdownBold(
               chatCompletion.choices[0].message.content.replace('(realtime)', '')
             )
+            cleanContent = convertMarkdownLinksToHtml(cleanContent)
             const response = {
               role: 'assistant',
               content: cleanContent,
@@ -553,7 +561,8 @@ export const onAiChatBotAssistant = async (
             return { response }
           }
 
-          const cleanContent = removeMarkdownBold(chatCompletion.choices[0].message.content || '')
+          let cleanContent = removeMarkdownBold(chatCompletion.choices[0].message.content || '')
+          cleanContent = convertMarkdownLinksToHtml(cleanContent)
           const response = {
             role: 'assistant',
             content: cleanContent,
@@ -603,7 +612,8 @@ export const onAiChatBotAssistant = async (
       })
 
       if (chatCompletion) {
-        const cleanContent = removeMarkdownBold(chatCompletion.choices[0].message.content || '')
+        let cleanContent = removeMarkdownBold(chatCompletion.choices[0].message.content || '')
+        cleanContent = convertMarkdownLinksToHtml(cleanContent)
         const response = {
           role: 'assistant',
           content: cleanContent,
