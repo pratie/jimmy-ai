@@ -75,6 +75,11 @@ const openai = new OpenAI({
 
 export const maxDuration = 30
 
+// Helper to remove markdown bold syntax from text
+function removeMarkdownBold(text: string): string {
+  return text.replace(/\*\*/g, '')
+}
+
 // Helper to store conversations
 async function storeConversation(id: string, message: string, role: 'assistant' | 'user') {
   await client.chatRoom.update({
@@ -530,8 +535,10 @@ export async function POST(req: Request) {
               }
               tokenCount++
               fullResponse += content
+              // Remove markdown bold syntax before sending to client
+              const cleanContent = removeMarkdownBold(content)
               // Send as Server-Sent Events format
-              controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content })}\n\n`))
+              controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content: cleanContent })}\n\n`))
             }
           }
 
@@ -577,7 +584,9 @@ export async function POST(req: Request) {
 
           // Store complete AI response (background, do not block request end)
           if (chatRoomId && fullResponse) {
-            storeConversation(chatRoomId, fullResponse, 'assistant').catch((e) => {
+            // Clean markdown bold before storing in database
+            const cleanFullResponse = removeMarkdownBold(fullResponse)
+            storeConversation(chatRoomId, cleanFullResponse, 'assistant').catch((e) => {
               devError('[Bot Stream] Failed to persist assistant message:', e)
             })
           }

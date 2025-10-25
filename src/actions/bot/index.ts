@@ -13,8 +13,13 @@ import { searchKnowledgeBaseWithFallback, formatResultsForPrompt, hasTrainedEmbe
 const openai = new OpenAi({
   apiKey: process.env.OPENAI_API_KEY,
   timeout: 30000, // 30 second timeout to prevent long waits
-  maxRetries: 2, // Retry failed requests twice
+  maxRetries: 2, // Retry failed requests twice,
 })
+
+// Helper to remove markdown bold syntax from text
+function removeMarkdownBold(text: string): string {
+  return text.replace(/\*\*/g, '')
+}
 
 export const onStoreConversations = async (
   id: string,
@@ -271,9 +276,10 @@ export const onAiChatBotAssistant = async (
         })
 
         if (chatCompletion) {
+          const cleanContent = removeMarkdownBold(chatCompletion.choices[0].message.content || '')
           const response = {
             role: 'assistant',
-            content: chatCompletion.choices[0].message.content,
+            content: cleanContent,
           }
 
           // Store AI response
@@ -482,12 +488,12 @@ export const onAiChatBotAssistant = async (
           })
 
           if (realtime) {
+            const cleanContent = removeMarkdownBold(
+              chatCompletion.choices[0].message.content.replace('(realtime)', '')
+            )
             const response = {
               role: 'assistant',
-              content: chatCompletion.choices[0].message.content.replace(
-                '(realtime)',
-                ''
-              ),
+              content: cleanContent,
             }
 
             await onStoreConversations(
@@ -547,9 +553,10 @@ export const onAiChatBotAssistant = async (
             return { response }
           }
 
+          const cleanContent = removeMarkdownBold(chatCompletion.choices[0].message.content || '')
           const response = {
             role: 'assistant',
-            content: chatCompletion.choices[0].message.content,
+            content: cleanContent,
           }
 
           await onStoreConversations(
@@ -596,9 +603,10 @@ export const onAiChatBotAssistant = async (
       })
 
       if (chatCompletion) {
+        const cleanContent = removeMarkdownBold(chatCompletion.choices[0].message.content || '')
         const response = {
           role: 'assistant',
-          content: chatCompletion.choices[0].message.content,
+          content: cleanContent,
         }
 
         return { response }
