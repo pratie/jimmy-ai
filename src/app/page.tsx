@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import Image from 'next/image'
 import Link from 'next/link'
 import PricingSection from '@/components/landing/pricing-section'
+import FlowDiagram from '@/components/landing/flow-diagram'
 import { Check } from 'lucide-react'
 
 export const metadata: Metadata = {
@@ -68,7 +69,7 @@ export default async function Home() {
                 height={800}
                 alt="BookmyLead AI Dashboard"
                 className="w-full h-auto object-contain relative z-10 shadow-2xl rounded-2xl border border-brand-base-300/40 bg-white/70 dark:bg-black/30 backdrop-blur-sm p-2"
-                priority
+                loading="lazy"
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 1200px"
               />
             </div>
@@ -100,75 +101,8 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* How It Works */}
-      <section className="py-24 bg-transparent" id="features">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-20">
-            <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold text-brand-primary mb-6">
-              From zero to selling in 3 simple steps
-            </h2>
-            <p className="text-brand-primary/70 text-lg md:text-xl max-w-3xl mx-auto leading-relaxed">
-              Launch your AI sales assistant in minutes. No developers, no complex setup, no hassle.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12 max-w-6xl mx-auto">
-            {/* Step 1 */}
-            <div className="relative">
-              <div className="absolute -top-6 -left-6 w-16 h-16 bg-[#f5d9d9] rounded-full flex items-center justify-center shadow-lg z-10">
-                <span className="text-3xl font-bold text-brand-primary">1</span>
-              </div>
-              <div className="bg-white dark:bg-black/40 backdrop-blur-md p-10 pt-12 rounded-3xl border-2 border-brand-base-300 h-full">
-                <div className="w-16 h-16 bg-[#f5d9d9] rounded-2xl flex items-center justify-center mb-6">
-                  <svg className="w-8 h-8 text-brand-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                  </svg>
-                </div>
-                <h3 className="text-2xl font-bold text-brand-primary mb-4">Train on your products & FAQs</h3>
-                <p className="text-brand-primary/70 text-base leading-relaxed">
-                  Upload your product catalog, pricing, shipping policies, and FAQs. Our AI learns everything about your business in seconds—from product specs to return policies.
-                </p>
-              </div>
-            </div>
-
-            {/* Step 2 */}
-            <div className="relative">
-              <div className="absolute -top-6 -left-6 w-16 h-16 bg-[#d9d9f5] rounded-full flex items-center justify-center shadow-lg z-10">
-                <span className="text-3xl font-bold text-brand-primary">2</span>
-              </div>
-              <div className="bg-white dark:bg-black/40 backdrop-blur-md p-10 pt-12 rounded-3xl border-2 border-brand-base-300 h-full">
-                <div className="w-16 h-16 bg-[#d9d9f5] rounded-2xl flex items-center justify-center mb-6">
-                  <svg className="w-8 h-8 text-brand-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
-                  </svg>
-                </div>
-                <h3 className="text-2xl font-bold text-brand-primary mb-4">Match your brand</h3>
-                <p className="text-brand-primary/70 text-base leading-relaxed">
-                  Customize colors, tone, and chat widget to match your brand. Choose Sales mode to close deals, Support mode for customer help, or FAQ mode for instant answers.
-                </p>
-              </div>
-            </div>
-
-            {/* Step 3 */}
-            <div className="relative">
-              <div className="absolute -top-6 -left-6 w-16 h-16 bg-[#d9f5e5] rounded-full flex items-center justify-center shadow-lg z-10">
-                <span className="text-3xl font-bold text-brand-primary">3</span>
-              </div>
-              <div className="bg-white dark:bg-black/40 backdrop-blur-md p-10 pt-12 rounded-3xl border-2 border-brand-base-300 h-full">
-                <div className="w-16 h-16 bg-[#d9f5e5] rounded-2xl flex items-center justify-center mb-6">
-                  <svg className="w-8 h-8 text-brand-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                  </svg>
-                </div>
-                <h3 className="text-2xl font-bold text-brand-primary mb-4">Go live & start selling</h3>
-                <p className="text-brand-primary/70 text-base leading-relaxed">
-                  Add one line of code to your Shopify, WordPress, or any website. Your AI starts converting visitors into customers immediately—no app installation required.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* How It Works - Interactive Flow */}
+      <FlowDiagram />
 
       {/* Features Grid */}
       <section className="py-24 bg-brand-base-100/50 backdrop-blur-sm">
