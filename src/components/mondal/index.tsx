@@ -17,6 +17,7 @@ type Props = {
   description: string
   type?: 'Integration'
   logo?: string
+  contentClassName?: string
 }
 
 const Modal = ({
@@ -26,13 +27,15 @@ const Modal = ({
   description,
   type,
   logo,
+  contentClassName,
 }: Props) => {
   switch (type) {
     case 'Integration':
       return (
         <Dialog>
           <DialogTrigger asChild>{trigger}</DialogTrigger>
-          <DialogContent>
+          <DialogContent className={contentClassName}
+          >
             <div className="flex justify-center gap-3">
               <div className="w-12 h-12 relative">
                 <Image
@@ -67,7 +70,7 @@ const Modal = ({
       return (
         <Dialog>
           <DialogTrigger asChild>{trigger}</DialogTrigger>
-          <DialogContent>
+          <DialogContent className={contentClassName}>
             <DialogHeader>
               <DialogTitle className="text-xl">{title}</DialogTitle>
               <DialogDescription>{description}</DialogDescription>

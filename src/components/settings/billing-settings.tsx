@@ -31,6 +31,7 @@ const BillingSettings = async (props: Props) => {
           <Modal
             title="Choose A Plan"
             description="Upgrade your plan to unlock more messages, domains, and features."
+            contentClassName="max-w-5xl w-[calc(100vw-2rem)]"
             trigger={
               <Card className="border-dashed bg-cream border-brand-base-300 w-full cursor-pointer h-[270px] flex justify-center items-center">
                 <CardContent className="flex gap-2 items-center">

@@ -22,29 +22,30 @@ const SubscriptionForm = ({ plan }: Props) => {
     FREE: { monthly: '0', yearly: '0', monthlyEquivalent: '0' },
     STARTER: { monthly: '19', yearly: '134', monthlyEquivalent: '11' },
     PRO: { monthly: '49', yearly: '348', monthlyEquivalent: '29' },
-    BUSINESS: { monthly: '99', yearly: '708', monthlyEquivalent: '59' },
+    BUSINESS: { monthly: '99', yearly: '585', monthlyEquivalent: '49' },
   }
 
   return (
     <Loader loading={loading}>
-      <div className="flex flex-col gap-5">
-        {/* Monthly/Yearly Toggle */}
-        <div className="flex items-center justify-center gap-4 mb-2">
-          <span className={clsx('text-sm font-semibold', !isYearly ? 'text-primary' : 'text-muted-foreground')}>
+      <div className="flex flex-col gap-6">
+        {/* Plan interval toggle */}
+        <div className="flex items-center justify-center gap-4">
+          <span className={clsx('text-sm font-semibold', !isYearly ? 'text-brand-primary' : 'text-brand-primary/60')}>
             Monthly
           </span>
           <button
             onClick={() => setIsYearly(!isYearly)}
-            className="relative inline-flex h-7 w-12 items-center rounded-full bg-muted transition-colors focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2"
+            className="relative inline-flex h-8 w-14 items-center rounded-full bg-brand-base-200 transition-colors focus:outline-none focus:ring-2 focus:ring-brand-accent/50 focus:ring-offset-2"
+            aria-label="Toggle billing interval"
           >
             <span
               className={clsx(
-                'inline-block h-5 w-5 transform rounded-full bg-primary transition-transform',
-                isYearly ? 'translate-x-6' : 'translate-x-1'
+                'inline-block h-6 w-6 transform rounded-full bg-brand-accent transition-transform',
+                isYearly ? 'translate-x-7' : 'translate-x-1'
               )}
             />
           </button>
-          <span className={clsx('text-sm font-semibold', isYearly ? 'text-primary' : 'text-muted-foreground')}>
+          <span className={clsx('text-sm font-semibold', isYearly ? 'text-brand-primary' : 'text-brand-primary/60')}>
             Yearly
             <span className="ml-2 text-xs bg-green-500/20 text-green-700 dark:text-green-400 px-2 py-0.5 rounded-full">
               Save up to 40%
@@ -52,7 +53,8 @@ const SubscriptionForm = ({ plan }: Props) => {
           </span>
         </div>
 
-        <div className="flex flex-col gap-3">
+        {/* Plans grid — horizontal like landing (responsive) */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           <SubscriptionCard
             title="FREE"
             description="Perfect if you&apos;re just getting started with BookmyLead"
@@ -89,12 +91,9 @@ const SubscriptionForm = ({ plan }: Props) => {
             id="BUSINESS"
           />
         </div>
+
+        {/* Action */}
         <StripeElements payment={payment} interval={isYearly ? 'YEARLY' : 'MONTHLY'} />
-        {payment === 'FREE' && (
-          <Button onClick={onUpdateToFreeTier}>
-            <Loader loading={loading}>Confirm</Loader>
-          </Button>
-        )}
       </div>
     </Loader>
   )

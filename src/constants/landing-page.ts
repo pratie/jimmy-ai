@@ -15,9 +15,10 @@ export const pricingCards = [
     duration: 'month',
     highlight: 'Everything in Free, plus',
     features: ['2,000 messages/month', '1 AI chatbot', '20 MB knowledge base', '15 training sources', 'Unlimited conversation history', 'Priority support'],
-    priceId: 'pdt_H8UFvwsiedYbSFvkeTp3m',
+    // Dodo Product IDs (monthly/yearly)
+    priceId: 'pdt_Gez1YlhKjDIJz3Asiql8Y',
     yearlyPrice: '$134',
-    yearlyPriceId: 'pdt_TEMGX6k2iUz4zNq1tNtA6',
+    yearlyPriceId: 'pdt_4WrJSCwPMmqIAT8tVr2Kk',
   },
   {
     title: 'Pro',
@@ -26,9 +27,9 @@ export const pricingCards = [
     duration: 'month',
     highlight: 'Everything in Starter, plus',
     features: ['5,000 messages/month', '5 AI chatbots', '50 MB knowledge base', '50 training sources', 'Advanced analytics', 'Custom branding'],
-    priceId: 'pdt_gfPZ5YvERGTr1bPgrrCPS',
+    priceId: 'pdt_VvrVsP0saqj0fjjQKVcbc',
     yearlyPrice: '$348',
-    yearlyPriceId: 'pdt_RrOvAZyElPoHftofvcg2d',
+    yearlyPriceId: 'pdt_suAOuFzuuXYGSntIZ8S94',
   },
   {
     title: 'Business',
@@ -37,8 +38,8 @@ export const pricingCards = [
     duration: 'month',
     highlight: 'Everything in Pro, plus',
     features: ['10,000 messages/month', 'Unlimited AI chatbots', '200 MB knowledge base', 'Unlimited training sources', '24/7 Premium support', 'Custom integrations', 'White label options'],
-    priceId: 'pdt_mKXy3ImVkBgEsXaKCoBAN',
-    yearlyPrice: '$708',
-    yearlyPriceId: 'pdt_dAXoky321LAd0qOJBX9up',
+    priceId: 'pdt_2RWqgVJU6XFZ6nKQHRQez',
+    yearlyPrice: '$585',
+    yearlyPriceId: 'pdt_md26pGqUBcoGv8n0lWe1v',
   },
 ]

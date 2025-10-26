@@ -14,15 +14,15 @@ const getPlanProductId = (item: 'FREE' | 'STARTER' | 'PRO' | 'BUSINESS', interva
 
   // Yearly subscriptions
   if (interval === 'YEARLY') {
-    if (item === 'STARTER') return process.env.DODO_PRODUCT_ID_STARTER_YEARLY || 'pdt_TEMGX6k2iUz4zNq1tNtA6'
-    if (item === 'PRO') return process.env.DODO_PRODUCT_ID_PRO_YEARLY || 'pdt_RrOvAZyElPoHftofvcg2d'
-    if (item === 'BUSINESS') return process.env.DODO_PRODUCT_ID_BUSINESS_YEARLY || 'pdt_dAXoky321LAd0qOJBX9up'
+    if (item === 'STARTER') return process.env.DODO_PRODUCT_ID_STARTER_YEARLY || 'pdt_4WrJSCwPMmqIAT8tVr2Kk'
+    if (item === 'PRO') return process.env.DODO_PRODUCT_ID_PRO_YEARLY || 'pdt_suAOuFzuuXYGSntIZ8S94'
+    if (item === 'BUSINESS') return process.env.DODO_PRODUCT_ID_BUSINESS_YEARLY || 'pdt_md26pGqUBcoGv8n0lWe1v'
   }
 
   // Monthly subscriptions (default)
-  if (item === 'STARTER') return process.env.DODO_PRODUCT_ID_STARTER || 'pdt_H8UFvwsiedYbSFvkeTp3m'
-  if (item === 'PRO') return process.env.DODO_PRODUCT_ID_PRO || 'pdt_gfPZ5YvERGTr1bPgrrCPS'
-  if (item === 'BUSINESS') return process.env.DODO_PRODUCT_ID_BUSINESS || 'pdt_mKXy3ImVkBgEsXaKCoBAN'
+  if (item === 'STARTER') return process.env.DODO_PRODUCT_ID_STARTER || 'pdt_Gez1YlhKjDIJz3Asiql8Y'
+  if (item === 'PRO') return process.env.DODO_PRODUCT_ID_PRO || 'pdt_VvrVsP0saqj0fjjQKVcbc'
+  if (item === 'BUSINESS') return process.env.DODO_PRODUCT_ID_BUSINESS || 'pdt_2RWqgVJU6XFZ6nKQHRQez'
 
   return null
 }

@@ -50,7 +50,8 @@ export default function PricingSection() {
             // Calculate monthly equivalent for yearly plans
             const yearlyPriceNum = card.yearlyPrice ? parseInt(card.yearlyPrice.replace('$', '')) : 0
             const monthlyPriceNum = card.price ? parseInt(card.price.replace('$', '')) : 0
-            const monthlyEquivalent = yearlyPriceNum > 0 ? Math.floor(yearlyPriceNum / 12) : monthlyPriceNum
+            // Use rounded monthly equivalent to stay consistent with settings upgrade UI
+            const monthlyEquivalent = yearlyPriceNum > 0 ? Math.round(yearlyPriceNum / 12) : monthlyPriceNum
 
             // Calculate savings percentage
             const savingsPercent = monthlyPriceNum > 0

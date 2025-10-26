@@ -46,15 +46,15 @@ export const PLAN_PRICES = {
   },
   STARTER: {
     monthly: 19,
-    yearly: 132, // $11/mo * 12
+    yearly: 134, // $134/year
   },
   PRO: {
     monthly: 49,
-    yearly: 348, // $29/mo * 12
+    yearly: 348, // $348/year
   },
   BUSINESS: {
     monthly: 99,
-    yearly: 708, // $59/mo * 12
+    yearly: 585, // $585/year
   },
 } as const
 
