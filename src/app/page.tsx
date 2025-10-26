@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import Image from 'next/image'
 import Link from 'next/link'
 import PricingSection from '@/components/landing/pricing-section'
+import Script from 'next/script'
 import FlowDiagram from '@/components/landing/flow-diagram'
 import { Check } from 'lucide-react'
 
@@ -241,6 +242,16 @@ export default async function Home() {
 
       {/* Pricing Section */}
       <PricingSection />
+      {/* Chatbot Embed - Landing page only */}
+      <Script
+        id="bml-embed"
+        src="https://www.bookmylead.app/embed.min.js"
+        strategy="afterInteractive"
+        data-domain-id="75975441-fef0-4fa2-8034-cdd69e1a96ff"
+        data-app-origin="https://www.bookmylead.app"
+        data-margin="24"
+        data-size="md"
+      />
     </main>
   )
 }
