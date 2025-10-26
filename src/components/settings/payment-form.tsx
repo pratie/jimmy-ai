@@ -33,7 +33,6 @@ export const PaymentForm = ({ plan, interval = 'MONTHLY' }: PaymentFormProps) =>
             🔒 Secure payment processing by Dodo Payments
           </p>
           <p className="text-xs text-brand-primary/60">
-            • 3-day free trial included
             • Cancel anytime
             • {interval === 'YEARLY' ? 'Annual billing' : 'Monthly billing'}
           </p>
