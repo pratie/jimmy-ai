@@ -44,8 +44,9 @@ const SubscriptionCard = ({
     <Label htmlFor={id} className="cursor-pointer">
       <Card
         className={cn(
-          'relative w-full flex flex-col justify-between rounded-base overflow-hidden transition-all bg-bg border-2 border-border shadow-shadow hover:translate-x-1 hover:translate-y-1 hover:shadow-none',
-          isSelected && 'border-main bg-main/10'
+          'relative w-full flex flex-col justify-between rounded-base overflow-hidden transition-all bg-bg border-2 shadow-shadow hover:translate-x-1 hover:translate-y-1 hover:shadow-none',
+          // Featured look like landing: Business card gets main border by default
+          isSelected ? 'border-main bg-main/10' : (isPopular ? 'border-main' : 'border-border')
         )}
       >
         {isPopular && (
