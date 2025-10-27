@@ -672,6 +672,10 @@ export const onScrapeSelectedSources = async (
   try {
     console.log('[Firecrawl] Scraping', selectedUrls.length, 'selected sources')
 
+    // Small pacing between URLs to avoid hitting Firecrawl rate limits too quickly
+    const INTER_URL_DELAY_MS = Number(process.env.FIRECRAWL_INTER_URL_DELAY_MS || 1500)
+    let scrapeIndex = 0
+
     // Get domain and plan info
     const domain = await client.domain.findUnique({
       where: { id: domainId },
@@ -719,6 +723,11 @@ export const onScrapeSelectedSources = async (
 
     for (const url of selectedUrls) {
       try {
+        // Delay between scrapes (skip before the first URL)
+        if (scrapeIndex > 0 && INTER_URL_DELAY_MS > 0) {
+          await new Promise((r) => setTimeout(r, INTER_URL_DELAY_MS))
+        }
+        scrapeIndex += 1
         console.log('[Firecrawl] Scraping:', url)
 
         const result = await scrapeWebsite({

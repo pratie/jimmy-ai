@@ -36,49 +36,80 @@ export const scrapeWebsite = async (
     throw new Error('FIRECRAWL_API_KEY not configured in environment variables')
   }
 
-  try {
-    console.log('[Firecrawl] Scraping URL:', options.url)
+  // Basic retry with exponential backoff for 429/5xx
+  const maxRetries = 5
+  const baseDelayMs = 1200
 
-    const response = await fetch(`${apiUrl}/scrape`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        url: options.url,
-        onlyMainContent: options.onlyMainContent ?? true,
-        maxAge: options.maxAge ?? 172800000, // 48 hours cache
-        formats: options.formats ?? ['markdown'],
-        parsers: options.parsers ?? ['pdf'],
-        origin: 'website',
-      }),
-    })
+  let attempt = 0
+  let lastError: any
 
-    if (!response.ok) {
-      // Handle specific error codes
-      if (response.status === 402) {
-        throw new Error('Firecrawl payment required. Please upgrade your plan.')
-      }
-      if (response.status === 429) {
-        throw new Error('Rate limit exceeded. Please try again in a few minutes.')
-      }
-      if (response.status === 500) {
-        throw new Error('Firecrawl server error. Please try again later.')
+  while (attempt <= maxRetries) {
+    try {
+      console.log('[Firecrawl] Scraping URL:', options.url, 'attempt', attempt + 1)
+
+      const response = await fetch(`${apiUrl}/scrape`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          url: options.url,
+          onlyMainContent: options.onlyMainContent ?? true,
+          maxAge: options.maxAge ?? 172800000, // 48 hours cache
+          formats: options.formats ?? ['markdown'],
+          parsers: options.parsers ?? ['pdf'],
+          origin: 'website',
+        }),
+      })
+
+      if (!response.ok) {
+        // Specific error handling
+        if (response.status === 402) {
+          throw new Error('Firecrawl payment required. Please upgrade your plan.')
+        }
+
+        if (response.status === 429 || response.status >= 500) {
+          // Read server-provided backoff if available
+          const retryAfter = Number(response.headers.get('retry-after'))
+          const delay = retryAfter && retryAfter > 0
+            ? retryAfter * 1000
+            : baseDelayMs * Math.pow(2, attempt) + Math.floor(Math.random() * 250)
+
+          if (attempt < maxRetries) {
+            console.warn(`[Firecrawl] ${response.status} received. Backing off for ${delay}ms before retry...`)
+            await new Promise((r) => setTimeout(r, delay))
+            attempt++
+            continue
+          }
+        }
+
+        const errorText = await response.text()
+        throw new Error(`Firecrawl API error (${response.status}): ${errorText}`)
       }
 
-      const errorText = await response.text()
-      throw new Error(`Firecrawl API error (${response.status}): ${errorText}`)
+      const result = await response.json()
+      console.log('[Firecrawl] Scrape successful! Markdown length:', result.data?.markdown?.length || 0)
+      return result
+    } catch (error: any) {
+      lastError = error
+      // Only retry network errors if attempts remain
+      const msg = String(error?.message || '')
+      const retriable = /rate limit|429|fetch failed|network|timeout|ECONNRESET|ETIMEDOUT/i.test(msg)
+      if (retriable && attempt < maxRetries) {
+        const delay = baseDelayMs * Math.pow(2, attempt) + Math.floor(Math.random() * 250)
+        console.warn(`[Firecrawl] Retriable error: ${msg}. Waiting ${delay}ms then retry (${attempt + 1}/${maxRetries})...`)
+        await new Promise((r) => setTimeout(r, delay))
+        attempt++
+        continue
+      }
+      console.error('[Firecrawl] Error:', msg)
+      throw error
     }
-
-    const result = await response.json()
-    console.log('[Firecrawl] Scrape successful! Markdown length:', result.data?.markdown?.length || 0)
-
-    return result
-  } catch (error: any) {
-    console.error('[Firecrawl] Error:', error.message)
-    throw error
   }
+
+  // Should not reach here; surface last error
+  throw lastError || new Error('Unknown Firecrawl error')
 }
 
 // Helper: Truncate markdown for OpenAI context (max 3000 tokens ≈ 12000 chars)
@@ -141,39 +172,65 @@ export const mapWebsite = async (
     throw new Error('FIRECRAWL_API_KEY not configured in environment variables')
   }
 
-  try {
-    console.log('[Firecrawl Map] Discovering URLs for:', options.url)
+  const maxRetries = 4
+  const baseDelayMs = 1000
+  let attempt = 0
+  let lastError: any
 
-    const response = await fetch(`${apiUrl}/map`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        url: options.url,
-        limit: options.limit ?? 100, // Get up to 100 URLs
-        search: options.search,
-      }),
-    })
+  while (attempt <= maxRetries) {
+    try {
+      console.log('[Firecrawl Map] Discovering URLs for:', options.url, 'attempt', attempt + 1)
 
-    if (!response.ok) {
-      if (response.status === 402) {
-        throw new Error('Firecrawl payment required. Please upgrade your plan.')
+      const response = await fetch(`${apiUrl}/map`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          url: options.url,
+          limit: options.limit ?? 100,
+          search: options.search,
+        }),
+      })
+
+      if (!response.ok) {
+        if (response.status === 402) {
+          throw new Error('Firecrawl payment required. Please upgrade your plan.')
+        }
+        if (response.status === 429 || response.status >= 500) {
+          const retryAfter = Number(response.headers.get('retry-after'))
+          const delay = retryAfter && retryAfter > 0
+            ? retryAfter * 1000
+            : baseDelayMs * Math.pow(2, attempt) + Math.floor(Math.random() * 250)
+          if (attempt < maxRetries) {
+            console.warn(`[Firecrawl Map] ${response.status} received. Backing off ${delay}ms...`)
+            await new Promise((r) => setTimeout(r, delay))
+            attempt++
+            continue
+          }
+        }
+        const errorText = await response.text()
+        throw new Error(`Firecrawl Map API error (${response.status}): ${errorText}`)
       }
-      if (response.status === 429) {
-        throw new Error('Rate limit exceeded. Please try again in a few minutes.')
+
+      const result = await response.json()
+      console.log('[Firecrawl Map] Discovered', result.links?.length || 0, 'URLs')
+      return result
+    } catch (error: any) {
+      lastError = error
+      const msg = String(error?.message || '')
+      const retriable = /rate limit|429|fetch failed|network|timeout|ECONNRESET|ETIMEDOUT/i.test(msg)
+      if (retriable && attempt < maxRetries) {
+        const delay = baseDelayMs * Math.pow(2, attempt) + Math.floor(Math.random() * 250)
+        console.warn(`[Firecrawl Map] Retriable error: ${msg}. Waiting ${delay}ms then retry (${attempt + 1}/${maxRetries})...`)
+        await new Promise((r) => setTimeout(r, delay))
+        attempt++
+        continue
       }
-      const errorText = await response.text()
-      throw new Error(`Firecrawl Map API error (${response.status}): ${errorText}`)
+      console.error('[Firecrawl Map] Error:', msg)
+      throw error
     }
-
-    const result = await response.json()
-    console.log('[Firecrawl Map] Discovered', result.links?.length || 0, 'URLs')
-
-    return result
-  } catch (error: any) {
-    console.error('[Firecrawl Map] Error:', error.message)
-    throw error
   }
+  throw lastError || new Error('Unknown Firecrawl Map error')
 }
