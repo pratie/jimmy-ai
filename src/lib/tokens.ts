@@ -2,7 +2,6 @@
 // Precise tokenization utilities using js-tiktoken with local ranks (no network fetch)
 
 import { Tiktoken } from 'js-tiktoken'
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore - default export is the ranks JSON structure (exported path)
 import cl100k from 'js-tiktoken/ranks/cl100k_base'
 
@@ -62,4 +61,3 @@ export function groupByTokenBudget(items: string[], maxTokens: number): string[]
   if (current.length) batches.push(current)
   return batches
 }
-
