@@ -2,6 +2,7 @@
 // OpenAI Embeddings for RAG - text-embedding-3-small
 import OpenAI from 'openai'
 import { devLog, devError } from '@/lib/utils'
+import { countTokens } from './tokens'
 
 // Create OpenAI client (same setup as your chatbot)
 const openai = new OpenAI({
@@ -83,7 +84,7 @@ export async function generateEmbeddings(texts: string[]): Promise<number[][]> {
  * Rough estimate: ~4 chars = 1 token for English text
  */
 export function estimateTokens(text: string): number {
-  return Math.ceil(text.length / 4)
+  return countTokens(text)
 }
 
 /**

@@ -4,6 +4,7 @@ import { client } from '@/lib/prisma'
 import { scrapeWebsite, normalizeUrl, mapWebsite } from '@/lib/firecrawl'
 import { chunkContent, validateContent } from '@/lib/chunking'
 import { generateEmbeddings } from '@/lib/embeddings'
+import { countTokens, groupByTokenBudget } from '@/lib/tokens'
 import { getPlanLimits } from '@/lib/plans'
 import { extractTextFromPDF, isValidPDF, cleanPDFText } from '@/lib/pdf-extractor'
 
@@ -361,27 +362,67 @@ export const onTrainChatbot = async (domainId: string, force: boolean = false) =
       where: { chatBotId },
     })
 
-    // Step 3: Generate embeddings in batches (OpenAI has rate limits)
-    const BATCH_SIZE = 100 // Increased from 50 to 100 for faster processing
+    // Step 3: Generate embeddings in batches with token-aware grouping
+    const MAX_TOKENS_PER_REQUEST = Number(process.env.EMBEDDINGS_MAX_TOKENS_PER_REQUEST || 8000)
+    const CONCURRENT_INSERTS = 10
+    const batches: string[][] = groupByTokenBudget(chunks, MAX_TOKENS_PER_REQUEST)
+
     let processedCount = 0
-
-    for (let i = 0; i < chunks.length; i += BATCH_SIZE) {
-      const batch = chunks.slice(i, i + BATCH_SIZE)
-
-      // Generate embeddings for this batch
-      const embeddings = await generateEmbeddings(batch)
-
-      // OPTIMIZATION: Batch insert with controlled concurrency (prevents connection pool exhaustion)
-      // Process inserts in chunks of 10 at a time to avoid overwhelming the connection pool
-      const CONCURRENT_INSERTS = 10
+    for (const batch of batches) {
+      let embeddings: number[][]
+      try {
+        embeddings = await generateEmbeddings(batch)
+      } catch (e: any) {
+        // Fallback: if provider still complains about tokens, split the batch and retry
+        if (batch.length > 1) {
+          const mid = Math.floor(batch.length / 2)
+          const parts = [batch.slice(0, mid), batch.slice(mid)]
+          for (const sub of parts) {
+            const subEmbeddings = await generateEmbeddings(sub)
+            for (let j = 0; j < sub.length; j += CONCURRENT_INSERTS) {
+              const insertBatch = sub.slice(j, j + CONCURRENT_INSERTS)
+              const insertPromises = insertBatch.map(async (content, idx) => {
+                const embedding = subEmbeddings[j + idx]
+                const vectorString = `[${embedding.join(',')}]`
+                return client.$executeRaw`
+                  INSERT INTO "KnowledgeChunk" (
+                    "domainId", "chatBotId", content, embedding, "sourceType", "createdAt", "updatedAt"
+                  ) VALUES (
+                    ${domainId}::uuid,
+                    ${chatBotId}::uuid,
+                    ${content},
+                    ${vectorString}::vector,
+                    'firecrawl',
+                    NOW(),
+                    NOW()
+                  )
+                `
+              })
+              await Promise.all(insertPromises)
+            }
+            processedCount += sub.length
+          }
+          const progress = Math.round((processedCount / chunks.length) * 100)
+          if (processedCount % 100 === 0 || processedCount === chunks.length) {
+            await client.chatBot.update({
+              where: { id: chatBotId },
+              data: {
+                embeddingProgress: progress,
+                embeddingChunksProcessed: processedCount,
+              },
+            })
+          }
+          console.log(`[RAG] Progress: ${processedCount}/${chunks.length} chunks (${progress}%)`)
+          continue
+        }
+        throw e
+      }
 
       for (let j = 0; j < batch.length; j += CONCURRENT_INSERTS) {
         const insertBatch = batch.slice(j, j + CONCURRENT_INSERTS)
         const insertPromises = insertBatch.map(async (content, idx) => {
-          const globalIdx = j + idx
-          const embedding = embeddings[globalIdx]
+          const embedding = embeddings[j + idx]
           const vectorString = `[${embedding.join(',')}]`
-
           return client.$executeRaw`
             INSERT INTO "KnowledgeChunk" (
               "domainId", "chatBotId", content, embedding, "sourceType", "createdAt", "updatedAt"
@@ -396,15 +437,11 @@ export const onTrainChatbot = async (domainId: string, force: boolean = false) =
             )
           `
         })
-
-        // Execute up to 10 inserts in parallel
         await Promise.all(insertPromises)
       }
 
       processedCount += batch.length
       const progress = Math.round((processedCount / chunks.length) * 100)
-
-      // Update progress (only every 100 chunks to reduce database calls)
       if (processedCount % 100 === 0 || processedCount === chunks.length) {
         await client.chatBot.update({
           where: { id: chatBotId },
@@ -414,7 +451,6 @@ export const onTrainChatbot = async (domainId: string, force: boolean = false) =
           },
         })
       }
-
       console.log(`[RAG] Progress: ${processedCount}/${chunks.length} chunks (${progress}%)`)
     }
 
