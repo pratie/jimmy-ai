@@ -40,7 +40,8 @@ const Page = async (props: Props) => {
             <AddDomainCTA />
           </div>
         )}
-        <div className="mx-auto max-w-5xl px-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="mx-auto max-w-5xl px-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <DashboardCard
             value={conversations || 0}
             title="Conversations"
@@ -58,22 +59,25 @@ const Page = async (props: Props) => {
             icon={<CalIcon />}
             percentage={appointmentsConversionRate}
           />
+          </div>
         </div>
         <div className="w-full py-10">
-          <div className="mx-auto max-w-5xl px-4 relative bg-bg dark:bg-darkBg rounded-base border-2 border-border shadow-shadow p-6">
-            <div className="mb-6">
-              <h2 className="font-heading text-xl text-text dark:text-darkText">Plan Usage</h2>
-              <p className="text-sm text-text/70 dark:text-darkText/70 mt-1">
-                A detailed overview of your metrics, usage, customers and more
-              </p>
+          <div className="mx-auto max-w-5xl px-4">
+            <div className="relative bg-bg dark:bg-darkBg rounded-base border-2 border-border shadow-shadow p-6">
+              <div className="mb-6">
+                <h2 className="font-heading text-xl text-text dark:text-darkText">Plan Usage</h2>
+                <p className="text-sm text-text/70 dark:text-darkText/70 mt-1">
+                  A detailed overview of your metrics, usage, customers and more
+                </p>
+              </div>
+              <PlanUsage
+                plan={plan?.plan!}
+                messageCredits={plan?.messageCredits || 0}
+                messagesUsed={plan?.messagesUsed || 0}
+                domains={plan?.domains || 0}
+                clients={leads || 0}
+              />
             </div>
-            <PlanUsage
-              plan={plan?.plan!}
-              messageCredits={plan?.messageCredits || 0}
-              messagesUsed={plan?.messagesUsed || 0}
-              domains={plan?.domains || 0}
-              clients={leads || 0}
-            />
           </div>
         </div>
       </div>
