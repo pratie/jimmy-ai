@@ -38,7 +38,7 @@ const OwnerLayout = async ({ children }: Props) => {
 
     return (
       <ChatProvider>
-        <div className="landing-gradient min-h-screen flex h-screen w-full">
+        <div className="min-h-screen bg-background flex h-screen w-full">
           <SideBar
             domains={authenticated.domain}
             user={authenticated.user}
