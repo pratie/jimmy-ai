@@ -12,10 +12,10 @@ const ConversationPage = async (props: Props) => {
   return (
     <div
       className={
-        // Remove the global dashboard left padding for this page so the list hugs the sidebar
-        // 60px on mobile, 80px on md, 96px on lg; add small inner padding for breathing room
+        // Remove the global dashboard left padding so the list is flush with the sidebar
+        // 60px on mobile, 80px on md, 96px on lg
         "w-full h-full flex flex-col md:flex-row overflow-hidden " +
-        "-ml-[60px] md:-ml-20 lg:-ml-24 pl-2 md:pl-4 lg:pl-6"
+        "-ml-[60px] md:-ml-20 lg:-ml-24 pl-0"
       }
     >
       <div className="w-full md:w-80 md:min-w-[320px] border-r border-brand-base-300 overflow-y-auto">
