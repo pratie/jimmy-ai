@@ -527,26 +527,29 @@ export async function POST(req: Request) {
 
     const readableStream = new ReadableStream({
       async start(controller) {
-        try {
-          let firstTokenTime: number | null = null
-          let tokenCount = 0
-          let ttft = 0
+        let controllerErrored = false
+        let firstTokenTime: number | null = null
+        let tokenCount = 0
+        let ttft = 0
 
+        try {
           for await (const chunk of stream) {
             const content = chunk.choices[0]?.delta?.content || ''
-            if (content) {
-              if (!firstTokenTime) {
-                firstTokenTime = Date.now()
-                devLog(`[Bot Stream] ⚡ First token received in: ${firstTokenTime - llmStartTime}ms (TTFT - Time To First Token)`)
-              }
-              tokenCount++
-              fullResponse += content
-              // Process markdown: remove bold and convert links to HTML
-              let cleanContent = removeMarkdownBold(content)
-              cleanContent = convertMarkdownLinksToHtml(cleanContent)
-              // Send as Server-Sent Events format
-              controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content: cleanContent })}\n\n`))
+            if (!content) continue
+
+            if (!firstTokenTime) {
+              firstTokenTime = Date.now()
+              devLog(`[Bot Stream] ⚡ First token received in: ${firstTokenTime - llmStartTime}ms (TTFT - Time To First Token)`)
             }
+
+            tokenCount++
+            fullResponse += content
+
+            // Process markdown: remove bold and convert links to HTML
+            let cleanContent = removeMarkdownBold(content)
+            cleanContent = convertMarkdownLinksToHtml(cleanContent)
+            // Send as Server-Sent Events format
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content: cleanContent })}\n\n`))
           }
 
           const totalTime = Date.now() - startTime
@@ -555,9 +558,6 @@ export async function POST(req: Request) {
           devLog(`[Bot Stream] ✅ Stream completed: ${tokenCount} tokens in ${streamTime}ms`)
           devLog(`[Bot Stream] 📊 Total request time: ${totalTime}ms`)
 
-          // ═══════════════════════════════════════════════════════════
-          // 🔍 DEBUG: LOG COMPLETE LLM RESPONSE
-          // ═══════════════════════════════════════════════════════════
           if (process.env.DEBUG_LLM === 'true') {
             console.log('\n' + '='.repeat(80))
             console.log('📥 OPENAI API RESPONSE')
@@ -588,19 +588,25 @@ export async function POST(req: Request) {
             domainRatio,
             globalRatio
           )
-
-          // Store complete AI response (background, do not block request end)
-          if (chatRoomId && fullResponse) {
-            // Clean markdown: remove bold and convert links to HTML
-            let cleanFullResponse = removeMarkdownBold(fullResponse)
-            cleanFullResponse = convertMarkdownLinksToHtml(cleanFullResponse)
-            storeConversation(chatRoomId, cleanFullResponse, 'assistant').catch((e) => {
-              devError('[Bot Stream] Failed to persist assistant message:', e)
-            })
+        } catch (error) {
+          controllerErrored = true
+          devError('[Bot Stream] ❌ Stream error:', error)
+          // Signal error to client; we'll still persist any partial content in finally
+          try { controller.error(error) } catch (_) {}
+        } finally {
+          // Persist any generated content (complete or partial) to ensure dashboard consistency
+          if (chatRoomId && fullResponse && fullResponse.trim().length > 0) {
+            try {
+              let cleanFullResponse = removeMarkdownBold(fullResponse)
+              cleanFullResponse = convertMarkdownLinksToHtml(cleanFullResponse)
+              await storeConversation(chatRoomId, cleanFullResponse, 'assistant')
+            } catch (e) {
+              devError('[Bot Stream] Failed to persist assistant message (finalize):', e)
+            }
           }
 
-          // Increment message usage count
-          if (chatBotDomain?.userId && fullResponse) {
+          // Increment message usage if any response was actually produced
+          if (chatBotDomain?.userId && fullResponse && fullResponse.trim().length > 0) {
             client.billings.update({
               where: { userId: chatBotDomain.userId },
               data: { messagesUsed: { increment: 1 } }
@@ -609,11 +615,11 @@ export async function POST(req: Request) {
             })
           }
 
-          controller.enqueue(encoder.encode('data: [DONE]\n\n'))
-          controller.close()
-        } catch (error) {
-          devError('[Bot Stream] ❌ Stream error:', error)
-          controller.error(error)
+          // Finish the SSE stream if we haven't already errored the controller
+          if (!controllerErrored) {
+            try { controller.enqueue(encoder.encode('data: [DONE]\n\n')) } catch (_) {}
+            try { controller.close() } catch (_) {}
+          }
         }
       },
     })

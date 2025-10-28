@@ -324,7 +324,8 @@ export const useChatBot = (options?: UseChatBotOptions) => {
       } catch (error) {
         console.error('[Chatbot] Stream error:', error)
         setOnAiTyping(false)
-        // Fallback to non-streaming
+
+        // Fallback to non-streaming: replace the assistant placeholder instead of appending
         const response = await onAiChatBotAssistant(
           currentBotId!,
           onChats,
@@ -335,13 +336,34 @@ export const useChatBot = (options?: UseChatBotOptions) => {
 
         if (response) {
           if (response.live) {
+            // Enter realtime mode; remove empty assistant placeholder if present
             setOnRealTime((prev) => ({
               ...prev,
               chatroom: response.chatRoom,
               mode: response.live,
             }))
-          } else {
-            setOnChats((prev: any) => [...prev, response.response])
+            setOnChats((prev: any) => {
+              const updated = [...prev]
+              if (
+                updated.length > 0 &&
+                updated[updated.length - 1].role === 'assistant' &&
+                (!updated[updated.length - 1].content || updated[updated.length - 1].content.trim() === '')
+              ) {
+                updated.pop()
+              }
+              return updated
+            })
+          } else if (response.response) {
+            setOnChats((prev: any) => {
+              const updated = [...prev]
+              if (updated.length > 0 && updated[updated.length - 1].role === 'assistant') {
+                // Replace the placeholder/partial assistant message with fallback content
+                updated[updated.length - 1] = response.response
+              } else {
+                updated.push(response.response)
+              }
+              return updated
+            })
           }
         }
       }
