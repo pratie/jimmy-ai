@@ -14,20 +14,9 @@ body {
 }
 
 /* Sauce AI inspired grid pattern */
+/* Disable global grid background to keep a clean canvas across the app */
 body::before {
-  content: '';
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  /* Subtle grid tinted with brand base color */
-  background-image:
-    linear-gradient(to right, rgba(231, 226, 214, 0.3) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(231, 226, 214, 0.3) 1px, transparent 1px);
-  background-size: 50px 50px;
-  pointer-events: none;
-  z-index: 0;
+  content: none;
 }
 
 .chat-window::-webkit-scrollbar {
