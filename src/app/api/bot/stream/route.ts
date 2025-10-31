@@ -7,7 +7,8 @@ import { truncateMarkdown } from '@/lib/firecrawl'
 import { buildSystemPrompt } from '@/lib/promptBuilder'
 import { searchKnowledgeBaseWithFallback, formatResultsForPrompt, hasTrainedEmbeddings } from '@/lib/vector-search'
 import { getPlanLimits, shouldResetCredits, getNextResetDate } from '@/lib/plans'
-import OpenAI from 'openai'
+import { streamText } from 'ai'
+import { getModel } from '@/lib/ai-models'
 
 // --- Minimal in-memory LRU cache for domain config ---
 type DomainConfig = {
@@ -66,12 +67,6 @@ function setDomainInCache(domainId: string, value: DomainConfig) {
   }
   domainCache.set(domainId, { value, expires: Date.now() + DOMAIN_CACHE_TTL_MS })
 }
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-  timeout: 30000,
-  maxRetries: 2,
-})
 
 export const maxDuration = 30
 
@@ -510,58 +505,68 @@ export async function POST(req: Request) {
       console.log('\n' + '='.repeat(80) + '\n')
     }
 
-    // Create streaming completion
-    devLog('[Bot Stream] 🤖 Calling OpenAI API...')
+    // Get AI model dynamically (supports OpenAI, Anthropic, Google)
+    const model = getModel(llmModel)
+
+    devLog('[Bot Stream] 🤖 Calling AI API...')
+    devLog('[Bot Stream] 📍 Model:', llmModel)
+    devLog('[Bot Stream] 🌡️  Temperature:', llmTemperature)
+
     const llmStartTime = Date.now()
-    const stream = await openai.chat.completions.create({
-      model: llmModel,
+
+    // Create AI SDK streaming result
+    const result = streamText({
+      model: model as any,
       messages: messages as any,
-      stream: true,
       temperature: llmTemperature,
-      max_tokens: 800, // Limit response length to control costs and latency (~3-4 paragraphs)
+      maxTokens: 800,
     })
 
-    // Create readable stream for response
+    // Custom stream processing to maintain per-chunk markdown cleaning
     const encoder = new TextEncoder()
     let fullResponse = ''
+    let firstTokenTime: number | null = null
+    let tokenCount = 0
 
-    const readableStream = new ReadableStream({
+    const customStream = new ReadableStream({
       async start(controller) {
         let controllerErrored = false
-        let firstTokenTime: number | null = null
-        let tokenCount = 0
-        let ttft = 0
 
         try {
-          for await (const chunk of stream) {
-            const content = chunk.choices[0]?.delta?.content || ''
-            if (!content) continue
-
+          // Consume AI SDK text stream
+          for await (const textPart of result.textStream) {
             if (!firstTokenTime) {
               firstTokenTime = Date.now()
-              devLog(`[Bot Stream] ⚡ First token received in: ${firstTokenTime - llmStartTime}ms (TTFT - Time To First Token)`)
+              const ttft = firstTokenTime - llmStartTime
+              devLog(`[Bot Stream] ⚡ First token received in: ${ttft}ms (TTFT - Time To First Token)`)
             }
 
             tokenCount++
-            fullResponse += content
+            fullResponse += textPart
 
             // Process markdown: remove bold and convert links to HTML
-            let cleanContent = removeMarkdownBold(content)
+            let cleanContent = removeMarkdownBold(textPart)
             cleanContent = convertMarkdownLinksToHtml(cleanContent)
+
             // Send as Server-Sent Events format
-            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content: cleanContent })}\n\n`))
+            controller.enqueue(
+              encoder.encode(`data: ${JSON.stringify({ content: cleanContent })}\n\n`)
+            )
           }
 
+          // Calculate metrics
           const totalTime = Date.now() - startTime
           const streamTime = Date.now() - llmStartTime
-          ttft = (firstTokenTime ?? llmStartTime) - llmStartTime
+          const ttft = (firstTokenTime ?? llmStartTime) - llmStartTime
+
           devLog(`[Bot Stream] ✅ Stream completed: ${tokenCount} tokens in ${streamTime}ms`)
           devLog(`[Bot Stream] 📊 Total request time: ${totalTime}ms`)
 
           if (process.env.DEBUG_LLM === 'true') {
             console.log('\n' + '='.repeat(80))
-            console.log('📥 OPENAI API RESPONSE')
+            console.log('📥 AI SDK RESPONSE')
             console.log('='.repeat(80))
+            console.log('Model:', llmModel)
             console.log('Tokens:', tokenCount)
             console.log('TTFT (Time to First Token):', ttft, 'ms')
             console.log('Stream Duration:', streamTime, 'ms')
@@ -624,7 +629,7 @@ export async function POST(req: Request) {
       },
     })
 
-    return new Response(readableStream, {
+    return new Response(customStream, {
       headers: {
         'Content-Type': 'text/event-stream',
         'Cache-Control': 'no-cache',

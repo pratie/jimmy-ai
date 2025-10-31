@@ -10,6 +10,7 @@ import { useToast } from '@/components/ui/use-toast'
 import { onUpdateLlmConfig, onUpdateModePrompts } from '@/actions/settings'
 import { DEFAULT_MODE_BLOCKS } from '@/lib/promptBuilder'
 import { useRouter } from 'next/navigation'
+import { AVAILABLE_MODELS } from '@/lib/ai-models'
 
 type Props = {
   domainId: string
@@ -19,12 +20,9 @@ type Props = {
   modePrompts: Record<string, string> | null
 }
 
-const MODEL_OPTIONS = [
-  'gpt-4o-mini',
-  'gpt-4o',
-  'gpt-4.1-mini',
-  'gpt-4.1',
-]
+// Filter models to OpenAI and Anthropic only
+const OPENAI_MODELS = AVAILABLE_MODELS.filter(m => m.provider === 'OpenAI')
+const ANTHROPIC_MODELS = AVAILABLE_MODELS.filter(m => m.provider === 'Anthropic')
 
 const AdvancedAISettings = ({
   domainId,
@@ -84,7 +82,7 @@ const AdvancedAISettings = ({
       <Card>
         <CardHeader>
           <CardTitle>Model & Temperature</CardTitle>
-          <CardDescription>Choose an OpenAI model and set response creativity</CardDescription>
+          <CardDescription>Choose your AI model provider and set response creativity</CardDescription>
         </CardHeader>
         <CardContent>
           <Loader loading={savingModel}>
@@ -97,11 +95,24 @@ const AdvancedAISettings = ({
                   onChange={(e) => setModel(e.target.value)}
                   className="w-full px-3 py-2 border-2 rounded-md border-brand-base-300 bg-white/95 text-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/40"
                 >
-                  {MODEL_OPTIONS.map((m) => (
-                    <option key={m} value={m}>{m}</option>
-                  ))}
+                  <optgroup label="OpenAI">
+                    {OPENAI_MODELS.map((m) => (
+                      <option key={m.id} value={m.id}>
+                        {m.name} ({m.contextWindow.toLocaleString()} tokens)
+                      </option>
+                    ))}
+                  </optgroup>
+                  <optgroup label="Anthropic Claude">
+                    {ANTHROPIC_MODELS.map((m) => (
+                      <option key={m.id} value={m.id}>
+                        {m.name} ({m.contextWindow.toLocaleString()} tokens)
+                      </option>
+                    ))}
+                  </optgroup>
                 </select>
-                <p className="text-xs text-brand-primary/60">Default: gpt-4o-mini</p>
+                <p className="text-xs text-brand-primary/60">
+                  Multi-provider support: OpenAI & Anthropic Claude
+                </p>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="temperature">Temperature</Label>

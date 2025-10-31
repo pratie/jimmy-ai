@@ -7,14 +7,9 @@ import { buildSystemPrompt } from '@/lib/promptBuilder'
 import { onRealTimeChat } from '../conversation'
 import { clerkClient } from '@clerk/nextjs/server'
 import { onMailer } from '../mailer'
-import OpenAi from 'openai'
+import { generateText } from 'ai'
+import { getModel } from '@/lib/ai-models'
 import { searchKnowledgeBaseWithFallback, formatResultsForPrompt, hasTrainedEmbeddings } from '@/lib/vector-search'
-
-const openai = new OpenAi({
-  apiKey: process.env.OPENAI_API_KEY,
-  timeout: 30000, // 30 second timeout to prevent long waits
-  maxRetries: 2, // Retry failed requests twice,
-})
 
 // Helper to remove markdown bold syntax from text
 function removeMarkdownBold(text: string): string {
@@ -264,7 +259,8 @@ export const onAiChatBotAssistant = async (
           customModeBlocks: (chatBotDomain.chatBot?.modePrompts as any) || undefined,
         })
 
-        const chatCompletion = await openai.chat.completions.create({
+        const { text } = await generateText({
+          model: getModel(chatBotDomain.chatBot?.llmModel || 'gpt-4o-mini') as any,
           messages: [
             {
               role: 'system',
@@ -276,13 +272,12 @@ export const onAiChatBotAssistant = async (
               content: message,
             },
           ],
-          model: chatBotDomain.chatBot?.llmModel || 'gpt-4o-mini',
           temperature: (typeof chatBotDomain.chatBot?.llmTemperature === 'number') ? (chatBotDomain.chatBot?.llmTemperature as number) : 0.7,
-          max_tokens: 800, // Limit response length to control costs and latency
+          maxTokens: 800, // Limit response length to control costs and latency
         })
 
-        if (chatCompletion) {
-          let cleanContent = removeMarkdownBold(chatCompletion.choices[0].message.content || '')
+        if (text) {
+          let cleanContent = removeMarkdownBold(text)
           cleanContent = convertMarkdownLinksToHtml(cleanContent)
           const response = {
             role: 'assistant',
@@ -467,7 +462,8 @@ export const onAiChatBotAssistant = async (
           customModeBlocks: (chatBotDomain.chatBot?.modePrompts as any) || undefined,
         })
 
-        const chatCompletion = await openai.chat.completions.create({
+        const { text } = await generateText({
+          model: getModel(chatBotDomain.chatBot?.llmModel || 'gpt-4o-mini') as any,
           messages: [
             {
               role: 'system',
@@ -479,12 +475,11 @@ export const onAiChatBotAssistant = async (
               content: message,
             },
           ],
-          model: chatBotDomain.chatBot?.llmModel || 'gpt-4o-mini',
           temperature: (typeof chatBotDomain.chatBot?.llmTemperature === 'number') ? (chatBotDomain.chatBot?.llmTemperature as number) : 0.7,
-          max_tokens: 800, // Limit response length to control costs and latency
+          maxTokens: 800, // Limit response length to control costs and latency
         })
 
-        if (chatCompletion.choices[0].message.content?.includes('(realtime)')) {
+        if (text?.includes('(realtime)')) {
           const realtime = await client.chatRoom.update({
             where: {
               id: checkCustomer?.customer[0].chatRoom[0].id,
@@ -496,7 +491,7 @@ export const onAiChatBotAssistant = async (
 
           if (realtime) {
             let cleanContent = removeMarkdownBold(
-              chatCompletion.choices[0].message.content.replace('(realtime)', '')
+              text.replace('(realtime)', '')
             )
             cleanContent = convertMarkdownLinksToHtml(cleanContent)
             const response = {
@@ -539,10 +534,8 @@ export const onAiChatBotAssistant = async (
           }
         }
 
-        if (chatCompletion) {
-          const generatedLink = extractURLfromString(
-            chatCompletion.choices[0].message.content as string
-          )
+        if (text) {
+          const generatedLink = extractURLfromString(text)
 
           if (generatedLink) {
             const link = generatedLink[0]
@@ -561,7 +554,7 @@ export const onAiChatBotAssistant = async (
             return { response }
           }
 
-          let cleanContent = removeMarkdownBold(chatCompletion.choices[0].message.content || '')
+          let cleanContent = removeMarkdownBold(text)
           cleanContent = convertMarkdownLinksToHtml(cleanContent)
           const response = {
             role: 'assistant',
@@ -594,7 +587,8 @@ export const onAiChatBotAssistant = async (
         customModeBlocks: (chatBotDomain.chatBot?.modePrompts as any) || undefined,
       })
 
-      const chatCompletion = await openai.chat.completions.create({
+      const { text } = await generateText({
+        model: getModel(chatBotDomain.chatBot?.llmModel || 'gpt-4o-mini') as any,
         messages: [
           {
             role: 'system',
@@ -606,13 +600,12 @@ export const onAiChatBotAssistant = async (
             content: message,
           },
         ],
-        model: chatBotDomain.chatBot?.llmModel || 'gpt-4o-mini',
         temperature: (typeof chatBotDomain.chatBot?.llmTemperature === 'number') ? (chatBotDomain.chatBot?.llmTemperature as number) : 0.7,
-        max_tokens: 800, // Limit response length to control costs and latency
+        maxTokens: 800, // Limit response length to control costs and latency
       })
 
-      if (chatCompletion) {
-        let cleanContent = removeMarkdownBold(chatCompletion.choices[0].message.content || '')
+      if (text) {
+        let cleanContent = removeMarkdownBold(text)
         cleanContent = convertMarkdownLinksToHtml(cleanContent)
         const response = {
           role: 'assistant',
