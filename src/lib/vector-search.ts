@@ -1,8 +1,10 @@
 // src/lib/vector-search.ts
 // Vector similarity search using Supabase pgvector
-import { generateEmbedding } from './embeddings'
+import { generateEmbedding, generateEmbeddings } from './embeddings'
 import { client } from './prisma'
 import { devLog, devError } from './utils'
+import { expandQuery } from './query-expansion'
+import { rerankChunks } from './jina-reranker'
 
 export interface SearchResult {
   id: string
@@ -79,6 +81,127 @@ export async function searchKnowledgeBaseWithFallback(
   }
 
   return results
+}
+
+/**
+ * Multi-query RAG retrieval with expansion + parallel searches + Jina reranking.
+ * - Expands the original query to N variations (JSON-mode) → total M queries.
+ * - Batch embeds queries → parallel pgvector searches.
+ * - Dedup by chunk id.
+ * - Rerank with original query via Jina (if configured) → top K.
+ * - Falls back to vector similarity order when reranker unavailable or fails.
+ */
+export async function searchKnowledgeBaseMultiQuery(
+  userQuery: string,
+  domainId: string,
+  chunksPerQuery: number = 5,
+  finalTopN: number = 3
+): Promise<SearchResult[]> {
+  const start = Date.now()
+  devLog('[Multi-RAG] start')
+
+  // 1) Expand query (best-effort; on failure → no expansion)
+  const expansionStart = Date.now()
+  let variations: string[] = []
+  try {
+    variations = await expandQuery(userQuery, 3, 3000)  // Increased to 3000ms for reliability
+  } catch (e) {
+    devError('[Multi-RAG] expansion failed:', e)
+    variations = []
+  }
+  const allQueries = [userQuery, ...variations]
+  const expansionTime = Date.now() - expansionStart
+
+  if (variations.length > 0) {
+    devLog('[Multi-RAG] ✅ expansion ms=%d queries=%d (1 original + %d variations)',
+      expansionTime, allQueries.length, variations.length)
+  } else {
+    devLog('[Multi-RAG] ⚠️  expansion ms=%d queries=%d (no variations generated)',
+      expansionTime, allQueries.length)
+  }
+
+  // 2) Batch embeddings for all queries
+  const embedStart = Date.now()
+  let embeddings: number[][]
+  try {
+    embeddings = await generateEmbeddings(allQueries)
+  } catch (e) {
+    devError('[Multi-RAG] embedding error, fallback to single', e)
+    // Fallback to single-query retrieval
+    return await searchKnowledgeBase(userQuery, domainId, finalTopN, 0.3)
+  }
+  devLog('[Multi-RAG] embed ms=%d', Date.now() - embedStart)
+
+  // 3) Parallel vector searches for each query embedding
+  const searchStart = Date.now()
+  const perQueryResults = await Promise.all(
+    embeddings.map((embedding, idx) =>
+      client.$queryRaw<SearchResult[]>`
+        SELECT * FROM match_knowledge_chunks(
+          ${embedding}::vector,
+          ${0.3}::float,
+          ${chunksPerQuery}::int,
+          ${domainId}::text
+        )
+      `.then((rows) => {
+        devLog('[Multi-RAG] q%d rows=%d', idx + 1, rows.length)
+        return rows
+      }).catch((e) => {
+        devError('[Multi-RAG] q%d search error', idx + 1, e)
+        return [] as SearchResult[]
+      })
+    )
+  )
+  devLog('[Multi-RAG] search ms=%d', Date.now() - searchStart)
+
+  // 4) Dedup by id only (no content-level dedup per request)
+  const flat = perQueryResults.flat()
+  const byId = new Map<string, SearchResult>()
+  for (const r of flat) {
+    if (!byId.has(r.id)) byId.set(r.id, r)
+  }
+  const unique = Array.from(byId.values())
+  if (unique.length === 0) {
+    devLog('[Multi-RAG] no results after dedup')
+    return []
+  }
+
+  // 5) Rerank using Jina (optional). If reranker not configured/failed, fallback to vector order
+  const rerankStart = Date.now()
+  try {
+    const input = unique.map((c) => ({ id: c.id, content: c.content }))
+    devLog('[Multi-RAG] 🔄 Sending %d chunks to Jina reranker...', input.length)
+    const reranked = await rerankChunks(userQuery, input, Math.min(finalTopN, unique.length), 2000)  // Increased to 2000ms
+
+    if (reranked.length > 0) {
+      devLog('[Multi-RAG] ✅ Reranker returned %d chunks', reranked.length)
+      const idSet = new Set(reranked.map((r) => r.id))
+      // Keep reranked order and map to original results; if reranker returns less than topN, fill with vector-order
+      const topFromRerank = reranked
+        .map((r) => byId.get(r.id)!)
+        .filter(Boolean)
+
+      if (topFromRerank.length < finalTopN) {
+        for (const r of unique.sort((a, b) => b.similarity - a.similarity)) {
+          if (topFromRerank.length >= finalTopN) break
+          if (!idSet.has(r.id)) topFromRerank.push(r)
+        }
+      }
+
+      devLog('[Multi-RAG] ✅ rerank ms=%d', Date.now() - rerankStart)
+      devLog('[Multi-RAG] ✅ total ms=%d', Date.now() - start)
+      return topFromRerank.slice(0, finalTopN)
+    } else {
+      devLog('[Multi-RAG] ⚠️  Reranker returned 0 results, using vector order')
+    }
+  } catch (e) {
+    devError('[Multi-RAG] ❌ reranker error, using vector order:', e)
+  }
+
+  // Fallback: top by original vector similarity
+  const fallback = unique.sort((a, b) => b.similarity - a.similarity).slice(0, finalTopN)
+  devLog('[Multi-RAG] ⚠️  total ms=%d (vector-order fallback)', Date.now() - start)
+  return fallback
 }
 
 /**

@@ -5,7 +5,7 @@ import { client } from '@/lib/prisma'
 import { extractEmailsFromString, devLog, devError } from '@/lib/utils'
 import { truncateMarkdown } from '@/lib/firecrawl'
 import { buildSystemPrompt } from '@/lib/promptBuilder'
-import { searchKnowledgeBaseWithFallback, formatResultsForPrompt, hasTrainedEmbeddings } from '@/lib/vector-search'
+import { searchKnowledgeBaseWithFallback, formatResultsForPrompt, hasTrainedEmbeddings, searchKnowledgeBaseMultiQuery } from '@/lib/vector-search'
 import { getPlanLimits, shouldResetCredits, getNextResetDate } from '@/lib/plans'
 import { streamText } from 'ai'
 import { getModel } from '@/lib/ai-models'
@@ -25,7 +25,7 @@ type DomainConfig = {
   } | null
 }
 
-const DOMAIN_CACHE_TTL_MS = 60_000 // 60 seconds
+const DOMAIN_CACHE_TTL_MS = 300_000 // 5 minutes
 const DOMAIN_CACHE_CAPACITY = 100
 const domainCache = new Map<string, { value: DomainConfig; expires: number }>()
 
@@ -214,11 +214,31 @@ export async function POST(req: Request) {
     let knowledgeBase: string
 
     if (hasTrained) {
-      devLog('[Bot Stream] 🔍 Using RAG vector search')
+      // Multi-query RAG with reranking (embeddings required)
+      devLog('[Bot Stream] 🔍 Using multi-query RAG with reranking')
       const vectorSearchStart = Date.now()
-      const searchResults = await searchKnowledgeBaseWithFallback(message, domainId, 5)
-      devLog(`[Bot Stream] ✅ Vector search took: ${Date.now() - vectorSearchStart}ms (found ${searchResults.length} chunks)`)
-      knowledgeBase = formatResultsForPrompt(searchResults)
+      try {
+        // Defaults tuned for speed/quality; can be made configurable later
+        const chunksPerQuery = 4  // 4 queries × 4 chunks = 16 total (reduced from 20)
+        const finalTopN = 3
+        const searchResults = await searchKnowledgeBaseMultiQuery(message, domainId, chunksPerQuery, finalTopN)
+        devLog(`[Bot Stream] ✅ Multi-query search took: ${Date.now() - vectorSearchStart}ms (final ${searchResults.length} chunks)`) 
+        // If multi-query returned no chunks (edge), fallback to single-query search
+        if (searchResults.length === 0) {
+          const fallbackStart = Date.now()
+          const fallbackResults = await searchKnowledgeBaseWithFallback(message, domainId, 5)
+          devLog(`[Bot Stream] ⚠️  Fallback single-query took: ${Date.now() - fallbackStart}ms (found ${fallbackResults.length} chunks)`) 
+          knowledgeBase = formatResultsForPrompt(fallbackResults)
+        } else {
+          knowledgeBase = formatResultsForPrompt(searchResults)
+        }
+      } catch (e) {
+        devError('[Bot Stream] Multi-query RAG failed, using fallback:', e)
+        const vectorSearchStart2 = Date.now()
+        const searchResults = await searchKnowledgeBaseWithFallback(message, domainId, 5)
+        devLog(`[Bot Stream] ✅ Vector search (fallback) took: ${Date.now() - vectorSearchStart2}ms (found ${searchResults.length} chunks)`) 
+        knowledgeBase = formatResultsForPrompt(searchResults)
+      }
     } else {
       devLog('[Bot Stream] ⚠️  Using fallback: fetching truncated knowledge base (no embeddings trained)')
       // Only fetch knowledgeBase when embeddings aren't trained (rare case)
@@ -583,16 +603,12 @@ export async function POST(req: Request) {
           const stats = domainCacheStats.get(domainId) || { hits: 0, misses: 0 }
           const globalRatio = (cacheHits + cacheMisses) > 0 ? (cacheHits / (cacheHits + cacheMisses)) : 0
           const domainRatio = (stats.hits + stats.misses) > 0 ? (stats.hits / (stats.hits + stats.misses)) : 0
-          devLog('[Metrics] cache=%s ttftMs=%d streamMs=%d totalMs=%d domainHits=%d domainMisses=%d domainHitRatio=%.2f globalHitRatio=%.2f',
-            cacheHit ? 'hit' : 'miss',
-            ttft,
-            streamTime,
-            totalTime,
-            stats.hits,
-            stats.misses,
-            domainRatio,
-            globalRatio
-          )
+          const metricsMsg = `` +
+            `[Metrics] cache=${cacheHit ? 'hit' : 'miss'} ` +
+            `ttftMs=${ttft} streamMs=${streamTime} totalMs=${totalTime} ` +
+            `domainHits=${stats.hits} domainMisses=${stats.misses} ` +
+            `domainHitRatio=${domainRatio.toFixed(2)} globalHitRatio=${globalRatio.toFixed(2)}`
+          devLog(metricsMsg)
         } catch (error) {
           controllerErrored = true
           devError('[Bot Stream] ❌ Stream error:', error)
