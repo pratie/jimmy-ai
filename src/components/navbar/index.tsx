@@ -1,65 +1,49 @@
+"use client"
+
 import Image from 'next/image'
 import * as React from 'react'
 import Link from 'next/link'
 
 function NavBar() {
   return (
-    <>
-      <div className="w-full">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex h-16 items-center justify-between">
-            {/* Logo */}
-            <div className="flex items-center text-2xl tracking-tighter text-brand-primary">
-              <Image
-                src="/images/logo.svg"
-                alt="Logo"
-                sizes="100vw"
-                style={{ width: '50px', height: 'auto' }}
-                width={0}
-                height={0}
-              />
-            </div>
+    <nav className="fixed top-0 w-full bg-background z-50 border-b-4 border-foreground">
+      <div className="max-w-7xl mx-auto px-8 py-4">
+        <div className="flex justify-between items-center">
+          {/* Logo */}
+          <div className="flex items-center gap-3">
+            <Image
+              src="/images/logo.svg"
+              alt="BookmyLead Logo"
+              width={40}
+              height={40}
+              className="w-10 h-10"
+            />
+            <span className="font-black text-xl tracking-tight uppercase">BookmyLead</span>
+          </div>
 
-            {/* Nav links */}
-            <ul className="hidden md:flex items-center gap-6 text-sm text-brand-primary/70 font-medium">
-              <li>
-                <a
-                  href="#features"
-                  className="hover:text-brand-primary hover:underline decoration-brand-accent decoration-2 underline-offset-4 transition-colors"
-                >
-                  Features
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#pricing"
-                  className="hover:text-brand-primary hover:underline decoration-brand-accent decoration-2 underline-offset-4 transition-colors"
-                >
-                  Pricing
-                </a>
-              </li>
-              <li>
-                <Link
-                  href="/blogs"
-                  className="hover:text-brand-primary hover:underline decoration-brand-accent decoration-2 underline-offset-4 transition-colors"
-                >
-                  Blog
-                </Link>
-              </li>
-            </ul>
-
-            {/* CTA */}
-            <Link
-              href="/dashboard"
-              className="px-4 py-2.5 rounded-base bg-main text-black font-heading border-2 border-border shadow-shadow hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-transform"
-            >
-              Start Automating Now
+          {/* Nav links */}
+          <div className="hidden md:flex gap-12 font-bold uppercase text-sm tracking-widest">
+            <a href="#features" className="hover:underline">
+              Features
+            </a>
+            <a href="#pricing" className="hover:underline">
+              Pricing
+            </a>
+            <Link href="/blogs" className="hover:underline">
+              Blog
             </Link>
           </div>
+
+          {/* CTA */}
+          <Link
+            href="/auth/sign-up"
+            className="bg-foreground text-background font-bold border-2 border-foreground uppercase text-xs tracking-widest px-6 py-2.5 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all"
+          >
+            Start Free
+          </Link>
         </div>
       </div>
-      <div className="w-full h-px bg-brand-base-300" />
-    </>
+    </nav>
   )
 }
 

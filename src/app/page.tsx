@@ -7,6 +7,7 @@ import PricingSection from '@/components/landing/pricing-section'
 import Script from 'next/script'
 import FlowDiagram from '@/components/landing/flow-diagram'
 import { Check } from 'lucide-react'
+import { Footer } from '@/components/landing/footer'
 
 export const metadata: Metadata = {
   alternates: {
@@ -20,7 +21,7 @@ export default async function Home() {
       <NavBar />
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden">
+      <section className="relative overflow-hidden pt-20">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="relative flex items-center justify-center flex-col pt-20 md:pt-28 lg:pt-32 pb-12 md:pb-16 gap-6 md:gap-8">
 
@@ -106,7 +107,7 @@ export default async function Home() {
       <FlowDiagram />
 
       {/* Features Grid */}
-      <section className="py-24 bg-brand-base-100/50 backdrop-blur-sm">
+      <section id="features" className="py-24 bg-brand-base-100/50 backdrop-blur-sm">
         <div className="container mx-auto px-4">
           <div className="text-center mb-20">
             <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold text-brand-primary mb-6">
@@ -242,6 +243,10 @@ export default async function Home() {
 
       {/* Pricing Section */}
       <PricingSection />
+
+      {/* Footer */}
+      <Footer />
+
       {/* Chatbot Embed - Landing page only */}
       <Script
         id="bml-embed"
