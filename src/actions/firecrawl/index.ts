@@ -632,7 +632,7 @@ export const onDiscoverTrainingSources = async (domainId: string) => {
     // Discover all URLs using Firecrawl Map
     const result = await mapWebsite({
       url: websiteUrl,
-      limit: 100, // Get up to 100 URLs to choose from
+      limit: 200, // Get up to 200 URLs to choose from
     })
 
     if (!result.success || !result.links) {

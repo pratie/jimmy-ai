@@ -189,7 +189,7 @@ export const mapWebsite = async (
         },
         body: JSON.stringify({
           url: options.url,
-          limit: options.limit ?? 100,
+          limit: options.limit ?? 200,
           search: options.search,
         }),
       })
