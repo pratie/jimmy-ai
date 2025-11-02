@@ -126,6 +126,19 @@ body::before {
   .hover\:translate-boxShadow:hover {
     transform: translate(4px, 4px);
   }
+
+  /* Neobrutalism typography utilities */
+  .text-neobrutalism {
+    @apply font-bold uppercase tracking-widest;
+  }
+
+  .text-neobrutalism-heading {
+    @apply font-extrabold uppercase tracking-tight;
+  }
+
+  .text-neobrutalism-body {
+    @apply font-bold;
+  }
 }
 
 @layer base {
@@ -138,6 +151,27 @@ body::before {
   main, #__next, #root {
     position: relative;
     z-index: 1;
+  }
+
+  /* Neobrutalism typography defaults */
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-bold;
+  }
+
+  h1 {
+    @apply text-4xl font-extrabold tracking-tight;
+  }
+
+  h2 {
+    @apply text-3xl font-extrabold tracking-tight;
+  }
+
+  h3 {
+    @apply text-2xl font-bold;
+  }
+
+  button, a.btn, .btn {
+    @apply font-bold;
   }
 }
 

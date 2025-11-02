@@ -18,7 +18,7 @@ function NavBar() {
               height={40}
               className="w-10 h-10"
             />
-            <span className="font-black text-xl tracking-tight uppercase">BookmyLead</span>
+            <span className="font-extrabold text-xl tracking-tight uppercase">BookmyLead</span>
           </div>
 
           {/* Nav links */}

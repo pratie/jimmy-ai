@@ -17,7 +17,7 @@ export function Footer() {
                 height={32}
                 className="w-8 h-8"
               />
-              <span className="font-black uppercase text-lg">BookmyLead</span>
+              <span className="font-extrabold uppercase text-lg">BookmyLead</span>
             </div>
             <p className="text-sm font-bold">AI chatbot for e-commerce & agencies.</p>
           </div>

@@ -27,15 +27,15 @@ export default async function Home() {
 
             {/* Main Headline */}
             <div className="text-center space-y-5 md:space-y-6 max-w-4xl">
-              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-semibold text-brand-primary leading-[1.15] tracking-tight">
+              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-brand-primary leading-[1.15] tracking-tight">
                 Turn Website Visitors Into
                 <br />
-                <span className="bg-main px-4 py-2 rounded-base border-2 border-border inline-block mt-3 text-black">
+                <span className="bg-main px-4 py-2 rounded-base border-2 border-border inline-block mt-3 text-black font-extrabold">
                   Paying Customers 24/7
                 </span>
               </h1>
 
-              <p className="text-brand-primary/65 text-base sm:text-lg md:text-xl max-w-2xl mx-auto leading-relaxed font-normal">
+              <p className="text-brand-primary/65 text-base sm:text-lg md:text-xl max-w-2xl mx-auto leading-relaxed font-medium">
                 AI-powered chatbot for e-commerce, agencies, and SMBs. Answer customer questions instantly, recover abandoned carts, qualify leads, and close sales while you sleep.
               </p>
             </div>
@@ -44,15 +44,15 @@ export default async function Home() {
             <div className="flex flex-wrap items-center justify-center gap-4 md:gap-6 text-brand-primary/75 mt-2">
               <div className="flex items-center gap-2">
                 <Check className="w-4 h-4 text-green-600 dark:text-green-400" strokeWidth={2.5} />
-                <span className="text-sm font-normal">Free forever plan</span>
+                <span className="text-sm font-medium">Free forever plan</span>
               </div>
               <div className="flex items-center gap-2">
                 <Check className="w-4 h-4 text-green-600 dark:text-green-400" strokeWidth={2.5} />
-                <span className="text-sm font-normal">Live in 5 minutes</span>
+                <span className="text-sm font-medium">Live in 5 minutes</span>
               </div>
               <div className="flex items-center gap-2">
                 <Check className="w-4 h-4 text-green-600 dark:text-green-400" strokeWidth={2.5} />
-                <span className="text-sm font-normal">No coding needed</span>
+                <span className="text-sm font-medium">No coding needed</span>
               </div>
             </div>
 

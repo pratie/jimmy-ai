@@ -1,16 +1,17 @@
 import type { Metadata, Viewport } from 'next'
 import { ClerkProvider } from '@clerk/nextjs'
-import { Cuprum } from 'next/font/google'
+import { Inter } from 'next/font/google'
 import Script from 'next/script'
 import './globals.css'
 import { Toaster } from '@/components/ui/toaster'
 import { ThemeProvider } from '@/context/them-provider'
 
-const cuprum = Cuprum({
+const inter = Inter({
   subsets: ['latin'],
   display: 'swap',
   preload: true,
-  weight: ['400', '700'],
+  weight: ['400', '500', '600', '700', '800', '900'],
+  variable: '--font-inter',
 })
 
 const APP_URL = (process.env.NEXT_PUBLIC_APP_URL || 'https://bookmylead.app').replace(/\/$/, '')
@@ -69,7 +70,7 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en" suppressHydrationWarning>
-        <body className={`${cuprum.className} min-h-screen`}>
+        <body className={`${inter.variable} font-sans min-h-screen antialiased`}>
           {/* DataFast Analytics - Must be in body for Next.js Script component */}
           <Script
             defer
