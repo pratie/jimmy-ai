@@ -33,7 +33,9 @@ const ChatbotPreview = ({ domainId }: Props) => {
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle>Chatbot Preview</CardTitle>
+        <CardTitle>
+          {currentBot?.name ? `${currentBot.name} GPT` : 'Assistant GPT'}
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <Loader loading={loading}>
