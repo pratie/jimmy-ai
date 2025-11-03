@@ -86,11 +86,12 @@ export default function AnimatedChatHero({
         new Promise<void>((resolve) => {
           let elapsed = 0
           const step = 50
-          const tick = () => {
+          const tick = (): void => {
             if (cancelled) return resolve()
             if (!playingRef.current) {
               // pause without adding elapsed
-              return setTimeout(tick, step)
+              setTimeout(tick, step)
+              return
             }
             elapsed += step
             if (elapsed >= ms) return resolve()
@@ -134,7 +135,7 @@ export default function AnimatedChatHero({
       cancelled = true
       clearTimers()
     }
-  }, [JSON.stringify(messages), typingMsPerChar, gapMs, loopPauseMs])
+  }, [script, typingMsPerChar, gapMs, loopPauseMs])
 
   const heightClass = responsiveHeight ? 'h-[400px] md:h-[450px] lg:h-[520px]' : 'h-[500px]'
   const densityBubble = density === 'compact' ? 'text-[13px] px-3 py-2' : 'text-[15px] px-4 py-3'
