@@ -8,6 +8,7 @@ import Script from 'next/script'
 import FlowDiagram from '@/components/landing/flow-diagram'
 import { Check } from 'lucide-react'
 import { Footer } from '@/components/landing/footer'
+import AnimatedChatHero from '@/components/landing/animated-chat-hero'
 
 export const metadata: Metadata = {
   alternates: {
@@ -22,62 +23,90 @@ export default async function Home() {
 
       {/* Hero Section */}
       <section className="relative overflow-hidden pt-20">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="relative flex items-center justify-center flex-col pt-20 md:pt-28 lg:pt-32 pb-12 md:pb-16 gap-6 md:gap-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="relative pt-8 md:pt-12 lg:pt-16 pb-12 md:pb-16 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
 
-            {/* Main Headline */}
-            <div className="text-center space-y-5 md:space-y-6 max-w-4xl">
-              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-brand-primary leading-[1.15] tracking-tight">
-                Turn Website Visitors Into
-                <br />
-                <span className="bg-main px-4 py-2 rounded-base border-2 border-border inline-block mt-3 text-black font-extrabold">
-                  Paying Customers 24/7
-                </span>
-              </h1>
 
-              <p className="text-brand-primary/65 text-base sm:text-lg md:text-xl max-w-2xl mx-auto leading-relaxed font-medium">
-                AI-powered chatbot for e-commerce, agencies, and SMBs. Answer customer questions instantly, recover abandoned carts, qualify leads, and close sales while you sleep.
+            {/* Left Column - Text Content */}
+            <div className="space-y-6 md:space-y-8 max-w-2xl lg:max-w-none text-center lg:text-left">
+              {/* Main Headline */}
+              <div className="space-y-3">
+                <h1 className="text-4xl sm:text-5xl md:text-5xl lg:text-[56px] font-bold text-gray-900 dark:text-white leading-[1.1] tracking-[-0.02em]">
+                  <span className="block">AI chatbot that turns</span>
+                  <span className="block">
+                    visitors into{' '}
+                    <span className="relative inline-block">
+                      <span className="relative z-10">customers</span>
+                      <svg className="absolute -bottom-1 left-0 w-full" viewBox="0 0 200 12" preserveAspectRatio="none">
+                        <path d="M0 8 Q100 2 200 8" stroke="currentColor" strokeWidth="3" fill="none" className="text-main/50" />
+                      </svg>
+                    </span>
+                  </span>
+                </h1>
+                <div className="text-xl sm:text-2xl lg:text-3xl font-medium text-gray-600 dark:text-gray-400">
+                  Sells{' '}
+                  <span className="relative inline-block px-2 py-0.5 bg-brand-accent/20 text-brand-accent font-bold rounded">
+                    24/7
+                  </span>
+                  {' '}• Answers <span className="text-gray-900 dark:text-white font-bold">instantly</span> • Never sleeps
+                </div>
+              </div>
+
+              <p className="text-gray-600 dark:text-gray-400 text-base sm:text-lg max-w-lg lg:max-w-xl leading-relaxed">
+                Boost sales by 40% with an AI assistant that recovers abandoned carts, qualifies leads, and closes deals automatically. Perfect for e-commerce stores and agencies.
               </p>
+
+              {/* CTA and Trust Section */}
+              <div className="flex flex-col sm:flex-row items-center lg:items-start gap-6">
+                <Link href="/auth/sign-up">
+                  <Button size="lg" className="bg-black dark:bg-white text-white dark:text-black font-semibold px-8 py-4 text-base rounded-lg hover:scale-105 transition-transform shadow-lg">
+                    Get Started Free →
+                  </Button>
+                </Link>
+                <div className="flex flex-col gap-2 text-sm text-gray-500 dark:text-gray-400">
+                  <div className="flex items-center gap-2">
+                    <Check className="w-4 h-4 text-green-500" strokeWidth={3} />
+                    <span>No credit card required</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Check className="w-4 h-4 text-green-500" strokeWidth={3} />
+                    <span>Live in 5 minutes</span>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            {/* Trust Indicators */}
-            <div className="flex flex-wrap items-center justify-center gap-4 md:gap-6 text-brand-primary/75 mt-2">
-              <div className="flex items-center gap-2">
-                <Check className="w-4 h-4 text-green-600 dark:text-green-400" strokeWidth={2.5} />
-                <span className="text-sm font-medium">Free forever plan</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Check className="w-4 h-4 text-green-600 dark:text-green-400" strokeWidth={2.5} />
-                <span className="text-sm font-medium">Live in 5 minutes</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Check className="w-4 h-4 text-green-600 dark:text-green-400" strokeWidth={2.5} />
-                <span className="text-sm font-medium">No coding needed</span>
-              </div>
-            </div>
+            {/* Right Column - Animated Chat Demo */}
+            <div className="relative w-full max-w-[480px] mx-auto lg:mx-0 lg:ml-auto">
+              <div className="relative">
+                <AnimatedChatHero density="cozy" title="BookmyLead Assistant" />
 
-            {/* CTA Button */}
-            <Link href="/auth/sign-up" className="mt-2">
-              <Button size="lg" className="bg-main text-black font-heading px-10 py-6 text-lg border-2 border-border shadow-shadow hover:translate-x-1 hover:translate-y-1 hover:shadow-none">
-                Start for free →
-              </Button>
-            </Link>
+                {/* Floating Dashboard Elements */}
+                <div className="hidden lg:block absolute -right-16 top-10 space-y-4">
+                  {/* Rating Card */}
+                  <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 w-48">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Customer Rating</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-2xl font-bold text-gray-900 dark:text-white">4.9</span>
+                      <div className="flex gap-0.5">
+                        {[...Array(5)].map((_, i) => (
+                          <svg key={i} className={`w-4 h-4 ${i < 5 ? 'text-yellow-400' : 'text-gray-300'}`} fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                          </svg>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
 
-            {/* Dashboard Preview */}
-            <div className="mt-10 md:mt-16 relative w-full max-w-5xl">
-              <Image
-                src="/images/app-ui.png"
-                width={1200}
-                height={800}
-                alt="BookmyLead AI Dashboard"
-                className="w-full h-auto object-contain relative z-10 shadow-2xl rounded-2xl border border-brand-base-300/40 bg-white/70 dark:bg-black/30 backdrop-blur-sm p-2"
-                loading="lazy"
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 1200px"
-              />
+              </div>
             </div>
           </div>
         </div>
       </section>
+
 
       {/* Social Proof / Stats */}
       <section className="py-20 bg-brand-base-100/50 backdrop-blur-sm">
