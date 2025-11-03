@@ -11,6 +11,7 @@ import { onUpdateLlmConfig, onUpdateModePrompts } from '@/actions/settings'
 import { DEFAULT_MODE_BLOCKS } from '@/lib/promptBuilder'
 import { useRouter } from 'next/navigation'
 import { AVAILABLE_MODELS } from '@/lib/ai-models'
+import { OpenAIIcon, AnthropicIcon, GoogleIcon } from '@/components/icons/provider-icons'
 
 type Props = {
   domainId: string
@@ -20,9 +21,10 @@ type Props = {
   modePrompts: Record<string, string> | null
 }
 
-// Filter models to OpenAI and Anthropic only
+// Filter models to OpenAI, Anthropic, and Google
 const OPENAI_MODELS = AVAILABLE_MODELS.filter(m => m.provider === 'OpenAI')
 const ANTHROPIC_MODELS = AVAILABLE_MODELS.filter(m => m.provider === 'Anthropic')
+const GOOGLE_MODELS = AVAILABLE_MODELS.filter(m => m.provider === 'Google')
 
 const AdvancedAISettings = ({
   domainId,
@@ -37,7 +39,7 @@ const AdvancedAISettings = ({
   const [savingPrompts, setSavingPrompts] = useState(false)
 
   // LLM Config state
-  const [model, setModel] = useState(currentModel || 'gpt-4o-mini')
+  const [model, setModel] = useState(currentModel || 'gemini-2.5-flash-lite')
   const [temperature, setTemperature] = useState<number>(
     typeof currentTemperature === 'number' ? currentTemperature : 0.7
   )
@@ -89,29 +91,43 @@ const AdvancedAISettings = ({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="llm-model">Model</Label>
-                <select
-                  id="llm-model"
-                  value={model}
-                  onChange={(e) => setModel(e.target.value)}
-                  className="w-full px-3 py-2 border-2 rounded-md border-brand-base-300 bg-white/95 text-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/40"
-                >
-                  <optgroup label="OpenAI">
-                    {OPENAI_MODELS.map((m) => (
-                      <option key={m.id} value={m.id}>
-                        {m.name} ({m.contextWindow.toLocaleString()} tokens)
-                      </option>
-                    ))}
-                  </optgroup>
-                  <optgroup label="Anthropic Claude">
-                    {ANTHROPIC_MODELS.map((m) => (
-                      <option key={m.id} value={m.id}>
-                        {m.name} ({m.contextWindow.toLocaleString()} tokens)
-                      </option>
-                    ))}
-                  </optgroup>
-                </select>
+                <div className="relative">
+                  <select
+                    id="llm-model"
+                    value={model}
+                    onChange={(e) => setModel(e.target.value)}
+                    className="w-full px-3 py-2 pl-10 border-2 rounded-md border-brand-base-300 bg-white/95 text-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/40 appearance-none"
+                  >
+                    <optgroup label="OpenAI">
+                      {OPENAI_MODELS.map((m) => (
+                        <option key={m.id} value={m.id}>
+                          {m.name} ({m.contextWindow.toLocaleString()} tokens)
+                        </option>
+                      ))}
+                    </optgroup>
+                    <optgroup label="Anthropic Claude">
+                      {ANTHROPIC_MODELS.map((m) => (
+                        <option key={m.id} value={m.id}>
+                          {m.name} ({m.contextWindow.toLocaleString()} tokens)
+                        </option>
+                      ))}
+                    </optgroup>
+                    <optgroup label="Google Gemini">
+                      {GOOGLE_MODELS.map((m) => (
+                        <option key={m.id} value={m.id}>
+                          {m.name} ({m.contextWindow.toLocaleString()} tokens)
+                        </option>
+                      ))}
+                    </optgroup>
+                  </select>
+                  <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                    {model.startsWith('gpt-') && <OpenAIIcon size={18} className="text-brand-primary" />}
+                    {model.startsWith('claude-') && <AnthropicIcon size={18} className="text-brand-primary" />}
+                    {model.startsWith('gemini-') && <GoogleIcon size={18} className="text-brand-primary" />}
+                  </div>
+                </div>
                 <p className="text-xs text-brand-primary/60">
-                  Multi-provider support: OpenAI & Anthropic Claude
+                  Multi-provider support: OpenAI, Anthropic Claude & Google Gemini
                 </p>
               </div>
               <div className="space-y-2">

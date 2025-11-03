@@ -2,6 +2,7 @@
 import { client } from '@/lib/prisma'
 import { clerkClient, currentUser } from '@clerk/nextjs/server'
 import { getPlanLimits } from '@/lib/plans'
+import { isValidModel } from '@/lib/ai-models'
 
 export const onIntegrateDomain = async (domain: string, icon: string) => {
   const user = await currentUser()
@@ -380,6 +381,10 @@ export const onUpdateLlmConfig = async (
   domainId: string
 ) => {
   try {
+    // Validate model id against the registry to avoid breaking runtime generation
+    if (!isValidModel(model)) {
+      return { status: 400, message: 'Invalid model id. Please select a supported model.' }
+    }
     const update = await client.domain.update({
       where: { id: domainId },
       data: {

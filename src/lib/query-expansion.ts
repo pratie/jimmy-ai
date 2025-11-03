@@ -88,7 +88,7 @@ export async function expandQuery(
 Return concise, natural-language phrasings that preserve intent.
 User query: "${q}"`,
         // Keep response small and fast
-        maxTokens: 120,
+        maxOutputTokens: 120,
       }) as Promise<{ object: { variations: string[] } }>,
       timeoutMs
     )

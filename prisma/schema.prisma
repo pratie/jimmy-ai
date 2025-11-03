@@ -64,7 +64,7 @@ model ChatBot {
   brandTone                String?          @default("friendly, concise")
   language                 String?          @default("en")
   // Advanced AI settings
-  llmModel                 String?          @default("gpt-4o-mini")
+  llmModel                 String?          @default("gemini-2.5-flash-lite")
   llmTemperature           Float?           @default(0.7)
   modePrompts              Json?
   embeddingStatus          String?          @default("not_started")

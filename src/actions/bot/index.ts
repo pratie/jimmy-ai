@@ -143,9 +143,9 @@ export const onAiChatBotAssistant = async (
         const searchResults = await searchKnowledgeBaseWithFallback(message, id, 5)
         knowledgeBase = formatResultsForPrompt(searchResults)
       } else {
-        devLog('[Bot] Using fallback: truncated knowledge base')
+        devLog('[Bot] Using fallback: full knowledge base')
         knowledgeBase = chatBotDomain.chatBot?.knowledgeBase
-          ? truncateMarkdown(chatBotDomain.chatBot.knowledgeBase, 12000)
+          ? chatBotDomain.chatBot.knowledgeBase // Pass full KB without truncation
           : 'No knowledge base available yet. Please ask the customer to provide more details about their inquiry.'
       }
 
@@ -260,7 +260,7 @@ export const onAiChatBotAssistant = async (
         })
 
         const { text } = await generateText({
-          model: getModel(chatBotDomain.chatBot?.llmModel || 'gpt-4o-mini') as any,
+          model: getModel(chatBotDomain.chatBot?.llmModel || 'gemini-2.5-flash-lite') as any,
           messages: [
             {
               role: 'system',
@@ -273,7 +273,7 @@ export const onAiChatBotAssistant = async (
             },
           ],
           temperature: (typeof chatBotDomain.chatBot?.llmTemperature === 'number') ? (chatBotDomain.chatBot?.llmTemperature as number) : 0.7,
-          maxTokens: 800, // Limit response length to control costs and latency
+          maxOutputTokens: 4096, // Increased to avoid Gemini truncation issues
         })
 
         if (text) {
@@ -463,7 +463,7 @@ export const onAiChatBotAssistant = async (
         })
 
         const { text } = await generateText({
-          model: getModel(chatBotDomain.chatBot?.llmModel || 'gpt-4o-mini') as any,
+          model: getModel(chatBotDomain.chatBot?.llmModel || 'gemini-2.5-flash-lite') as any,
           messages: [
             {
               role: 'system',
@@ -476,7 +476,7 @@ export const onAiChatBotAssistant = async (
             },
           ],
           temperature: (typeof chatBotDomain.chatBot?.llmTemperature === 'number') ? (chatBotDomain.chatBot?.llmTemperature as number) : 0.7,
-          maxTokens: 800, // Limit response length to control costs and latency
+          maxOutputTokens: 4096, // Increased to avoid Gemini truncation issues
         })
 
         if (text?.includes('(realtime)')) {
@@ -588,7 +588,7 @@ export const onAiChatBotAssistant = async (
       })
 
       const { text } = await generateText({
-        model: getModel(chatBotDomain.chatBot?.llmModel || 'gpt-4o-mini') as any,
+        model: getModel(chatBotDomain.chatBot?.llmModel || 'gemini-2.5-flash-lite') as any,
         messages: [
           {
             role: 'system',
@@ -601,7 +601,7 @@ export const onAiChatBotAssistant = async (
           },
         ],
         temperature: (typeof chatBotDomain.chatBot?.llmTemperature === 'number') ? (chatBotDomain.chatBot?.llmTemperature as number) : 0.7,
-        maxTokens: 800, // Limit response length to control costs and latency
+        maxOutputTokens: 800, // Limit response length to control costs and latency
       })
 
       if (text) {

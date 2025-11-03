@@ -19,7 +19,7 @@ const AdvancedAIPage = async (
         <AdvancedAISettings
           domainId={active.id}
           domainName={active.name}
-          currentModel={active.chatBot?.llmModel || 'gpt-4o-mini'}
+          currentModel={active.chatBot?.llmModel || 'gemini-2.5-flash-lite'}
           currentTemperature={typeof active.chatBot?.llmTemperature === 'number' ? (active.chatBot?.llmTemperature as number) : 0.7}
           modePrompts={(active.chatBot?.modePrompts as any) || null}
         />

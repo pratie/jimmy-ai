@@ -240,14 +240,14 @@ export async function POST(req: Request) {
         knowledgeBase = formatResultsForPrompt(searchResults)
       }
     } else {
-      devLog('[Bot Stream] ⚠️  Using fallback: fetching truncated knowledge base (no embeddings trained)')
+      devLog('[Bot Stream] ⚠️  Using fallback: fetching full knowledge base (no embeddings trained)')
       // Only fetch knowledgeBase when embeddings aren't trained (rare case)
       const kbData = await client.chatBot.findUnique({
         where: { domainId: domainId },
         select: { knowledgeBase: true }
       })
       knowledgeBase = kbData?.knowledgeBase
-        ? truncateMarkdown(kbData.knowledgeBase, 12000)
+        ? kbData.knowledgeBase // Pass full KB without truncation
         : 'No knowledge base available yet. Please ask the customer to provide more details about their inquiry.'
     }
     devLog(`[Bot Stream] ✅ RAG retrieval took: ${Date.now() - ragStartTime}ms`)
@@ -494,7 +494,7 @@ export async function POST(req: Request) {
     devLog(`[Bot Stream] ✅ Prompt building took: ${Date.now() - promptStartTime}ms`)
 
     // Prepare OpenAI request data
-    const llmModel = chatBotDomain.chatBot?.llmModel || 'gpt-4o-mini'
+    const llmModel = chatBotDomain.chatBot?.llmModel || 'gemini-2.5-flash-lite'
     const llmTemperature = (typeof chatBotDomain.chatBot?.llmTemperature === 'number') ? chatBotDomain.chatBot?.llmTemperature as number : 0.7
     const messages = [
       { role: 'system', content: systemPrompt },
@@ -507,11 +507,11 @@ export async function POST(req: Request) {
     // ═══════════════════════════════════════════════════════════
     if (process.env.DEBUG_LLM === 'true') {
       console.log('\n' + '='.repeat(80))
-      console.log('📤 OPENAI API REQUEST')
+      console.log('📤 AI SDK REQUEST')
       console.log('='.repeat(80))
       console.log('Model:', llmModel)
       console.log('Temperature:', llmTemperature)
-      console.log('Max Tokens:', 800)
+      console.log('Max Tokens:', 4096)
       console.log('Stream:', true)
       console.log('\n' + '-'.repeat(80))
       console.log('MESSAGES:')
@@ -539,7 +539,7 @@ export async function POST(req: Request) {
       model: model as any,
       messages: messages as any,
       temperature: llmTemperature,
-      maxTokens: 800,
+      maxOutputTokens: 4096,
     })
 
     // Custom stream processing to maintain per-chunk markdown cleaning

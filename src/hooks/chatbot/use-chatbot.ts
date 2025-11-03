@@ -256,66 +256,100 @@ export const useChatBot = (options?: UseChatBotOptions) => {
             anonymousId,
           }),
         })
+        const contentType = streamResponse.headers.get('Content-Type') || ''
+        const isSSE = contentType.startsWith('text/event-stream')
 
-        if (!streamResponse.ok) {
-          const errorData = await streamResponse.json()
+        // JSON response path (e.g., live mode or errors)
+        if (!isSSE) {
+          const data = await streamResponse.json().catch(() => ({}))
+          setOnAiTyping(false)
 
-          // Check if live mode is active
-          if (errorData.live) {
-            setOnAiTyping(false)
+          if (data && data.live) {
             setOnRealTime((prev) => ({
               ...prev,
-              chatroom: errorData.chatRoom,
-              mode: errorData.live,
+              chatroom: data.chatRoom,
+              mode: true,
             }))
+            // Do not add/keep empty assistant placeholder in live mode
+            setOnChats((prev: any) => {
+              const updated = [...prev]
+              if (
+                updated.length > 0 &&
+                updated[updated.length - 1].role === 'assistant' &&
+                (!updated[updated.length - 1].content || updated[updated.length - 1].content.trim() === '')
+              ) {
+                updated.pop()
+              }
+              return updated
+            })
             return
           }
 
-          throw new Error(`HTTP error! status: ${streamResponse.status}`)
+          if (data && data.error) {
+            // Show server message or generic error
+            setOnChats((prev: any) => [
+              ...prev,
+              { role: 'assistant', content: data.message || 'Sorry, I encountered an error. Please try again.' },
+            ])
+            return
+          }
+
+          // Fallback to generic error path
+          if (!streamResponse.ok) {
+            throw new Error(`HTTP error! status: ${streamResponse.status}`)
+          }
+          return
         }
 
+        // SSE streaming path
         const reader = streamResponse.body?.getReader()
         const decoder = new TextDecoder()
         let assistantMessage = ''
+        let buffer = ''
 
         if (!reader) {
           throw new Error('No response body')
         }
 
-        // Create assistant message placeholder
+        // Create assistant message placeholder only for SSE
         setOnChats((prev: any) => [...prev, { role: 'assistant', content: '' }])
-        { const el = messageWindowRef.current; if (el) setTimeout(() => el.scroll({ top: el.scrollHeight, behavior: 'smooth' }), 0) }
         { const el = messageWindowRef.current; if (el) setTimeout(() => el.scroll({ top: el.scrollHeight, behavior: 'smooth' }), 0) }
 
         while (true) {
           const { done, value } = await reader.read()
           if (done) break
 
-          const chunk = decoder.decode(value)
-          const lines = chunk.split('\n')
+          buffer += decoder.decode(value, { stream: true })
+          // Process complete SSE events separated by blank line
+          const events = buffer.split('\n\n')
+          buffer = events.pop() || '' // keep incomplete fragment
 
-          for (const line of lines) {
-            if (line.startsWith('data: ')) {
-              const data = line.slice(6)
-              if (data === '[DONE]') continue
+          for (const evt of events) {
+            // Join multi-line data fields if any
+            const dataLines = evt
+              .split('\n')
+              .filter((l) => l.startsWith('data: '))
+              .map((l) => l.slice(6))
 
-              try {
-                const parsed = JSON.parse(data)
-                if (parsed.content) {
-                  assistantMessage += parsed.content
-                  // Update assistant message in real-time
-                  setOnChats((prev: any) => {
-                    const updatedChats = [...prev]
-                    updatedChats[updatedChats.length - 1] = {
-                      role: 'assistant',
-                      content: assistantMessage,
-                    }
-                    return updatedChats
-                  })
-                }
-              } catch (e) {
-                // Ignore parse errors for partial chunks
+            if (dataLines.length === 0) continue
+            const dataPayload = dataLines.join('\n')
+            if (dataPayload === '[DONE]') continue
+
+            try {
+              const parsed = JSON.parse(dataPayload)
+              if (parsed.content) {
+                assistantMessage += parsed.content
+                setOnChats((prev: any) => {
+                  const updated = [...prev]
+                  updated[updated.length - 1] = {
+                    role: 'assistant',
+                    content: assistantMessage,
+                  }
+                  return updated
+                })
               }
+            } catch (_) {
+              // ignore malformed partials
             }
           }
         }

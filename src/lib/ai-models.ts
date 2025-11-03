@@ -39,9 +39,9 @@ export function getModel(modelId: string) {
   // if (modelId.startsWith('grok-')) return xai(modelId)
   // if (modelId.startsWith('mistral-')) return mistral(modelId)
 
-  // Default fallback to GPT-4o Mini
-  console.warn(`[AI Models] Unknown model: ${modelId}, falling back to gpt-4o-mini`)
-  return openai('gpt-4o-mini')
+  // Default fallback to Gemini 2.5 Flash Lite
+  console.warn(`[AI Models] Unknown model: ${modelId}, falling back to gemini-2.5-flash-lite`)
+  return google('gemini-2.5-flash-lite')
 }
 
 /**
@@ -111,28 +111,36 @@ export const AVAILABLE_MODELS = [
 
   // ===== Google =====
   {
-    id: 'gemini-2.0-flash-exp',
-    name: 'Gemini 2.0 Flash',
+    id: 'gemini-2.5-flash',
+    name: 'Gemini 2.5 Flash',
     provider: 'Google',
     contextWindow: 1000000,
-    description: 'Experimental fast model with huge context window',
-    costPer1MTokens: { input: 0.00, output: 0.00 }, // Free during preview
+    description: 'Fast & intelligent with hybrid reasoning',
+    costPer1MTokens: { input: 0.08, output: 0.32 },
   },
   {
-    id: 'gemini-1.5-pro',
-    name: 'Gemini 1.5 Pro',
-    provider: 'Google',
-    contextWindow: 2000000,
-    description: 'Most capable Gemini model, 2M token context',
-    costPer1MTokens: { input: 1.25, output: 5.00 },
-  },
-  {
-    id: 'gemini-1.5-flash',
-    name: 'Gemini 1.5 Flash',
+    id: 'gemini-2.5-flash-lite',
+    name: 'Gemini 2.5 Flash Lite',
     provider: 'Google',
     contextWindow: 1000000,
-    description: 'Fast and efficient with 1M token context',
-    costPer1MTokens: { input: 0.075, output: 0.30 },
+    description: 'Ultra-fast, optimized for low latency',
+    costPer1MTokens: { input: 0.06, output: 0.24 },
+  },
+  {
+    id: 'gemini-2.5-flash-lite-preview-09-2025',
+    name: 'Gemini 2.5 Flash-Lite (Preview 09-2025)',
+    provider: 'Google',
+    contextWindow: 1000000,
+    description: 'Preview of Flash-Lite. Subject to change and deprecation.',
+    costPer1MTokens: { input: 0.06, output: 0.24 },
+  },
+  {
+    id: 'gemini-2.5-pro',
+    name: 'Gemini 2.5 Pro',
+    provider: 'Google',
+    contextWindow: 1000000,
+    description: 'Most capable Gemini for complex reasoning',
+    costPer1MTokens: { input: 1.00, output: 4.00 },
   },
 ] as const
 
