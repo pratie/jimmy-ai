@@ -13,17 +13,13 @@ function NavBar() {
           <div className="flex items-center gap-2 sm:gap-3">
             <Image
               src="/images/logo.svg"
-              alt="BookmyLead Logo"
+              alt="ChatDock Logo"
               width={40}
               height={40}
               className="w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0"
             />
-            <span className="font-extrabold text-base sm:text-lg md:text-xl tracking-tight uppercase hidden xs:block">
-              BookmyLead
-            </span>
-            {/* Mobile-only abbreviated version */}
-            <span className="font-extrabold text-base tracking-tight uppercase xs:hidden">
-              BML
+            <span className="font-extrabold text-base sm:text-lg md:text-xl tracking-tight uppercase">
+              ChatDock
             </span>
           </div>
 

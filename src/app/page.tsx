@@ -79,7 +79,7 @@ export default async function Home() {
             {/* Right Column - Animated Chat Demo */}
             <div className="relative w-full max-w-[480px] mx-auto lg:mx-0 lg:ml-auto">
               <div className="relative">
-                <AnimatedChatHero density="cozy" title="BookmyLead Assistant" />
+                <AnimatedChatHero density="cozy" title="ChatDock Assistant" />
 
                 {/* Floating Dashboard Elements */}
                 <div className="hidden lg:block absolute -right-16 top-10 space-y-4">
@@ -278,11 +278,11 @@ export default async function Home() {
 
       {/* Chatbot Embed - Landing page only */}
       <Script
-        id="bml-embed"
-        src="https://www.bookmylead.app/embed.min.js"
+        id="chatdock-embed"
+        src="https://www.chatdock.io/embed.min.js"
         strategy="afterInteractive"
         data-domain-id="75975441-fef0-4fa2-8034-cdd69e1a96ff"
-        data-app-origin="https://www.bookmylead.app"
+        data-app-origin="https://www.chatdock.io"
         data-margin="24"
         data-size="md"
       />
