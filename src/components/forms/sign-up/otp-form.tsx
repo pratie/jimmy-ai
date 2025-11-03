@@ -3,6 +3,9 @@ import React, { useCallback, useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { useSignUp } from '@clerk/nextjs'
 import { useToast } from '@/components/ui/use-toast'
+import Image from 'next/image'
+import { ArrowLeft } from 'lucide-react'
+import { useAuthContextHook } from '@/context/use-auth-context'
 
 type Props = {
   setOTP: React.Dispatch<React.SetStateAction<string>>
@@ -12,6 +15,7 @@ type Props = {
 const OTPForm = ({ onOTP, setOTP }: Props) => {
   const { signUp, isLoaded } = useSignUp()
   const { toast } = useToast()
+  const { setCurrentStep } = useAuthContextHook()
   const [resendCooldown, setResendCooldown] = useState<number>(0)
   const [resending, setResending] = useState<boolean>(false)
 
@@ -39,7 +43,25 @@ const OTPForm = ({ onOTP, setOTP }: Props) => {
 
   return (
     <>
-      <h2 className="text-gravel md:text-4xl font-bold">Enter OTP</h2>
+      <div className="flex items-center gap-4 mb-4">
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          onClick={() => setCurrentStep(2)}
+          className="flex-shrink-0"
+        >
+          <ArrowLeft className="h-4 w-4" />
+        </Button>
+        <Image
+          src="/images/logo.svg"
+          alt="Logo"
+          width={60}
+          height={60}
+          className="flex-shrink-0"
+        />
+        <h2 className="text-gravel md:text-4xl font-bold">Enter OTP</h2>
+      </div>
       <p className="text-iridium md:text-sm">
         Enter the one time password that was sent to your email.
       </p>

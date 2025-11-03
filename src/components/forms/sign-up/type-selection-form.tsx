@@ -1,6 +1,7 @@
 import React from 'react'
 import { FieldValues, UseFormRegister } from 'react-hook-form'
 import UserTypeCard from './user-type-card'
+import Image from 'next/image'
 
 type Props = {
   register: UseFormRegister<FieldValues>
@@ -11,9 +12,18 @@ type Props = {
 const TypeSelectionForm = ({ register, setUserType, userType }: Props) => {
   return (
     <>
-      <h2 className="text-gravel md:text-4xl font-bold">Create an account</h2>
+      <div className="flex items-center gap-4 mb-4">
+        <Image
+          src="/images/logo.svg"
+          alt="Logo"
+          width={60}
+          height={60}
+          className="flex-shrink-0"
+        />
+        <h2 className="text-gravel md:text-4xl font-bold">Create an account</h2>
+      </div>
       <p className="text-iridium md:text-sm">
-        Tell us about yourself! What do you do? Let’s tailor your
+        Tell us about yourself! What do you do? Let's tailor your
         <br /> experience so it best suits you.
       </p>
       <UserTypeCard
