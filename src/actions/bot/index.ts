@@ -273,7 +273,7 @@ export const onAiChatBotAssistant = async (
             },
           ],
           temperature: (typeof chatBotDomain.chatBot?.llmTemperature === 'number') ? (chatBotDomain.chatBot?.llmTemperature as number) : 0.7,
-          maxOutputTokens: 4096, // Increased to avoid Gemini truncation issues
+          maxOutputTokens: 2000,
         })
 
         if (text) {
@@ -476,7 +476,7 @@ export const onAiChatBotAssistant = async (
             },
           ],
           temperature: (typeof chatBotDomain.chatBot?.llmTemperature === 'number') ? (chatBotDomain.chatBot?.llmTemperature as number) : 0.7,
-          maxOutputTokens: 4096, // Increased to avoid Gemini truncation issues
+          maxOutputTokens: 2000,
         })
 
         if (text?.includes('(realtime)')) {

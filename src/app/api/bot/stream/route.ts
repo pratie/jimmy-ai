@@ -539,7 +539,7 @@ export async function POST(req: Request) {
       model: model as any,
       messages: messages as any,
       temperature: llmTemperature,
-      maxOutputTokens: 4096,
+      maxOutputTokens: 2000,
     })
 
     // Custom stream processing to maintain per-chunk markdown cleaning
