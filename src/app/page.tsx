@@ -21,48 +21,45 @@ export default async function Home() {
     <main className="min-h-screen">
       <NavBar />
 
-      {/* Hero Section */}
-      <section className="relative overflow-hidden pt-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="relative pt-8 md:pt-12 lg:pt-16 pb-12 md:pb-16 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
+      {/* Hero Section - Improved spacing and typography */}
+      <section className="relative overflow-hidden pt-32 md:pt-40 pb-20 md:pb-32">
+        <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
+          <div className="relative grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
 
-
-            {/* Left Column - Text Content */}
-            <div className="space-y-6 md:space-y-8 max-w-2xl lg:max-w-none text-center lg:text-left">
-              {/* Main Headline */}
-              <div className="space-y-3">
-                <h1 className="text-4xl sm:text-5xl md:text-5xl lg:text-[56px] font-bold text-gray-900 dark:text-white leading-[1.1] tracking-[-0.02em]">
-                  <span className="block">AI knowledge base</span>
-                  <span className="block">and website assistant</span>
+            {/* Left Column - Enhanced text hierarchy */}
+            <div className="space-y-8 md:space-y-10 max-w-2xl lg:max-w-none text-center lg:text-left">
+              {/* Main Headline - Larger, more impactful */}
+              <div className="space-y-6">
+                <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-[72px] font-extrabold text-gray-900 dark:text-white leading-[0.95] tracking-[-0.03em]">
+                  <span className="block">Deliver <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-purple-600">magical</span></span>
+                  <span className="block">customer support</span>
+                  <span className="block text-3xl sm:text-4xl lg:text-5xl font-bold mt-4 text-gray-700 dark:text-gray-300">with AI Agent</span>
                 </h1>
-                <div className="text-xl sm:text-2xl lg:text-3xl font-medium text-gray-600 dark:text-gray-400">
-                  Answers from your docs
-                  <span className="relative inline-block px-2 py-0.5 bg-brand-accent/20 text-brand-accent font-bold rounded ml-1">
-                    24/7
-                  </span>
-                  {' '}• Instant & accurate • Human handoff when needed
-                </div>
               </div>
 
-              <p className="text-gray-600 dark:text-gray-400 text-base sm:text-lg max-w-lg lg:max-w-xl leading-relaxed">
-                Reduce tickets and help customers self‑serve with an AI assistant grounded in your website and documentation. Escalate to a human in real‑time, and book meetings when it matters. Built for support and growth teams.
+              <p className="text-gray-600 dark:text-gray-400 text-lg sm:text-xl max-w-xl leading-[1.8]">
+                ChatDock helps you build and deploy AI support agents that answer using your own content. Seamlessly hand off to human agents when needed.
               </p>
 
-              {/* CTA and Trust Section */}
-              <div className="flex flex-col sm:flex-row items-center lg:items-start gap-6">
+              {/* CTA and Trust Section - Better visual weight */}
+              <div className="flex flex-col sm:flex-row items-center lg:items-start gap-8 pt-4">
                 <Link href="/auth/sign-up">
-                  <Button size="lg" className="bg-black dark:bg-white text-white dark:text-black font-semibold px-8 py-4 text-base rounded-lg hover:scale-105 transition-transform shadow-lg">
-                    Get Started Free →
+                  <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-10 py-5 text-lg rounded-xl hover:scale-105 transition-all shadow-xl hover:shadow-2xl">
+                    Build Your Agent →
                   </Button>
                 </Link>
-                <div className="flex flex-col gap-2 text-sm text-gray-500 dark:text-gray-400">
-                  <div className="flex items-center gap-2">
-                    <Check className="w-4 h-4 text-green-500" strokeWidth={3} />
-                    <span>No credit card required</span>
+                <div className="flex flex-col gap-3 text-base text-gray-600 dark:text-gray-400">
+                  <div className="flex items-center gap-3">
+                    <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center">
+                      <Check className="w-3 h-3 text-white" strokeWidth={3} />
+                    </div>
+                    <span>5-minute setup</span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Check className="w-4 h-4 text-green-500" strokeWidth={3} />
-                    <span>Live in 5 minutes</span>
+                  <div className="flex items-center gap-3">
+                    <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center">
+                      <Check className="w-3 h-3 text-white" strokeWidth={3} />
+                    </div>
+                    <span>No credit card required</span>
                   </div>
                 </div>
               </div>
@@ -99,16 +96,16 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* Works with your site + docs */}
-      <section className="py-16">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-10">
-            <h2 className="text-3xl sm:text-4xl font-bold text-brand-primary">Works with your site + docs</h2>
-            <p className="mt-3 text-brand-primary/70 max-w-2xl mx-auto">
+      {/* Works with your site + docs - Enhanced spacing */}
+      <section className="py-24 md:py-32">
+        <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-brand-primary mb-6">Works with your site + docs</h2>
+            <p className="text-lg sm:text-xl text-brand-primary/70 max-w-2xl mx-auto">
               Bring your content in minutes. No complex setup.
             </p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             <div className="bg-white dark:bg-black/40 p-6 rounded-2xl border-2 border-brand-base-300 flex flex-col items-start gap-3">
               <Image src="/icons/integrations.svg" alt="Website crawl" width={28} height={28} />
               <h3 className="font-semibold text-brand-primary">Website crawl</h3>
@@ -133,12 +130,12 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* Learn more (Blog CTAs) */}
-      <section className="py-12">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-8">
-            <h2 className="text-2xl sm:text-3xl font-bold text-brand-primary">Learn more</h2>
-            <p className="mt-2 text-brand-primary/70">Deep dives on setup, RAG accuracy, and support automation.</p>
+      {/* Learn more (Blog CTAs) - Better spacing */}
+      <section className="py-20 md:py-28">
+        <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-brand-primary mb-4">Learn more</h2>
+            <p className="text-lg text-brand-primary/70">Deep dives on setup, RAG accuracy, and support automation.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             <Link href="/blogs/how-to-train-an-ai-website-chatbot-on-your-docs" className="group">
@@ -163,25 +160,25 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* Social Proof / Stats */}
-      <section className="py-20 bg-brand-base-100/50 backdrop-blur-sm">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12 max-w-5xl mx-auto">
+      {/* Social Proof / Stats - Enhanced visual impact */}
+      <section className="py-28 md:py-36 bg-gradient-to-b from-brand-base-100/50 to-transparent backdrop-blur-sm">
+        <div className="container mx-auto px-6 sm:px-8 lg:px-12">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-12 md:gap-16 max-w-5xl mx-auto">
             <div className="text-center">
-              <div className="text-4xl md:text-6xl font-extrabold text-brand-primary mb-2">67%</div>
-              <div className="text-brand-primary/70 text-sm md:text-base font-medium">Higher conversion rate</div>
+              <div className="text-5xl md:text-7xl font-extrabold text-brand-primary mb-3 tracking-tighter">67%</div>
+              <div className="text-brand-primary/70 text-base md:text-lg font-medium">Higher conversion rate</div>
             </div>
             <div className="text-center">
-              <div className="text-4xl md:text-6xl font-extrabold text-brand-primary mb-2">40%</div>
-              <div className="text-brand-primary/70 text-sm md:text-base font-medium">Fewer support tickets</div>
+              <div className="text-5xl md:text-7xl font-extrabold text-brand-primary mb-3 tracking-tighter">40%</div>
+              <div className="text-brand-primary/70 text-base md:text-lg font-medium">Fewer support tickets</div>
             </div>
             <div className="text-center">
-              <div className="text-4xl md:text-6xl font-extrabold text-brand-primary mb-2">24/7</div>
-              <div className="text-brand-primary/70 text-sm md:text-base font-medium">Customer support</div>
+              <div className="text-5xl md:text-7xl font-extrabold text-brand-primary mb-3 tracking-tighter">24/7</div>
+              <div className="text-brand-primary/70 text-base md:text-lg font-medium">Customer support</div>
             </div>
             <div className="text-center">
-              <div className="text-4xl md:text-6xl font-extrabold text-brand-primary mb-2">5min</div>
-              <div className="text-brand-primary/70 text-sm md:text-base font-medium">To go live</div>
+              <div className="text-5xl md:text-7xl font-extrabold text-brand-primary mb-3 tracking-tighter">5min</div>
+              <div className="text-brand-primary/70 text-base md:text-lg font-medium">To go live</div>
             </div>
           </div>
         </div>
@@ -190,19 +187,19 @@ export default async function Home() {
       {/* How It Works - Interactive Flow */}
       <FlowDiagram />
 
-      {/* Features Grid */}
-      <section id="features" className="py-24 bg-brand-base-100/50 backdrop-blur-sm">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-20">
-            <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold text-brand-primary mb-6">
+      {/* Features Grid - Enhanced visual hierarchy */}
+      <section id="features" className="py-32 md:py-40 bg-gradient-to-b from-transparent via-brand-base-100/30 to-transparent">
+        <div className="container mx-auto px-6 sm:px-8 lg:px-12">
+          <div className="text-center mb-24">
+            <h2 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-brand-primary mb-8 tracking-tight">
               Built for growing businesses
             </h2>
-            <p className="text-brand-primary/70 text-lg md:text-xl max-w-3xl mx-auto">
+            <p className="text-brand-primary/70 text-xl md:text-2xl max-w-3xl mx-auto leading-relaxed">
               Everything you need to sell more, support better, and scale faster
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 max-w-6xl mx-auto">
             {/* Feature Cards */}
 
             <div className="bg-white dark:bg-black/40 p-8 rounded-3xl border-2 border-brand-base-300 hover:border-brand-info/60 transition-all duration-300 hover:shadow-xl">
@@ -304,16 +301,16 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* Why ChatDock */}
-      <section className="py-20">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-10">
-            <h2 className="text-3xl sm:text-4xl font-bold text-brand-primary">Why ChatDock</h2>
-            <p className="mt-3 text-brand-primary/70 max-w-2xl mx-auto">
+      {/* Why ChatDock - Better spacing and hierarchy */}
+      <section className="py-28 md:py-36">
+        <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-brand-primary mb-6">Why ChatDock</h2>
+            <p className="text-lg sm:text-xl text-brand-primary/70 max-w-2xl mx-auto">
               Purpose‑built for accurate answers, fast experiences, and seamless handoffs.
             </p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             <div className="bg-white dark:bg-black/40 p-6 rounded-2xl border-2 border-brand-base-300">
               <h3 className="font-semibold text-brand-primary mb-2">Accurate by design</h3>
               <p className="text-sm text-brand-primary/70">Retrieval‑augmented generation uses your content to answer—no hallucinated guesses.</p>
@@ -334,22 +331,22 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* Final CTA */}
-      <section className="py-24">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto text-center bg-gradient-to-br from-brand-accent/10 via-brand-info/10 to-brand-success/10 rounded-3xl p-12 md:p-16 border-2 border-brand-base-300">
-            <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold text-brand-primary mb-6">
+      {/* Final CTA - Enhanced with better spacing */}
+      <section className="py-32 md:py-40">
+        <div className="container mx-auto px-6 sm:px-8 lg:px-12">
+          <div className="max-w-4xl mx-auto text-center bg-gradient-to-br from-brand-accent/10 via-brand-info/10 to-brand-success/10 rounded-3xl p-12 md:p-20 border-2 border-brand-base-300">
+            <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-brand-primary mb-8 leading-tight">
               Help more customers in less time
             </h2>
-            <p className="text-brand-primary/70 text-lg md:text-xl mb-10 max-w-2xl mx-auto">
+            <p className="text-brand-primary/70 text-lg md:text-xl lg:text-2xl mb-12 max-w-2xl mx-auto leading-relaxed">
               Support and growth teams use ChatDock to deliver instant answers from their content, reduce workload with self‑service, and convert more qualified leads.
             </p>
             <Link href="/auth/sign-up">
-              <Button size="lg" className="bg-main text-black font-heading px-12 py-7 text-xl border-2 border-border shadow-shadow hover:translate-x-1 hover:translate-y-1 hover:shadow-none">
+              <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-12 py-6 text-lg md:text-xl rounded-xl transition-all hover:scale-105 shadow-xl hover:shadow-2xl">
                 Get started free →
               </Button>
             </Link>
-            <p className="text-brand-primary/60 text-sm mt-6">
+            <p className="text-brand-primary/60 text-base mt-8">
               Free forever plan • Live in 5 minutes • No credit card needed
             </p>
           </div>
