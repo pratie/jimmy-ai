@@ -43,20 +43,20 @@ export default async function Home() {
               {/* CTA and Trust Section - Better visual weight */}
               <div className="flex flex-col sm:flex-row items-center lg:items-start gap-8 pt-4">
                 <Link href="/auth/sign-up">
-                  <Button size="lg" className="bg-gradient-to-r from-[#68FBCE] to-[#4FD1A0] hover:from-[#5FE3B5] hover:to-[#45C895] text-black font-semibold px-10 py-5 text-lg rounded-xl hover:scale-105 transition-all shadow-[0_10px_40px_rgba(104,251,206,0.3)] hover:shadow-[0_15px_50px_rgba(104,251,206,0.4)]">
+                  <Button size="lg" className="bg-[#68FBCE] hover:bg-[#5FE3B5] text-black font-bold px-10 py-5 text-lg rounded-lg border-[3px] border-black shadow-[4px_4px_0px_0px_#000] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_#000] transition-all">
                     Build Your Agent →
                   </Button>
                 </Link>
                 <div className="flex flex-col gap-3 text-base text-gray-600 dark:text-gray-400">
                   <div className="flex items-center gap-3">
-                    <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center">
-                      <Check className="w-3 h-3 text-white" strokeWidth={3} />
+                    <div className="w-5 h-5 rounded-full bg-[#68FBCE] border border-black flex items-center justify-center">
+                      <Check className="w-3 h-3 text-black" strokeWidth={3} />
                     </div>
                     <span>5-minute setup</span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center">
-                      <Check className="w-3 h-3 text-white" strokeWidth={3} />
+                    <div className="w-5 h-5 rounded-full bg-[#68FBCE] border border-black flex items-center justify-center">
+                      <Check className="w-3 h-3 text-black" strokeWidth={3} />
                     </div>
                     <span>No credit card required</span>
                   </div>
@@ -105,25 +105,33 @@ export default async function Home() {
             </p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="bg-white dark:bg-black/40 p-6 rounded-2xl border-2 border-brand-base-300 flex flex-col items-start gap-3">
-              <Image src="/icons/integrations.svg" alt="Website crawl" width={28} height={28} />
-              <h3 className="font-semibold text-brand-primary">Website crawl</h3>
-              <p className="text-sm text-brand-primary/70">Convert your site into clean, structured knowledge automatically.</p>
+            <div className="bg-white dark:bg-gray-900 p-6 rounded-lg border-2 border-gray-200 dark:border-gray-700 hover:border-[#68FBCE] hover:shadow-lg transition-all flex flex-col items-start gap-3">
+              <div className="w-10 h-10 bg-[#68FBCE]/20 rounded-lg border border-[#68FBCE] flex items-center justify-center">
+                <span className="text-xl">🌐</span>
+              </div>
+              <h3 className="font-semibold text-gray-900 dark:text-white">Website crawl</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Convert your site into clean, structured knowledge automatically.</p>
             </div>
-            <div className="bg-white dark:bg-black/40 p-6 rounded-2xl border-2 border-brand-base-300 flex flex-col items-start gap-3">
-              <Image src="/icons/documents.svg" alt="PDFs & docs" width={28} height={28} />
-              <h3 className="font-semibold text-brand-primary">PDFs & docs</h3>
-              <p className="text-sm text-brand-primary/70">Upload PDFs or paste text to enrich your knowledge base.</p>
+            <div className="bg-white dark:bg-gray-900 p-6 rounded-lg border-2 border-gray-200 dark:border-gray-700 hover:border-[#68FBCE] hover:shadow-lg transition-all flex flex-col items-start gap-3">
+              <div className="w-10 h-10 bg-[#68FBCE]/20 rounded-lg border border-[#68FBCE] flex items-center justify-center">
+                <span className="text-xl">📄</span>
+              </div>
+              <h3 className="font-semibold text-gray-900 dark:text-white">PDFs & docs</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Upload PDFs or paste text to enrich your knowledge base.</p>
             </div>
-            <div className="bg-white dark:bg-black/40 p-6 rounded-2xl border-2 border-brand-base-300 flex flex-col items-start gap-3">
-              <Image src="/icons/helpdesk.svg" alt="FAQs" width={28} height={28} />
-              <h3 className="font-semibold text-brand-primary">FAQs</h3>
-              <p className="text-sm text-brand-primary/70">Capture common questions/answers to guide fast resolutions.</p>
+            <div className="bg-white dark:bg-gray-900 p-6 rounded-lg border-2 border-gray-200 dark:border-gray-700 hover:border-[#68FBCE] hover:shadow-lg transition-all flex flex-col items-start gap-3">
+              <div className="w-10 h-10 bg-[#68FBCE]/20 rounded-lg border border-[#68FBCE] flex items-center justify-center">
+                <span className="text-xl">❓</span>
+              </div>
+              <h3 className="font-semibold text-gray-900 dark:text-white">FAQs</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Capture common questions/answers to guide fast resolutions.</p>
             </div>
-            <div className="bg-white dark:bg-black/40 p-6 rounded-2xl border-2 border-brand-base-300 flex flex-col items-start gap-3">
-              <Image src="/icons/settings.svg" alt="Guardrails" width={28} height={28} />
-              <h3 className="font-semibold text-brand-primary">Guardrails</h3>
-              <p className="text-sm text-brand-primary/70">On‑brand tone, strict FAQ mode, and live handoff when needed.</p>
+            <div className="bg-white dark:bg-gray-900 p-6 rounded-lg border-2 border-gray-200 dark:border-gray-700 hover:border-[#68FBCE] hover:shadow-lg transition-all flex flex-col items-start gap-3">
+              <div className="w-10 h-10 bg-[#68FBCE]/20 rounded-lg border border-[#68FBCE] flex items-center justify-center">
+                <span className="text-xl">⚙️</span>
+              </div>
+              <h3 className="font-semibold text-gray-900 dark:text-white">Guardrails</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400">On‑brand tone, strict FAQ mode, and live handoff when needed.</p>
             </div>
           </div>
         </div>
@@ -138,21 +146,21 @@ export default async function Home() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             <Link href="/blogs/how-to-train-an-ai-website-chatbot-on-your-docs" className="group">
-              <div className="bg-white dark:bg-black/40 h-full p-6 rounded-2xl border-2 border-brand-base-300 group-hover:border-brand-accent/60 transition-all">
-                <h3 className="font-semibold text-brand-primary mb-2">Train an AI chatbot on your docs</h3>
-                <p className="text-sm text-brand-primary/70">Step‑by‑step: connect sources, chunk content, and ensure accurate answers.</p>
+              <div className="bg-white dark:bg-gray-900 h-full p-6 rounded-lg border-2 border-gray-200 dark:border-gray-700 hover:border-[#68FBCE] hover:shadow-lg transition-all">
+                <h3 className="font-semibold text-gray-900 dark:text-white mb-2 group-hover:text-[#68FBCE] transition-colors">Train an AI chatbot on your docs</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Step‑by‑step: connect sources, chunk content, and ensure accurate answers.</p>
               </div>
             </Link>
             <Link href="/blogs/ai-chatbot-for-website" className="group">
-              <div className="bg-white dark:bg-black/40 h-full p-6 rounded-2xl border-2 border-brand-base-300 group-hover:border-brand-accent/60 transition-all">
-                <h3 className="font-semibold text-brand-primary mb-2">AI chatbot for your website</h3>
-                <p className="text-sm text-brand-primary/70">Benefits, setup, and best practices for 24/7 self‑service.</p>
+              <div className="bg-white dark:bg-gray-900 h-full p-6 rounded-lg border-2 border-gray-200 dark:border-gray-700 hover:border-[#68FBCE] hover:shadow-lg transition-all">
+                <h3 className="font-semibold text-gray-900 dark:text-white mb-2 group-hover:text-[#68FBCE] transition-colors">AI chatbot for your website</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Benefits, setup, and best practices for 24/7 self‑service.</p>
               </div>
             </Link>
             <Link href="/blogs/customer-support-ai" className="group">
-              <div className="bg-white dark:bg-black/40 h-full p-6 rounded-2xl border-2 border-brand-base-300 group-hover:border-brand-accent/60 transition-all">
-                <h3 className="font-semibold text-brand-primary mb-2">Customer support AI</h3>
-                <p className="text-sm text-brand-primary/70">Reduce ticket volume with AI while keeping human handoff seamless.</p>
+              <div className="bg-white dark:bg-gray-900 h-full p-6 rounded-lg border-2 border-gray-200 dark:border-gray-700 hover:border-[#68FBCE] hover:shadow-lg transition-all">
+                <h3 className="font-semibold text-gray-900 dark:text-white mb-2 group-hover:text-[#68FBCE] transition-colors">Customer support AI</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Reduce ticket volume with AI while keeping human handoff seamless.</p>
               </div>
             </Link>
           </div>
@@ -333,7 +341,7 @@ export default async function Home() {
       {/* Final CTA - Enhanced with better spacing */}
       <section className="py-32 md:py-40">
         <div className="container mx-auto px-6 sm:px-8 lg:px-12">
-          <div className="max-w-4xl mx-auto text-center bg-gradient-to-br from-brand-accent/10 via-brand-info/10 to-brand-success/10 rounded-3xl p-12 md:p-20 border-2 border-brand-base-300">
+          <div className="max-w-4xl mx-auto text-center bg-gradient-to-br from-[#68FBCE]/10 via-[#68FBCE]/5 to-white dark:to-black rounded-3xl p-12 md:p-20 border-2 border-black">
             <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-brand-primary mb-8 leading-tight">
               Help more customers in less time
             </h2>
@@ -341,7 +349,7 @@ export default async function Home() {
               Support and growth teams use ChatDock to deliver instant answers from their content, reduce workload with self‑service, and convert more qualified leads.
             </p>
             <Link href="/auth/sign-up">
-              <Button size="lg" className="bg-gradient-to-r from-[#68FBCE] to-[#4FD1A0] hover:from-[#5FE3B5] hover:to-[#45C895] text-black font-semibold px-12 py-6 text-lg md:text-xl rounded-xl transition-all hover:scale-105 shadow-[0_10px_40px_rgba(104,251,206,0.3)] hover:shadow-[0_15px_50px_rgba(104,251,206,0.4)]">
+              <Button size="lg" className="bg-[#68FBCE] hover:bg-[#5FE3B5] text-black font-bold px-12 py-6 text-lg md:text-xl rounded-lg border-[3px] border-black shadow-[4px_4px_0px_0px_#000] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_#000] transition-all">
                 Get started free →
               </Button>
             </Link>
