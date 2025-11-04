@@ -31,8 +31,8 @@ export default async function Home() {
               {/* Main Headline - Larger, more impactful */}
               <div className="space-y-6">
                 <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-[72px] font-extrabold text-gray-900 dark:text-white leading-[0.95] tracking-[-0.03em]">
-                  <span className="block">AI <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#68FBCE] via-[#5FE3B5] to-[#4FD1A0]">knowledge base</span></span>
-                  <span className="block">and website assistant</span>
+                  <span className="block"><span className="text-transparent bg-clip-text bg-gradient-to-r from-[#68FBCE] via-[#5FE3B5] to-[#4FD1A0]">AI</span> knowledge base</span>
+                  <span className="block">and website <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#68FBCE] via-[#5FE3B5] to-[#4FD1A0]">assistant</span></span>
                 </h1>
               </div>
 
