@@ -38,7 +38,7 @@ export default async function Home() {
               </div>
 
               <p className="text-gray-600 dark:text-gray-400 text-lg sm:text-xl max-w-xl leading-[1.8]">
-                ChatDock helps you build and deploy AI support agents that answer using your own content. Seamlessly hand off to human agents when needed.
+                Like ChatGPT trained on your business data - websites, PDFs, docs, and files. Use it for support, lead generation, or anything you need.
               </p>
 
               {/* CTA and Trust Section - Better visual weight */}
