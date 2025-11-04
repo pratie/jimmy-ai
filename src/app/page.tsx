@@ -22,7 +22,7 @@ export default async function Home() {
       <NavBar />
 
       {/* Hero Section - Improved spacing and typography */}
-      <section className="relative overflow-hidden pt-32 md:pt-40 pb-20 md:pb-32 bg-gradient-to-br from-gray-50 via-white to-[#68FBCE]/10 dark:from-gray-900 dark:via-black dark:to-[#68FBCE]/5">
+      <section className="relative overflow-hidden pt-32 md:pt-40 pb-20 md:pb-32 bg-gradient-to-br from-gray-50 via-white to-gray-50 dark:from-gray-900 dark:via-black dark:to-gray-900">
         <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
           <div className="relative grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
 
@@ -32,14 +32,8 @@ export default async function Home() {
               <div className="space-y-6">
                 <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-[72px] font-extrabold text-gray-900 dark:text-white leading-[0.95] tracking-[-0.03em]">
                   <span className="block">
-                    <span className="relative inline-block">
-                      <span className="absolute inset-0 text-black dark:text-white transform translate-x-[2px] translate-y-[2px] opacity-20">AI</span>
-                      <span className="relative text-transparent bg-clip-text bg-gradient-to-r from-[#68FBCE] via-[#5FE3B5] to-[#4FD1A0]">AI</span>
-                    </span>{' '}
-                    <span className="relative inline-block">
-                      <span className="absolute inset-0 text-black dark:text-white transform translate-x-[2px] translate-y-[2px] opacity-20">assistants</span>
-                      <span className="relative text-transparent bg-clip-text bg-gradient-to-r from-[#68FBCE] via-[#5FE3B5] to-[#4FD1A0]">assistants</span>
-                    </span>
+                    <span className="text-[#0D9373] font-black">AI</span>{' '}
+                    <span className="text-[#0D9373] font-black">assistants</span>
                   </span>
                   <span className="block">on your knowledge base</span>
                 </h1>
@@ -52,7 +46,7 @@ export default async function Home() {
               {/* CTA and Trust Section - Better visual weight */}
               <div className="flex flex-col sm:flex-row items-center lg:items-start gap-8 pt-4">
                 <Link href="/auth/sign-up">
-                  <Button size="lg" className="bg-[#68FBCE] hover:bg-[#5FE3B5] text-black font-bold px-10 py-5 text-lg rounded-lg border-[3px] border-black shadow-[4px_4px_0px_0px_#000] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_#000] transition-all">
+                  <Button size="lg" className="bg-[#0D9373] hover:bg-[#0A6553] text-white font-bold px-10 py-5 text-lg rounded-lg border-[3px] border-black shadow-[4px_4px_0px_0px_#000] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_#000] transition-all">
                     Build Your Agent →
                   </Button>
                 </Link>
@@ -350,7 +344,7 @@ export default async function Home() {
       {/* Final CTA - Enhanced with better spacing */}
       <section className="py-32 md:py-40">
         <div className="container mx-auto px-6 sm:px-8 lg:px-12">
-          <div className="max-w-4xl mx-auto text-center bg-gradient-to-br from-[#68FBCE]/10 via-[#68FBCE]/5 to-white dark:to-black rounded-3xl p-12 md:p-20 border-2 border-black">
+          <div className="max-w-4xl mx-auto text-center bg-gray-50 dark:bg-gray-900 rounded-3xl p-12 md:p-20 border-2 border-black">
             <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-brand-primary mb-8 leading-tight">
               Help more customers in less time
             </h2>
@@ -358,7 +352,7 @@ export default async function Home() {
               Support and growth teams use ChatDock to deliver instant answers from their content, reduce workload with self‑service, and convert more qualified leads.
             </p>
             <Link href="/auth/sign-up">
-              <Button size="lg" className="bg-[#68FBCE] hover:bg-[#5FE3B5] text-black font-bold px-12 py-6 text-lg md:text-xl rounded-lg border-[3px] border-black shadow-[4px_4px_0px_0px_#000] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_#000] transition-all">
+              <Button size="lg" className="bg-[#0D9373] hover:bg-[#0A6553] text-white font-bold px-12 py-6 text-lg md:text-xl rounded-lg border-[3px] border-black shadow-[4px_4px_0px_0px_#000] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_#000] transition-all">
                 Get started free →
               </Button>
             </Link>
