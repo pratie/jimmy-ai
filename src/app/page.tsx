@@ -31,7 +31,7 @@ export default async function Home() {
               {/* Main Headline - Larger, more impactful */}
               <div className="space-y-6">
                 <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-[72px] font-extrabold text-gray-900 dark:text-white leading-[0.95] tracking-[-0.03em]">
-                  <span className="block">Deliver <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-red-600 to-black">magical</span></span>
+                  <span className="block">Enable <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-red-600 to-black">24/7</span></span>
                   <span className="block">customer support</span>
                   <span className="block text-3xl sm:text-4xl lg:text-5xl font-bold mt-4 text-gray-700 dark:text-gray-300">with AI Agent</span>
                 </h1>
