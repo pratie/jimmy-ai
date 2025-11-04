@@ -106,6 +106,69 @@ export default async function Home() {
         </div>
       </section>
 
+      {/* Works with your site + docs */}
+      <section className="py-16">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-10">
+            <h2 className="text-3xl sm:text-4xl font-bold text-brand-primary">Works with your site + docs</h2>
+            <p className="mt-3 text-brand-primary/70 max-w-2xl mx-auto">
+              Bring your content in minutes. No complex setup.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            <div className="bg-white dark:bg-black/40 p-6 rounded-2xl border-2 border-brand-base-300 flex flex-col items-start gap-3">
+              <Image src="/icons/integrations.svg" alt="Website crawl" width={28} height={28} />
+              <h3 className="font-semibold text-brand-primary">Website crawl</h3>
+              <p className="text-sm text-brand-primary/70">Convert your site into clean, structured knowledge automatically.</p>
+            </div>
+            <div className="bg-white dark:bg-black/40 p-6 rounded-2xl border-2 border-brand-base-300 flex flex-col items-start gap-3">
+              <Image src="/icons/documents.svg" alt="PDFs & docs" width={28} height={28} />
+              <h3 className="font-semibold text-brand-primary">PDFs & docs</h3>
+              <p className="text-sm text-brand-primary/70">Upload PDFs or paste text to enrich your knowledge base.</p>
+            </div>
+            <div className="bg-white dark:bg-black/40 p-6 rounded-2xl border-2 border-brand-base-300 flex flex-col items-start gap-3">
+              <Image src="/icons/helpdesk.svg" alt="FAQs" width={28} height={28} />
+              <h3 className="font-semibold text-brand-primary">FAQs</h3>
+              <p className="text-sm text-brand-primary/70">Capture common questions/answers to guide fast resolutions.</p>
+            </div>
+            <div className="bg-white dark:bg-black/40 p-6 rounded-2xl border-2 border-brand-base-300 flex flex-col items-start gap-3">
+              <Image src="/icons/settings.svg" alt="Guardrails" width={28} height={28} />
+              <h3 className="font-semibold text-brand-primary">Guardrails</h3>
+              <p className="text-sm text-brand-primary/70">On‑brand tone, strict FAQ mode, and live handoff when needed.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Learn more (Blog CTAs) */}
+      <section className="py-12">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-8">
+            <h2 className="text-2xl sm:text-3xl font-bold text-brand-primary">Learn more</h2>
+            <p className="mt-2 text-brand-primary/70">Deep dives on setup, RAG accuracy, and support automation.</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <Link href="/blogs/how-to-train-an-ai-website-chatbot-on-your-docs" className="group">
+              <div className="bg-white dark:bg-black/40 h-full p-6 rounded-2xl border-2 border-brand-base-300 group-hover:border-brand-accent/60 transition-all">
+                <h3 className="font-semibold text-brand-primary mb-2">Train an AI chatbot on your docs</h3>
+                <p className="text-sm text-brand-primary/70">Step‑by‑step: connect sources, chunk content, and ensure accurate answers.</p>
+              </div>
+            </Link>
+            <Link href="/blogs/ai-chatbot-for-website" className="group">
+              <div className="bg-white dark:bg-black/40 h-full p-6 rounded-2xl border-2 border-brand-base-300 group-hover:border-brand-accent/60 transition-all">
+                <h3 className="font-semibold text-brand-primary mb-2">AI chatbot for your website</h3>
+                <p className="text-sm text-brand-primary/70">Benefits, setup, and best practices for 24/7 self‑service.</p>
+              </div>
+            </Link>
+            <Link href="/blogs/customer-support-ai" className="group">
+              <div className="bg-white dark:bg-black/40 h-full p-6 rounded-2xl border-2 border-brand-base-300 group-hover:border-brand-accent/60 transition-all">
+                <h3 className="font-semibold text-brand-primary mb-2">Customer support AI</h3>
+                <p className="text-sm text-brand-primary/70">Reduce ticket volume with AI while keeping human handoff seamless.</p>
+              </div>
+            </Link>
+          </div>
+        </div>
+      </section>
 
       {/* Social Proof / Stats */}
       <section className="py-20 bg-brand-base-100/50 backdrop-blur-sm">
