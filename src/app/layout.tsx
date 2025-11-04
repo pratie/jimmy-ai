@@ -74,8 +74,8 @@ export default function RootLayout({
           {/* DataFast Analytics - Must be in body for Next.js Script component */}
           <Script
             defer
-            data-website-id="68eaf4123d3dccc2e466bf8c"
-            data-domain="www.chatdock.io"
+            data-website-id="dfid_8E14zpXFdL9r5htqEUbhI"
+            data-domain="chatdock.io"
             src="https://datafa.st/js/script.js"
             strategy="afterInteractive"
           />

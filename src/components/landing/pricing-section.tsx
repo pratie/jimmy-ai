@@ -12,7 +12,12 @@ export default function PricingSection() {
   const [isYearly, setIsYearly] = useState(false)
 
   return (
-    <section id="pricing" className="bg-transparent py-20 mt-20">
+    <section
+      id="pricing"
+      className="bg-transparent py-20 mt-20"
+      data-fast-scroll="viewed_pricing"
+      data-fast-scroll-threshold="0.3"
+    >
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-brand-primary mb-6">
@@ -30,6 +35,7 @@ export default function PricingSection() {
             <button
               onClick={() => setIsYearly(!isYearly)}
               className="relative inline-flex h-8 w-14 items-center rounded-full bg-brand-base-200 transition-colors focus:outline-none focus:ring-2 focus:ring-brand-accent/50 focus:ring-offset-2"
+              data-fast-goal="toggled_yearly_pricing"
             >
               <span
                 className={clsx(
@@ -134,6 +140,10 @@ export default function PricingSection() {
                         ? 'bg-main text-black border-border shadow-shadow hover:translate-x-1 hover:translate-y-1 hover:shadow-none'
                         : 'bg-bg text-text border-border shadow-shadow hover:translate-x-1 hover:translate-y-1 hover:shadow-none'
                     )}
+                    data-fast-goal="clicked_pricing_cta"
+                    data-fast-goal-plan={card.title.toLowerCase()}
+                    data-fast-goal-price={isYearly ? monthlyEquivalent.toString() : card.price}
+                    data-fast-goal-billing={isYearly ? 'yearly' : 'monthly'}
                   >
                     Get Started
                   </Link>
