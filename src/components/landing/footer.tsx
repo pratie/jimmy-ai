@@ -19,7 +19,7 @@ export function Footer() {
               />
               <span className="font-extrabold uppercase text-lg">ChatDock</span>
             </div>
-            <p className="text-sm font-bold">AI chatbot for e-commerce & agencies.</p>
+            <p className="text-sm font-bold">AI knowledge base & website assistant.</p>
           </div>
 
           <div>
