@@ -32,11 +32,10 @@ export default async function Home() {
               {/* Main Headline */}
               <div className="space-y-3">
                 <h1 className="text-4xl sm:text-5xl md:text-5xl lg:text-[56px] font-bold text-gray-900 dark:text-white leading-[1.1] tracking-[-0.02em]">
-                  <span className="block">AI chatbot that turns</span>
+                  <span className="block">AI knowledge base</span>
                   <span className="block">
-                    visitors into{' '}
+                    and website assistant
                     <span className="relative inline-block">
-                      <span className="relative z-10">customers</span>
                       <svg className="absolute -bottom-1 left-0 w-full" viewBox="0 0 200 12" preserveAspectRatio="none">
                         <path d="M0 8 Q100 2 200 8" stroke="currentColor" strokeWidth="3" fill="none" className="text-main/50" />
                       </svg>
@@ -44,16 +43,16 @@ export default async function Home() {
                   </span>
                 </h1>
                 <div className="text-xl sm:text-2xl lg:text-3xl font-medium text-gray-600 dark:text-gray-400">
-                  Sells{' '}
-                  <span className="relative inline-block px-2 py-0.5 bg-brand-accent/20 text-brand-accent font-bold rounded">
+                  Answers from your docs
+                  <span className="relative inline-block px-2 py-0.5 bg-brand-accent/20 text-brand-accent font-bold rounded ml-1">
                     24/7
                   </span>
-                  {' '}• Answers <span className="text-gray-900 dark:text-white font-bold">instantly</span> • Never sleeps
+                  {' '}• Instant & accurate • Human handoff when needed
                 </div>
               </div>
 
               <p className="text-gray-600 dark:text-gray-400 text-base sm:text-lg max-w-lg lg:max-w-xl leading-relaxed">
-                Boost sales by 40% with an AI assistant that recovers abandoned carts, qualifies leads, and closes deals automatically. Perfect for e-commerce stores and agencies.
+                Reduce tickets and help customers self‑serve with an AI assistant grounded in your website and documentation. Escalate to a human in real‑time, and book meetings when it matters. Built for support and growth teams.
               </p>
 
               {/* CTA and Trust Section */}
@@ -253,10 +252,10 @@ export default async function Home() {
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center bg-gradient-to-br from-brand-accent/10 via-brand-info/10 to-brand-success/10 rounded-3xl p-12 md:p-16 border-2 border-brand-base-300">
             <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold text-brand-primary mb-6">
-              Start converting more visitors today
+              Help more customers in less time
             </h2>
             <p className="text-brand-primary/70 text-lg md:text-xl mb-10 max-w-2xl mx-auto">
-              Join 500+ e-commerce stores, agencies, and SMBs using AI to boost sales, reduce support costs, and scale without adding headcount.
+              Support and growth teams use ChatDock to deliver instant answers from their content, reduce workload with self‑service, and convert more qualified leads.
             </p>
             <Link href="/auth/sign-up">
               <Button size="lg" className="bg-main text-black font-heading px-12 py-7 text-xl border-2 border-border shadow-shadow hover:translate-x-1 hover:translate-y-1 hover:shadow-none">
