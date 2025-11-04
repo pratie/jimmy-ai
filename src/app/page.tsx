@@ -22,7 +22,7 @@ export default async function Home() {
       <NavBar />
 
       {/* Hero Section - Improved spacing and typography */}
-      <section className="relative overflow-hidden pt-32 md:pt-40 pb-20 md:pb-32 bg-gradient-to-br from-gray-50 via-white to-red-50 dark:from-gray-900 dark:via-black dark:to-red-950">
+      <section className="relative overflow-hidden pt-32 md:pt-40 pb-20 md:pb-32 bg-gradient-to-br from-gray-50 via-white to-[#68FBCE]/10 dark:from-gray-900 dark:via-black dark:to-[#68FBCE]/5">
         <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
           <div className="relative grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
 
@@ -31,9 +31,8 @@ export default async function Home() {
               {/* Main Headline - Larger, more impactful */}
               <div className="space-y-6">
                 <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-[72px] font-extrabold text-gray-900 dark:text-white leading-[0.95] tracking-[-0.03em]">
-                  <span className="block">Enable <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-red-600 to-black">24/7</span></span>
-                  <span className="block">customer support</span>
-                  <span className="block text-3xl sm:text-4xl lg:text-5xl font-bold mt-4 text-gray-700 dark:text-gray-300">with AI Agent</span>
+                  <span className="block">AI <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#68FBCE] via-[#5FE3B5] to-[#4FD1A0]">knowledge base</span></span>
+                  <span className="block">and website assistant</span>
                 </h1>
               </div>
 
@@ -44,7 +43,7 @@ export default async function Home() {
               {/* CTA and Trust Section - Better visual weight */}
               <div className="flex flex-col sm:flex-row items-center lg:items-start gap-8 pt-4">
                 <Link href="/auth/sign-up">
-                  <Button size="lg" className="bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white font-semibold px-10 py-5 text-lg rounded-xl hover:scale-105 transition-all shadow-[0_10px_40px_rgba(220,38,38,0.3)] hover:shadow-[0_15px_50px_rgba(220,38,38,0.4)]">
+                  <Button size="lg" className="bg-gradient-to-r from-[#68FBCE] to-[#4FD1A0] hover:from-[#5FE3B5] hover:to-[#45C895] text-black font-semibold px-10 py-5 text-lg rounded-xl hover:scale-105 transition-all shadow-[0_10px_40px_rgba(104,251,206,0.3)] hover:shadow-[0_15px_50px_rgba(104,251,206,0.4)]">
                     Build Your Agent →
                   </Button>
                 </Link>
@@ -342,7 +341,7 @@ export default async function Home() {
               Support and growth teams use ChatDock to deliver instant answers from their content, reduce workload with self‑service, and convert more qualified leads.
             </p>
             <Link href="/auth/sign-up">
-              <Button size="lg" className="bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white font-semibold px-12 py-6 text-lg md:text-xl rounded-xl transition-all hover:scale-105 shadow-[0_10px_40px_rgba(220,38,38,0.3)] hover:shadow-[0_15px_50px_rgba(220,38,38,0.4)]">
+              <Button size="lg" className="bg-gradient-to-r from-[#68FBCE] to-[#4FD1A0] hover:from-[#5FE3B5] hover:to-[#45C895] text-black font-semibold px-12 py-6 text-lg md:text-xl rounded-xl transition-all hover:scale-105 shadow-[0_10px_40px_rgba(104,251,206,0.3)] hover:shadow-[0_15px_50px_rgba(104,251,206,0.4)]">
                 Get started free →
               </Button>
             </Link>
