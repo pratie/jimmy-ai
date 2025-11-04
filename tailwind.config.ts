@@ -22,9 +22,9 @@ const config = {
         container: '1400px',
       },
       colors: {
-        // Neobrutalism Colors (from ronit.io)
-        main: '#76fbd9',              // Turquoise accent
-        mainAccent: '#76fbd9',
+        // Neobrutalism Colors (Updated brand palette)
+        main: '#68FBCE',              // Aquamarine accent (our brand color)
+        mainAccent: '#68FBCE',
         overlay: 'rgba(0,0,0,0.8)',
 
         // Light mode
