@@ -33,14 +33,7 @@ export default async function Home() {
               <div className="space-y-3">
                 <h1 className="text-4xl sm:text-5xl md:text-5xl lg:text-[56px] font-bold text-gray-900 dark:text-white leading-[1.1] tracking-[-0.02em]">
                   <span className="block">AI knowledge base</span>
-                  <span className="block">
-                    and website assistant
-                    <span className="relative inline-block">
-                      <svg className="absolute -bottom-1 left-0 w-full" viewBox="0 0 200 12" preserveAspectRatio="none">
-                        <path d="M0 8 Q100 2 200 8" stroke="currentColor" strokeWidth="3" fill="none" className="text-main/50" />
-                      </svg>
-                    </span>
-                  </span>
+                  <span className="block">and website assistant</span>
                 </h1>
                 <div className="text-xl sm:text-2xl lg:text-3xl font-medium text-gray-600 dark:text-gray-400">
                   Answers from your docs
@@ -83,7 +76,7 @@ export default async function Home() {
                 {/* Floating Dashboard Elements */}
                 <div className="hidden lg:block absolute -right-16 top-10 space-y-4">
                   {/* Rating Card */}
-                  <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 w-48">
+                  <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 w-48 transform -translate-y-12">
                     <div className="flex items-center gap-2 mb-2">
                       <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Customer Rating</span>
                     </div>
@@ -180,7 +173,7 @@ export default async function Home() {
             </div>
             <div className="text-center">
               <div className="text-4xl md:text-6xl font-extrabold text-brand-primary mb-2">40%</div>
-              <div className="text-brand-primary/70 text-sm md:text-base font-medium">Fewer cart abandonments</div>
+              <div className="text-brand-primary/70 text-sm md:text-base font-medium">Fewer support tickets</div>
             </div>
             <div className="text-center">
               <div className="text-4xl md:text-6xl font-extrabold text-brand-primary mb-2">24/7</div>
@@ -211,17 +204,6 @@ export default async function Home() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
             {/* Feature Cards */}
-            <div className="bg-white dark:bg-black/40 p-8 rounded-3xl border-2 border-brand-base-300 hover:border-brand-accent/60 transition-all duration-300 hover:shadow-xl">
-              <div className="w-12 h-12 bg-brand-accent/20 rounded-xl flex items-center justify-center mb-5">
-                <svg className="w-6 h-6 text-brand-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>
-              </div>
-              <h3 className="text-xl font-bold text-brand-primary mb-3">Recover abandoned carts</h3>
-              <p className="text-brand-primary/70 leading-relaxed">
-                Proactively engage shoppers before they leave. Answer objections, offer help, and guide them to checkout—automatically reducing cart abandonment by up to 40%.
-              </p>
-            </div>
 
             <div className="bg-white dark:bg-black/40 p-8 rounded-3xl border-2 border-brand-base-300 hover:border-brand-info/60 transition-all duration-300 hover:shadow-xl">
               <div className="w-12 h-12 bg-brand-info/20 rounded-xl flex items-center justify-center mb-5">

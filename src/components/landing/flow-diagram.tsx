@@ -40,7 +40,7 @@ export default function FlowDiagram() {
     {
       number: '5',
       title: 'Start converting visitors',
-      description: 'AI handles questions, recovers carts, books calls',
+      description: 'AI handles questions, qualifies leads, books calls',
       position: 'left',
     },
     {
