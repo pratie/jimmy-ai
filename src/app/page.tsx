@@ -226,9 +226,9 @@ export default async function Home() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-bold text-brand-primary mb-3">Qualify leads while they browse</h3>
+              <h3 className="text-xl font-bold text-brand-primary mb-3">AI search over your docs</h3>
               <p className="text-brand-primary/70 leading-relaxed">
-                AI engages visitors naturally, asks qualifying questions, and captures emails at the right moment. No aggressive popups—just helpful conversations that convert.
+                Answers come from your website and documentation using retrieval‑augmented generation. Keep responses accurate, specific, and on‑brand—without manual tagging.
               </p>
             </div>
 
@@ -238,10 +238,52 @@ export default async function Home() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-bold text-brand-primary mb-3">Instant responses that feel human</h3>
+              <h3 className="text-xl font-bold text-brand-primary mb-3">24/7 self‑service</h3>
               <p className="text-brand-primary/70 leading-relaxed">
-                Sub-second response times keep customers engaged. Advanced AI streaming makes conversations feel natural—not robotic. Your visitors won&apos;t know they&apos;re talking to AI.
+                Give customers instant answers any time of day. Reduce ticket volume by letting users help themselves—with streaming responses that keep conversations engaging.
               </p>
+            </div>
+
+            <div className="bg-white dark:bg-black/40 p-8 rounded-3xl border-2 border-brand-base-300 hover:border-brand-success/60 transition-all duration-300 hover:shadow-xl">
+              <div className="w-12 h-12 bg-brand-success/20 rounded-xl flex items-center justify-center mb-5">
+                <svg className="w-6 h-6 text-brand-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7 12a5 5 0 1010 0 5 5 0 00-10 0z" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-bold text-brand-primary mb-3">Live handoff when it matters</h3>
+              <p className="text-brand-primary/70 leading-relaxed">
+                Switch to a human in real‑time for complex questions or high‑intent visitors. Share a booking link to schedule calls—no back‑and‑forth.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Why ChatDock */}
+      <section className="py-20">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-10">
+            <h2 className="text-3xl sm:text-4xl font-bold text-brand-primary">Why ChatDock</h2>
+            <p className="mt-3 text-brand-primary/70 max-w-2xl mx-auto">
+              Purpose‑built for accurate answers, fast experiences, and seamless handoffs.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            <div className="bg-white dark:bg-black/40 p-6 rounded-2xl border-2 border-brand-base-300">
+              <h3 className="font-semibold text-brand-primary mb-2">Accurate by design</h3>
+              <p className="text-sm text-brand-primary/70">Retrieval‑augmented generation uses your content to answer—no hallucinated guesses.</p>
+            </div>
+            <div className="bg-white dark:bg-black/40 p-6 rounded-2xl border-2 border-brand-base-300">
+              <h3 className="font-semibold text-brand-primary mb-2">Streamed, fast replies</h3>
+              <p className="text-sm text-brand-primary/70">Sub‑second time‑to‑first‑token keeps users engaged with natural, flowing responses.</p>
+            </div>
+            <div className="bg-white dark:bg-black/40 p-6 rounded-2xl border-2 border-brand-base-300">
+              <h3 className="font-semibold text-brand-primary mb-2">Live agent handoff</h3>
+              <p className="text-sm text-brand-primary/70">Escalate to a human instantly for edge cases—no context lost.</p>
+            </div>
+            <div className="bg-white dark:bg-black/40 p-6 rounded-2xl border-2 border-brand-base-300">
+              <h3 className="font-semibold text-brand-primary mb-2">Meetings when needed</h3>
+              <p className="text-sm text-brand-primary/70">Built‑in booking link lets qualified users schedule time without email back‑and‑forth.</p>
             </div>
           </div>
         </div>
