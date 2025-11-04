@@ -31,32 +31,32 @@ export default async function Home() {
               {/* Main Headline - Larger, more impactful */}
               <div className="space-y-6">
                 <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-[72px] font-extrabold text-gray-900 dark:text-white leading-[0.95] tracking-[-0.03em]">
-                  <span className="block">Deliver <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-purple-600">magical</span></span>
-                  <span className="block">customer support</span>
-                  <span className="block text-3xl sm:text-4xl lg:text-5xl font-bold mt-4 text-gray-700 dark:text-gray-300">with AI Agent</span>
+                  <span className="block">Turn every visitor</span>
+                  <span className="block">into a <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-orange-500 to-amber-500">happy customer</span></span>
+                  <span className="block text-3xl sm:text-4xl lg:text-5xl font-bold mt-4 text-gray-700 dark:text-gray-300">with smart AI support</span>
                 </h1>
               </div>
 
               <p className="text-gray-600 dark:text-gray-400 text-lg sm:text-xl max-w-xl leading-[1.8]">
-                ChatDock helps you build and deploy AI support agents that answer using your own content. Seamlessly hand off to human agents when needed.
+                Your AI assistant learns from your docs, answers instantly, and knows exactly when to bring in a human. Like having your best support rep online 24/7.
               </p>
 
               {/* CTA and Trust Section - Better visual weight */}
               <div className="flex flex-col sm:flex-row items-center lg:items-start gap-8 pt-4">
                 <Link href="/auth/sign-up">
-                  <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-10 py-5 text-lg rounded-xl hover:scale-105 transition-all shadow-xl hover:shadow-2xl">
-                    Build Your Agent →
+                  <Button size="lg" className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold px-10 py-5 text-lg rounded-xl hover:scale-105 transition-all shadow-xl hover:shadow-2xl">
+                    Start Free Trial →
                   </Button>
                 </Link>
                 <div className="flex flex-col gap-3 text-base text-gray-600 dark:text-gray-400">
                   <div className="flex items-center gap-3">
-                    <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center">
+                    <div className="w-5 h-5 rounded-full bg-orange-500 flex items-center justify-center">
                       <Check className="w-3 h-3 text-white" strokeWidth={3} />
                     </div>
                     <span>5-minute setup</span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center">
+                    <div className="w-5 h-5 rounded-full bg-orange-500 flex items-center justify-center">
                       <Check className="w-3 h-3 text-white" strokeWidth={3} />
                     </div>
                     <span>No credit card required</span>
@@ -139,19 +139,19 @@ export default async function Home() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             <Link href="/blogs/how-to-train-an-ai-website-chatbot-on-your-docs" className="group">
-              <div className="bg-white dark:bg-black/40 h-full p-6 rounded-2xl border-2 border-brand-base-300 group-hover:border-brand-accent/60 transition-all">
+              <div className="bg-white dark:bg-black/40 h-full p-6 rounded-2xl border-2 border-brand-base-300 group-hover:border-orange-400 transition-all">
                 <h3 className="font-semibold text-brand-primary mb-2">Train an AI chatbot on your docs</h3>
                 <p className="text-sm text-brand-primary/70">Step‑by‑step: connect sources, chunk content, and ensure accurate answers.</p>
               </div>
             </Link>
             <Link href="/blogs/ai-chatbot-for-website" className="group">
-              <div className="bg-white dark:bg-black/40 h-full p-6 rounded-2xl border-2 border-brand-base-300 group-hover:border-brand-accent/60 transition-all">
+              <div className="bg-white dark:bg-black/40 h-full p-6 rounded-2xl border-2 border-brand-base-300 group-hover:border-orange-400 transition-all">
                 <h3 className="font-semibold text-brand-primary mb-2">AI chatbot for your website</h3>
                 <p className="text-sm text-brand-primary/70">Benefits, setup, and best practices for 24/7 self‑service.</p>
               </div>
             </Link>
             <Link href="/blogs/customer-support-ai" className="group">
-              <div className="bg-white dark:bg-black/40 h-full p-6 rounded-2xl border-2 border-brand-base-300 group-hover:border-brand-accent/60 transition-all">
+              <div className="bg-white dark:bg-black/40 h-full p-6 rounded-2xl border-2 border-brand-base-300 group-hover:border-orange-400 transition-all">
                 <h3 className="font-semibold text-brand-primary mb-2">Customer support AI</h3>
                 <p className="text-sm text-brand-primary/70">Reduce ticket volume with AI while keeping human handoff seamless.</p>
               </div>
@@ -202,8 +202,8 @@ export default async function Home() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 max-w-6xl mx-auto">
             {/* Feature Cards */}
 
-            <div className="bg-white dark:bg-black/40 p-8 rounded-3xl border-2 border-brand-base-300 hover:border-brand-info/60 transition-all duration-300 hover:shadow-xl">
-              <div className="w-12 h-12 bg-brand-info/20 rounded-xl flex items-center justify-center mb-5">
+            <div className="bg-white dark:bg-black/40 p-8 rounded-3xl border-2 border-brand-base-300 hover:border-orange-400 transition-all duration-300 hover:shadow-xl">
+              <div className="w-12 h-12 bg-orange-100 dark:bg-orange-900/20 rounded-xl flex items-center justify-center mb-5">
                 <svg className="w-6 h-6 text-brand-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                 </svg>
@@ -214,8 +214,8 @@ export default async function Home() {
               </p>
             </div>
 
-            <div className="bg-white dark:bg-black/40 p-8 rounded-3xl border-2 border-brand-base-300 hover:border-brand-success/60 transition-all duration-300 hover:shadow-xl">
-              <div className="w-12 h-12 bg-brand-success/20 rounded-xl flex items-center justify-center mb-5">
+            <div className="bg-white dark:bg-black/40 p-8 rounded-3xl border-2 border-brand-base-300 hover:border-orange-400 transition-all duration-300 hover:shadow-xl">
+              <div className="w-12 h-12 bg-amber-100 dark:bg-amber-900/20 rounded-xl flex items-center justify-center mb-5">
                 <svg className="w-6 h-6 text-brand-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
@@ -226,8 +226,8 @@ export default async function Home() {
               </p>
             </div>
 
-            <div className="bg-white dark:bg-black/40 p-8 rounded-3xl border-2 border-brand-base-300 hover:border-brand-accent/60 transition-all duration-300 hover:shadow-xl">
-              <div className="w-12 h-12 bg-brand-accent/20 rounded-xl flex items-center justify-center mb-5">
+            <div className="bg-white dark:bg-black/40 p-8 rounded-3xl border-2 border-brand-base-300 hover:border-orange-400 transition-all duration-300 hover:shadow-xl">
+              <div className="w-12 h-12 bg-orange-50 dark:bg-orange-950/20 rounded-xl flex items-center justify-center mb-5">
                 <svg className="w-6 h-6 text-brand-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
                 </svg>
@@ -238,8 +238,8 @@ export default async function Home() {
               </p>
             </div>
 
-            <div className="bg-white dark:bg-black/40 p-8 rounded-3xl border-2 border-brand-base-300 hover:border-brand-info/60 transition-all duration-300 hover:shadow-xl">
-              <div className="w-12 h-12 bg-brand-info/20 rounded-xl flex items-center justify-center mb-5">
+            <div className="bg-white dark:bg-black/40 p-8 rounded-3xl border-2 border-brand-base-300 hover:border-orange-400 transition-all duration-300 hover:shadow-xl">
+              <div className="w-12 h-12 bg-orange-100 dark:bg-orange-900/20 rounded-xl flex items-center justify-center mb-5">
                 <svg className="w-6 h-6 text-brand-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                 </svg>
@@ -250,8 +250,8 @@ export default async function Home() {
               </p>
             </div>
 
-            <div className="bg-white dark:bg-black/40 p-8 rounded-3xl border-2 border-brand-base-300 hover:border-brand-success/60 transition-all duration-300 hover:shadow-xl">
-              <div className="w-12 h-12 bg-brand-success/20 rounded-xl flex items-center justify-center mb-5">
+            <div className="bg-white dark:bg-black/40 p-8 rounded-3xl border-2 border-brand-base-300 hover:border-orange-400 transition-all duration-300 hover:shadow-xl">
+              <div className="w-12 h-12 bg-amber-100 dark:bg-amber-900/20 rounded-xl flex items-center justify-center mb-5">
                 <svg className="w-6 h-6 text-brand-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
                 </svg>
@@ -262,8 +262,8 @@ export default async function Home() {
               </p>
             </div>
 
-            <div className="bg-white dark:bg-black/40 p-8 rounded-3xl border-2 border-brand-base-300 hover:border-brand-accent/60 transition-all duration-300 hover:shadow-xl">
-              <div className="w-12 h-12 bg-brand-accent/20 rounded-xl flex items-center justify-center mb-5">
+            <div className="bg-white dark:bg-black/40 p-8 rounded-3xl border-2 border-brand-base-300 hover:border-orange-400 transition-all duration-300 hover:shadow-xl">
+              <div className="w-12 h-12 bg-orange-50 dark:bg-orange-950/20 rounded-xl flex items-center justify-center mb-5">
                 <svg className="w-6 h-6 text-brand-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
@@ -274,8 +274,8 @@ export default async function Home() {
               </p>
             </div>
 
-            <div className="bg-white dark:bg-black/40 p-8 rounded-3xl border-2 border-brand-base-300 hover:border-brand-info/60 transition-all duration-300 hover:shadow-xl">
-              <div className="w-12 h-12 bg-brand-info/20 rounded-xl flex items-center justify-center mb-5">
+            <div className="bg-white dark:bg-black/40 p-8 rounded-3xl border-2 border-brand-base-300 hover:border-orange-400 transition-all duration-300 hover:shadow-xl">
+              <div className="w-12 h-12 bg-orange-100 dark:bg-orange-900/20 rounded-xl flex items-center justify-center mb-5">
                 <svg className="w-6 h-6 text-brand-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
@@ -286,8 +286,8 @@ export default async function Home() {
               </p>
             </div>
 
-            <div className="bg-white dark:bg-black/40 p-8 rounded-3xl border-2 border-brand-base-300 hover:border-brand-success/60 transition-all duration-300 hover:shadow-xl">
-              <div className="w-12 h-12 bg-brand-success/20 rounded-xl flex items-center justify-center mb-5">
+            <div className="bg-white dark:bg-black/40 p-8 rounded-3xl border-2 border-brand-base-300 hover:border-orange-400 transition-all duration-300 hover:shadow-xl">
+              <div className="w-12 h-12 bg-amber-100 dark:bg-amber-900/20 rounded-xl flex items-center justify-center mb-5">
                 <svg className="w-6 h-6 text-brand-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7 12a5 5 0 1010 0 5 5 0 00-10 0z" />
                 </svg>
@@ -334,7 +334,7 @@ export default async function Home() {
       {/* Final CTA - Enhanced with better spacing */}
       <section className="py-32 md:py-40">
         <div className="container mx-auto px-6 sm:px-8 lg:px-12">
-          <div className="max-w-4xl mx-auto text-center bg-gradient-to-br from-brand-accent/10 via-brand-info/10 to-brand-success/10 rounded-3xl p-12 md:p-20 border-2 border-brand-base-300">
+          <div className="max-w-4xl mx-auto text-center bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 dark:from-orange-950/20 dark:via-amber-950/20 dark:to-yellow-950/20 rounded-3xl p-12 md:p-20 border-2 border-orange-200 dark:border-orange-900/30">
             <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-brand-primary mb-8 leading-tight">
               Help more customers in less time
             </h2>
@@ -342,7 +342,7 @@ export default async function Home() {
               Support and growth teams use ChatDock to deliver instant answers from their content, reduce workload with self‑service, and convert more qualified leads.
             </p>
             <Link href="/auth/sign-up">
-              <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-12 py-6 text-lg md:text-xl rounded-xl transition-all hover:scale-105 shadow-xl hover:shadow-2xl">
+              <Button size="lg" className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold px-12 py-6 text-lg md:text-xl rounded-xl transition-all hover:scale-105 shadow-xl hover:shadow-2xl">
                 Get started free →
               </Button>
             </Link>
