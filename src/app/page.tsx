@@ -52,14 +52,14 @@ export default async function Home() {
                 </Link>
                 <div className="flex flex-col gap-3 text-base text-gray-600 dark:text-gray-400">
                   <div className="flex items-center gap-3">
-                    <div className="w-5 h-5 rounded-full bg-[#68FBCE] border border-black flex items-center justify-center">
-                      <Check className="w-3 h-3 text-black" strokeWidth={3} />
+                    <div className="w-5 h-5 rounded-full bg-[#0D9373] border border-black flex items-center justify-center">
+                      <Check className="w-3 h-3 text-white" strokeWidth={3} />
                     </div>
                     <span>5-minute setup</span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <div className="w-5 h-5 rounded-full bg-[#68FBCE] border border-black flex items-center justify-center">
-                      <Check className="w-3 h-3 text-black" strokeWidth={3} />
+                    <div className="w-5 h-5 rounded-full bg-[#0D9373] border border-black flex items-center justify-center">
+                      <Check className="w-3 h-3 text-white" strokeWidth={3} />
                     </div>
                     <span>No credit card required</span>
                   </div>
@@ -108,29 +108,29 @@ export default async function Home() {
             </p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="bg-white dark:bg-gray-900 p-6 rounded-lg border-2 border-gray-200 dark:border-gray-700 hover:border-[#68FBCE] hover:shadow-lg transition-all flex flex-col items-start gap-3">
-              <div className="w-10 h-10 bg-[#68FBCE]/20 rounded-lg border border-[#68FBCE] flex items-center justify-center">
+            <div className="bg-white dark:bg-gray-900 p-6 rounded-lg border-2 border-gray-200 dark:border-gray-700 hover:border-[#0D9373] hover:shadow-lg transition-all flex flex-col items-start gap-3">
+              <div className="w-10 h-10 bg-[#0D9373]/20 rounded-lg border border-[#0D9373] flex items-center justify-center">
                 <span className="text-xl">🌐</span>
               </div>
               <h3 className="font-semibold text-gray-900 dark:text-white">Website crawl</h3>
               <p className="text-sm text-gray-600 dark:text-gray-400">Convert your site into clean, structured knowledge automatically.</p>
             </div>
-            <div className="bg-white dark:bg-gray-900 p-6 rounded-lg border-2 border-gray-200 dark:border-gray-700 hover:border-[#68FBCE] hover:shadow-lg transition-all flex flex-col items-start gap-3">
-              <div className="w-10 h-10 bg-[#68FBCE]/20 rounded-lg border border-[#68FBCE] flex items-center justify-center">
+            <div className="bg-white dark:bg-gray-900 p-6 rounded-lg border-2 border-gray-200 dark:border-gray-700 hover:border-[#0D9373] hover:shadow-lg transition-all flex flex-col items-start gap-3">
+              <div className="w-10 h-10 bg-[#0D9373]/20 rounded-lg border border-[#0D9373] flex items-center justify-center">
                 <span className="text-xl">📄</span>
               </div>
               <h3 className="font-semibold text-gray-900 dark:text-white">PDFs & docs</h3>
               <p className="text-sm text-gray-600 dark:text-gray-400">Upload PDFs or paste text to enrich your knowledge base.</p>
             </div>
-            <div className="bg-white dark:bg-gray-900 p-6 rounded-lg border-2 border-gray-200 dark:border-gray-700 hover:border-[#68FBCE] hover:shadow-lg transition-all flex flex-col items-start gap-3">
-              <div className="w-10 h-10 bg-[#68FBCE]/20 rounded-lg border border-[#68FBCE] flex items-center justify-center">
+            <div className="bg-white dark:bg-gray-900 p-6 rounded-lg border-2 border-gray-200 dark:border-gray-700 hover:border-[#0D9373] hover:shadow-lg transition-all flex flex-col items-start gap-3">
+              <div className="w-10 h-10 bg-[#0D9373]/20 rounded-lg border border-[#0D9373] flex items-center justify-center">
                 <span className="text-xl">❓</span>
               </div>
               <h3 className="font-semibold text-gray-900 dark:text-white">FAQs</h3>
               <p className="text-sm text-gray-600 dark:text-gray-400">Capture common questions/answers to guide fast resolutions.</p>
             </div>
-            <div className="bg-white dark:bg-gray-900 p-6 rounded-lg border-2 border-gray-200 dark:border-gray-700 hover:border-[#68FBCE] hover:shadow-lg transition-all flex flex-col items-start gap-3">
-              <div className="w-10 h-10 bg-[#68FBCE]/20 rounded-lg border border-[#68FBCE] flex items-center justify-center">
+            <div className="bg-white dark:bg-gray-900 p-6 rounded-lg border-2 border-gray-200 dark:border-gray-700 hover:border-[#0D9373] hover:shadow-lg transition-all flex flex-col items-start gap-3">
+              <div className="w-10 h-10 bg-[#0D9373]/20 rounded-lg border border-[#0D9373] flex items-center justify-center">
                 <span className="text-xl">⚙️</span>
               </div>
               <h3 className="font-semibold text-gray-900 dark:text-white">Guardrails</h3>
@@ -149,20 +149,20 @@ export default async function Home() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             <Link href="/blogs/how-to-train-an-ai-website-chatbot-on-your-docs" className="group">
-              <div className="bg-white dark:bg-gray-900 h-full p-6 rounded-lg border-2 border-gray-200 dark:border-gray-700 hover:border-[#68FBCE] hover:shadow-lg transition-all">
-                <h3 className="font-semibold text-gray-900 dark:text-white mb-2 group-hover:text-[#68FBCE] transition-colors">Train an AI chatbot on your docs</h3>
+              <div className="bg-white dark:bg-gray-900 h-full p-6 rounded-lg border-2 border-gray-200 dark:border-gray-700 hover:border-[#0D9373] hover:shadow-lg transition-all">
+                <h3 className="font-semibold text-gray-900 dark:text-white mb-2 group-hover:text-[#0D9373] transition-colors">Train an AI chatbot on your docs</h3>
                 <p className="text-sm text-gray-600 dark:text-gray-400">Step‑by‑step: connect sources, chunk content, and ensure accurate answers.</p>
               </div>
             </Link>
             <Link href="/blogs/ai-chatbot-for-website" className="group">
-              <div className="bg-white dark:bg-gray-900 h-full p-6 rounded-lg border-2 border-gray-200 dark:border-gray-700 hover:border-[#68FBCE] hover:shadow-lg transition-all">
-                <h3 className="font-semibold text-gray-900 dark:text-white mb-2 group-hover:text-[#68FBCE] transition-colors">AI chatbot for your website</h3>
+              <div className="bg-white dark:bg-gray-900 h-full p-6 rounded-lg border-2 border-gray-200 dark:border-gray-700 hover:border-[#0D9373] hover:shadow-lg transition-all">
+                <h3 className="font-semibold text-gray-900 dark:text-white mb-2 group-hover:text-[#0D9373] transition-colors">AI chatbot for your website</h3>
                 <p className="text-sm text-gray-600 dark:text-gray-400">Benefits, setup, and best practices for 24/7 self‑service.</p>
               </div>
             </Link>
             <Link href="/blogs/customer-support-ai" className="group">
-              <div className="bg-white dark:bg-gray-900 h-full p-6 rounded-lg border-2 border-gray-200 dark:border-gray-700 hover:border-[#68FBCE] hover:shadow-lg transition-all">
-                <h3 className="font-semibold text-gray-900 dark:text-white mb-2 group-hover:text-[#68FBCE] transition-colors">Customer support AI</h3>
+              <div className="bg-white dark:bg-gray-900 h-full p-6 rounded-lg border-2 border-gray-200 dark:border-gray-700 hover:border-[#0D9373] hover:shadow-lg transition-all">
+                <h3 className="font-semibold text-gray-900 dark:text-white mb-2 group-hover:text-[#0D9373] transition-colors">Customer support AI</h3>
                 <p className="text-sm text-gray-600 dark:text-gray-400">Reduce ticket volume with AI while keeping human handoff seamless.</p>
               </div>
             </Link>

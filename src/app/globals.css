@@ -40,9 +40,9 @@ body::before {
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 0%;
 
-    /* Primary - using main turquoise for accents */
-    --primary: 168 95% 72%;            /* #76fbd9 - turquoise */
-    --primary-foreground: 0 0% 0%;     /* black on turquoise */
+    /* Primary - using professional teal for accents */
+    --primary: 166 81% 31%;            /* #0D9373 - professional teal */
+    --primary-foreground: 0 0% 100%;   /* white on teal */
 
     --secondary: 0 0% 96%;             /* light gray */
     --secondary-foreground: 0 0% 0%;
@@ -50,15 +50,15 @@ body::before {
     --muted: 0 0% 96%;
     --muted-foreground: 0 0% 40%;
 
-    --accent: 168 95% 72%;             /* turquoise accent */
-    --accent-foreground: 0 0% 0%;
+    --accent: 166 81% 31%;             /* professional teal accent */
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
 
     --border: 0 0% 0%;                 /* black borders */
     --input: 0 0% 100%;
-    --ring: 168 95% 72%;               /* turquoise ring */
+    --ring: 166 81% 31%;               /* professional teal ring */
 
     --radius: 0.3125rem;               /* 5px - Neobrutalism base */
 
@@ -80,8 +80,8 @@ body::before {
     --popover: 0 0% 13%;
     --popover-foreground: 45 13% 93%;
 
-    --primary: 168 95% 72%;            /* turquoise stays same */
-    --primary-foreground: 0 0% 0%;
+    --primary: 166 81% 31%;            /* professional teal stays same */
+    --primary-foreground: 0 0% 100%;
 
     --secondary: 0 0% 20%;
     --secondary-foreground: 45 13% 93%;
@@ -89,15 +89,15 @@ body::before {
     --muted: 0 0% 20%;
     --muted-foreground: 0 0% 65%;
 
-    --accent: 168 95% 72%;             /* turquoise */
-    --accent-foreground: 0 0% 0%;
+    --accent: 166 81% 31%;             /* professional teal */
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 63% 31%;
     --destructive-foreground: 0 0% 98%;
 
     --border: 0 0% 0%;                 /* keep black borders */
     --input: 0 0% 13%;
-    --ring: 168 95% 72%;
+    --ring: 166 81% 31%;
   }
 }
 

@@ -23,8 +23,8 @@ const config = {
       },
       colors: {
         // Neobrutalism Colors (Updated brand palette)
-        main: '#68FBCE',              // Aquamarine accent (our brand color)
-        mainAccent: '#68FBCE',
+        main: '#0D9373',              // Professional teal (our brand color)
+        mainAccent: '#0D9373',
         overlay: 'rgba(0,0,0,0.8)',
 
         // Light mode
