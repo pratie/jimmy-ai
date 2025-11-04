@@ -97,6 +97,8 @@ export async function POST(req: Request) {
   const startTime = Date.now()
   try {
     const { domainId, chat, message, anonymousId } = await req.json()
+    // Track resolved customer id (if we have an email / existing customer)
+    let resolvedCustomerId: string | undefined
 
     devLog('[Bot Stream] ⏱️  Request started')
 
@@ -334,6 +336,8 @@ export async function POST(req: Request) {
         }
 
         devLog('[Bot Stream] ✅ Customer found/created')
+        // Capture customer id for appointment link generation later
+        resolvedCustomerId = customer.id
 
         // 3. Check for anonymous history to link
         if (anonymousId) {
@@ -477,6 +481,10 @@ export async function POST(req: Request) {
 
     // Build system prompt
     const promptStartTime = Date.now()
+    // Build appointment link if we have a resolved customer id; leave paymentUrl empty (not used for now)
+    const appointmentUrl = resolvedCustomerId
+      ? `${process.env.NEXT_PUBLIC_APP_URL}/portal/${domainId}/appointment/${resolvedCustomerId}`
+      : ''
     const systemPrompt = buildSystemPrompt({
       businessName: chatBotDomain.name,
       domain: `${process.env.NEXT_PUBLIC_APP_URL}/portal/${domainId}`,
@@ -485,10 +493,10 @@ export async function POST(req: Request) {
       brandTone: chatBotDomain.chatBot?.brandTone || 'friendly, warm, conversational',
       language: chatBotDomain.chatBot?.language || 'en',
       qualificationQuestions: !customerEmail ? ['What is your email address so I can assist you better?'] : [],
-      appointmentUrl: '',
+      appointmentUrl,
       paymentUrl: '',
       portalBaseUrl: `${process.env.NEXT_PUBLIC_APP_URL}/portal/${domainId}`,
-      customerId: '',
+      customerId: resolvedCustomerId || '',
       customModeBlocks: (chatBotDomain.chatBot?.modePrompts as any) || undefined,
     })
     devLog(`[Bot Stream] ✅ Prompt building took: ${Date.now() - promptStartTime}ms`)
