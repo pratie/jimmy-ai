@@ -10,7 +10,7 @@ export const pricingCards = [
   },
   {
     title: 'Starter',
-    description: 'For growing online stores',
+    description: 'For growing teams',
     price: '$19',
     duration: 'month',
     highlight: 'Everything in Free, plus',
@@ -22,7 +22,7 @@ export const pricingCards = [
   },
   {
     title: 'Pro',
-    description: 'For agencies & multiple brands',
+    description: 'For multi-brand teams',
     price: '$49',
     duration: 'month',
     highlight: 'Everything in Starter, plus',

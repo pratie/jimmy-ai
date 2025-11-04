@@ -243,7 +243,7 @@ export default async function Home() {
               </div>
               <h3 className="text-xl font-bold text-brand-primary mb-3">Book consultations automatically</h3>
               <p className="text-brand-primary/70 leading-relaxed">
-                Perfect for agencies and service businesses. AI qualifies prospects, books discovery calls, and syncs with your calendar—no back-and-forth emails needed.
+                Great for support and success teams. Qualify visitors, share a booking link, and notify your team for high‑intent conversations—no back‑and‑forth scheduling.
               </p>
             </div>
 
@@ -279,7 +279,7 @@ export default async function Home() {
               </div>
               <h3 className="text-xl font-bold text-brand-primary mb-3">Scale across multiple stores</h3>
               <p className="text-brand-primary/70 leading-relaxed">
-                Perfect for agencies managing client sites or businesses with multiple brands. One dashboard to rule them all—each AI trained on specific products and policies.
+                Scale across multiple sites or brands. Manage assistants in one dashboard—each grounded in the right docs and policies.
               </p>
             </div>
 
