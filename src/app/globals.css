@@ -139,6 +139,13 @@ body::before {
   .text-neobrutalism-body {
     @apply font-bold;
   }
+
+  /* Text stroke effect for gradient text */
+  .text-stroke-black {
+    -webkit-text-stroke: 2px black;
+    text-stroke: 2px black;
+    letter-spacing: 0.02em;
+  }
 }
 
 @layer base {

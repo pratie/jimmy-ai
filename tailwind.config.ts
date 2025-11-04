@@ -37,18 +37,15 @@ const config = {
         darkBorder: '#000',
         secondaryBlack: '#212121',
 
-        // Brand Palette (Landing page) - Orange theme
+        // Brand Palette (Landing page) - Keep for backward compatibility
         'brand-primary': '#0f172a',   // Dark navy for primary actions
         'brand-secondary': '#f6f4ef', // Soft off-white for surfaces
-        'brand-accent': '#fb923c',    // Soothing orange accent
-        'brand-orange': '#fb923c',    // Primary orange
-        'brand-orange-light': '#fed7aa', // Light orange
-        'brand-orange-dark': '#ea580c',  // Dark orange
-        'brand-info': '#fb923c',      // Info orange (was purple)
+        'brand-accent': '#d97a5b',    // Accent highlight (salmon/coral)
+        'brand-info': '#5b50e6',      // Info purple
         'brand-success': '#22c55e',   // Success green
-        'brand-warning': '#f59e0b',   // Warning amber
+        'brand-warning': '#e24d4d',   // Warning (tomato red)
         'brand-error': '#b91c1c',     // Error red (darker)
-        'brand-yellow': '#fbbf24',    // Amber accent for highlights
+        'brand-yellow': '#f59e0b',    // Amber accent for highlights
         'brand-base-100': '#faf8f3',  // Lightest base
         'brand-base-200': '#f3f0e8',  // Medium base
         'brand-base-300': '#e7e2d6',  // Darkest base
