@@ -673,7 +673,11 @@ export const onScrapeSelectedSources = async (
     console.log('[Firecrawl] Scraping', selectedUrls.length, 'selected sources')
 
     // Small pacing between URLs to avoid hitting Firecrawl rate limits too quickly
-    const INTER_URL_DELAY_MS = Number(process.env.FIRECRAWL_INTER_URL_DELAY_MS || 1500)
+    // Faster defaults for paid plans when FIRECRAWL_SPEED_MODE=fast
+    const delayDefault = process.env.FIRECRAWL_SPEED_MODE === 'fast' ? 200 : 1500
+    const INTER_URL_DELAY_MS = Number(
+      process.env.FIRECRAWL_INTER_URL_DELAY_MS ?? delayDefault
+    )
     let scrapeIndex = 0
 
     // Get domain and plan info

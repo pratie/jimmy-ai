@@ -36,9 +36,9 @@ export const scrapeWebsite = async (
     throw new Error('FIRECRAWL_API_KEY not configured in environment variables')
   }
 
-  // Basic retry with exponential backoff for 429/5xx
-  const maxRetries = 5
-  const baseDelayMs = 1200
+  // Tunable retry with exponential backoff for 429/5xx (faster defaults for paid plans)
+  const maxRetries = Number(process.env.FIRECRAWL_SCRAPE_MAX_RETRIES ?? 3)
+  const baseDelayMs = Number(process.env.FIRECRAWL_SCRAPE_BASE_DELAY_MS ?? 400)
 
   let attempt = 0
   let lastError: any
@@ -172,8 +172,8 @@ export const mapWebsite = async (
     throw new Error('FIRECRAWL_API_KEY not configured in environment variables')
   }
 
-  const maxRetries = 4
-  const baseDelayMs = 1000
+  const maxRetries = Number(process.env.FIRECRAWL_MAP_MAX_RETRIES ?? 3)
+  const baseDelayMs = Number(process.env.FIRECRAWL_MAP_BASE_DELAY_MS ?? 400)
   let attempt = 0
   let lastError: any
 
