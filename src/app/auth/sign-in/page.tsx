@@ -1,4 +1,5 @@
 
+import type { Metadata } from 'next'
 import SignInFormProvider from '@/components/forms/sign-in/form-provider'
 import LoginForm from '@/components/forms/sign-in/login-form'
 import GoogleAuthButton from '@/components/forms/sign-in/google-auth-button'
@@ -49,3 +50,9 @@ const SignInPage = () => {
 }
 
 export default SignInPage
+
+export const metadata: Metadata = {
+  title: 'Sign in — ChatDock',
+  alternates: { canonical: '/auth/sign-in' },
+  robots: { index: false, follow: false },
+}

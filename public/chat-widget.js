@@ -29,13 +29,13 @@
     }
   `);
 
-  iframe.src = 'https://www.bookmylead.app/chatbot';
+  iframe.src = 'https://www.chatdock.io/chatbot';
   iframe.classList.add('chat-frame');
-  iframe.setAttribute('title', 'BookmyLead Chatbot');
+  iframe.setAttribute('title', 'ChatDock Chatbot');
   document.body.appendChild(iframe);
 
   window.addEventListener('message', (e) => {
-    if (e.origin !== 'https://www.bookmylead.app') return;
+    if (e.origin !== 'https://www.chatdock.io') return;
     let dimensions;
     try {
       dimensions = typeof e.data === 'string' ? JSON.parse(e.data) : e.data;
@@ -45,7 +45,6 @@
     if (!dimensions || !dimensions.width || !dimensions.height) return;
     iframe.width = dimensions.width;
     iframe.height = dimensions.height;
-    iframe.contentWindow?.postMessage('8fe60b6b-1a2b-42a5-9e4d-e4427ea85a54', 'https://www.bookmylead.app');
+    iframe.contentWindow?.postMessage('8fe60b6b-1a2b-42a5-9e4d-e4427ea85a54', 'https://www.chatdock.io');
   });
 })();
-

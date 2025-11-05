@@ -6,7 +6,7 @@ import {
 } from '@/schemas/auth.schema'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useSignUp } from '@clerk/nextjs'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { onCompleteUserRegistration } from '@/actions/auth'
@@ -23,6 +23,16 @@ export const useSignUpForm = () => {
     },
     mode: 'onChange',
   })
+  const params = useSearchParams()
+  const planParam = (params.get('plan') || '').toUpperCase()
+  const billingParam = (params.get('billing') || '').toUpperCase()
+  const dashboardWithPlan = (() => {
+    const qs = new URLSearchParams()
+    if (planParam) qs.set('plan', planParam)
+    if (billingParam) qs.set('billing', billingParam)
+    const s = qs.toString()
+    return s ? `/dashboard?${s}` : '/dashboard'
+  })()
 
   const onGenerateOTP = async (
     email: string,
@@ -124,7 +134,7 @@ export const useSignUpForm = () => {
 
       setLoading(false)
       console.log('[Sign-Up] 🚀 Redirecting to dashboard...')
-      router.push('/dashboard')
+      router.push(dashboardWithPlan)
     } catch (error: any) {
       console.error('[Sign-Up] ❌ Error during sign-up process:', error)
       const code = error?.errors?.[0]?.code
@@ -216,7 +226,7 @@ export const useSignUpForm = () => {
           console.log('[Sign-Up OTP] ✅ Session activated')
           setLoading(false)
           console.log('[Sign-Up OTP] 🚀 Redirecting to dashboard...')
-          router.push('/dashboard')
+          router.push(dashboardWithPlan)
           return
         }
 

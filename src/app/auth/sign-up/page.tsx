@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import ButtonHandler from '@/components/forms/sign-up/button-handlers'
 import SignUpFormProvider from '@/components/forms/sign-up/form-provider'
 import HighLightBar from '@/components/forms/sign-up/highlight-bar'
@@ -24,3 +25,9 @@ const SignUp = (props: Props) => {
 }
 
 export default SignUp
+
+export const metadata: Metadata = {
+  title: 'Create account — ChatDock',
+  alternates: { canonical: '/auth/sign-up' },
+  robots: { index: false, follow: false },
+}

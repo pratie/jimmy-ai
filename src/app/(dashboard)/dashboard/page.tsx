@@ -1,3 +1,5 @@
+import type { Metadata } from 'next'
+import AutoUpgradeRedirect from '@/components/dashboard/auto-upgrade-redirect'
 import {
   getUserConversations,
   getUserClients,
@@ -16,6 +18,11 @@ import AddDomainCTA from '@/components/onboarding/add-domain-cta'
 
 type Props = {}
 
+export const metadata: Metadata = {
+  title: 'Dashboard — ChatDock',
+  robots: { index: false, follow: false },
+}
+
 const Page = async (props: Props) => {
   const conversations = await getUserConversations()
   const leads = await getUserClients()
@@ -33,6 +40,7 @@ const Page = async (props: Props) => {
 
   return (
     <>
+      <AutoUpgradeRedirect currentPlan={plan?.plan as any} />
       <InfoBar />
       <div className="overflow-y-auto w-full chat-window flex-1 h-0">
         {!domains?.domains?.length && (

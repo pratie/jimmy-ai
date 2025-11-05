@@ -4,8 +4,7 @@ import Section from '../section-label'
 import { Card, CardContent, CardDescription } from '../ui/card'
 import { Check, CheckCircle2, Plus } from 'lucide-react'
 import { pricingCards } from '@/constants/landing-page'
-import Modal from '../mondal'
-import SubscriptionForm from '../forms/settings/subscription-form'
+import UpgradePlanModal from './upgrade-plan-modal'
 import Image from 'next/image'
 import CancelSubscriptionButton from './cancel-subscription'
 import ChangePlan from './change-plan'
@@ -28,25 +27,7 @@ const BillingSettings = async (props: Props) => {
       </div>
       {plan === 'FREE' ? (
         <div className="lg:col-span-2 flex justify-start lg:justify-center ">
-          <Modal
-            title="Choose A Plan"
-            description="Upgrade your plan to unlock more messages, domains, and features."
-            contentClassName="max-w-5xl w-[calc(100vw-2rem)]"
-            trigger={
-              <Card className="border-dashed bg-cream border-brand-base-300 w-full cursor-pointer h-[270px] flex justify-center items-center">
-                <CardContent className="flex gap-2 items-center">
-                  <div className="rounded-full border-2 p-1 border-brand-base-300">
-                    <Plus className="text-brand-primary/60" />
-                  </div>
-                  <CardDescription className="font-semibold">
-                    Upgrade Plan
-                  </CardDescription>
-                </CardContent>
-              </Card>
-            }
-          >
-            <SubscriptionForm plan={plan!} />
-          </Modal>
+          <UpgradePlanModal currentPlan={plan as any} />
         </div>
       ) : (
         <div className="lg:col-span-2" />

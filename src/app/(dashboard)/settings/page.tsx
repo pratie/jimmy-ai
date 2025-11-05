@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import InfoBar from '@/components/infobar'
 import BillingSettings from '@/components/settings/billing-settings'
 import ChangePassword from '@/components/settings/change-password'
@@ -35,3 +36,8 @@ const Page = async ({
 }
 
 export default Page
+
+export const metadata: Metadata = {
+  title: 'Settings — ChatDock',
+  robots: { index: false, follow: false },
+}

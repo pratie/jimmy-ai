@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button'
 import { useToast } from '@/components/ui/use-toast'
 import { useSignUp } from '@clerk/nextjs'
 import { useState } from 'react'
+import { useAuthContextHook } from '@/context/use-auth-context'
 
 const GoogleAuthButton = () => {
   const { signUp, isLoaded } = useSignUp()
@@ -10,8 +11,9 @@ const GoogleAuthButton = () => {
   const [loading, setLoading] = useState(false)
   const oauthCallbackUrl =
     process.env.NEXT_PUBLIC_CLERK_OAUTH_CALLBACK_URL || '/auth/sso-callback'
-  const redirectUrlComplete =
+  const baseRedirect =
     process.env.NEXT_PUBLIC_CLERK_SIGN_UP_FALLBACK_REDIRECT_URL || '/dashboard'
+  const { selectedPlan, billingInterval } = useAuthContextHook()
 
   const signUpWithGoogle = async () => {
     if (process.env.NODE_ENV === 'development') {
@@ -37,6 +39,14 @@ const GoogleAuthButton = () => {
       }
 
       // Clerk v5 OAuth flow - proper callback pattern
+      // Carry selected plan/billing to post-OAuth landing
+      const params = new URLSearchParams()
+      if (selectedPlan) params.set('plan', selectedPlan)
+      if (billingInterval) params.set('billing', billingInterval)
+      const redirectUrlComplete = params.toString()
+        ? `${baseRedirect}?${params.toString()}`
+        : baseRedirect
+
       await signUp.authenticateWithRedirect({
         strategy: 'oauth_google',
         redirectUrl: oauthCallbackUrl,

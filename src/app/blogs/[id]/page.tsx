@@ -29,7 +29,7 @@ export async function generateMetadata({
   const { id } = await params
   const post = await onGetBlogPost(id)
   const title = post?.title || 'Blog Post'
-  const description = toSummary(post?.content, `${title} — BookmyLead AI`)
+  const description = toSummary(post?.content, `${title} — ChatDock AI`)
 
   return {
     title,
@@ -80,7 +80,7 @@ const PostPage = async ({
               headline: post?.title || 'Blog Post',
               description: toSummary(post?.content, post?.title || 'Blog Post'),
               mainEntityOfPage: { '@type': 'WebPage', '@id': `/blogs/${id}` },
-              author: { '@type': 'Organization', name: 'BookmyLead AI' },
+              author: { '@type': 'Organization', name: 'ChatDock AI' },
               datePublished: post?.createdAt?.toISOString?.() || undefined,
             }),
           }}

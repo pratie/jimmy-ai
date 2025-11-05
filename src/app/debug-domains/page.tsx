@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import { onGetAllAccountDomains } from '@/actions/settings'
 import { currentUser } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
@@ -53,3 +54,8 @@ const DebugDomainsPage = async () => {
 }
 
 export default DebugDomainsPage
+
+export const metadata: Metadata = {
+  title: 'Debug Domains — ChatDock',
+  robots: { index: false, follow: false },
+}

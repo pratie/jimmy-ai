@@ -49,7 +49,7 @@ export default function BlogArticle() {
             AI Website Chatbot for Lead Generation: The 2025 Playbook
           </h1>
           <p className="mt-3 text-lg text-brand-primary/75">
-            Everything you need to launch a high‑converting website chatbot: strategy, prompts, setup, and metrics—built on BookmyLead AI.
+            Everything you need to launch a high‑converting website chatbot: strategy, prompts, setup, and metrics—built on ChatDock AI.
           </p>
         </header>
 
@@ -87,7 +87,7 @@ export default function BlogArticle() {
           <h2>How to set it up (in minutes)</h2>
           <ol>
             <li>
-              <strong>Connect sources:</strong> Crawl your website and upload docs/FAQs in BookmyLead
+              <strong>Connect sources:</strong> Crawl your website and upload docs/FAQs in ChatDock
               AI to build a clean knowledge base.
             </li>
             <li>
@@ -199,7 +199,7 @@ export default function BlogArticle() {
             },
             author: {
               '@type': 'Organization',
-              name: 'BookmyLead AI',
+              name: 'ChatDock AI',
             },
           }),
         }}

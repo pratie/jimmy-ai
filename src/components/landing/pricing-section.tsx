@@ -133,7 +133,7 @@ export default function PricingSection() {
                   </div>
 
                   <Link
-                    href={`/dashboard?plan=${card.title}`}
+                    href={`/auth/sign-up?plan=${encodeURIComponent(card.title)}${isYearly ? '&billing=yearly' : ''}`}
                     className={clsx(
                       'w-full text-center font-heading py-3 px-4 rounded-base transition-all border-2',
                       card.title === 'Business'

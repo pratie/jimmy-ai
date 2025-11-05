@@ -11,6 +11,9 @@ import { Footer } from '@/components/landing/footer'
 import AnimatedChatHero from '@/components/landing/animated-chat-hero'
 
 export const metadata: Metadata = {
+  title: 'ChatDock — AI assistants on your knowledge base',
+  description:
+    'Launch an AI assistant trained on your website, PDFs, and docs. Capture leads, answer questions, and automate support with ChatDock.',
   alternates: {
     canonical: '/',
   },

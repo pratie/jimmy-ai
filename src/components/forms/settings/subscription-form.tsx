@@ -5,8 +5,9 @@ import SubscriptionCard from '@/components/settings/subscription-card'
 import { Button } from '@/components/ui/button'
 import { useSubscriptions } from '@/hooks/billing/use-billing'
 import { PlanType } from '@/lib/plans'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import clsx from 'clsx'
+import { useSearchParams } from 'next/navigation'
 
 type Props = {
   plan: PlanType
@@ -16,6 +17,20 @@ const SubscriptionForm = ({ plan }: Props) => {
   const { loading, onSetPayment, payment, onUpdateToFreeTier } =
     useSubscriptions(plan)
   const [isYearly, setIsYearly] = useState(false)
+  const params = useSearchParams()
+
+  // Preselect from query if present (e.g., from sign-up flow)
+  useEffect(() => {
+    const rawPlan = (params.get('plan') || '').toUpperCase()
+    const rawBilling = (params.get('billing') || '').toUpperCase()
+    if (rawPlan === 'FREE' || rawPlan === 'STARTER' || rawPlan === 'PRO' || rawPlan === 'BUSINESS') {
+      onSetPayment(rawPlan as any)
+    }
+    if (rawBilling === 'YEARLY' || rawBilling === 'ANNUAL' || rawBilling === 'ANNUALLY') {
+      setIsYearly(true)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   // Pricing data
   const pricingData = {

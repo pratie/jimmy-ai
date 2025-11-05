@@ -18,6 +18,8 @@ type Props = {
   type?: 'Integration'
   logo?: string
   contentClassName?: string
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
 }
 
 const Modal = ({
@@ -28,11 +30,17 @@ const Modal = ({
   type,
   logo,
   contentClassName,
+  open,
+  onOpenChange,
 }: Props) => {
+  const dialogProps: any = {}
+  if (typeof open === 'boolean') dialogProps.open = open
+  if (onOpenChange) dialogProps.onOpenChange = onOpenChange
+
   switch (type) {
     case 'Integration':
       return (
-        <Dialog>
+        <Dialog {...dialogProps}>
           <DialogTrigger asChild>{trigger}</DialogTrigger>
           <DialogContent className={contentClassName}
           >
@@ -68,7 +76,7 @@ const Modal = ({
       )
     default:
       return (
-        <Dialog>
+        <Dialog {...dialogProps}>
           <DialogTrigger asChild>{trigger}</DialogTrigger>
           <DialogContent className={contentClassName}>
             <DialogHeader>

@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import { onGetAllAccountDomains } from '@/actions/settings'
 import ConversationMenu from '@/components/conversations'
 import Messenger from '@/components/conversations/messenger'
@@ -6,6 +7,11 @@ import { Separator } from '@/components/ui/separator'
 import React from 'react'
 
 type Props = {}
+
+export const metadata: Metadata = {
+  title: 'Conversations — ChatDock',
+  robots: { index: false, follow: false },
+}
 
 const ConversationPage = async (props: Props) => {
   const domains = await onGetAllAccountDomains()

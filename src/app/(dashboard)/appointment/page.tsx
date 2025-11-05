@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import { onGetAllBookingsForCurrentUser } from '@/actions/appointment'
 import AllAppointments from '@/components/appointment/all-appointments'
 import InfoBar from '@/components/infobar'
@@ -9,6 +10,11 @@ import { currentUser } from '@clerk/nextjs/server'
 import React from 'react'
 
 type Props = {}
+
+export const metadata: Metadata = {
+  title: 'Appointments — ChatDock',
+  robots: { index: false, follow: false },
+}
 
 const Page = async (props: Props) => {
   const user = await currentUser()

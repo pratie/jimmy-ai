@@ -297,13 +297,13 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
             style={{ backgroundColor: t.surface }}
           >
             <a
-              href="https://www.bookmylead.app/?utm_source=widget&utm_medium=free_badge&utm_campaign=virality"
+              href="https://chatdock.io/?utm_source=widget&utm_medium=free_badge&utm_campaign=virality"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center justify-center gap-1 text-[11px] leading-4 text-gray-400 hover:text-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded"
-              aria-label="Powered by BookmyLead – Get your AI assistant"
+              aria-label="Powered by ChatDock – Get your AI assistant"
             >
-              <span>Powered by BookmyLead</span>
+              <span>Powered by ChatDock</span>
               <span aria-hidden="true">• Free Plan</span>
             </a>
           </div>
