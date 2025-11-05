@@ -2,7 +2,7 @@
 
 import { client } from '@/lib/prisma'
 import { scrapeWebsite, normalizeUrl, mapWebsite } from '@/lib/firecrawl'
-import { chunkContent, validateContent } from '@/lib/chunking'
+import { chunkContent, validateContent, sanitizeKnowledgeBase } from '@/lib/chunking'
 import { generateEmbeddings } from '@/lib/embeddings'
 import { countTokens, groupByTokenBudget } from '@/lib/tokens'
 import { getPlanLimits } from '@/lib/plans'
@@ -87,7 +87,9 @@ export const onScrapeWebsiteForDomain = async (domainId: string) => {
 
     console.log('[Firecrawl] Scrape successful! Markdown length:', result.data.markdown.length)
 
-    const sizeMB = result.data.markdown.length / (1024 * 1024)
+    // Sanitize scraped content before storing (remove scripts, base64 blobs, etc.)
+    const sanitizedMarkdown = sanitizeKnowledgeBase(result.data.markdown)
+    const sizeMB = sanitizedMarkdown.length / (1024 * 1024)
 
     // ENFORCEMENT: Check KB size limit
     if (sizeMB > limits.knowledgeBaseMB) {
@@ -108,7 +110,7 @@ export const onScrapeWebsiteForDomain = async (domainId: string) => {
     await client.chatBot.update({
       where: { id: domain.chatBot.id },
       data: {
-        knowledgeBase: result.data.markdown,
+        knowledgeBase: sanitizedMarkdown,
         knowledgeBaseUpdatedAt: new Date(),
         knowledgeBaseStatus: 'scraped',
       },
@@ -253,10 +255,13 @@ export const onUpdateKnowledgeBase = async (domainId: string, markdown: string) 
       return { status: 404, message: 'ChatBot not found' }
     }
 
+    // Sanitize content before saving
+    const sanitized = sanitizeKnowledgeBase(markdown)
+
     await client.chatBot.update({
       where: { id: domain.chatBot.id },
       data: {
-        knowledgeBase: markdown,
+        knowledgeBase: sanitized,
         knowledgeBaseUpdatedAt: new Date(),
       },
     })
@@ -546,14 +551,15 @@ export const onUploadTextKnowledgeBase = async (domainId: string, text: string, 
       return { status: 400, message: validation.error }
     }
 
-    // Prepare final content
+    // Prepare final content and sanitize before saving
     let finalContent = text
     if (append && domain.chatBot.knowledgeBase) {
       finalContent = `${domain.chatBot.knowledgeBase}\n\n---\n\n${text}`
     }
+    const sanitizedFinal = sanitizeKnowledgeBase(finalContent)
 
-    // ENFORCEMENT: Check KB size limit
-    const newSizeMB = finalContent.length / (1024 * 1024)
+    // ENFORCEMENT: Check KB size limit using sanitized content
+    const newSizeMB = sanitizedFinal.length / (1024 * 1024)
     if (newSizeMB > limits.knowledgeBaseMB) {
       return {
         status: 400,
@@ -568,7 +574,7 @@ export const onUploadTextKnowledgeBase = async (domainId: string, text: string, 
     await client.chatBot.update({
       where: { id: domain.chatBot.id },
       data: {
-        knowledgeBase: finalContent,
+        knowledgeBase: sanitizedFinal,
         knowledgeBaseUpdatedAt: new Date(),
         knowledgeBaseStatus: 'scraped',
       },
@@ -587,7 +593,7 @@ export const onUploadTextKnowledgeBase = async (domainId: string, text: string, 
       status: 200,
       message: append ? 'Text appended to knowledge base successfully!' : 'Knowledge base updated successfully!',
       data: {
-        totalLength: finalContent.length,
+        totalLength: sanitizedFinal.length,
         sizeMB: newSizeMB.toFixed(2)
       },
     }
@@ -741,7 +747,9 @@ export const onScrapeSelectedSources = async (
         })
 
         if (result.success && result.data?.markdown) {
-          const sizeMB = result.data.markdown.length / (1024 * 1024)
+          // Sanitize per-page content before combining
+          const sanitized = sanitizeKnowledgeBase(result.data.markdown)
+          const sizeMB = sanitized.length / (1024 * 1024)
 
           // ENFORCEMENT: Check KB size limit
           if (domain.knowledgeBaseSizeMB + totalSizeMB + sizeMB > limits.knowledgeBaseMB) {
@@ -761,7 +769,7 @@ export const onScrapeSelectedSources = async (
 
           scrapedContent.push({
             url,
-            markdown: result.data.markdown,
+            markdown: sanitized,
             size: sizeMB
           })
           totalSizeMB += sizeMB
@@ -905,7 +913,7 @@ export const onUploadPDFKnowledgeBase = async (
       return { status: 400, message: validation.error }
     }
 
-    // Prepare final content with metadata
+    // Prepare final content with metadata and sanitize
     const pdfMetadata = `<!-- PDF: ${filename} | ${pdfResult.pages} pages${pdfResult.metadata?.title ? ` | Title: ${pdfResult.metadata.title}` : ''} -->\n\n`
     let finalContent = pdfMetadata + cleanedText
 
@@ -913,8 +921,10 @@ export const onUploadPDFKnowledgeBase = async (
       finalContent = `${domain.chatBot.knowledgeBase}\n\n---\n\n${finalContent}`
     }
 
-    // ENFORCEMENT: Check KB size limit
-    const newSizeMB = finalContent.length / (1024 * 1024)
+    const sanitizedFinal = sanitizeKnowledgeBase(finalContent)
+
+    // ENFORCEMENT: Check KB size limit (sanitized)
+    const newSizeMB = sanitizedFinal.length / (1024 * 1024)
     if (newSizeMB > limits.knowledgeBaseMB) {
       return {
         status: 400,
@@ -941,7 +951,7 @@ export const onUploadPDFKnowledgeBase = async (
     await client.chatBot.update({
       where: { id: domain.chatBot.id },
       data: {
-        knowledgeBase: finalContent,
+        knowledgeBase: sanitizedFinal,
         knowledgeBaseUpdatedAt: new Date(),
         knowledgeBaseStatus: 'scraped',
       },
