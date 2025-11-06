@@ -26,18 +26,6 @@ const isPublicRoute = createRouteMatcher([
 ])
 
 export default clerkMiddleware(async (auth, req) => {
-  // Canonical host: redirect www.chatdock.io → chatdock.io
-  try {
-    const host = req.headers.get('host') || ''
-    if (host.toLowerCase() === 'www.chatdock.io') {
-      const url = req.nextUrl
-      url.host = 'chatdock.io'
-      url.protocol = 'https'
-      return NextResponse.redirect(url, 308)
-    }
-  } catch (_) {
-    // ignore
-  }
   // Redirect unauthenticated users hitting /dashboard?plan=... to public sign-up with plan
   try {
     const url = req.nextUrl
