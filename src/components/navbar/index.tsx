@@ -18,7 +18,7 @@ function NavBar() {
               height={40}
               className="w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0"
             />
-            <span className="font-extrabold text-base sm:text-lg md:text-xl tracking-tight uppercase">
+            <span className="font-extrabold text-base sm:text-lg md:text-xl tracking-tight">
               Chatdock AI
             </span>
           </div>

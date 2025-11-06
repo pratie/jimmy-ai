@@ -17,7 +17,7 @@ export function Footer() {
                 height={32}
                 className="w-8 h-8"
               />
-              <span className="font-extrabold uppercase text-lg">Chatdock AI</span>
+              <span className="font-extrabold text-lg">Chatdock AI</span>
             </div>
             <p className="text-sm font-bold">AI knowledge base & website assistant.</p>
           </div>
