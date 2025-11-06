@@ -100,10 +100,11 @@ export const useChatBot = (options?: UseChatBotOptions) => {
 
   useEffect(() => {
     if (!disablePostMessage) {
+      // Request a comfortable desktop size (embed script will clamp to viewport and its max)
       postToParent(
         JSON.stringify({
-          width: botOpened ? 550 : 80,
-          height: botOpened ? 800 : 80,
+          width: botOpened ? 480 : 80,
+          height: botOpened ? 720 : 80,
         })
       )
     }

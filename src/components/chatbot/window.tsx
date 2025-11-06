@@ -96,15 +96,28 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
       headerText: '#111827',
       userBubbleBg: '#2563EB',
       userBubbleText: '#FFFFFF',
-      botBubbleBg: '#F3F4F6',
-      botBubbleText: '#111827',
+      botBubbleBg: '#F8FAFC',
+      botBubbleText: '#0F172A',
       inputBg: '#FFFFFF',
-      inputBorder: '#D1D5DB',
+      inputBorder: '#E5E7EB',
       accent: '#2563EB',
-      radius: 10,
+      radius: 12,
       shadow: 'sm' as 'none' | 'sm',
     }
     const t = { ...THEME_DEFAULT, ...(themeConfig || {}) }
+
+    // Density presets: compact | cozy | comfortable
+    const density = (themeConfig?.density as 'compact' | 'cozy' | 'comfortable') || 'comfortable'
+    const UI = {
+      // padding (px) and sizes tuned to resemble popular widgets
+      bubblePadding: density === 'compact' ? 10 : density === 'comfortable' ? 16 : 12,
+      bubbleFontSize: density === 'compact' ? 14 : density === 'comfortable' ? 16 : 15,
+      bubbleLineHeight: density === 'compact' ? 1.45 : density === 'comfortable' ? 1.7 : 1.6,
+      inputHeight: density === 'compact' ? 40 : density === 'comfortable' ? 48 : 44,
+      controlSize: density === 'compact' ? 40 : density === 'comfortable' ? 48 : 44,
+      headerPadX: density === 'compact' ? 12 : density === 'comfortable' ? 18 : 16,
+      headerPadY: density === 'compact' ? 8 : density === 'comfortable' ? 12 : 10,
+    }
 
     // Toggle jump-to-latest button based on scroll position
     React.useEffect(() => {
@@ -126,20 +139,23 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
         className={cn(
         'relative flex flex-col overflow-hidden',
         cuprum.className,
-        responsive ? 'h-full w-full max-w-none' : 'h-[520px] w-[360px] sm:h-[600px] sm:w-[380px] md:h-[620px] md:w-[420px]'
+        responsive ? 'h-full w-full max-w-none' : 'h-[560px] w-[380px] sm:h-[640px] sm:w-[400px] md:h-[680px] md:w-[440px]'
       )}
         style={{
           backgroundColor: t.surface,
           color: t.text,
           borderRadius: t.radius,
           boxShadow: t.shadow === 'sm' ? '0 1px 2px rgba(0,0,0,0.06)' : 'none',
-          border: '1px solid #D1D5DB'
+          border: '1px solid #E5E7EB'
         }}
       >
         {/* Fixed Header */}
-        <div className="flex justify-between items-center px-3 py-2 border-b shrink-0" style={{ backgroundColor: t.headerBg, color: t.headerText }}>
+        <div
+          className="flex justify-between items-center border-b shrink-0"
+          style={{ backgroundColor: t.headerBg, color: t.headerText, padding: `${UI.headerPadY}px ${UI.headerPadX}px` }}
+        >
           <div className="flex gap-2 items-center">
-            <Avatar className="w-9 h-9">
+            <Avatar className="w-10 h-10">
               {botIcon && !avatarError ? (
                 <AvatarImage
                   src={getKieImageUrl(botIcon)}
@@ -153,19 +169,21 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
               )}
             </Avatar>
             <div className="flex flex-col">
-              <h3 className="text-sm font-semibold leading-tight">
+              <h3 className="text-base font-semibold leading-tight">
                 {domainName || 'Assistant'}
               </h3>
-              <p className="text-xs text-gray-500 flex items-center gap-1">
-                <span className="inline-block w-1.5 h-1.5 rounded-full bg-green-500" aria-hidden="true" />
-                Online
-              </p>
-              {realtimeMode?.mode && (
-                <RealTimeMode
-                  setChats={setChat}
-                  chatRoomId={realtimeMode.chatroom}
-                />
-              )}
+              <div className="flex items-center gap-2">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[11px]">
+                  <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500" aria-hidden="true" />
+                  Online
+                </span>
+                {realtimeMode?.mode && (
+                  <RealTimeMode
+                    setChats={setChat}
+                    chatRoomId={realtimeMode.chatroom}
+                  />
+                )}
+              </div>
             </div>
           </div>
           <div className="flex items-center">
@@ -174,7 +192,8 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
                 type="button"
                 aria-label="Close chat"
                 onClick={onClose}
-                className="h-8 w-8 inline-flex items-center justify-center rounded-full hover:bg-gray-100 transition"
+                className="inline-flex items-center justify-center rounded-full hover:bg-gray-100 transition"
+                style={{ height: UI.controlSize, width: UI.controlSize }}
                 title="Close"
               >
                 <X className="w-5 h-5 text-gray-500" />
@@ -205,7 +224,7 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
             {/* Messages area - takes all available space */}
             <div
               style={{ color: textColor || t.text, backgroundColor: t.surface }}
-              className="flex-1 overflow-y-auto px-4 py-3"
+              className="flex-1 overflow-y-auto px-4 py-4"
               ref={ref}
             >
               <div className="flex flex-col gap-2">
@@ -220,6 +239,9 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
                       botBg: t.botBubbleBg,
                       botText: t.botBubbleText,
                     }}
+                    bubblePadding={UI.bubblePadding}
+                    fontSize={UI.bubbleFontSize}
+                    lineHeight={UI.bubbleLineHeight}
                   />
                 ))}
                 {onResponding && <Responding botIcon={botIcon} />}
@@ -232,24 +254,29 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
                 e.preventDefault()
                 onChat()
               }}
-              className="flex px-2 py-2 items-center gap-2 bg-white border-t shrink-0"
+              className="flex px-3 items-center gap-2 bg-white border-t shrink-0"
+              style={{ paddingTop: Math.max(8, UI.headerPadY - 2), paddingBottom: Math.max(8, UI.headerPadY - 2) }}
             >
               <Input
                 {...register('content')}
                 placeholder={`Type a message...`}
-                className="flex-1 h-[40px] rounded-lg px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                style={{ backgroundColor: t.inputBg, border: `1px solid ${t.inputBorder}`, color: t.text }}
+                className="flex-1 rounded-xl px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                style={{ backgroundColor: t.inputBg, border: `1px solid ${t.inputBorder}`, color: t.text, height: UI.inputHeight, fontSize: UI.bubbleFontSize }}
               />
               <button
                 type="submit"
-                className="shrink-0 h-[40px] w-[40px] rounded-lg bg-blue-500 hover:bg-blue-600 disabled:bg-blue-300 disabled:cursor-not-allowed text-white flex items-center justify-center transition-colors"
+                className="shrink-0 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 disabled:cursor-not-allowed text-white flex items-center justify-center transition-colors"
+                style={{ height: UI.controlSize, width: UI.controlSize }}
                 disabled={!canSend}
                 aria-label="Send"
               >
                 <Send className="w-4 h-4" />
               </button>
               <Label htmlFor="bot-image" className="cursor-pointer">
-                <div className="h-[40px] w-[40px] rounded-lg border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-colors">
+                <div
+                  className="rounded-xl border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-colors"
+                  style={{ height: UI.controlSize, width: UI.controlSize }}
+                >
                   <Paperclip className="w-5 h-5 text-gray-500" />
                 </div>
                 <Input
@@ -262,10 +289,10 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
             </form>
           </TabsContent>
 
-          <TabsContent value="faqs" className="flex-1 overflow-y-auto m-0 p-3">
+          <TabsContent value="faqs" className="flex-1 overflow-y-auto m-0 p-4">
             <div className="space-y-4">
               <div>
-                <CardTitle className="text-lg">Frequently Asked Questions</CardTitle>
+                <CardTitle className="text-[15px] font-semibold">Frequently Asked Questions</CardTitle>
                 <CardDescription className="text-sm mt-1">
                   Find quick answers to common questions
                 </CardDescription>

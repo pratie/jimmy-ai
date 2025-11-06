@@ -19,14 +19,59 @@ type Props = {
     botBg?: string
     botText?: string
   }
+  bubblePadding?: number
+  fontSize?: number
+  lineHeight?: number
 }
 
-const Bubble = ({ message, createdAt, botIcon, theme }: Props) => {
+const Bubble = ({ message, createdAt, botIcon, theme, bubblePadding = 12, fontSize = 15, lineHeight = 1.6 }: Props) => {
   let d = new Date()
   const image = extractUUIDFromString(message.content)
   const [imageError, setImageError] = useState(false)
   const [botAvatarError, setBotAvatarError] = useState(false)
   //
+
+  // Lightweight sanitizer: allowlisted tags; strip on* attributes; constrain <a>
+  const sanitizeHtml = (html: string): string => {
+    if (typeof window === 'undefined' || !html) return html
+    const allowed = new Set(['A', 'BR', 'STRONG', 'EM', 'B', 'I', 'CODE', 'P', 'UL', 'OL', 'LI'])
+    const wrap = document.createElement('div')
+    wrap.innerHTML = html
+    const walker = (el: Element | Node) => {
+      if (el.nodeType === Node.TEXT_NODE) return
+      if (el.nodeType === Node.ELEMENT_NODE) {
+        const eln = el as HTMLElement
+        // Remove event handlers
+        ;[...eln.attributes].forEach((attr) => {
+          if (attr.name.toLowerCase().startsWith('on')) eln.removeAttribute(attr.name)
+        })
+        if (!allowed.has(eln.tagName)) {
+          // Replace disallowed element with its text content
+          const text = document.createTextNode(eln.textContent || '')
+          eln.replaceWith(text)
+          return
+        }
+        if (eln.tagName === 'A') {
+          const a = eln as HTMLAnchorElement
+          const href = a.getAttribute('href') || ''
+          // Basic href validation
+          if (!/^https?:\/\//i.test(href)) {
+            a.removeAttribute('href')
+          } else {
+            a.setAttribute('target', '_blank')
+            a.setAttribute('rel', 'noopener noreferrer')
+          }
+          // Remove other attributes
+          ;[...a.attributes].forEach((attr) => {
+            if (!['href', 'target', 'rel'].includes(attr.name)) a.removeAttribute(attr.name)
+          })
+        }
+      }
+      el.childNodes.forEach((n) => walker(n))
+    }
+    wrap.childNodes.forEach((n) => walker(n))
+    return wrap.innerHTML
+  }
 
   return (
     <div
@@ -58,7 +103,7 @@ const Bubble = ({ message, createdAt, botIcon, theme }: Props) => {
       )}
       <div
         className={cn(
-          'flex flex-col gap-1.5 min-w-[100px] max-w-[320px] p-3 rounded-lg',
+          'flex flex-col gap-1.5 min-w-[100px] max-w-[85%] rounded-2xl',
           message.role == 'assistant' ? 'rounded-bl-none' : 'rounded-br-none'
         )}
         style={{
@@ -70,6 +115,7 @@ const Bubble = ({ message, createdAt, botIcon, theme }: Props) => {
             message.role === 'assistant'
               ? theme?.botText || '#111827'
               : theme?.userText || '#ffffff',
+          padding: bubblePadding,
         }}
       >
         {createdAt ? (
@@ -114,10 +160,10 @@ const Bubble = ({ message, createdAt, botIcon, theme }: Props) => {
             <p className="text-xs text-brand-primary/60">Image failed to load</p>
           </div>
         ) : (
-          <div className="text-sm break-words whitespace-pre-wrap">
+          <div className="break-words whitespace-pre-wrap" style={{ fontSize, lineHeight }}>
             <span
               dangerouslySetInnerHTML={{
-                __html: message.content.replace('(complete)', ' ')
+                __html: sanitizeHtml(message.content.replace('(complete)', ' '))
               }}
             />
             {message.link && (
