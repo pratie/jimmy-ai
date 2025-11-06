@@ -9,9 +9,13 @@ import FlowDiagram from '@/components/landing/flow-diagram'
 import { Check } from 'lucide-react'
 import { Footer } from '@/components/landing/footer'
 import AnimatedChatHero from '@/components/landing/animated-chat-hero'
+import { Bebas_Neue } from 'next/font/google'
+import { OpenAIIcon, AnthropicIcon, GoogleIcon } from '@/components/icons/provider-icons'
+
+const bebas = Bebas_Neue({ subsets: ['latin'], weight: '400' })
 
 export const metadata: Metadata = {
-  title: 'Chatdock AI — AI assistants on your knowledge base',
+  title: 'Chatdock AI — AI assistant on your knowledge base',
   description:
     'Launch an AI assistant trained on your website, PDFs, and docs. Capture leads, answer questions, and automate support with Chatdock AI.',
   alternates: {
@@ -33,10 +37,10 @@ export default async function Home() {
             <div className="space-y-8 md:space-y-10 max-w-2xl lg:max-w-none text-center lg:text-left">
               {/* Main Headline - Larger, more impactful */}
               <div className="space-y-6">
-                <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-[72px] font-extrabold text-gray-900 dark:text-white leading-[0.95] tracking-[-0.03em]">
+                <h1 className={`${bebas.className} text-5xl sm:text-6xl md:text-7xl lg:text-[72px] font-normal text-gray-900 dark:text-white leading-[1.05] tracking-normal`}>
                   <span className="block">
-                    <span className="text-[#0D9373] font-black">AI</span>{' '}
-                    <span className="text-[#0D9373] font-black">assistants</span>
+                    <span className="text-[#0D9373]">AI</span>{' '}
+                    <span className="text-[#0D9373]">assistant</span>
                   </span>
                   <span className="block">on your knowledge base</span>
                 </h1>
@@ -65,6 +69,25 @@ export default async function Home() {
                       <Check className="w-3 h-3 text-white" strokeWidth={3} />
                     </div>
                     <span>No credit card required</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Powered by providers */}
+              <div className="mt-2 flex flex-col sm:flex-row items-center gap-3 text-gray-500 dark:text-gray-400">
+                <span className="text-sm">Powered by</span>
+                <div className="flex items-center gap-5">
+                  <div className="flex items-center gap-2">
+                    <OpenAIIcon size={18} className="text-gray-700 dark:text-gray-300" />
+                    <span className="text-sm">OpenAI</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <AnthropicIcon size={18} className="text-gray-700 dark:text-gray-300" />
+                    <span className="text-sm">Anthropic</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <GoogleIcon size={18} className="text-gray-700 dark:text-gray-300" />
+                    <span className="text-sm">Google Gemini</span>
                   </div>
                 </div>
               </div>
