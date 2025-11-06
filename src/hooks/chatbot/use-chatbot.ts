@@ -105,7 +105,7 @@ export const useChatBot = (options?: UseChatBotOptions) => {
         JSON.stringify({
           // Crisp-style: ~372px width, height ~70–80vh (embed clamps)
           width: botOpened ? 372 : 80,
-          height: botOpened ? 640 : 80,
+          height: botOpened ? 720 : 80,
         })
       )
     }

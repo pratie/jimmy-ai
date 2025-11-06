@@ -139,7 +139,7 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
         className={cn(
         'relative flex flex-col overflow-hidden',
         cuprum.className,
-        responsive ? 'h-full w-full max-w-none' : 'h-[560px] w-[372px] sm:h-[640px] sm:w-[372px] md:h-[70vh] md:w-[372px]'
+        responsive ? 'h-full w-full max-w-none' : 'h-[560px] w-[372px] sm:h-[640px] sm:w-[372px] md:h-[75vh] md:w-[372px]'
       )}
         style={{
           backgroundColor: t.surface,
