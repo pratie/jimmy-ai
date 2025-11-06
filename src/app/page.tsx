@@ -11,9 +11,9 @@ import { Footer } from '@/components/landing/footer'
 import AnimatedChatHero from '@/components/landing/animated-chat-hero'
 
 export const metadata: Metadata = {
-  title: 'ChatDock — AI assistants on your knowledge base',
+  title: 'Chatdock AI — AI assistants on your knowledge base',
   description:
-    'Launch an AI assistant trained on your website, PDFs, and docs. Capture leads, answer questions, and automate support with ChatDock.',
+    'Launch an AI assistant trained on your website, PDFs, and docs. Capture leads, answer questions, and automate support with Chatdock AI.',
   alternates: {
     canonical: '/',
   },
@@ -73,7 +73,7 @@ export default async function Home() {
             {/* Right Column - Animated Chat Demo */}
             <div className="relative w-full max-w-[480px] mx-auto lg:mx-0 lg:ml-auto">
               <div className="relative">
-                <AnimatedChatHero density="cozy" title="ChatDock Assistant" />
+                <AnimatedChatHero density="cozy" title="Chatdock AI Assistant" />
 
                 {/* Floating Dashboard Elements */}
                 <div className="hidden lg:block absolute -right-16 top-10 space-y-4">
@@ -314,11 +314,11 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* Why ChatDock - Better spacing and hierarchy */}
+      {/* Why Chatdock AI - Better spacing and hierarchy */}
       <section className="py-28 md:py-36">
         <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12">
           <div className="text-center mb-16">
-            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-brand-primary mb-6">Why ChatDock</h2>
+            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-brand-primary mb-6">Why Chatdock AI</h2>
             <p className="text-lg sm:text-xl text-brand-primary/70 max-w-2xl mx-auto">
               Purpose‑built for accurate answers, fast experiences, and seamless handoffs.
             </p>
@@ -352,7 +352,7 @@ export default async function Home() {
               Help more customers in less time
             </h2>
             <p className="text-brand-primary/70 text-lg md:text-xl lg:text-2xl mb-12 max-w-2xl mx-auto leading-relaxed">
-              Support and growth teams use ChatDock to deliver instant answers from their content, reduce workload with self‑service, and convert more qualified leads.
+              Support and growth teams use Chatdock AI to deliver instant answers from their content, reduce workload with self‑service, and convert more qualified leads.
             </p>
             <Link href="/auth/sign-up">
               <Button size="lg" className="bg-[#0D9373] hover:bg-[#0A6553] text-white font-bold px-12 py-6 text-lg md:text-xl rounded-lg border-[3px] border-black shadow-[4px_4px_0px_0px_#000] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_#000] transition-all">
