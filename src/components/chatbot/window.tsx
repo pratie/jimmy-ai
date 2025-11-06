@@ -101,7 +101,7 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
       inputBg: '#FFFFFF',
       inputBorder: '#E5E7EB',
       accent: '#2563EB',
-      radius: 12,
+      radius: 18,
       shadow: 'sm' as 'none' | 'sm',
     }
     const t = { ...THEME_DEFAULT, ...(themeConfig || {}) }
@@ -139,23 +139,23 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
         className={cn(
         'relative flex flex-col overflow-hidden',
         cuprum.className,
-        responsive ? 'h-full w-full max-w-none' : 'h-[560px] w-[380px] sm:h-[640px] sm:w-[400px] md:h-[680px] md:w-[440px]'
+        responsive ? 'h-full w-full max-w-none' : 'h-[560px] w-[372px] sm:h-[640px] sm:w-[372px] md:h-[70vh] md:w-[372px]'
       )}
         style={{
           backgroundColor: t.surface,
           color: t.text,
           borderRadius: t.radius,
-          boxShadow: t.shadow === 'sm' ? '0 1px 2px rgba(0,0,0,0.06)' : 'none',
+          boxShadow: '0 10px 30px rgba(0,0,0,0.12)',
           border: '1px solid #E5E7EB'
         }}
       >
         {/* Fixed Header */}
         <div
           className="flex justify-between items-center border-b shrink-0"
-          style={{ backgroundColor: t.headerBg, color: t.headerText, padding: `${UI.headerPadY}px ${UI.headerPadX}px` }}
+          style={{ backgroundColor: t.headerBg, color: t.headerText, padding: `${UI.headerPadY}px ${UI.headerPadX}px`, height: 64 }}
         >
           <div className="flex gap-2 items-center">
-            <Avatar className="w-10 h-10">
+            <Avatar className="w-8 h-8">
               {botIcon && !avatarError ? (
                 <AvatarImage
                   src={getKieImageUrl(botIcon)}
@@ -173,7 +173,7 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
                 {domainName || 'Assistant'}
               </h3>
               <div className="flex items-center gap-2">
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[11px]">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[12px]">
                   <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500" aria-hidden="true" />
                   Online
                 </span>
@@ -193,7 +193,7 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
                 aria-label="Close chat"
                 onClick={onClose}
                 className="inline-flex items-center justify-center rounded-full hover:bg-gray-100 transition"
-                style={{ height: UI.controlSize, width: UI.controlSize }}
+                style={{ height: 40, width: 40 }}
                 title="Close"
               >
                 <X className="w-5 h-5 text-gray-500" />
@@ -223,11 +223,11 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
           <TabsContent value="chat" className="flex-1 flex flex-col min-h-0 m-0">
             {/* Messages area - takes all available space */}
             <div
-              style={{ color: textColor || t.text, backgroundColor: t.surface }}
+              style={{ color: textColor || t.text, backgroundColor: t.surface, paddingBottom: 'max(12px, env(safe-area-inset-bottom))' }}
               className="flex-1 overflow-y-auto px-4 py-4"
               ref={ref}
             >
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-1.5">
                 {chats.map((chat, key) => (
                   <Bubble
                     key={key}
@@ -239,7 +239,8 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
                       botBg: t.botBubbleBg,
                       botText: t.botBubbleText,
                     }}
-                    bubblePadding={UI.bubblePadding}
+                    paddingV={12}
+                    paddingH={14}
                     fontSize={UI.bubbleFontSize}
                     lineHeight={UI.bubbleLineHeight}
                   />
@@ -254,19 +255,19 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
                 e.preventDefault()
                 onChat()
               }}
-              className="flex px-3 items-center gap-2 bg-white border-t shrink-0"
-              style={{ paddingTop: Math.max(8, UI.headerPadY - 2), paddingBottom: Math.max(8, UI.headerPadY - 2) }}
+              className="flex px-4 items-center gap-3 bg-white border-t shrink-0"
+              style={{ paddingTop: 10, paddingBottom: 10 }}
             >
               <Input
                 {...register('content')}
                 placeholder={`Type a message...`}
                 className="flex-1 rounded-xl px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                style={{ backgroundColor: t.inputBg, border: `1px solid ${t.inputBorder}`, color: t.text, height: UI.inputHeight, fontSize: UI.bubbleFontSize }}
+                style={{ backgroundColor: t.inputBg, border: `1px solid ${t.inputBorder}`, color: t.text, height: 44, fontSize: UI.bubbleFontSize }}
               />
               <button
                 type="submit"
-                className="shrink-0 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 disabled:cursor-not-allowed text-white flex items-center justify-center transition-colors"
-                style={{ height: UI.controlSize, width: UI.controlSize }}
+                className="shrink-0 rounded-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 disabled:cursor-not-allowed text-white flex items-center justify-center transition-colors"
+                style={{ height: 40, width: 40 }}
                 disabled={!canSend}
                 aria-label="Send"
               >
@@ -274,8 +275,8 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
               </button>
               <Label htmlFor="bot-image" className="cursor-pointer">
                 <div
-                  className="rounded-xl border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-colors"
-                  style={{ height: UI.controlSize, width: UI.controlSize }}
+                  className="rounded-full border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-colors"
+                  style={{ height: 40, width: 40 }}
                 >
                   <Paperclip className="w-5 h-5 text-gray-500" />
                 </div>

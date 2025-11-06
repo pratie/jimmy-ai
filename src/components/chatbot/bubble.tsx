@@ -19,12 +19,13 @@ type Props = {
     botBg?: string
     botText?: string
   }
-  bubblePadding?: number
+  paddingV?: number
+  paddingH?: number
   fontSize?: number
   lineHeight?: number
 }
 
-const Bubble = ({ message, createdAt, botIcon, theme, bubblePadding = 12, fontSize = 15, lineHeight = 1.6 }: Props) => {
+const Bubble = ({ message, createdAt, botIcon, theme, paddingV = 12, paddingH = 14, fontSize = 15, lineHeight = 1.6 }: Props) => {
   let d = new Date()
   const image = extractUUIDFromString(message.content)
   const [imageError, setImageError] = useState(false)
@@ -103,7 +104,7 @@ const Bubble = ({ message, createdAt, botIcon, theme, bubblePadding = 12, fontSi
       )}
       <div
         className={cn(
-          'flex flex-col gap-1.5 min-w-[100px] max-w-[85%] rounded-2xl',
+          'flex flex-col gap-1.5 min-w-[100px] rounded-2xl',
           message.role == 'assistant' ? 'rounded-bl-none' : 'rounded-br-none'
         )}
         style={{
@@ -115,7 +116,8 @@ const Bubble = ({ message, createdAt, botIcon, theme, bubblePadding = 12, fontSi
             message.role === 'assistant'
               ? theme?.botText || '#111827'
               : theme?.userText || '#ffffff',
-          padding: bubblePadding,
+          padding: `${paddingV}px ${paddingH}px`,
+          maxWidth: '72%',
         }}
       >
         {createdAt ? (
