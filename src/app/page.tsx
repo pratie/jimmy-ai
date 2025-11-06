@@ -374,10 +374,9 @@ export default async function Home() {
 
       {/* Chatbot Embed - Landing page only */}
       <Script
-        id="chatdock-embed"
+        id="46316941-5e6b-4222-adc4-48fc5221012c"
         src="https://www.chatdock.io/embed.min.js"
         strategy="afterInteractive"
-        data-domain-id="75975441-fef0-4fa2-8034-cdd69e1a96ff"
         data-app-origin="https://www.chatdock.io"
         data-margin="24"
         data-size="md"
