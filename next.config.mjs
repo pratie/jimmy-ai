@@ -1,8 +1,22 @@
 /** @type {import('next').NextConfig} */
+const cspDirectives = [
+  "default-src 'self'",
+  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://datafa.st https://clerk.chatdock.io https://*.clerk.services https://*.clerkstage.dev",
+  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+  "font-src 'self' https://fonts.gstatic.com data:",
+  "img-src 'self' data: blob: https://clerk.chatdock.io https://*.clerk.services https://ucarecdn.com https://wordpress-1269066-4577871.cloudwaysapps.com https://tempfile.redpandaai.co",
+  "connect-src 'self' https://datafa.st https://clerk.chatdock.io https://*.clerk.services https://api.clerk.com https://*.pusher.com https://*.pusherapp.com wss://*.pusher.com wss://*.pusherapp.com",
+  "frame-src 'self' https://clerk.chatdock.io https://*.clerk.services https://*.clerkstage.dev",
+  "worker-src 'self' blob:",
+  "media-src 'self' blob:",
+  "form-action 'self'",
+  "base-uri 'self'"
+].join('; ')
+
 const securityHeaders = [
   {
     key: 'Content-Security-Policy',
-    value: "default-src 'self'",
+    value: cspDirectives,
   },
   {
     key: 'X-Frame-Options',
