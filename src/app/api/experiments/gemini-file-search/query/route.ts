@@ -11,7 +11,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json()
     const prompt: string = body.prompt
     const storeNames: string[] = body.storeNames
-    const modelId: string = body.modelId || 'gemini-2.5-pro'
+    const modelId: string = body.modelId || 'gemini-2.5-flash'
     const metadataFilter: string | undefined = body.metadataFilter
     const topK: number | undefined = body.topK
 
@@ -41,4 +41,3 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: false, error: err?.message || 'Gemini file search failed' }, { status: 400 })
   }
 }
-

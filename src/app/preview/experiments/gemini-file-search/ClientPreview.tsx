@@ -18,8 +18,8 @@ const ClientPreview: React.FC = () => {
   const searchParams = useSearchParams()
 
   const [storeName, setStoreName] = useState('')
-  const [prompt, setPrompt] = useState('Tell me about the README file we uploaded.')
-  const modelId = 'gemini-2.5-pro'
+  const [prompt, setPrompt] = useState('')
+  const modelId = 'gemini-2.5-flash'
   const [running, setRunning] = useState(false)
   const [result, setResult] = useState<QueryResult | null>(null)
 
