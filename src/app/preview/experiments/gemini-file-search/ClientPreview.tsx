@@ -52,11 +52,18 @@ const ClientPreview: React.FC = () => {
 
   return (
     <div className="w-full max-w-[980px] space-y-4">
-      <div>
-        <h1 className="text-2xl font-bold mb-1">Gemini File Search — Live Preview (Experimental)</h1>
-        <p className="text-sm text-muted-foreground">
-          Query a Gemini File Search store. To create a store or upload files, go to the Experiments page.
-        </p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold mb-1">Gemini File Search — Live Preview (Experimental)</h1>
+          <p className="text-sm text-muted-foreground">
+            Query a Gemini File Search store. To create a store or upload files, go to the Experiments page.
+          </p>
+        </div>
+        <Button asChild size="sm" variant="reverse">
+          <a href="https://chatdock.io" target="_blank" rel="noopener noreferrer">
+            Upload your own file
+          </a>
+        </Button>
       </div>
 
       {!storeName && (
@@ -70,6 +77,36 @@ const ClientPreview: React.FC = () => {
           <CardTitle>Query with File Search Tool</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
+          <div className="space-y-2">
+            <div className="text-sm font-medium">Suggested questions</div>
+            <div className="flex flex-wrap gap-2">
+              <Button
+                type="button"
+                variant="neutral"
+                size="sm"
+                onClick={() => setPrompt("Which startup has the highest MRR?")}
+              >
+                Highest MRR startup
+              </Button>
+              <Button
+                type="button"
+                variant="neutral"
+                size="sm"
+                onClick={() => setPrompt("Which startup has the highest revenue?")}
+              >
+                Highest revenue startup
+              </Button>
+              <Button
+                type="button"
+                variant="neutral"
+                size="sm"
+                onClick={() => setPrompt("What are the top 3 startups in the 'Services' category based on their 30-day revenue?")}
+              >
+                Top 3 in Services (30d revenue)
+              </Button>
+            </div>
+          </div>
+
           <div>
             <label className="block text-sm font-medium mb-1">Prompt</label>
             <Textarea value={prompt} onChange={(e) => setPrompt(e.target.value)} className="h-28" />
@@ -115,4 +152,3 @@ const ClientPreview: React.FC = () => {
 }
 
 export default ClientPreview
-
