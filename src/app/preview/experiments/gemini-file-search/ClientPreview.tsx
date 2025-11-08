@@ -18,7 +18,7 @@ const ClientPreview: React.FC = () => {
   const searchParams = useSearchParams()
 
   const [storeName, setStoreName] = useState('')
-  const [prompt, setPrompt] = useState('')
+  const [prompt, setPrompt] = useState('what is TrustMRR')
   const modelId = 'gemini-2.5-flash'
   const [running, setRunning] = useState(false)
   const [result, setResult] = useState<QueryResult | null>(null)
