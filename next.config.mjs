@@ -1,4 +1,19 @@
 /** @type {import('next').NextConfig} */
+const securityHeaders = [
+  {
+    key: 'Content-Security-Policy',
+    value: "default-src 'self'",
+  },
+  {
+    key: 'X-Frame-Options',
+    value: 'SAMEORIGIN',
+  },
+  {
+    key: 'X-Content-Type-Options',
+    value: 'nosniff',
+  },
+]
+
 const nextConfig = {
   reactStrictMode: false,
   // Allow larger payloads for Server Actions (paste/upload KB text)
@@ -33,6 +48,14 @@ const nextConfig = {
     }
 
     return config
+  },
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: securityHeaders,
+      },
+    ]
   },
 }
 
