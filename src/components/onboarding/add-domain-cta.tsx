@@ -15,7 +15,7 @@ const AddDomainCTA = () => {
     <div className="w-full rounded-2xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-8 md:p-12">
       <div className="flex flex-col items-center text-center max-w-3xl mx-auto">
         {/* Icon */}
-        <div className="w-16 h-16 mb-6 items-center justify-center rounded-full bg-[#0D9373]/10 text-[#0D9373] flex">
+        <div className="w-16 h-16 mb-6 items-center justify-center rounded-full bg-[#FF622D]/10 text-[#FF622D] flex">
           <Sparkles size={32} />
         </div>
 
@@ -34,7 +34,7 @@ const AddDomainCTA = () => {
           onOpen={
             <Button
               size="lg"
-              className="bg-[#0D9373] hover:bg-[#0A6553] text-white font-bold px-8 py-4 text-base rounded-lg border-2 border-black shadow-[4px_4px_0px_0px_#000] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_#000] transition-all"
+              className="bg-[#FF622D] hover:bg-[#E24D1C] text-white font-bold px-8 py-4 text-base rounded-lg border-2 border-black shadow-[4px_4px_0px_0px_#000] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_#000] transition-all"
             >
               <Plus size={20} className="mr-2" />
               Add Domain

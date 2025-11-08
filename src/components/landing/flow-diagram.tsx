@@ -76,9 +76,9 @@ export default function FlowDiagram() {
           >
             <defs>
               <linearGradient id="pathGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#0D9373" />
+                <stop offset="0%" stopColor="#FF622D" />
                 <stop offset="50%" stopColor="#4A5568" />
-                <stop offset="100%" stopColor="#0D9373" />
+                <stop offset="100%" stopColor="#FF622D" />
               </linearGradient>
             </defs>
 
@@ -107,7 +107,7 @@ export default function FlowDiagram() {
                 cx="0"
                 cy="0"
                 r="6"
-                fill="#0D9373"
+                fill="#FF622D"
                 className="animate-pulse"
                 style={{
                   animation: `moveAlongPath 3s ease-in-out ${i * 0.5}s infinite`,
@@ -145,10 +145,10 @@ export default function FlowDiagram() {
                     <div
                       className={`w-16 h-16 md:w-20 md:h-20 rounded-full flex items-center justify-center font-bold text-3xl md:text-4xl text-white border-3 border-border shadow-shadow ${
                         index % 3 === 0
-                          ? 'bg-[#0D9373]'
+                          ? 'bg-[#FF622D]'
                           : index % 3 === 1
                           ? 'bg-[#4A5568]'
-                          : 'bg-[#0A6553]'
+                          : 'bg-[#E24D1C]'
                       }`}
                     >
                       {step.number}
@@ -157,10 +157,10 @@ export default function FlowDiagram() {
                     <div
                       className={`absolute inset-0 rounded-full border-2 border-dashed ${
                         index % 3 === 0
-                          ? 'border-[#0D9373]/30'
+                          ? 'border-[#FF622D]/30'
                           : index % 3 === 1
                           ? 'border-[#4A5568]/30'
-                          : 'border-[#0A6553]/30'
+                          : 'border-[#E24D1C]/30'
                       } animate-spin`}
                       style={{
                         width: 'calc(100% + 12px)',
@@ -200,7 +200,7 @@ export default function FlowDiagram() {
         </div>
 
         {/* Mobile Path Indicator */}
-        <div className="md:hidden absolute left-12 top-48 bottom-48 w-1 bg-gradient-to-b from-[#0D9373] via-[#4A5568] to-[#0D9373] opacity-30 rounded-full" />
+        <div className="md:hidden absolute left-12 top-48 bottom-48 w-1 bg-gradient-to-b from-[#FF622D] via-[#4A5568] to-[#FF622D] opacity-30 rounded-full" />
       </div>
     </section>
   )

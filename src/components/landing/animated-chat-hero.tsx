@@ -16,7 +16,6 @@ interface AnimatedChatHeroProps {
   messages?: ChatMessage[]
   typingMsPerChar?: number
   gapMs?: number
-  loopPauseMs?: number
   responsiveHeight?: boolean
   density?: Density
   className?: string
@@ -35,7 +34,6 @@ export default function AnimatedChatHero({
   messages,
   typingMsPerChar = 24,
   gapMs = 700,
-  loopPauseMs = 1600,
   responsiveHeight = true,
   density = 'compact',
   className,
@@ -46,14 +44,11 @@ export default function AnimatedChatHero({
   const [cursorText, setCursorText] = useState('')
   const [isTyping, setIsTyping] = useState(false)
   const containerRef = useRef<HTMLDivElement | null>(null)
-  const resetTimerRef = useRef<number | null>(null)
   const typingTimerRef = useRef<number | null>(null)
   const playingRef = useRef(true)
 
   const clearTimers = () => {
-    if (resetTimerRef.current) window.clearTimeout(resetTimerRef.current)
     if (typingTimerRef.current) window.clearInterval(typingTimerRef.current)
-    resetTimerRef.current = null
     typingTimerRef.current = null
   }
 
@@ -116,18 +111,7 @@ export default function AnimatedChatHero({
         }
       }
 
-      await wait(loopPauseMs)
-      if (!cancelled) {
-        setDisplayed([])
-        setCursorText('')
-        setIsTyping(false)
-        // quick nudge to restart
-        resetTimerRef.current = window.setTimeout(() => {
-          if (!cancelled) {
-            setDisplayed([])
-          }
-        }, 200)
-      }
+      // After finishing once, keep transcript visible
     }
 
     run()
@@ -135,7 +119,7 @@ export default function AnimatedChatHero({
       cancelled = true
       clearTimers()
     }
-  }, [script, typingMsPerChar, gapMs, loopPauseMs])
+  }, [script, typingMsPerChar, gapMs])
 
   const heightClass = responsiveHeight ? 'h-[400px] md:h-[450px] lg:h-[520px]' : 'h-[500px]'
   const densityBubble = density === 'compact' ? 'text-[13px] px-3 py-2' : 'text-[15px] px-4 py-3'
@@ -155,7 +139,7 @@ export default function AnimatedChatHero({
       {/* Header */}
       <div className="relative overflow-hidden bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 dark:from-black dark:via-gray-950 dark:to-black rounded-t-2xl border-b border-gray-700/50">
         <div className="h-[60px] w-full flex items-center gap-3 px-5">
-          <div className="h-10 w-10 rounded-full bg-[#0D9373]/20 backdrop-blur-sm flex items-center justify-center ring-2 ring-[#0D9373]/40 overflow-hidden">
+          <div className="h-10 w-10 rounded-full bg-[#FF622D]/20 backdrop-blur-sm flex items-center justify-center ring-2 ring-[#FF622D]/40 overflow-hidden">
             <Image src="/images/logo.svg" alt="Chatdock AI" width={24} height={24} className="opacity-95" />
           </div>
           <div>
@@ -235,7 +219,7 @@ export default function AnimatedChatHero({
 function Avatar({ who }: { who: Role }) {
   if (who === 'assistant') {
     return (
-      <div className="h-8 w-8 flex-shrink-0 rounded-full bg-[#0D9373]/10 shadow-sm grid place-items-center ring-1 ring-[#0D9373]/30 overflow-hidden">
+      <div className="h-8 w-8 flex-shrink-0 rounded-full bg-[#FF622D]/10 shadow-sm grid place-items-center ring-1 ring-[#FF622D]/30 overflow-hidden">
         <Image
           src="/images/logo.svg"
           alt="Chatdock AI"

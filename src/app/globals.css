@@ -40,9 +40,9 @@ body::before {
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 0%;
 
-    /* Primary - using professional teal for accents */
-    --primary: 166 81% 31%;            /* #0D9373 - professional teal */
-    --primary-foreground: 0 0% 100%;   /* white on teal */
+    /* Primary - vibrant orange accent */
+    --primary: 15 100% 59%;            /* #FF622D */
+    --primary-foreground: 0 0% 100%;   /* white on orange */
 
     --secondary: 0 0% 96%;             /* light gray */
     --secondary-foreground: 0 0% 0%;
@@ -50,7 +50,7 @@ body::before {
     --muted: 0 0% 96%;
     --muted-foreground: 0 0% 40%;
 
-    --accent: 166 81% 31%;             /* professional teal accent */
+    --accent: 15 100% 59%;             /* primary orange accent */
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
@@ -58,7 +58,7 @@ body::before {
 
     --border: 0 0% 0%;                 /* black borders */
     --input: 0 0% 100%;
-    --ring: 166 81% 31%;               /* professional teal ring */
+    --ring: 15 100% 59%;               /* primary orange ring */
 
     --radius: 0.3125rem;               /* 5px - Neobrutalism base */
 
@@ -80,7 +80,7 @@ body::before {
     --popover: 0 0% 13%;
     --popover-foreground: 45 13% 93%;
 
-    --primary: 166 81% 31%;            /* professional teal stays same */
+    --primary: 15 100% 59%;            /* primary orange */
     --primary-foreground: 0 0% 100%;
 
     --secondary: 0 0% 20%;
@@ -89,7 +89,7 @@ body::before {
     --muted: 0 0% 20%;
     --muted-foreground: 0 0% 65%;
 
-    --accent: 166 81% 31%;             /* professional teal */
+    --accent: 15 100% 59%;             /* primary orange */
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 63% 31%;
@@ -97,7 +97,7 @@ body::before {
 
     --border: 0 0% 0%;                 /* keep black borders */
     --input: 0 0% 13%;
-    --ring: 166 81% 31%;
+    --ring: 15 100% 59%;
   }
 }
 
@@ -180,10 +180,10 @@ body::before {
   background: linear-gradient(180deg, #f6fbf8 0%, #eef8f3 40%, #fafdfb 100%);
 }
 
-/* Hero subtle greenish radial glow */
+/* Hero subtle orange radial glow */
 .landing-hero {
   position: relative;
-  background-image: radial-gradient(900px 500px at 70% 20%, rgba(34, 197, 94, 0.12), rgba(255, 255, 255, 0) 65%);
+  background-image: radial-gradient(900px 500px at 70% 20%, rgba(255, 98, 45, 0.12), rgba(255, 255, 255, 0) 65%);
 }
 
 .chat-bubble {

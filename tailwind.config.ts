@@ -23,8 +23,8 @@ const config = {
       },
       colors: {
         // Neobrutalism Colors (Updated brand palette)
-        main: '#0D9373',              // Professional teal (our brand color)
-        mainAccent: '#0D9373',
+        main: '#FF622D',              // Vibrant primary orange
+        mainAccent: '#FF622D',
         overlay: 'rgba(0,0,0,0.8)',
 
         // Light mode
