@@ -1,16 +1,65 @@
 /** @type {import('next').NextConfig} */
+const isDev = process.env.NODE_ENV !== 'production'
+
+const scriptSrc = [
+  "'self'", "'unsafe-inline'", "'unsafe-eval'",
+  'https://datafa.st',
+  'https://clerk.chatdock.io',
+  'https://*.clerk.services',
+  'https://*.clerkstage.dev',
+]
+if (isDev) {
+  // Allow Clerk dev script host e.g. https://known-*.clerk.accounts.dev
+  scriptSrc.push('https://*.clerk.accounts.dev', 'https://*.clerk.dev')
+}
+
+const styleSrc = ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com']
+const fontSrc = ["'self'", 'https://fonts.gstatic.com', 'data:']
+const imgSrc = [
+  "'self'", 'data:', 'blob:',
+  'https://clerk.chatdock.io', 'https://*.clerk.services',
+  'https://ucarecdn.com',
+  'https://wordpress-1269066-4577871.cloudwaysapps.com',
+  'https://tempfile.redpandaai.co',
+]
+if (isDev) {
+  imgSrc.push('https://*.clerk.accounts.dev')
+}
+
+const connectSrc = [
+  "'self'",
+  'https://datafa.st',
+  'https://clerk.chatdock.io',
+  'https://*.clerk.services',
+  'https://api.clerk.com',
+  'https://*.pusher.com', 'https://*.pusherapp.com',
+  'wss://*.pusher.com', 'wss://*.pusherapp.com',
+]
+if (isDev) {
+  // Clerk dev APIs + websockets
+  connectSrc.push('https://*.clerk.accounts.dev', 'https://api.clerk.dev', 'wss://*.clerk.accounts.dev')
+}
+
+const frameSrc = [
+  "'self'",
+  'https://clerk.chatdock.io', 'https://*.clerk.services', 'https://*.clerkstage.dev',
+]
+if (isDev) {
+  frameSrc.push('https://*.clerk.accounts.dev')
+}
+
 const cspDirectives = [
-  "default-src 'self'",
-  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://datafa.st https://clerk.chatdock.io https://*.clerk.services https://*.clerkstage.dev",
-  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-  "font-src 'self' https://fonts.gstatic.com data:",
-  "img-src 'self' data: blob: https://clerk.chatdock.io https://*.clerk.services https://ucarecdn.com https://wordpress-1269066-4577871.cloudwaysapps.com https://tempfile.redpandaai.co",
-  "connect-src 'self' https://datafa.st https://clerk.chatdock.io https://*.clerk.services https://api.clerk.com https://*.pusher.com https://*.pusherapp.com wss://*.pusher.com wss://*.pusherapp.com",
-  "frame-src 'self' https://clerk.chatdock.io https://*.clerk.services https://*.clerkstage.dev",
-  "worker-src 'self' blob:",
-  "media-src 'self' blob:",
-  "form-action 'self'",
-  "base-uri 'self'"
+  `default-src 'self'`,
+  `script-src ${scriptSrc.join(' ')}`,
+  `style-src ${styleSrc.join(' ')}`,
+  `font-src ${fontSrc.join(' ')}`,
+  `img-src ${imgSrc.join(' ')}`,
+  `connect-src ${connectSrc.join(' ')}`,
+  `frame-src ${frameSrc.join(' ')}`,
+  `worker-src 'self' blob:`,
+  `media-src 'self' blob:`,
+  `form-action 'self'`,
+  `base-uri 'self'`,
 ].join('; ')
 
 const securityHeaders = [

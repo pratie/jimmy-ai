@@ -21,6 +21,8 @@ const isPublicRoute = createRouteMatcher([
   '/api/dodo(.*)',
   // Allow public chatbot streaming + related bot APIs
   '/api/bot(.*)',
+  // Public experimental Gemini File Search preview query endpoint
+  '/api/experiments/gemini-file-search/query',
   // Public upload proxy for chatbot image uploads
   '/api/upload'
 ])

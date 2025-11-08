@@ -45,6 +45,11 @@ export const SIDE_BAR_MENU_SECONDARY: SIDE_BAR_MENU_PROPS[] = [
     icon: <EmailIcon />,
     path: 'email-marketing',
   },
+  {
+    label: 'Experiments',
+    icon: <IntegrationsIcon />,
+    path: 'experiments',
+  },
 ]
 
 type TABS_MENU_PROPS = {
