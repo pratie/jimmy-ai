@@ -18,7 +18,7 @@ const ClientPreview: React.FC = () => {
   const searchParams = useSearchParams()
 
   const [storeName, setStoreName] = useState('')
-  const [prompt, setPrompt] = useState('what is TrustMRR')
+  const [prompt, setPrompt] = useState('')
   const modelId = 'gemini-2.5-flash'
   const [running, setRunning] = useState(false)
   const [result, setResult] = useState<QueryResult | null>(null)
@@ -27,6 +27,8 @@ const ClientPreview: React.FC = () => {
     const preset = searchParams?.get('store') || ''
     if (preset) setStoreName(preset)
   }, [searchParams])
+
+  // Suggestions removed per request
 
   const onRunQuery = async () => {
     setRunning(true)
@@ -77,35 +79,7 @@ const ClientPreview: React.FC = () => {
           <CardTitle>Query with File Search Tool</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
-          <div className="space-y-2">
-            <div className="text-sm font-medium">Suggested questions</div>
-            <div className="flex flex-wrap gap-2">
-              <Button
-                type="button"
-                variant="neutral"
-                size="sm"
-                onClick={() => setPrompt("Which startup has the highest MRR?")}
-              >
-                Highest MRR startup
-              </Button>
-              <Button
-                type="button"
-                variant="neutral"
-                size="sm"
-                onClick={() => setPrompt("Which startup has the highest revenue?")}
-              >
-                Highest revenue startup
-              </Button>
-              <Button
-                type="button"
-                variant="neutral"
-                size="sm"
-                onClick={() => setPrompt("What are the top 3 startups in the 'Services' category based on their 30-day revenue?")}
-              >
-                Top 3 in Services (30d revenue)
-              </Button>
-            </div>
-          </div>
+          {/* Suggestions removed */}
 
           <div>
             <label className="block text-sm font-medium mb-1">Prompt</label>
