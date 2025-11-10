@@ -2,6 +2,8 @@ import type { Metadata } from 'next'
 import NavBar from '@/components/navbar'
 import { Button } from '@/components/ui/button'
 import Image from 'next/image'
+import DashboardImg from '../../public/images/Dashboard.png'
+import { AspectRatio } from '@/components/ui/aspect-ratio'
 import Link from 'next/link'
 import PricingSection from '@/components/landing/pricing-section'
 import Script from 'next/script'
@@ -120,6 +122,33 @@ export default async function Home() {
 
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Product Preview - Dashboard Screenshot */}
+      <section className="py-20 md:py-28">
+        <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12">
+          <div className="text-center mb-8 md:mb-10">
+            <h2 className="text-4xl sm:text-5xl font-bold text-brand-primary mb-4">
+              See the dashboard
+            </h2>
+            <p className="text-brand-primary/70 text-lg max-w-2xl mx-auto">
+              Manage chatbots, track conversations, train your knowledge base, and tweak
+              advanced AI settings—all in one place.
+            </p>
+          </div>
+          <div className="max-w-5xl mx-auto rounded-2xl border-2 border-black bg-white dark:bg-gray-900 shadow-[4px_4px_0px_0px_#000] overflow-hidden">
+            <AspectRatio ratio={16/9}>
+              <Image
+                src={DashboardImg}
+                alt="Chatdock dashboard screenshot"
+                fill
+                className="object-contain"
+                priority={false}
+                sizes="(min-width: 1280px) 1024px, (min-width: 768px) 80vw, 100vw"
+              />
+            </AspectRatio>
           </div>
         </div>
       </section>
