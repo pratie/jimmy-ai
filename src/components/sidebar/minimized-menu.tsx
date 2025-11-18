@@ -34,12 +34,12 @@ export const MinMenu = ({
   const [showDropdown, setShowDropdown] = useState(false)
 
   return (
-    <div className="p-3 flex flex-col items-center h-full">
+    <div className="p-3 flex flex-col items-center h-full text-white">
       <button
         onClick={onShrink}
-        className="animate-fade-in opacity-0 delay-300 fill-mode-forwards cursor-pointer w-10 h-10 flex items-center justify-center rounded-lg hover:bg-brand-base-100 transition-all"
+        className="animate-fade-in opacity-0 delay-300 fill-mode-forwards cursor-pointer w-10 h-10 flex items-center justify-center rounded-lg bg-white/5 hover:bg-white/15 transition-all"
       >
-        <Menu className="w-5 h-5 text-brand-primary/80" />
+        <Menu className="w-5 h-5 text-white" />
       </button>
       <div className="animate-fade-in opacity-0 delay-300 fill-mode-forwards flex flex-col justify-between h-full pt-10">
         <div className="flex flex-col">
@@ -69,13 +69,13 @@ export const MinMenu = ({
             <div className="relative">
               <button
                 onClick={() => setShowDropdown(!showDropdown)}
-                className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-brand-accent to-brand-primary hover:opacity-90 transition-opacity"
+                className="flex items-center justify-center w-10 h-10 rounded-full bg-white/15 hover:bg-white/25 transition"
               >
                 <User className="w-5 h-5 text-white" />
               </button>
               {showDropdown && (
-                <div className="absolute bottom-full left-full ml-2 mb-0 bg-white/95 backdrop-blur-sm border border-brand-base-300 rounded-lg shadow-lg overflow-hidden w-48">
-                  <div className="px-4 py-3 border-b border-brand-base-300/60">
+                <div className="absolute bottom-full left-full ml-2 mb-0 bg-white/95 backdrop-blur-sm border border-white/40 rounded-lg shadow-lg overflow-hidden w-48">
+                  <div className="px-4 py-3 border-b border-white/40">
                     <p className="text-sm font-medium text-brand-primary truncate">{user.fullname}</p>
                     <p className="text-xs text-brand-primary/70 truncate">{user.email}</p>
                   </div>
@@ -84,10 +84,10 @@ export const MinMenu = ({
                       setShowDropdown(false)
                       onSignOut()
                     }}
-                    className="flex items-center gap-2 px-4 py-2 w-full hover:bg-brand-base-100 transition-colors text-left"
+                    className="flex items-center gap-2 px-4 py-2 w-full hover:bg-brand-base-100 transition-colors text-left text-brand-primary"
                   >
-                    <LogOut className="w-4 h-4 text-brand-primary/80" />
-                    <span className="text-sm text-brand-primary/90">Sign out</span>
+                    <LogOut className="w-4 h-4" />
+                    <span className="text-sm">Sign out</span>
                   </button>
                 </div>
               )}

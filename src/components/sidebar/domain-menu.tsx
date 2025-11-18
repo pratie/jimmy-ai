@@ -57,13 +57,16 @@ const DomainMenu = ({ domains, min }: Props) => {
   return (
     <div className={cn('flex flex-col gap-3', min ? 'mt-6' : 'mt-3')}>
       <div className="flex justify-between w-full items-center">
-        {!min && <p className="text-xs text-brand-primary/60">AI AGENTS</p>}
+        {!min && <p className="text-xs tracking-[0.08em] text-white">AI AGENTS</p>}
         <AppDrawer
           description="add in your domain address to integrate your chatbot"
           title="Add your business domain"
           onOpen={
-            <div className="cursor-pointer text-brand-primary/60 hover:text-brand-primary rounded-full border-2 border-brand-base-300">
-              <Plus />
+            <div className={cn(
+              'cursor-pointer rounded-full border border-white/40 p-1 text-white/70 transition',
+              'hover:border-white hover:text-white'
+            )}>
+              <Plus className="w-4 h-4" />
             </div>
           }
         >
@@ -96,18 +99,18 @@ const DomainMenu = ({ domains, min }: Props) => {
           </Loader>
         </AppDrawer>
       </div>
-      <div className="flex flex-col gap-1 text-brand-primary font-medium">
+      <div className="flex flex-col gap-1 font-medium text-white">
         {domains &&
           domains.map((domain) => (
             <Link
               href={`/settings/${domain.name.split('.')[0]}`}
               key={domain.id}
               className={cn(
-                'flex gap-3 hover:bg-brand-base-100 rounded-full transition duration-150 ease-in-out cursor-pointer border-2',
+                'flex gap-3 rounded-full transition duration-150 ease-in-out cursor-pointer border',
                 !min ? 'p-2' : 'py-2',
                 domain.name.split('.')[0] == isDomain
-                  ? 'bg-brand-secondary border-brand-base-300 shadow-sm'
-                  : 'border-transparent'
+                  ? 'bg-white/15 border-white/30 text-white'
+                  : 'text-white border-transparent hover:bg-white/10'
               )}
             >
               <DomainIcon
