@@ -12,12 +12,12 @@ export function Footer() {
             <div className="flex items-center gap-3 mb-4">
               <Image
                 src="/images/logo.svg"
-                alt="Chatdock AI Logo"
+                alt="ChatDock AI Logo"
                 width={32}
                 height={32}
                 className="w-8 h-8"
               />
-              <span className="font-extrabold text-lg">Chatdock AI</span>
+              <span className="font-extrabold text-lg">ChatDock AI</span>
             </div>
             <p className="text-sm font-bold">AI knowledge base & website assistant.</p>
           </div>
@@ -62,7 +62,7 @@ export function Footer() {
         </div>
 
         <p className="text-center text-sm font-black uppercase tracking-widest">
-          © 2025 Chatdock AI. All rights reserved.
+          © 2025 ChatDock AI. All rights reserved.
         </p>
       </div>
     </footer>

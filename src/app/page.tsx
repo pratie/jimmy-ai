@@ -17,9 +17,9 @@ import { OpenAIIcon, AnthropicIcon, GoogleIcon } from '@/components/icons/provid
 const bebas = Bebas_Neue({ subsets: ['latin'], weight: '400' })
 
 export const metadata: Metadata = {
-  title: 'Chatdock AI — AI assistant on your knowledge base',
+  title: 'ChatDock AI — AI assistant on your knowledge base',
   description:
-    'Launch an AI assistant trained on your website, PDFs, and docs. Capture leads, answer questions, and automate support with Chatdock AI.',
+    'Launch an AI assistant trained on your website, PDFs, and docs. Capture leads, answer questions, and automate support with ChatDock AI.',
   alternates: {
     canonical: '/',
   },
@@ -101,7 +101,7 @@ export default async function Home() {
             {/* Right Column - Animated Chat Demo */}
             <div className="relative w-full max-w-[480px] mx-auto lg:mx-0 lg:ml-auto">
               <div className="relative">
-                <AnimatedChatHero density="cozy" title="Chatdock AI Assistant" />
+                <AnimatedChatHero density="cozy" title="ChatDock AI Assistant" />
 
                 {/* Floating Dashboard Elements */}
                 <div className="hidden lg:block absolute -right-16 top-10 space-y-4">
@@ -145,7 +145,7 @@ export default async function Home() {
             <AspectRatio ratio={16/9}>
               <Image
                 src={DashboardImg}
-                alt="Chatdock dashboard screenshot"
+                alt="ChatDock dashboard screenshot"
                 fill
                 className="object-contain"
                 priority={false}
@@ -369,11 +369,11 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* Why Chatdock AI - Better spacing and hierarchy */}
+      {/* Why ChatDock AI - Better spacing and hierarchy */}
       <section className="py-28 md:py-36">
         <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12">
           <div className="text-center mb-16">
-            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-brand-primary mb-6">Why Chatdock AI</h2>
+            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-brand-primary mb-6">Why ChatDock AI</h2>
             <p className="text-lg sm:text-xl text-brand-primary/70 max-w-2xl mx-auto">
               Purpose‑built for accurate answers, fast experiences, and seamless handoffs.
             </p>
@@ -407,7 +407,7 @@ export default async function Home() {
               Help more customers in less time
             </h2>
             <p className="text-brand-primary/70 text-lg md:text-xl lg:text-2xl mb-12 max-w-2xl mx-auto leading-relaxed">
-              Support and growth teams use Chatdock AI to deliver instant answers from their content, reduce workload with self‑service, and convert more qualified leads.
+              Support and growth teams use ChatDock AI to deliver instant answers from their content, reduce workload with self‑service, and convert more qualified leads.
             </p>
             <Link href="/auth/sign-up">
               <Button

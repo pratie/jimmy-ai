@@ -37,7 +37,7 @@ export default function AnimatedChatHero({
   responsiveHeight = true,
   density = 'compact',
   className,
-  title = 'Chatdock AI Assistant',
+  title = 'ChatDock AI Assistant',
 }: AnimatedChatHeroProps) {
   const script = messages && messages.length ? messages : DEFAULT_SCRIPT
   const [displayed, setDisplayed] = useState<ChatMessage[]>([])
@@ -140,7 +140,7 @@ export default function AnimatedChatHero({
       <div className="relative overflow-hidden bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 dark:from-black dark:via-gray-950 dark:to-black rounded-t-2xl border-b border-gray-700/50">
         <div className="h-[60px] w-full flex items-center gap-3 px-5">
           <div className="h-10 w-10 rounded-full bg-main/20 backdrop-blur-sm flex items-center justify-center ring-2 ring-main/40 overflow-hidden">
-            <Image src="/images/logo.svg" alt="Chatdock AI" width={24} height={24} className="opacity-95" />
+            <Image src="/images/logo.svg" alt="ChatDock AI" width={24} height={24} className="opacity-95" />
           </div>
           <div>
             <div className="text-white font-semibold text-[15px] leading-tight">{title}</div>
@@ -222,7 +222,7 @@ function Avatar({ who }: { who: Role }) {
       <div className="h-8 w-8 flex-shrink-0 rounded-full bg-main/10 shadow-sm grid place-items-center ring-1 ring-main/30 overflow-hidden">
         <Image
           src="/images/logo.svg"
-          alt="Chatdock AI"
+          alt="ChatDock AI"
           width={20}
           height={20}
           className="opacity-90"
