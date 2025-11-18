@@ -72,10 +72,10 @@ const MaxMenu = ({ current, domains, onExpand, onSignOut, user }: Props) => {
             <div className="relative">
               <button
                 onClick={() => setShowDropdown(!showDropdown)}
-                className="flex items-center gap-2 px-2 py-2 w-full hover:bg-bg rounded-base transition-all border-2 border-transparent hover:border-border hover:shadow-[2px_2px_0px_0px_#000]"
+                className="flex items-center gap-2 px-2 py-2 w-full rounded-base transition-all border border-transparent hover:border-border hover:bg-white/60 dark:hover:bg-darkBg hover:shadow-light"
               >
-                <div className="flex items-center justify-center w-10 h-10 rounded-full bg-main border-2 border-border shadow-[2px_2px_0px_0px_#000]">
-                  <User className="w-5 h-5 text-black" />
+                <div className="flex items-center justify-center w-10 h-10 rounded-full bg-main/15 text-main">
+                  <User className="w-5 h-5" />
                 </div>
                 <div className="flex flex-col overflow-hidden flex-1 text-left">
                   <p className="text-sm font-heading text-text truncate dark:text-darkText">
@@ -87,8 +87,8 @@ const MaxMenu = ({ current, domains, onExpand, onSignOut, user }: Props) => {
                 </div>
               </button>
               {showDropdown && (
-                <div className="absolute bottom-full left-0 right-0 mb-2 bg-bg border-2 border-border rounded-base shadow-shadow overflow-hidden dark:bg-darkBg">
-                  <div className="px-4 py-3 border-b-2 border-border">
+                <div className="absolute bottom-full left-0 right-0 mb-2 bg-bg border border-border rounded-base shadow-shadow overflow-hidden dark:bg-darkBg">
+                  <div className="px-4 py-3 border-b border-border">
                     <p className="text-sm font-heading text-text dark:text-darkText">{user.fullname}</p>
                     <p className="text-xs text-text/70 dark:text-darkText/70">{user.email}</p>
                   </div>

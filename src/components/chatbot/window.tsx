@@ -89,18 +89,18 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
     const canSend = !!(contentValue && contentValue.trim().length > 0) || hasImage
 
     const THEME_DEFAULT = {
-      primary: '#2563EB',
+      primary: '#1DA1F2',
       surface: '#FFFFFF',
       text: '#111827',
       headerBg: '#FFFFFF',
       headerText: '#111827',
-      userBubbleBg: '#2563EB',
+      userBubbleBg: '#1DA1F2',
       userBubbleText: '#FFFFFF',
       botBubbleBg: '#F3F4F6',
       botBubbleText: '#111827',
       inputBg: '#FFFFFF',
       inputBorder: '#D1D5DB',
-      accent: '#2563EB',
+      accent: '#1DA1F2',
       radius: 10,
       shadow: 'sm' as 'none' | 'sm',
     }

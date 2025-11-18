@@ -68,16 +68,16 @@ export default function PricingSection() {
               <Card
                 key={card.title}
                 className={clsx(
-                  'w-full max-w-[320px] sm:w-[320px] flex flex-col justify-between rounded-base overflow-hidden transition-all',
+                  'w-full max-w-[320px] sm:w-[320px] flex flex-col justify-between rounded-2xl overflow-hidden transition-all',
                   {
-                    'bg-bg border-2 border-main shadow-shadow hover:translate-x-1 hover:translate-y-1 hover:shadow-none relative':
+                    'bg-bg border border-main shadow-shadow hover:shadow-light relative':
                       card.title === 'Business',
-                    'bg-bg border-2 border-border shadow-shadow hover:translate-x-1 hover:translate-y-1 hover:shadow-none': card.title !== 'Business',
+                    'bg-bg border border-border shadow-shadow hover:shadow-light': card.title !== 'Business',
                   }
                 )}
               >
                 {card.title === 'Business' && (
-                  <div className="absolute top-0 right-0 bg-main text-black px-4 py-1 text-sm font-heading border-2 border-border border-t-0 border-r-0 rounded-bl-base shadow-[2px_2px_0px_0px_#000]">
+                  <div className="absolute top-0 right-0 bg-main text-white px-4 py-1 text-xs font-heading rounded-bl-base">
                     ⭐ Most Popular
                   </div>
                 )}
@@ -120,7 +120,7 @@ export default function PricingSection() {
                   )}
                 </CardContent>
 
-                <CardFooter className="flex flex-col items-start gap-6 pt-4 border-t-2 border-brand-base-300">
+                <CardFooter className="flex flex-col items-start gap-6 pt-4 border-t border-brand-base-300">
                   <div className="space-y-3 w-full">
                     {card.features.map((feature) => (
                       <div key={feature} className="flex items-center gap-3">
@@ -135,10 +135,10 @@ export default function PricingSection() {
                   <Link
                     href={`/auth/sign-up?plan=${encodeURIComponent(card.title)}${isYearly ? '&billing=yearly' : ''}`}
                     className={clsx(
-                      'w-full text-center font-heading py-3 px-4 rounded-base transition-all border-2',
+                      'w-full text-center font-heading py-3 px-4 rounded-base transition-all border',
                       card.title === 'Business'
-                        ? 'bg-main text-black border-border shadow-shadow hover:translate-x-1 hover:translate-y-1 hover:shadow-none'
-                        : 'bg-bg text-text border-border shadow-shadow hover:translate-x-1 hover:translate-y-1 hover:shadow-none'
+                        ? 'bg-main text-white border-transparent shadow-shadow hover:shadow-light'
+                        : 'bg-bg text-text border-border shadow-shadow hover:shadow-light'
                     )}
                     data-fast-goal="clicked_pricing_cta"
                     data-fast-goal-plan={card.title.toLowerCase()}

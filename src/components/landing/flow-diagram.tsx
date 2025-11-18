@@ -76,9 +76,9 @@ export default function FlowDiagram() {
           >
             <defs>
               <linearGradient id="pathGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#FF622D" />
-                <stop offset="50%" stopColor="#4A5568" />
-                <stop offset="100%" stopColor="#FF622D" />
+                <stop offset="0%" stopColor="#1DA1F2" />
+                <stop offset="50%" stopColor="#0F8AD8" />
+                <stop offset="100%" stopColor="#38BDF8" />
               </linearGradient>
             </defs>
 
@@ -107,7 +107,7 @@ export default function FlowDiagram() {
                 cx="0"
                 cy="0"
                 r="6"
-                fill="#FF622D"
+                fill="#1DA1F2"
                 className="animate-pulse"
                 style={{
                   animation: `moveAlongPath 3s ease-in-out ${i * 0.5}s infinite`,
@@ -145,10 +145,10 @@ export default function FlowDiagram() {
                     <div
                       className={`w-16 h-16 md:w-20 md:h-20 rounded-full flex items-center justify-center font-bold text-3xl md:text-4xl text-white border-3 border-border shadow-shadow ${
                         index % 3 === 0
-                          ? 'bg-[#FF622D]'
+                          ? 'bg-main'
                           : index % 3 === 1
-                          ? 'bg-[#4A5568]'
-                          : 'bg-[#E24D1C]'
+                          ? 'bg-brand-info'
+                          : 'bg-brand-accent'
                       }`}
                     >
                       {step.number}
@@ -157,10 +157,10 @@ export default function FlowDiagram() {
                     <div
                       className={`absolute inset-0 rounded-full border-2 border-dashed ${
                         index % 3 === 0
-                          ? 'border-[#FF622D]/30'
+                          ? 'border-main/30'
                           : index % 3 === 1
-                          ? 'border-[#4A5568]/30'
-                          : 'border-[#E24D1C]/30'
+                          ? 'border-brand-info/30'
+                          : 'border-brand-accent/30'
                       } animate-spin`}
                       style={{
                         width: 'calc(100% + 12px)',
@@ -174,7 +174,7 @@ export default function FlowDiagram() {
                 </div>
 
                 {/* Step Content */}
-                <div className="flex-1 bg-white dark:bg-black/40 backdrop-blur-md p-5 md:p-6 rounded-xl border-2 border-brand-base-300 shadow-lg hover:shadow-xl transition-shadow">
+                <div className="flex-1 bg-white dark:bg-black/40 backdrop-blur-md p-5 md:p-6 rounded-xl border border-brand-base-300 shadow-shadow hover:shadow-light transition-shadow">
                   <h3 className="text-xl md:text-2xl font-bold text-brand-primary mb-2">
                     {step.title}
                   </h3>
@@ -187,7 +187,7 @@ export default function FlowDiagram() {
                     <Link href="/auth/sign-up" className="inline-block mt-3">
                       <Button
                         size="default"
-                        className="bg-main text-black font-heading px-6 py-2.5 text-sm border-2 border-border shadow-shadow hover:translate-x-1 hover:translate-y-1 hover:shadow-none"
+                        className="bg-main text-white font-heading px-6 py-2.5 text-sm rounded-full shadow-shadow hover:shadow-light transition-all"
                       >
                         Get Started Free →
                       </Button>
@@ -200,7 +200,7 @@ export default function FlowDiagram() {
         </div>
 
         {/* Mobile Path Indicator */}
-        <div className="md:hidden absolute left-12 top-48 bottom-48 w-1 bg-gradient-to-b from-[#FF622D] via-[#4A5568] to-[#FF622D] opacity-30 rounded-full" />
+        <div className="md:hidden absolute left-12 top-48 bottom-48 w-1 bg-gradient-to-b from-main via-brand-info to-brand-accent opacity-30 rounded-full" />
       </div>
     </section>
   )

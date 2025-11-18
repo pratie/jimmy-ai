@@ -65,7 +65,7 @@ const Bubble = ({ message, createdAt, botIcon, theme }: Props) => {
           backgroundColor:
             message.role === 'assistant'
               ? theme?.botBg || '#f3f4f6'
-              : theme?.userBg || '#2563eb',
+              : theme?.userBg || '#1da1f2',
           color:
             message.role === 'assistant'
               ? theme?.botText || '#111827'

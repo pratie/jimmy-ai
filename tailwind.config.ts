@@ -22,85 +22,85 @@ const config = {
         container: '1400px',
       },
       colors: {
-        // Neobrutalism Colors (Updated brand palette)
-        main: '#FF622D',              // Vibrant primary orange
-        mainAccent: '#FF622D',
-        overlay: 'rgba(0,0,0,0.8)',
+        // Refined SMB-friendly palette
+        main: '#1da1f2',              // Primary brand blue
+        mainAccent: '#0f8ad8',
+        overlay: 'rgba(15,23,42,0.8)',
 
-        // Light mode
-        bg: '#ffffff',
-        text: '#000',
+        // Light mode surfaces
+        bg: '#f4f6fb',
+        text: '#0f172a',
 
-        // Dark mode
-        darkBg: '#212121',
-        darkText: '#eeefe9',
-        darkBorder: '#000',
-        secondaryBlack: '#212121',
+        // Dark mode surfaces
+        darkBg: '#050914',
+        darkText: '#e2e8f0',
+        darkBorder: '#1e293b',
+        secondaryBlack: '#0f172a',
 
-        // Brand Palette (Landing page) - Keep for backward compatibility
-        'brand-primary': '#0f172a',   // Dark navy for primary actions
-        'brand-secondary': '#f6f4ef', // Soft off-white for surfaces
-        'brand-accent': '#d97a5b',    // Accent highlight (salmon/coral)
-        'brand-info': '#5b50e6',      // Info purple
-        'brand-success': '#22c55e',   // Success green
-        'brand-warning': '#e24d4d',   // Warning (tomato red)
-        'brand-error': '#b91c1c',     // Error red (darker)
-        'brand-yellow': '#f59e0b',    // Amber accent for highlights
-        'brand-base-100': '#faf8f3',  // Lightest base
-        'brand-base-200': '#f3f0e8',  // Medium base
-        'brand-base-300': '#e7e2d6',  // Darkest base
-        // Map legacy "sauce-*" tokens to landing brand palette
-        // This keeps existing classnames working while unifying colors app-wide
-        'sauce-mint': '#f6f4ef',          // -> brand-secondary
-        'sauce-cyan': '#e7e2d6',          // -> brand-base-300 (borders)
-        'sauce-purple': '#d97a5b',        // -> brand-accent (coral)
-        'sauce-purple-dark': '#d97a5b',   // -> brand-accent (fallback)
-        'sauce-purple-light': '#d97a5b',  // -> brand-accent (fallback)
-        'sauce-black': '#0f172a',         // -> brand-primary (text)
-        'sauce-gray': '#0f172a',          // -> brand-primary (secondary text)
-        'sauce-grid': '#e7e2d6',          // -> brand-base-300 (grid lines)
+        // Brand Palette (Landing page)
+        'brand-primary': '#0f172a',
+        'brand-secondary': '#e0e7ff',
+        'brand-accent': '#1da1f2',
+        'brand-info': '#6366f1',
+        'brand-success': '#22c55e',
+        'brand-warning': '#f97316',
+        'brand-error': '#ef4444',
+        'brand-yellow': '#fbbf24',
+        'brand-base-100': '#f8fafc',
+        'brand-base-200': '#eef2ff',
+        'brand-base-300': '#e2e8f0',
+
+        // Legacy "sauce-*" tokens mapped to calm hues
+        'sauce-mint': '#e0e7ff',
+        'sauce-cyan': '#dbeafe',
+        'sauce-purple': '#6366f1',
+        'sauce-purple-dark': '#4f46e5',
+        'sauce-purple-light': '#818cf8',
+        'sauce-black': '#0f172a',
+        'sauce-gray': '#1f2937',
+        'sauce-grid': '#e2e8f0',
 
         // Accent colors from logos
-        'accent-red': '#ef4444',         // incident.io red
-        'accent-yellow': '#fbbf24',      // whatnot yellow
-        'accent-green': '#10b981',       // linktree green
+        'accent-red': '#ef4444',
+        'accent-yellow': '#fbbf24',
+        'accent-green': '#10b981',
 
-        // Pastel Palette - Subtle Hues Theme (keeping for compatibility)
-        'pastel-lavender': '#eae4e9',
-        'pastel-cream': '#fff1e6',
-        'pastel-blush': '#fde2e4',
-        'pastel-pink': '#fad2e1',
-        'pastel-mint': '#e2ece9',
-        'pastel-sky': '#dfe7fd',
-        'pastel-periwinkle': '#cddafd',
+        // Pastel Palette - retained for compatibility
+        'pastel-lavender': '#ede9fe',
+        'pastel-cream': '#fff4e6',
+        'pastel-blush': '#ffe4e6',
+        'pastel-pink': '#fed7e2',
+        'pastel-mint': '#dcfce7',
+        'pastel-sky': '#dbeafe',
+        'pastel-periwinkle': '#e0e7ff',
 
-        // Darker shades for text/contrast
-        'text-primary': '#0a0a0a',       // Bold black
-        'text-secondary': '#525252',     // Medium gray
-        'text-muted': '#737373',         // Light gray
+        // Text shades
+        'text-primary': '#0f172a',
+        'text-secondary': '#475569',
+        'text-muted': '#94a3b8',
 
         // Interactive states
-        'interactive-pink': '#f7a6c4',
-        'interactive-blue': '#a7c7e7',
-        'interactive-mint': '#b8ddd3',
+        'interactive-pink': '#f8bbd0',
+        'interactive-blue': '#bfdbfe',
+        'interactive-mint': '#bbf7d0',
 
-        // Legacy colors (remapped to landing palette for consistency)
-        cream: '#faf8f3',                 // -> brand-base-100
-        'notebook-yellow': '#faf8f3',     // -> brand-base-100
-        'sketch-red': '#e24d4d',          // -> brand-warning
-        'line-blue': '#e7e2d6',           // -> brand-base-300
-        gravel: '#0f172a',                // -> brand-primary
-        iridium: '#0f172a',               // -> brand-primary
-        orange: '#d97a5b',                // -> brand-accent
-        peach: '#f6f4ef',                 // -> brand-secondary
-        platinum: '#e7e2d6',              // -> brand-base-300
-        ghost: '#e7e2d6',                 // -> brand-base-300
-        grandis: '#d97a5b',               // -> brand-accent
-        porcelain: '#f3f0e8',             // -> brand-base-200
-        ironside: '#0f172a',              // -> brand-primary
+        // Legacy aliases
+        cream: '#f8fafc',
+        'notebook-yellow': '#fefce8',
+        'sketch-red': '#ef4444',
+        'line-blue': '#e2e8f0',
+        gravel: '#0f172a',
+        iridium: '#0f172a',
+        orange: '#f97316',
+        peach: '#ffe4e6',
+        platinum: '#e2e8f0',
+        ghost: '#e2e8f0',
+        grandis: '#fcd34d',
+        porcelain: '#e0e7ff',
+        ironside: '#1f2937',
 
-        // Shadcn theme colors (hybrid with Neobrutalism)
-        border: '#000',  // Neobrutalism uses solid black borders
+        // Shadcn theme colors (aligned with new system)
+        border: '#e2e8f0',
         input: 'hsl(var(--input))',
         ring: 'hsl(var(--ring))',
         background: 'hsl(var(--background))',
@@ -135,21 +135,21 @@ const config = {
         },
       },
       borderRadius: {
-        base: '5px',  // Neobrutalism border radius
+        base: '12px',
         lg: 'var(--radius)',
         md: 'calc(var(--radius) - 2px)',
         sm: 'calc(var(--radius) - 4px)',
       },
       boxShadow: {
-        light: '4px 4px 0px 0px #000',
-        dark: '4px 4px 0px 0px #000',
-        shadow: '4px 4px 0px 0px #000',  // Neobrutalism shadow
+        light: '0 15px 35px rgba(15,23,42,0.12)',
+        dark: '0 25px 50px rgba(2,6,23,0.5)',
+        shadow: '0 20px 45px rgba(15,23,42,0.12)',
       },
       translate: {
-        boxShadowX: '4px',
-        boxShadowY: '4px',
-        reverseBoxShadowX: '-4px',
-        reverseBoxShadowY: '-4px',
+        boxShadowX: '0px',
+        boxShadowY: '-2px',
+        reverseBoxShadowX: '0px',
+        reverseBoxShadowY: '2px',
       },
       fontWeight: {
         base: '500',

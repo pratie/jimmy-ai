@@ -18,10 +18,10 @@ const MenuItem = ({ size, path, icon, label, current, onSignOut }: Props) => {
         <Link
           onClick={onSignOut}
           className={cn(
-            'flex items-center gap-2 px-2 py-2 rounded-base my-1 transition-all border-2 font-base',
+            'flex items-center gap-2 px-2 py-2 rounded-base my-1 transition-all border font-base',
             current === path
-              ? 'bg-main text-black font-heading border-border shadow-shadow'
-              : 'text-text border-transparent hover:bg-bg hover:border-border hover:shadow-[2px_2px_0px_0px_#000] dark:text-darkText'
+              ? 'bg-main text-white font-heading border-transparent shadow-shadow'
+              : 'text-text border-transparent hover:bg-white/60 dark:hover:bg-darkBg hover:border-border hover:shadow-light dark:text-darkText'
           )}
           href={path ? `/${path}` : '#'}
         >
@@ -33,10 +33,10 @@ const MenuItem = ({ size, path, icon, label, current, onSignOut }: Props) => {
         <Link
           onClick={onSignOut}
           className={cn(
-            'rounded-base p-2 my-1 transition-all border-2',
+            'rounded-base p-2 my-1 transition-all border',
             current === path
-              ? 'bg-main text-black border-border shadow-shadow'
-              : 'text-text border-transparent hover:bg-bg hover:border-border hover:shadow-[2px_2px_0px_0px_#000] dark:text-darkText'
+              ? 'bg-main text-white border-transparent shadow-shadow'
+              : 'text-text border-transparent hover:bg-white/60 dark:hover:bg-darkBg hover:border-border hover:shadow-light dark:text-darkText'
           )}
           href={path ? `/${path}` : '#'}
         >

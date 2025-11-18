@@ -31,8 +31,8 @@ const ChatbotPreview = ({ domainId }: Props) => {
   }, [domainId, setOnChats])
 
   return (
-    <Card className="w-full border-[3px] border-black rounded-[22px] shadow-[8px_8px_0px_rgba(0,0,0,0.85)]">
-      <CardHeader className="border-b-[3px] border-black">
+    <Card className="w-full border border-border rounded-3xl shadow-shadow">
+      <CardHeader className="border-b border-border">
         <CardTitle>
           {currentBot?.name ? `${currentBot.name} GPT` : 'Assistant GPT'}
         </CardTitle>

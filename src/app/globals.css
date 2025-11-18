@@ -13,8 +13,6 @@ body {
   min-height: 100vh;
 }
 
-/* Sauce AI inspired grid pattern */
-/* Disable global grid background to keep a clean canvas across the app */
 body::before {
   content: none;
 }
@@ -30,114 +28,110 @@ body::before {
 
 @layer base {
   :root {
-    /* Neobrutalism + Ronit.io Light Mode */
-    --background: 0 0% 100%;           /* #ffffff - white */
-    --foreground: 0 0% 0%;             /* #000 - black */
+    /* Calm, SMB-friendly palette */
+    --background: 214 32% 97%;         /* Soft gray-blue */
+    --foreground: 222 47% 11%;         /* Slate 900 */
 
-    --card: 0 0% 100%;                 /* white */
-    --card-foreground: 0 0% 0%;        /* black */
+    --card: 0 0% 100%;                 /* White cards */
+    --card-foreground: 222 47% 11%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 0%;
+    --popover-foreground: 222 47% 11%;
 
-    /* Primary - vibrant orange accent */
-    --primary: 15 100% 59%;            /* #FF622D */
-    --primary-foreground: 0 0% 100%;   /* white on orange */
+    --primary: 203 89% 54%;            /* Brand blue (#1DA1F2) */
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 0 0% 96%;             /* light gray */
-    --secondary-foreground: 0 0% 0%;
+    --secondary: 210 40% 96%;          /* Subtle panel */
+    --secondary-foreground: 222 47% 20%;
 
-    --muted: 0 0% 96%;
-    --muted-foreground: 0 0% 40%;
+    --muted: 214 32% 91%;
+    --muted-foreground: 215 16% 47%;
 
-    --accent: 15 100% 59%;             /* primary orange accent */
+    --accent: 203 89% 54%;             /* Matches brand blue */
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 98%;
+    --destructive: 0 62% 52%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 0%;                 /* black borders */
+    --border: 213 27% 84%;
     --input: 0 0% 100%;
-    --ring: 15 100% 59%;               /* primary orange ring */
+    --ring: 203 89% 54%;
 
-    --radius: 0.3125rem;               /* 5px - Neobrutalism base */
+    --radius: 0.75rem;
 
-    /* Neobrutalism shadow offsets */
-    --boxShadowX: 4px;
-    --boxShadowY: 4px;
-    --reverseBoxShadowX: -4px;
-    --reverseBoxShadowY: -4px;
+    --shadow-soft: 0 20px 45px rgba(15, 23, 42, 0.12);
+    --shadow-hover: 0 25px 55px rgba(15, 23, 42, 0.16);
   }
 
   .dark {
-    /* Neobrutalism Dark Mode (#212121) */
-    --background: 0 0% 13%;            /* #212121 */
-    --foreground: 45 13% 93%;          /* #eeefe9 */
+    --background: 215 30% 8%;          /* Slate 950 */
+    --foreground: 210 36% 96%;
 
-    --card: 0 0% 13%;
-    --card-foreground: 45 13% 93%;
+    --card: 215 27% 14%;
+    --card-foreground: 210 36% 96%;
 
-    --popover: 0 0% 13%;
-    --popover-foreground: 45 13% 93%;
+    --popover: 215 27% 14%;
+    --popover-foreground: 210 36% 96%;
 
-    --primary: 15 100% 59%;            /* primary orange */
-    --primary-foreground: 0 0% 100%;
+    --primary: 203 90% 70%;
+    --primary-foreground: 215 30% 12%;
 
-    --secondary: 0 0% 20%;
-    --secondary-foreground: 45 13% 93%;
+    --secondary: 217 18% 22%;
+    --secondary-foreground: 210 36% 96%;
 
-    --muted: 0 0% 20%;
-    --muted-foreground: 0 0% 65%;
+    --muted: 217 18% 22%;
+    --muted-foreground: 215 16% 65%;
 
-    --accent: 15 100% 59%;             /* primary orange */
-    --accent-foreground: 0 0% 100%;
+    --accent: 203 90% 70%;
+    --accent-foreground: 215 30% 12%;
 
-    --destructive: 0 63% 31%;
-    --destructive-foreground: 0 0% 98%;
+    --destructive: 0 63% 45%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 0%;                 /* keep black borders */
-    --input: 0 0% 13%;
-    --ring: 15 100% 59%;
+    --border: 217 19% 27%;
+    --input: 217 19% 27%;
+    --ring: 203 90% 70%;
+
+    --shadow-soft: 0 25px 45px rgba(2, 6, 23, 0.55);
+    --shadow-hover: 0 35px 65px rgba(2, 6, 23, 0.65);
   }
 }
 
-/* Neobrutalism utility classes */
 @layer utilities {
   .shadow-shadow {
-    box-shadow: 4px 4px 0px 0px #000;
+    box-shadow: var(--shadow-soft);
   }
 
   .shadow-light {
-    box-shadow: 4px 4px 0px 0px #000;
+    box-shadow: var(--shadow-soft);
   }
 
   .shadow-dark {
-    box-shadow: 4px 4px 0px 0px #000;
+    box-shadow: var(--shadow-soft);
   }
 
   .rounded-base {
-    border-radius: 5px;
+    border-radius: 0.75rem;
   }
 
   .translate-boxShadow {
-    transform: translate(4px, 4px);
+    transform: translateY(-2px);
   }
 
   .hover\:translate-boxShadow:hover {
-    transform: translate(4px, 4px);
+    transform: translateY(-2px);
   }
 
-  /* Neobrutalism typography utilities */
   .text-neobrutalism {
-    @apply font-bold uppercase tracking-widest;
+    @apply font-semibold tracking-wide text-slate-600 uppercase;
   }
 
   .text-neobrutalism-heading {
-    @apply font-extrabold uppercase tracking-tight;
+    @apply font-black tracking-tight text-slate-900 dark:text-white;
   }
 
   .text-neobrutalism-body {
-    @apply font-bold;
+    @apply font-semibold text-slate-700 dark:text-slate-200;
   }
 }
 
@@ -153,25 +147,24 @@ body::before {
     z-index: 1;
   }
 
-  /* Neobrutalism typography defaults */
   h1, h2, h3, h4, h5, h6 {
-    @apply font-bold;
+    @apply font-semibold text-slate-900 dark:text-white;
   }
 
   h1 {
-    @apply text-4xl font-extrabold tracking-tight;
+    @apply text-4xl font-bold tracking-tight;
   }
 
   h2 {
-    @apply text-3xl font-extrabold tracking-tight;
+    @apply text-3xl font-semibold tracking-tight;
   }
 
   h3 {
-    @apply text-2xl font-bold;
+    @apply text-2xl font-semibold;
   }
 
   button, a.btn, .btn {
-    @apply font-bold;
+    @apply font-semibold;
   }
 }
 
@@ -180,10 +173,10 @@ body::before {
   background: linear-gradient(180deg, #f6fbf8 0%, #eef8f3 40%, #fafdfb 100%);
 }
 
-/* Hero subtle orange radial glow */
+/* Hero subtle glow */
 .landing-hero {
   position: relative;
-  background-image: radial-gradient(900px 500px at 70% 20%, rgba(255, 98, 45, 0.12), rgba(255, 255, 255, 0) 65%);
+  background-image: radial-gradient(900px 500px at 70% 20%, rgba(29, 161, 242, 0.15), rgba(255, 255, 255, 0) 65%);
 }
 
 .chat-bubble {
