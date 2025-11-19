@@ -26,8 +26,8 @@ const ButtonHandler = (props: Props) => {
     isPasswordDirty: isPassword,
   })
 
-  if (currentStep === 3) {
-    console.log('[Sign-Up Form] 🔐 Step 3: OTP verification step')
+  if (currentStep === 2) {
+    console.log('[Sign-Up Form] 🔐 Step 2: OTP verification step')
 
     return (
       <div className="w-full flex flex-col gap-3 items-center">
@@ -57,61 +57,33 @@ const ButtonHandler = (props: Props) => {
     )
   }
 
-  if (currentStep === 2) {
-    console.log('[Sign-Up Form] 📝 Step 2: Account details step')
-    const canProceed = isName && isEmail && isPassword
-    console.log('[Sign-Up Form] ✅ Can proceed to registration:', canProceed)
-
-    return (
-      <div className="w-full flex flex-col gap-3 items-center">
-        <Button
-          type="button"
-          className="w-full"
-          disabled={!canProceed || loading}
-          onClick={() => {
-            if (!canProceed || loading) return
-            console.log('[Sign-Up Form] 🚀 Continue button clicked, triggering registration...')
-            onGenerateOTP(
-              getValues('email'),
-              getValues('password'),
-              setCurrentStep
-            )
-          }}
-        >
-          {loading ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Sending code...
-            </>
-          ) : (
-            'Continue'
-          )}
-        </Button>
-        <p>
-          Already have an account?{' '}
-          <Link
-            href="/auth/sign-in"
-            className="font-bold"
-          >
-            Sign In
-          </Link>
-        </p>
-      </div>
-    )
-  }
-
-  console.log('[Sign-Up Form] 🎯 Step 1: User type selection step')
+  console.log('[Sign-Up Form] 📝 Step 1: Account details step')
+  const canProceed = isName && isEmail && isPassword
+  console.log('[Sign-Up Form] ✅ Can proceed to registration:', canProceed)
 
   return (
     <div className="w-full flex flex-col gap-3 items-center">
       <Button
         type="button"
         className="w-full"
+        disabled={!canProceed || loading}
         onClick={() => {
-          console.log('[Sign-Up Form] ➡️ Moving to step 2 (Account details)')
-          setCurrentStep((prev: number) => prev + 1)
+          if (!canProceed || loading) return
+          console.log('[Sign-Up Form] 🚀 Continue button clicked, triggering registration...')
+          onGenerateOTP(
+            getValues('email'),
+            getValues('password'),
+            setCurrentStep
+          )
         }}
       >
-        Continue
+        {loading ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Sending code...
+          </>
+        ) : (
+          'Continue'
+        )}
       </Button>
       <div className="w-full relative">
         <div className="absolute inset-0 flex items-center">

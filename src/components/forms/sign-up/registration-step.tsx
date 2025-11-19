@@ -4,7 +4,6 @@ import React, { useMemo, useState } from 'react'
 import dynamic from 'next/dynamic'
 import { useAuthContextHook } from '@/context/use-auth-context'
 import { useFormContext } from 'react-hook-form'
-import TypeSelectionForm from './type-selection-form'
 import { Spinner } from '@/components/spinner'
 
 const LoadingSpinner = () => <Spinner noPadding={false} />
@@ -29,7 +28,6 @@ const RegistrationFormStep = (props: Props) => {
   } = useFormContext()
   const { currentStep, selectedPlan, billingInterval } = useAuthContextHook()
   const [onOTP, setOnOTP] = useState<string>('')
-  const [onUserType, setOnUserType] = useState<'owner' | 'student'>('owner')
 
   setValue('otp', onOTP)
 
@@ -37,20 +35,12 @@ const RegistrationFormStep = (props: Props) => {
     switch (currentStep) {
       case 1:
         return (
-          <TypeSelectionForm
-            register={register}
-            userType={onUserType}
-            setUserType={setOnUserType}
-          />
-        )
-      case 2:
-        return (
           <DetailForm
             errors={errors}
             register={register}
           />
         )
-      case 3:
+      case 2:
         return (
           <OTPForm
             onOTP={onOTP}
@@ -60,7 +50,7 @@ const RegistrationFormStep = (props: Props) => {
       default:
         return <div />
     }
-  }, [currentStep, register, onUserType, errors, onOTP])
+  }, [currentStep, register, errors, onOTP])
 
   return (
     <div className="flex flex-col gap-4">
