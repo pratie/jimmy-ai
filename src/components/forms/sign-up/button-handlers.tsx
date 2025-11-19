@@ -1,34 +1,34 @@
 'use client'
 import { Button } from '@/components/ui/button'
 import { useAuthContextHook } from '@/context/use-auth-context'
-import { useSignUpForm } from '@/hooks/sign-up/use-sign-up'
+import { useFormContext } from 'react-hook-form'
 import GoogleAuthButton from './google-auth-button'
 import Link from 'next/link'
-import { Loader2 } from 'lucide-react'
 import React from 'react'
-import { useFormContext } from 'react-hook-form'
+import { Loader2 } from 'lucide-react'
+import { useSignUpFormContext } from './form-provider'
 
 type Props = {}
 
 const ButtonHandler = (props: Props) => {
-  const { setCurrentStep, currentStep } = useAuthContextHook()
-  const { formState, getFieldState, getValues } = useFormContext()
-  const { onGenerateOTP, loading } = useSignUpForm()
+  const { currentStep, setCurrentStep } = useAuthContextHook()
+  const {
+    formState,
+    getFieldState,
+    getValues,
+  } = useFormContext()
+  const {
+    onGenerateOTP,
+    loading,
+    showAccountForm,
+    setShowAccountForm,
+  } = useSignUpFormContext()
 
-  const { isDirty: isName } = getFieldState('fullname', formState)
   const { isDirty: isEmail } = getFieldState('email', formState)
   const { isDirty: isPassword } = getFieldState('password', formState)
-
-  console.log('[Sign-Up Form] 📊 Current step:', currentStep)
-  console.log('[Sign-Up Form] ✅ Form validation status:', {
-    isNameDirty: isName,
-    isEmailDirty: isEmail,
-    isPasswordDirty: isPassword,
-  })
+  const canProceed = isEmail && isPassword
 
   if (currentStep === 2) {
-    console.log('[Sign-Up Form] 🔐 Step 2: OTP verification step')
-
     return (
       <div className="w-full flex flex-col gap-3 items-center">
         <Button
@@ -45,7 +45,7 @@ const ButtonHandler = (props: Props) => {
           )}
         </Button>
         <p>
-          Already have an account?
+          Already have an account?{' '}
           <Link
             href="/auth/sign-in"
             className="font-bold"
@@ -57,45 +57,53 @@ const ButtonHandler = (props: Props) => {
     )
   }
 
-  console.log('[Sign-Up Form] 📝 Step 1: Account details step')
-  const canProceed = isName && isEmail && isPassword
-  console.log('[Sign-Up Form] ✅ Can proceed to registration:', canProceed)
-
   return (
     <div className="w-full flex flex-col gap-3 items-center">
-      <Button
-        type="button"
-        className="w-full"
-        disabled={!canProceed || loading}
-        onClick={() => {
-          if (!canProceed || loading) return
-          console.log('[Sign-Up Form] 🚀 Continue button clicked, triggering registration...')
-          onGenerateOTP(
-            getValues('email'),
-            getValues('password'),
-            setCurrentStep
-          )
-        }}
-      >
-        {loading ? (
-          <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Sending code...
-          </>
-        ) : (
-          'Continue'
-        )}
-      </Button>
+      <GoogleAuthButton />
       <div className="w-full relative">
         <div className="absolute inset-0 flex items-center">
           <span className="w-full border-t" />
         </div>
         <div className="relative flex justify-center text-xs uppercase">
           <span className="bg-background px-2 text-muted-foreground">
-            Or continue with
+            Or continue with account
           </span>
         </div>
       </div>
-      <GoogleAuthButton />
+      {!showAccountForm && (
+        <Button
+          type="button"
+          className="w-full border border-border bg-white text-brand-primary hover:bg-white/80"
+          variant="outline"
+          onClick={() => setShowAccountForm(true)}
+        >
+          Continue with account
+        </Button>
+      )}
+      {showAccountForm && (
+        <Button
+          variant="outline"
+          type="button"
+          className="w-full border border-border bg-white text-brand-primary hover:bg-white/80"
+          disabled={!canProceed || loading}
+          onClick={() => {
+            if (!canProceed || loading) return
+            onGenerateOTP(
+              getValues('email'),
+              getValues('password'),
+              setCurrentStep
+            )
+          }}
+        >
+          {loading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Sending code...
+            </>
+          ) : (
+            'Continue'
+          )}
+        </Button>
+      )}
       <p>
         Already have an account?{' '}
         <Link

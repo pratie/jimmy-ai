@@ -81,8 +81,7 @@ const GoogleAuthButton = () => {
 
   return (
     <Button
-      variant="outline"
-      className="w-full"
+      className="w-full bg-main text-white hover:bg-mainAccent"
       type="button"
       onClick={signUpWithGoogle}
       disabled={!isLoaded || loading}

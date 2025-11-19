@@ -79,8 +79,8 @@ export const useSignUpForm = () => {
             description: 'We sent you a 6-digit code. Enter it to complete sign-up.',
           })
           setLoading(false)
-          console.log('[Sign-Up] ➡️ Moving to OTP step (step 3)')
-          onNext(3)
+          console.log('[Sign-Up] ➡️ Moving to OTP step (step 2)')
+          onNext(2)
           return
         } catch (prepError: any) {
           console.error('[Sign-Up] ❌ Failed to prepare email verification:', prepError)

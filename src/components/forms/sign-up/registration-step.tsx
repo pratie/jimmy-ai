@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic'
 import { useAuthContextHook } from '@/context/use-auth-context'
 import { useFormContext } from 'react-hook-form'
 import { Spinner } from '@/components/spinner'
+import { useSignUpFormContext } from './form-provider'
 
 const LoadingSpinner = () => <Spinner noPadding={false} />
 
@@ -26,7 +27,8 @@ const RegistrationFormStep = (props: Props) => {
     formState: { errors },
     setValue,
   } = useFormContext()
-  const { currentStep, selectedPlan, billingInterval } = useAuthContextHook()
+  const { currentStep } = useAuthContextHook()
+  const { showAccountForm } = useSignUpFormContext()
   const [onOTP, setOnOTP] = useState<string>('')
 
   setValue('otp', onOTP)
@@ -34,6 +36,7 @@ const RegistrationFormStep = (props: Props) => {
   const StepContent = useMemo(() => {
     switch (currentStep) {
       case 1:
+        if (!showAccountForm) return null
         return (
           <DetailForm
             errors={errors}
@@ -50,21 +53,10 @@ const RegistrationFormStep = (props: Props) => {
       default:
         return <div />
     }
-  }, [currentStep, register, errors, onOTP])
+  }, [currentStep, register, errors, onOTP, showAccountForm])
 
   return (
     <div className="flex flex-col gap-4">
-      {/* Selected plan badge (if passed via query) */}
-      {selectedPlan && (
-        <div className="w-full rounded-base border-2 border-brand-base-300 bg-white dark:bg-black/40 px-4 py-3 text-sm">
-          <span className="font-semibold">Selected plan:</span>{' '}
-          <span className="uppercase">{selectedPlan}</span>
-          {billingInterval && (
-            <span className="text-muted-foreground"> · {billingInterval.toLowerCase()}</span>
-          )}
-        </div>
-      )}
-
       {StepContent}
     </div>
   )

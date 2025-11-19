@@ -12,8 +12,30 @@ type Props = {
   children: React.ReactNode
 }
 
+type SignUpFormContextValue = {
+  onGenerateOTP: (
+    email: string,
+    password: string,
+    onNext: React.Dispatch<React.SetStateAction<number>>
+  ) => Promise<void>
+  loading: boolean
+  showAccountForm: boolean
+  setShowAccountForm: React.Dispatch<React.SetStateAction<boolean>>
+}
+
+const SignUpFormContext = React.createContext<SignUpFormContextValue | undefined>(undefined)
+
+export const useSignUpFormContext = () => {
+  const ctx = React.useContext(SignUpFormContext)
+  if (!ctx) {
+    throw new Error('useSignUpFormContext must be used within SignUpFormProvider')
+  }
+  return ctx
+}
+
 const SignUpFormProvider = ({ children }: Props) => {
-  const { methods, onHandleSubmit, loading } = useSignUpForm()
+  const { methods, onHandleSubmit, onGenerateOTP, loading } = useSignUpForm()
+  const [showAccountForm, setShowAccountForm] = React.useState<boolean>(false)
   // Inner initializer to run inside context provider
   const Initializer = () => {
     const params = useSearchParams()
@@ -52,14 +74,18 @@ const SignUpFormProvider = ({ children }: Props) => {
     <AuthContextProvider>
       <Initializer />
       <FormProvider {...methods}>
-        <form
-          onSubmit={onHandleSubmit}
-          className="h-full"
+        <SignUpFormContext.Provider
+          value={{ onGenerateOTP, loading, showAccountForm, setShowAccountForm }}
         >
-          <div className="flex flex-col justify-between gap-3 h-full">
-            <Loader loading={loading}>{children}</Loader>
-          </div>
-        </form>
+          <form
+            onSubmit={onHandleSubmit}
+            className="h-full"
+          >
+            <div className="flex flex-col justify-between gap-3 h-full">
+              <Loader loading={loading}>{children}</Loader>
+            </div>
+          </form>
+        </SignUpFormContext.Provider>
       </FormProvider>
     </AuthContextProvider>
   )

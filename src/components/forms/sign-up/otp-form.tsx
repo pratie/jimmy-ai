@@ -48,7 +48,7 @@ const OTPForm = ({ onOTP, setOTP }: Props) => {
           type="button"
           variant="ghost"
           size="icon"
-          onClick={() => setCurrentStep(2)}
+          onClick={() => setCurrentStep(1)}
           className="flex-shrink-0"
         >
           <ArrowLeft className="h-4 w-4" />

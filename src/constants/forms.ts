@@ -10,13 +10,6 @@ type UserRegistrationProps = {
 
 export const USER_REGISTRATION_FORM: UserRegistrationProps[] = [
   {
-    id: '1',
-    inputType: 'input',
-    placeholder: 'Full name',
-    name: 'fullname',
-    type: 'text',
-  },
-  {
     id: '2',
     inputType: 'input',
     placeholder: 'Email',
