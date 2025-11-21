@@ -27,6 +27,10 @@ const WelcomeMessage = dynamic(
 
 import { PlanType, getPlanLimits } from '@/lib/plans'
 
+import { UploadDataForm } from '@/components/structured-data/upload-form'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { format } from 'date-fns'
+
 type Props = {
   id: string
   name: string
@@ -45,11 +49,12 @@ type Props = {
   } | null
   trainingSourcesUsed?: number
   knowledgeBaseSizeMB?: number
+  datasets?: any[]
 }
 
-type TabKey = 'knowledge' | 'behavior' | 'appearance' | 'domain'
+type TabKey = 'knowledge' | 'behavior' | 'appearance' | 'domain' | 'structured'
 
-const SettingsForm = ({ id, name, chatBot, plan, trainingSourcesUsed, knowledgeBaseSizeMB }: Props) => {
+const SettingsForm = ({ id, name, chatBot, plan, trainingSourcesUsed, knowledgeBaseSizeMB, datasets = [] }: Props) => {
   const {
     register,
     onUpdateSettings,
@@ -69,18 +74,18 @@ const SettingsForm = ({ id, name, chatBot, plan, trainingSourcesUsed, knowledgeB
 
   useEffect(() => {
     let mounted = true
-    ;(async () => {
-      try {
-        const res = await onGetEmbeddingStatus(id)
-        if (mounted && res?.status === 200 && res.data) {
-          const status = res.data.status
-          if (status === 'not_started' || status === 'processing' || status === 'completed' || status === 'failed') {
-            setEmbedStatus(status)
+      ; (async () => {
+        try {
+          const res = await onGetEmbeddingStatus(id)
+          if (mounted && res?.status === 200 && res.data) {
+            const status = res.data.status
+            if (status === 'not_started' || status === 'processing' || status === 'completed' || status === 'failed') {
+              setEmbedStatus(status)
+            }
+            setHasEmbeddings(!!res.data.hasEmbeddings)
           }
-          setHasEmbeddings(!!res.data.hasEmbeddings)
-        }
-      } catch {}
-    })()
+        } catch { }
+      })()
     return () => { mounted = false }
   }, [id])
 
@@ -141,6 +146,12 @@ const SettingsForm = ({ id, name, chatBot, plan, trainingSourcesUsed, knowledgeB
             Knowledge Base
           </TabsTrigger>
           <TabsTrigger
+            value="structured"
+            className="flex-1 rounded-xl text-xs font-semibold data-[state=active]:bg-white"
+          >
+            Structured Data
+          </TabsTrigger>
+          <TabsTrigger
             value="behavior"
             className="flex-1 rounded-xl text-xs font-semibold data-[state=active]:bg-white"
           >
@@ -175,6 +186,58 @@ const SettingsForm = ({ id, name, chatBot, plan, trainingSourcesUsed, knowledgeB
               kbSizeMB={knowledgeBaseSizeMB || 0}
               kbSizeLimit={planLimits.knowledgeBaseMB}
             />
+          </div>
+        </TabsContent>
+
+        <TabsContent value="structured" className="mt-0">
+          <div className="flex flex-col gap-6">
+            <div className="flex flex-col gap-2.5 rounded-lg border border-sauce-cyan/40 bg-white px-4 py-3.5 shadow-sm">
+              <h2 className="font-semibold text-lg text-sauce-black">Upload Structured Data</h2>
+              <p className="text-sm text-gray-500 mb-2">Upload CSV or Excel files to allow the AI to query your structured data.</p>
+              <UploadDataForm domainId={id} />
+            </div>
+
+            <div className="flex flex-col gap-2.5 rounded-lg border border-sauce-cyan/40 bg-white px-4 py-3.5 shadow-sm">
+              <h2 className="font-semibold text-lg text-sauce-black">Uploaded Datasets</h2>
+              {datasets.length === 0 ? (
+                <p className="text-gray-500 text-sm">No datasets uploaded yet.</p>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {datasets.map((dataset) => (
+                    <Card key={dataset.id}>
+                      <CardHeader className="p-4 pb-2">
+                        <CardTitle className="truncate text-base" title={dataset.title}>
+                          {dataset.title}
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="p-4 pt-0">
+                        <div className="text-xs text-gray-500 space-y-1">
+                          <p>Uploaded: {format(new Date(dataset.createdAt), 'PPP')}</p>
+                          <div>
+                            <span className="font-medium">Schema:</span>
+                            <div className="flex flex-wrap gap-1 mt-1">
+                              {(dataset.schema as string[])?.slice(0, 5).map((field) => (
+                                <span
+                                  key={field}
+                                  className="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-[10px]"
+                                >
+                                  {field}
+                                </span>
+                              ))}
+                              {(dataset.schema as string[])?.length > 5 && (
+                                <span className="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-[10px]">
+                                  +{(dataset.schema as string[]).length - 5} more
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </TabsContent>
 

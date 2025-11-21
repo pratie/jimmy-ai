@@ -43,6 +43,7 @@ model Domain {
   helpdesk            HelpDesk[]
   knowledgeChunks     KnowledgeChunk[]
   products            Product[]
+  recordManager       RecordManager[]
 
   @@index([userId])
   @@index([campaignId])
@@ -268,4 +269,30 @@ enum BillingInterval {
 enum Role {
   user
   assistant
+}
+
+model RecordManager {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title     String
+  type      String   @default("tabular")
+  schema    Json?
+  hash      String?
+  domainId  String   @db.Uuid
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  Domain    Domain   @relation(fields: [domainId], references: [id], onDelete: Cascade)
+  tabularData TabularData[]
+
+  @@index([domainId])
+}
+
+model TabularData {
+  id              String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  recordManagerId String        @db.Uuid
+  rowData         Json
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  RecordManager   RecordManager @relation(fields: [recordManagerId], references: [id], onDelete: Cascade)
+
+  @@index([recordManagerId])
 }

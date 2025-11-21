@@ -7,7 +7,7 @@ import { truncateMarkdown } from '@/lib/firecrawl'
 import { buildSystemPrompt } from '@/lib/promptBuilder'
 import { searchKnowledgeBaseWithFallback, formatResultsForPrompt, hasTrainedEmbeddings, searchKnowledgeBaseMultiQuery } from '@/lib/vector-search'
 import { getPlanLimits, shouldResetCredits, getNextResetDate } from '@/lib/plans'
-import { streamText } from 'ai'
+import { streamText, stepCountIs } from 'ai'
 import { getModel } from '@/lib/ai-models'
 
 // --- Minimal in-memory LRU cache for domain config ---
@@ -202,7 +202,7 @@ export async function POST(req: Request) {
 
     const hasTrained = !!(chatBotDomain?.chatBot?.hasEmbeddings)
 
-    devLog(`[Bot Stream] ✅ Parallel queries took: ${Date.now() - parallelStartTime}ms (max of both)`)    
+    devLog(`[Bot Stream] ✅ Parallel queries took: ${Date.now() - parallelStartTime}ms (max of both)`)
 
     if (!chatBotDomain) {
       return new Response(JSON.stringify({ error: 'Chatbot not found' }), {
@@ -224,12 +224,12 @@ export async function POST(req: Request) {
         const chunksPerQuery = 4  // 4 queries × 4 chunks = 16 total (reduced from 20)
         const finalTopN = 3
         const searchResults = await searchKnowledgeBaseMultiQuery(message, domainId, chunksPerQuery, finalTopN)
-        devLog(`[Bot Stream] ✅ Multi-query search took: ${Date.now() - vectorSearchStart}ms (final ${searchResults.length} chunks)`) 
+        devLog(`[Bot Stream] ✅ Multi-query search took: ${Date.now() - vectorSearchStart}ms (final ${searchResults.length} chunks)`)
         // If multi-query returned no chunks (edge), fallback to single-query search
         if (searchResults.length === 0) {
           const fallbackStart = Date.now()
           const fallbackResults = await searchKnowledgeBaseWithFallback(message, domainId, 5)
-          devLog(`[Bot Stream] ⚠️  Fallback single-query took: ${Date.now() - fallbackStart}ms (found ${fallbackResults.length} chunks)`) 
+          devLog(`[Bot Stream] ⚠️  Fallback single-query took: ${Date.now() - fallbackStart}ms (found ${fallbackResults.length} chunks)`)
           knowledgeBase = formatResultsForPrompt(fallbackResults)
         } else {
           knowledgeBase = formatResultsForPrompt(searchResults)
@@ -238,7 +238,7 @@ export async function POST(req: Request) {
         devError('[Bot Stream] Multi-query RAG failed, using fallback:', e)
         const vectorSearchStart2 = Date.now()
         const searchResults = await searchKnowledgeBaseWithFallback(message, domainId, 5)
-        devLog(`[Bot Stream] ✅ Vector search (fallback) took: ${Date.now() - vectorSearchStart2}ms (found ${searchResults.length} chunks)`) 
+        devLog(`[Bot Stream] ✅ Vector search (fallback) took: ${Date.now() - vectorSearchStart2}ms (found ${searchResults.length} chunks)`)
         knowledgeBase = formatResultsForPrompt(searchResults)
       }
     } else {
@@ -504,34 +504,52 @@ export async function POST(req: Request) {
     // Prepare OpenAI request data
     const llmModel = chatBotDomain.chatBot?.llmModel || 'gemini-2.5-flash-lite'
     const llmTemperature = (typeof chatBotDomain.chatBot?.llmTemperature === 'number') ? chatBotDomain.chatBot?.llmTemperature as number : 0.7
+    // Append structured data instructions to system prompt
+    const structuredDataInstructions = `
+
+STRUCTURED DATA TOOLS:
+You have access to two powerful tools for querying structured data:
+1. 'getDatasets' - Lists all available datasets (CSV/Excel files) uploaded by the user
+2. 'queryTabularData' - Executes SQL queries on the structured data
+
+WHEN TO USE STRUCTURED DATA TOOLS:
+- If the user asks about data, numbers, lists, counts, totals, averages, or specific records (e.g., "employees", "sales", "customers", "products")
+- You MUST ALWAYS call 'getDatasets' FIRST, even if you think you know the recordManagerId
+- NEVER use the domainId as the recordManagerId - they are different!
+- Then call 'queryTabularData' with BOTH the recordManagerId AND the SQL query
+
+HOW TO USE queryTabularData:
+1. MANDATORY FIRST STEP: Call getDatasets to get the list of available datasets
+2. Extract the "id" field from the dataset you want to query - this is the recordManagerId (NOT the domainId!)
+3. Call queryTabularData with TWO parameters:
+   - recordManagerId: The "id" from the getDatasets result (e.g., "fb906cae-9bc4-4dd2-9185-4ffa8891fd6b")
+   - query: Your SQL query
+4. CRITICAL: The recordManagerId is a UUID that looks like "fb906cae-9bc4-4dd2-9185-4ffa8891fd6b", NOT the domain ID
+
+SQL QUERY RULES:
+- Table name is ALWAYS "TabularData" (with quotes, PascalCase)
+- Data is stored in JSONB column "rowData" (must be quoted with double quotes, camelCase)
+- Use Postgres JSON operators: "rowData"->>'ColumnName' to extract values
+- IMPORTANT: Always quote "rowData" and "recordManagerId" and "TabularData" in your SQL
+- MUST include WHERE "recordManagerId" = 'the-id-from-getDatasets'
+- Example: 
+  recordManagerId: "fb906cae-9bc4-4dd2-9185-4ffa8891fd6b"
+  query: "SELECT \\"rowData\\"-\u003e\u003e'First Name' as name FROM \\"TabularData\\" WHERE \\"recordManagerId\\" = 'fb906cae-9bc4-4dd2-9185-4ffa8891fd6b' ORDER BY \\"rowData\\"-\u003e\u003e'Customer Id' LIMIT 10"
+
+WHEN TO USE KNOWLEDGE BASE (RAG):
+- For general questions about services, policies, or information from the knowledge base
+- If no structured data is available or relevant
+
+IMPORTANT: If the user asks about data/numbers/lists, you MUST use the structured data tools, not the knowledge base.
+`
+
+    const finalSystemPrompt = systemPrompt + structuredDataInstructions
+
     const messages = [
-      { role: 'system', content: systemPrompt },
+      { role: 'system', content: finalSystemPrompt },
       ...chat,
       { role: 'user', content: message },
     ]
-
-    // ═══════════════════════════════════════════════════════════
-    // 🔍 DEBUG: LOG COMPLETE LLM REQUEST DATA
-    // ═══════════════════════════════════════════════════════════
-    if (process.env.DEBUG_LLM === 'true') {
-      console.log('\n' + '='.repeat(80))
-      console.log('📤 AI SDK REQUEST')
-      console.log('='.repeat(80))
-      console.log('Model:', llmModel)
-      console.log('Temperature:', llmTemperature)
-      console.log('Max Tokens:', 4096)
-      console.log('Stream:', true)
-      console.log('\n' + '-'.repeat(80))
-      console.log('MESSAGES:')
-      console.log('-'.repeat(80))
-      messages.forEach((msg, idx) => {
-        console.log(`\n[Message ${idx + 1}] Role: ${msg.role}`)
-        console.log('-'.repeat(80))
-        console.log(msg.content)
-        console.log('-'.repeat(80))
-      })
-      console.log('\n' + '='.repeat(80) + '\n')
-    }
 
     // Get AI model dynamically (supports OpenAI, Anthropic, Google)
     const model = getModel(llmModel)
@@ -542,12 +560,20 @@ export async function POST(req: Request) {
 
     const llmStartTime = Date.now()
 
-    // Create AI SDK streaming result
+    // Import tools
+    const { createGetDatasetsTool, createQueryTabularDataTool } = require('@/lib/ai/tools/structured-data')
+
+    // Create AI SDK streaming result with multi-step tool calling
     const result = streamText({
       model: model as any,
       messages: messages as any,
       temperature: llmTemperature,
       maxOutputTokens: 2000,
+      tools: {
+        getDatasets: createGetDatasetsTool(domainId),
+        queryTabularData: createQueryTabularDataTool(domainId),
+      },
+      stopWhen: stepCountIs(5), // Allow up to 5 steps for multi-step tool calling
     })
 
     // Custom stream processing to maintain per-chunk markdown cleaning
@@ -555,31 +581,55 @@ export async function POST(req: Request) {
     let fullResponse = ''
     let firstTokenTime: number | null = null
     let tokenCount = 0
+    let toolCallCount = 0
 
     const customStream = new ReadableStream({
       async start(controller) {
         let controllerErrored = false
 
         try {
-          // Consume AI SDK text stream
-          for await (const textPart of result.textStream) {
-            if (!firstTokenTime) {
-              firstTokenTime = Date.now()
-              const ttft = firstTokenTime - llmStartTime
-              devLog(`[Bot Stream] ⚡ First token received in: ${ttft}ms (TTFT - Time To First Token)`)
+          // Log tool calls and results
+          for await (const delta of result.fullStream) {
+            // Log tool calls
+            if (delta.type === 'tool-call') {
+              toolCallCount++
+              console.log(`\n${'='.repeat(80)}`)
+              console.log(`[Agent Decision] 🤖 Tool Call #${toolCallCount}: ${delta.toolName}`)
+              console.log(`${'='.repeat(80)}`)
+              console.log('Arguments:', JSON.stringify((delta as any).input || (delta as any).args, null, 2))
+              console.log(`${'-'.repeat(80)}\n`)
             }
 
-            tokenCount++
-            fullResponse += textPart
+            // Log tool results
+            if (delta.type === 'tool-result') {
+              console.log(`\n${'='.repeat(80)}`)
+              console.log(`[Agent Decision] 📊 Tool Result: ${delta.toolName}`)
+              console.log(`${'='.repeat(80)}`)
+              console.log('Result:', JSON.stringify((delta as any).output || (delta as any).result, null, 2))
+              console.log(`${'-'.repeat(80)}\n`)
+            }
 
-            // Process markdown: remove bold and convert links to HTML
-            let cleanContent = removeMarkdownBold(textPart)
-            cleanContent = convertMarkdownLinksToHtml(cleanContent)
+            // Handle text deltas
+            if (delta.type === 'text-delta') {
+              if (!firstTokenTime) {
+                firstTokenTime = Date.now()
+                const ttft = firstTokenTime - llmStartTime
+                devLog(`[Bot Stream] ⚡ First token received in: ${ttft}ms (TTFT - Time To First Token)`)
+              }
 
-            // Send as Server-Sent Events format
-            controller.enqueue(
-              encoder.encode(`data: ${JSON.stringify({ content: cleanContent })}\n\n`)
-            )
+              tokenCount++
+              const textContent = (delta as any).text || (delta as any).textDelta
+              fullResponse += textContent
+
+              // Process markdown: remove bold and convert links to HTML
+              let cleanContent = removeMarkdownBold(textContent)
+              cleanContent = convertMarkdownLinksToHtml(cleanContent)
+
+              // Send as Server-Sent Events format
+              controller.enqueue(
+                encoder.encode(`data: ${JSON.stringify({ content: cleanContent })}\n\n`)
+              )
+            }
           }
 
           // Calculate metrics
@@ -621,7 +671,7 @@ export async function POST(req: Request) {
           controllerErrored = true
           devError('[Bot Stream] ❌ Stream error:', error)
           // Signal error to client; we'll still persist any partial content in finally
-          try { controller.error(error) } catch (_) {}
+          try { controller.error(error) } catch (_) { }
         } finally {
           // Persist any generated content (complete or partial) to ensure dashboard consistency
           if (chatRoomId && fullResponse && fullResponse.trim().length > 0) {
@@ -646,8 +696,8 @@ export async function POST(req: Request) {
 
           // Finish the SSE stream if we haven't already errored the controller
           if (!controllerErrored) {
-            try { controller.enqueue(encoder.encode('data: [DONE]\n\n')) } catch (_) {}
-            try { controller.close() } catch (_) {}
+            try { controller.enqueue(encoder.encode('data: [DONE]\n\n')) } catch (_) { }
+            try { controller.close() } catch (_) { }
           }
         }
       },

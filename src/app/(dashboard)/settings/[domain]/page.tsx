@@ -3,6 +3,7 @@ import SettingsForm from '@/components/forms/settings/form'
 import InfoBar from '@/components/infobar'
 import { redirect } from 'next/navigation'
 import React from 'react'
+import { client as prisma } from '@/lib/prisma'
 
 const DomainSettingsPage = async (
   { params }: { params: Promise<{ domain: string }> }
@@ -14,6 +15,17 @@ const DomainSettingsPage = async (
   }
 
   const activeDomain = domain.domains[0]
+
+  // Fetch structured datasets
+  const datasets = await prisma.recordManager.findMany({
+    where: {
+      domainId: activeDomain.id,
+      type: 'tabular',
+    },
+    orderBy: {
+      createdAt: 'desc',
+    },
+  })
 
   return (
     <>
@@ -27,6 +39,7 @@ const DomainSettingsPage = async (
             name={activeDomain.name}
             trainingSourcesUsed={activeDomain.trainingSourcesUsed}
             knowledgeBaseSizeMB={activeDomain.knowledgeBaseSizeMB}
+            datasets={datasets}
           />
           {/* Products section temporarily disabled - will be re-enabled in 2 weeks */}
           {/* <ProductTable

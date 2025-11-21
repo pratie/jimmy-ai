@@ -46,6 +46,7 @@
     "@radix-ui/react-toggle-group": "^1.0.4",
     "@radix-ui/react-tooltip": "^1.2.8",
     "@types/nodemailer": "^6.4.15",
+    "@types/papaparse": "^5.5.0",
     "ai": "^5.0.86",
     "axios": "^1.7.2",
     "class-variance-authority": "^0.7.0",
@@ -60,6 +61,7 @@
     "next-themes": "^0.3.0",
     "nodemailer": "^6.9.13",
     "openai": "^4.47.1",
+    "papaparse": "^5.5.3",
     "pdf-parse-fork": "^1.2.0",
     "prisma": "^5.13.0",
     "pusher": "^5.2.0",
@@ -75,6 +77,7 @@
     "tailwind-merge": "^2.3.0",
     "tailwindcss-animate": "^1.0.7",
     "vaul": "^0.9.0",
+    "xlsx": "^0.18.5",
     "zod": "^3.25.76"
   },
   "devDependencies": {
