@@ -165,7 +165,7 @@ export const useSignUpForm = () => {
   const onHandleSubmit = methods.handleSubmit(
     async (values: UserRegistrationProps) => {
       console.log('[Sign-Up OTP] 🔐 OTP verification flow started')
-      console.log('[Sign-Up OTP] 📊 Form values:', { ...values, password: '[REDACTED]', confirmPassword: '[REDACTED]' })
+      console.log('[Sign-Up OTP] 📊 Form values:', { ...values, password: '[REDACTED]' })
 
       if (!isLoaded) {
         console.log('[Sign-Up OTP] ⚠️ Clerk not loaded, aborting...')

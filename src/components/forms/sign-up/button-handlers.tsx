@@ -66,7 +66,7 @@ const ButtonHandler = (props: Props) => {
         </div>
         <div className="relative flex justify-center text-xs uppercase">
           <span className="bg-background px-2 text-muted-foreground">
-            Or continue with account
+            Or sign up with email
           </span>
         </div>
       </div>
@@ -77,7 +77,7 @@ const ButtonHandler = (props: Props) => {
           variant="outline"
           onClick={() => setShowAccountForm(true)}
         >
-          Continue with account
+          Sign up with Email
         </Button>
       )}
       {showAccountForm && (

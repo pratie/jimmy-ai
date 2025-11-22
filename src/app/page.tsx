@@ -7,7 +7,7 @@ import { AspectRatio } from '@/components/ui/aspect-ratio'
 import Link from 'next/link'
 import PricingSection from '@/components/landing/pricing-section'
 import Script from 'next/script'
-import FlowDiagram from '@/components/landing/flow-diagram'
+import HowItWorks from '@/components/landing/how-it-works'
 import { Check } from 'lucide-react'
 import { Footer } from '@/components/landing/footer'
 import AnimatedChatHero from '@/components/landing/animated-chat-hero'
@@ -17,9 +17,9 @@ import { OpenAIIcon, AnthropicIcon, GoogleIcon } from '@/components/icons/provid
 const bebas = Bebas_Neue({ subsets: ['latin'], weight: '400' })
 
 export const metadata: Metadata = {
-  title: 'ChatDock AI — AI assistant on your knowledge base',
+  title: 'ChatDock AI — Your 24/7 AI Sales Agent',
   description:
-    'Launch an AI assistant trained on your website, PDFs, and docs. Capture leads, answer questions, and automate support with ChatDock AI.',
+    'Turn visitors into leads with a 24/7 AI sales agent. Train it on your website and docs to answer questions and book meetings automatically.',
   alternates: {
     canonical: '/',
   },
@@ -41,15 +41,14 @@ export default async function Home() {
               <div className="space-y-6">
                 <h1 className={`${bebas.className} text-5xl sm:text-6xl md:text-7xl lg:text-[72px] font-normal text-gray-900 dark:text-white leading-[1.05] tracking-normal`}>
                   <span className="block">
-                    <span className="text-main">AI</span>{' '}
-                    <span className="text-main">assistant</span>
+                    Your <span className="text-main">AI Sales Agent</span>,
                   </span>
-                  <span className="block">on your knowledge base</span>
+                  <span className="block">Working 24/7</span>
                 </h1>
               </div>
 
               <p className="text-gray-600 dark:text-gray-400 text-lg sm:text-xl max-w-xl leading-[1.8]">
-                Like ChatGPT trained on your business data - websites, PDFs, docs, and files. Use it for support, lead generation, or anything you need.
+                Turn every visitor into a lead. ChatDock trains on your website and docs to answer questions, capture emails, and book meetings—even while you sleep.
               </p>
 
               {/* CTA and Trust Section - Better visual weight */}
@@ -129,6 +128,30 @@ export default async function Home() {
         </div>
       </section>
 
+      {/* Social Proof / Stats - Enhanced visual impact */}
+      <section className="py-28 md:py-36 bg-gradient-to-b from-brand-base-100/50 to-transparent backdrop-blur-sm">
+        <div className="container mx-auto px-6 sm:px-8 lg:px-12">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-16 max-w-5xl mx-auto">
+            <div className="text-center">
+              <div className="text-5xl md:text-7xl font-extrabold text-brand-primary mb-3 tracking-tighter">67%</div>
+              <div className="text-brand-primary/70 text-base md:text-lg font-medium">Higher conversion rate</div>
+            </div>
+            <div className="text-center">
+              <div className="text-5xl md:text-7xl font-extrabold text-brand-primary mb-3 tracking-tighter">40%</div>
+              <div className="text-brand-primary/70 text-base md:text-lg font-medium">Fewer support tickets</div>
+            </div>
+            <div className="text-center">
+              <div className="text-5xl md:text-7xl font-extrabold text-brand-primary mb-3 tracking-tighter">24/7</div>
+              <div className="text-brand-primary/70 text-base md:text-lg font-medium">Customer support</div>
+            </div>
+            <div className="text-center">
+              <div className="text-5xl md:text-7xl font-extrabold text-brand-primary mb-3 tracking-tighter">5min</div>
+              <div className="text-brand-primary/70 text-base md:text-lg font-medium">To go live</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Product Preview - Dashboard Screenshot */}
       <section className="py-20 md:py-28">
         <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12">
@@ -142,7 +165,7 @@ export default async function Home() {
             </p>
           </div>
           <div className="max-w-5xl mx-auto rounded-3xl border border-border bg-white dark:bg-gray-900 shadow-shadow overflow-hidden">
-            <AspectRatio ratio={16/9}>
+            <AspectRatio ratio={16 / 9}>
               <Image
                 src={DashboardImg}
                 alt="ChatDock dashboard screenshot"
@@ -155,6 +178,9 @@ export default async function Home() {
           </div>
         </div>
       </section>
+
+      {/* How It Works - Interactive Flow */}
+      <HowItWorks />
 
       {/* Works with your site + docs - Enhanced spacing */}
       <section className="py-24 md:py-32">
@@ -198,62 +224,11 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* Learn more (Blog CTAs) - Better spacing */}
-      <section className="py-20 md:py-28">
-        <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-brand-primary mb-4">Learn more</h2>
-            <p className="text-lg text-brand-primary/70">Deep dives on setup, RAG accuracy, and support automation.</p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            <Link href="/blogs/how-to-train-an-ai-website-chatbot-on-your-docs" className="group">
-              <div className="bg-white dark:bg-gray-900 h-full p-6 rounded-lg border-2 border-gray-200 dark:border-gray-700 hover:border-main hover:shadow-lg transition-all">
-                <h3 className="font-semibold text-gray-900 dark:text-white mb-2 group-hover:text-main transition-colors">Train an AI chatbot on your docs</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Step‑by‑step: connect sources, chunk content, and ensure accurate answers.</p>
-              </div>
-            </Link>
-            <Link href="/blogs/ai-chatbot-for-website" className="group">
-              <div className="bg-white dark:bg-gray-900 h-full p-6 rounded-lg border-2 border-gray-200 dark:border-gray-700 hover:border-main hover:shadow-lg transition-all">
-                <h3 className="font-semibold text-gray-900 dark:text-white mb-2 group-hover:text-main transition-colors">AI chatbot for your website</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Benefits, setup, and best practices for 24/7 self‑service.</p>
-              </div>
-            </Link>
-            <Link href="/blogs/customer-support-ai" className="group">
-              <div className="bg-white dark:bg-gray-900 h-full p-6 rounded-lg border-2 border-gray-200 dark:border-gray-700 hover:border-main hover:shadow-lg transition-all">
-                <h3 className="font-semibold text-gray-900 dark:text-white mb-2 group-hover:text-main transition-colors">Customer support AI</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Reduce ticket volume with AI while keeping human handoff seamless.</p>
-              </div>
-            </Link>
-          </div>
-        </div>
-      </section>
 
-      {/* Social Proof / Stats - Enhanced visual impact */}
-      <section className="py-28 md:py-36 bg-gradient-to-b from-brand-base-100/50 to-transparent backdrop-blur-sm">
-        <div className="container mx-auto px-6 sm:px-8 lg:px-12">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-12 md:gap-16 max-w-5xl mx-auto">
-            <div className="text-center">
-              <div className="text-5xl md:text-7xl font-extrabold text-brand-primary mb-3 tracking-tighter">67%</div>
-              <div className="text-brand-primary/70 text-base md:text-lg font-medium">Higher conversion rate</div>
-            </div>
-            <div className="text-center">
-              <div className="text-5xl md:text-7xl font-extrabold text-brand-primary mb-3 tracking-tighter">40%</div>
-              <div className="text-brand-primary/70 text-base md:text-lg font-medium">Fewer support tickets</div>
-            </div>
-            <div className="text-center">
-              <div className="text-5xl md:text-7xl font-extrabold text-brand-primary mb-3 tracking-tighter">24/7</div>
-              <div className="text-brand-primary/70 text-base md:text-lg font-medium">Customer support</div>
-            </div>
-            <div className="text-center">
-              <div className="text-5xl md:text-7xl font-extrabold text-brand-primary mb-3 tracking-tighter">5min</div>
-              <div className="text-brand-primary/70 text-base md:text-lg font-medium">To go live</div>
-            </div>
-          </div>
-        </div>
-      </section>
 
-      {/* How It Works - Interactive Flow */}
-      <FlowDiagram />
+
+
+
 
       {/* Features Grid - Enhanced visual hierarchy */}
       <section id="features" className="py-32 md:py-40 bg-gradient-to-b from-transparent via-brand-base-100/30 to-transparent">
@@ -267,7 +242,7 @@ export default async function Home() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10 max-w-6xl mx-auto">
             {/* Feature Cards */}
 
             <div className="bg-white dark:bg-black/40 p-8 rounded-3xl border-2 border-brand-base-300 hover:border-brand-info/60 transition-all duration-300 hover:shadow-xl">
@@ -399,8 +374,11 @@ export default async function Home() {
         </div>
       </section>
 
+      {/* Pricing Section */}
+      <PricingSection />
+
       {/* Final CTA - Enhanced with better spacing */}
-      <section className="py-32 md:py-40">
+      <section className="py-20 md:py-40">
         <div className="container mx-auto px-6 sm:px-8 lg:px-12">
           <div className="max-w-4xl mx-auto text-center bg-white/90 dark:bg-gray-900 rounded-3xl p-12 md:p-20 border border-border shadow-shadow">
             <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-brand-primary mb-8 leading-tight">
@@ -424,8 +402,35 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* Pricing Section */}
-      <PricingSection />
+      {/* Learn more (Blog CTAs) - Better spacing */}
+      <section className="py-20 md:py-28">
+        <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-brand-primary mb-4">Learn more</h2>
+            <p className="text-lg text-brand-primary/70">Deep dives on setup, RAG accuracy, and support automation.</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <Link href="/blogs/how-to-train-an-ai-website-chatbot-on-your-docs" className="group">
+              <div className="bg-white dark:bg-gray-900 h-full p-6 rounded-lg border-2 border-gray-200 dark:border-gray-700 hover:border-main hover:shadow-lg transition-all">
+                <h3 className="font-semibold text-gray-900 dark:text-white mb-2 group-hover:text-main transition-colors">Train an AI chatbot on your docs</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Step‑by‑step: connect sources, chunk content, and ensure accurate answers.</p>
+              </div>
+            </Link>
+            <Link href="/blogs/ai-chatbot-for-website" className="group">
+              <div className="bg-white dark:bg-gray-900 h-full p-6 rounded-lg border-2 border-gray-200 dark:border-gray-700 hover:border-main hover:shadow-lg transition-all">
+                <h3 className="font-semibold text-gray-900 dark:text-white mb-2 group-hover:text-main transition-colors">AI chatbot for your website</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Benefits, setup, and best practices for 24/7 self‑service.</p>
+              </div>
+            </Link>
+            <Link href="/blogs/customer-support-ai" className="group">
+              <div className="bg-white dark:bg-gray-900 h-full p-6 rounded-lg border-2 border-gray-200 dark:border-gray-700 hover:border-main hover:shadow-lg transition-all">
+                <h3 className="font-semibold text-gray-900 dark:text-white mb-2 group-hover:text-main transition-colors">Customer support AI</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Reduce ticket volume with AI while keeping human handoff seamless.</p>
+              </div>
+            </Link>
+          </div>
+        </div>
+      </section>
 
       {/* Footer */}
       <Footer />

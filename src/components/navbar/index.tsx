@@ -39,10 +39,15 @@ function NavBar() {
           {/* CTA - Responsive padding and text */}
           <Link
             href="/auth/sign-up"
-            className="bg-main text-white font-semibold rounded-full text-[10px] sm:text-xs tracking-wider sm:tracking-tight px-3 py-2 sm:px-6 sm:py-2.5 shadow-shadow hover:shadow-light transition-all whitespace-nowrap"
+            className="group relative inline-flex items-center justify-center overflow-hidden rounded-full bg-gradient-to-r from-main to-blue-600 px-6 py-2.5 font-bold text-white shadow-lg shadow-blue-500/30 transition-all duration-300 hover:scale-105 hover:shadow-blue-500/50 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2"
           >
-            <span className="hidden sm:inline">Start Free</span>
-            <span className="sm:hidden">Start</span>
+            <span className="relative flex items-center gap-2">
+              <span className="hidden sm:inline text-sm">Start Free</span>
+              <span className="sm:hidden text-xs">Start</span>
+              <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              </svg>
+            </span>
           </Link>
         </div>
       </div>

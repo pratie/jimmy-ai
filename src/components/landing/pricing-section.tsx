@@ -51,7 +51,7 @@ export default function PricingSection() {
           </div>
         </div>
 
-        <div className="flex justify-center gap-6 flex-wrap px-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 px-4 max-w-[1400px] mx-auto">
           {pricingCards.map((card) => {
             // Calculate monthly equivalent for yearly plans
             const yearlyPriceNum = card.yearlyPrice ? parseInt(card.yearlyPrice.replace('$', '')) : 0
@@ -68,7 +68,7 @@ export default function PricingSection() {
               <Card
                 key={card.title}
                 className={clsx(
-                  'w-full max-w-[320px] sm:w-[320px] flex flex-col justify-between rounded-2xl overflow-hidden transition-all',
+                  'w-full flex flex-col justify-between rounded-2xl overflow-hidden transition-all',
                   {
                     'bg-bg border border-main shadow-shadow hover:shadow-light relative':
                       card.title === 'Business',
