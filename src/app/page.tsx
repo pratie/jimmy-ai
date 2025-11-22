@@ -13,6 +13,7 @@ import { Footer } from '@/components/landing/footer'
 import AnimatedChatHero from '@/components/landing/animated-chat-hero'
 import { Bebas_Neue } from 'next/font/google'
 import { OpenAIIcon, AnthropicIcon, GoogleIcon } from '@/components/icons/provider-icons'
+import Marquee from '@/components/ui/marquee'
 
 const bebas = Bebas_Neue({ subsets: ['latin'], weight: '400' })
 
@@ -77,22 +78,23 @@ export default async function Home() {
                 </div>
               </div>
 
-              {/* Powered by providers */}
               <div className="mt-2 flex flex-col sm:flex-row items-center gap-3 text-gray-500 dark:text-gray-400">
-                <span className="text-sm">Powered by</span>
-                <div className="flex items-center gap-5">
-                  <div className="flex items-center gap-2">
-                    <OpenAIIcon size={18} className="text-gray-700 dark:text-gray-300" />
-                    <span className="text-sm">OpenAI</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <AnthropicIcon size={18} className="text-gray-700 dark:text-gray-300" />
-                    <span className="text-sm">Anthropic</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <GoogleIcon size={18} className="text-gray-700 dark:text-gray-300" />
-                    <span className="text-sm">Google Gemini</span>
-                  </div>
+                <span className="text-sm whitespace-nowrap">Powered by</span>
+                <div className="relative flex w-full max-w-[300px] items-center overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_10%,black_90%,transparent)]">
+                  <Marquee pauseOnHover className="[--duration:20s] [--gap:2rem]">
+                    <div className="flex items-center gap-2">
+                      <OpenAIIcon size={18} className="text-gray-700 dark:text-gray-300" />
+                      <span className="text-sm">OpenAI</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <AnthropicIcon size={18} className="text-gray-700 dark:text-gray-300" />
+                      <span className="text-sm">Anthropic</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <GoogleIcon size={18} className="text-gray-700 dark:text-gray-300" />
+                      <span className="text-sm">Google Gemini</span>
+                    </div>
+                  </Marquee>
                 </div>
               </div>
             </div>
