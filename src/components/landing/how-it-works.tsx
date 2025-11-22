@@ -37,8 +37,8 @@ const steps = [
         icon: Zap,
         title: 'Start converting',
         description: 'AI handles questions 24/7, qualifies leads, and books meetings automatically.',
-        color: 'bg-orange-500',
-        gradient: 'from-orange-500 to-orange-600',
+        color: 'bg-amber-500',
+        gradient: 'from-amber-500 to-amber-600',
     },
     {
         icon: BarChart3,
@@ -114,7 +114,7 @@ export default function HowItWorks() {
                     {/* Central Beam (Desktop) */}
                     <div className="absolute left-1/2 top-0 bottom-0 w-1 bg-gray-200 dark:bg-gray-800 -translate-x-1/2 hidden md:block rounded-full overflow-hidden">
                         <div
-                            className="w-full bg-gradient-to-b from-blue-500 via-purple-500 to-orange-500 transition-all duration-1000 ease-out"
+                            className="w-full bg-gradient-to-b from-blue-500 via-purple-500 to-amber-500 transition-all duration-1000 ease-out"
                             style={{ height: `${((activeStep + 1) / steps.length) * 100}%` }}
                         />
                     </div>
@@ -122,7 +122,7 @@ export default function HowItWorks() {
                     {/* Mobile Beam (Left aligned) */}
                     <div className="absolute left-8 top-0 bottom-0 w-1 bg-gray-200 dark:bg-gray-800 md:hidden rounded-full overflow-hidden">
                         <div
-                            className="w-full bg-gradient-to-b from-blue-500 via-purple-500 to-orange-500 transition-all duration-1000 ease-out"
+                            className="w-full bg-gradient-to-b from-blue-500 via-purple-500 to-amber-500 transition-all duration-1000 ease-out"
                             style={{ height: `${((activeStep + 1) / steps.length) * 100}%` }}
                         />
                     </div>

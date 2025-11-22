@@ -39,7 +39,7 @@ export default async function Home() {
             <div className="space-y-8 md:space-y-10 max-w-2xl lg:max-w-none text-center lg:text-left">
               {/* Main Headline - Larger, more impactful */}
               <div className="space-y-6">
-                <h1 className={`${bebas.className} text-5xl sm:text-6xl md:text-7xl lg:text-[72px] font-normal text-gray-900 dark:text-white leading-[1.05] tracking-normal`}>
+                <h1 className={`${bebas.className} text-4xl sm:text-6xl md:text-7xl lg:text-[72px] font-normal text-gray-900 dark:text-white leading-[1.05] tracking-normal`}>
                   <span className="block">
                     Your <span className="text-main">AI Sales Agent</span>,
                   </span>
