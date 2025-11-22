@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useToast } from '@/components/ui/use-toast'
-import { onScrapeWebsiteForDomain, onUpdateKnowledgeBase, onTrainChatbot, onUploadTextKnowledgeBase, onGetEmbeddingStatus, onDiscoverTrainingSources, onScrapeSelectedSources } from '@/actions/firecrawl'
+import { onScrapeWebsiteForDomain, onUpdateKnowledgeBase, onTrainChatbot, onUploadTextKnowledgeBase, onGetEmbeddingStatus, onDiscoverTrainingSources, onScrapeSelectedSources, onUploadPDFKnowledgeBase } from '@/actions/firecrawl'
 import { useRouter } from 'next/navigation'
 
 export const useScrapeWebsite = () => {
@@ -209,6 +209,45 @@ export const useUploadText = () => {
   }
 
   return { onUpload, loading }
+}
+
+// Upload PDF (base64 string) to knowledge base
+export const useUploadPdf = () => {
+  const [loading, setLoading] = useState(false)
+  const { toast } = useToast()
+  const router = useRouter()
+
+  const onUploadPdf = async (domainId: string, fileBase64: string, filename: string, append: boolean = true) => {
+    try {
+      setLoading(true)
+
+      const result = await onUploadPDFKnowledgeBase(domainId, fileBase64, filename, append)
+
+      if (result.status === 200) {
+        toast({
+          title: 'Success!',
+          description: result.message,
+        })
+        router.refresh()
+      } else {
+        toast({
+          title: 'Error',
+          description: result.message,
+          variant: 'destructive',
+        })
+      }
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to upload PDF',
+        variant: 'destructive',
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return { onUploadPdf, loading }
 }
 
 export const useDiscoverSources = () => {

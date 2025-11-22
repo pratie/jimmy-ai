@@ -119,9 +119,9 @@ export function validateContent(content: string): { valid: boolean; error?: stri
     return { valid: false, error: 'Content is empty' }
   }
 
-  const MAX_SIZE = 10 * 1024 * 1024 // 10MB
+  const MAX_SIZE = 50 * 1024 * 1024 // 50MB
   if (content.length > MAX_SIZE) {
-    return { valid: false, error: 'Content too large. Max 10MB.' }
+    return { valid: false, error: 'Content too large. Max 50MB.' }
   }
 
   if (content.trim().length < 50) {

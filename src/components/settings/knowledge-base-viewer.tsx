@@ -13,7 +13,7 @@ import {
   Upload, CheckCircle2, CircleDashed, Link2, FileUp,
   HelpCircle, ArrowRight, Database, Eye, ChevronDown, ChevronUp
 } from 'lucide-react'
-import { useScrapeWebsite, useUpdateKnowledgeBase, useTrainChatbot, useUploadText, useScrapeSelected } from '@/hooks/firecrawl/use-scrape'
+import { useScrapeWebsite, useUpdateKnowledgeBase, useTrainChatbot, useUploadText, useScrapeSelected, useUploadPdf } from '@/hooks/firecrawl/use-scrape'
 import { TrainingSourcesSelector } from './training-sources-selector'
 import { formatDistanceToNow } from 'date-fns'
 import { Switch } from '@/components/ui/switch'
@@ -55,6 +55,7 @@ const KnowledgeBaseViewerV2 = ({
   const [singleUrl, setSingleUrl] = useState('')
   const [appendMode, setAppendMode] = useState(true)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [pdfBase64, setPdfBase64] = useState<string | null>(null)
   const [fileError, setFileError] = useState<string | null>(null)
 
   const { onScrape, loading: scraping } = useScrapeWebsite()
@@ -62,6 +63,7 @@ const KnowledgeBaseViewerV2 = ({
   const { onUpdate, loading: updating } = useUpdateKnowledgeBase()
   const { onTrain, loading: training, progress, status: trainingStatus, hasEmbeddings, completedAt } = useTrainChatbot()
   const { onUpload, loading: uploading } = useUploadText()
+  const { onUploadPdf, loading: uploadingPdf } = useUploadPdf()
 
   // Update edited markdown when knowledge base changes
   React.useEffect(() => {
@@ -80,6 +82,7 @@ const KnowledgeBaseViewerV2 = ({
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     setFileError(null)
+    setPdfBase64(null)
     const file = e.target.files?.[0]
     if (!file) return
 
@@ -87,40 +90,66 @@ const KnowledgeBaseViewerV2 = ({
     const isTxt = file.type === 'text/plain' || file.name.toLowerCase().endsWith('.txt')
     const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')
 
-    // For now, only .txt is supported in UI
-    if (isPdf) {
-      setFileError('PDF upload coming soon. Please upload a .txt file for now.')
+    if (!isTxt && !isPdf) {
+      setFileError('Only .txt or .pdf files are supported at the moment')
+      setSelectedFile(null)
       return
     }
 
-    if (!isTxt) {
-      setFileError('Only .txt files are supported at the moment')
-      return
-    }
-
-    const MAX = 10 * 1024 * 1024 // 10MB
+    const MAX = 50 * 1024 * 1024 // 50MB
     if (file.size > MAX) {
-      setFileError('File too large. Maximum 10MB')
+      setFileError('File too large. Maximum 50MB')
+      setSelectedFile(null)
       return
     }
 
     setSelectedFile(file)
 
-    // For text files, read content
-    if (isTxt) {
+    if (isPdf) {
+      // Read as data URL and strip prefix to get base64 payload
       const reader = new FileReader()
       reader.onload = () => {
-        const text = String(reader.result || '')
-        setUploadText(text)
+        const result = String(reader.result || '')
+        const base64 = result.includes(',') ? result.split(',')[1] || '' : result
+        if (!base64) {
+          setFileError('Failed to read PDF')
+          setPdfBase64(null)
+          return
+        }
+        setPdfBase64(base64)
+        setUploadText('') // Clear any text content preview when switching to PDF
       }
-      reader.onerror = () => setFileError('Failed to read file')
-      reader.readAsText(file)
+      reader.onerror = () => {
+        setFileError('Failed to read PDF')
+        setPdfBase64(null)
+      }
+      reader.readAsDataURL(file)
+      return
     }
+
+    // For text files, read content
+    const reader = new FileReader()
+    reader.onload = () => {
+      const text = String(reader.result || '')
+      setUploadText(text)
+    }
+    reader.onerror = () => setFileError('Failed to read file')
+    reader.readAsText(file)
   }
 
   const handleTextUpload = async () => {
     await onUpload(domainId, uploadText, appendMode)
     setUploadText('')
+    setSelectedFile(null)
+    setPdfBase64(null)
+    setFileError(null)
+    setAppendMode(true)
+  }
+
+  const handlePdfUpload = async () => {
+    if (!pdfBase64 || !selectedFile) return
+    await onUploadPdf(domainId, pdfBase64, selectedFile.name, appendMode)
+    setPdfBase64(null)
     setSelectedFile(null)
     setFileError(null)
     setAppendMode(true)
@@ -140,6 +169,12 @@ const KnowledgeBaseViewerV2 = ({
     ? 0
     : (trainingSourcesUsed / trainingSourcesLimit) * 100
   const kbPercent = (kbSizeMB / kbSizeLimit) * 100
+  const isSelectedTextFile = selectedFile
+    ? selectedFile.type === 'text/plain' || selectedFile.name.toLowerCase().endsWith('.txt')
+    : false
+  const isSelectedPdfFile = selectedFile
+    ? selectedFile.type === 'application/pdf' || selectedFile.name.toLowerCase().endsWith('.pdf')
+    : false
 
   // Check completion status
   const hasKB = !!knowledgeBase && knowledgeBase.length >= 50
@@ -361,8 +396,8 @@ const KnowledgeBaseViewerV2 = ({
             {/* File Upload Tab */}
             <TabsContent value="file" className="space-y-4 mt-4">
               <div className="flex items-center justify-between">
-                <p className="text-sm text-muted-foreground">Upload .txt files (PDF coming soon)</p>
-                <Badge variant="outline" className="text-xs">10MB max</Badge>
+                <p className="text-sm text-muted-foreground">Upload .txt or .pdf files (scanned PDFs not yet supported)</p>
+                <Badge variant="outline" className="text-xs">50MB max</Badge>
               </div>
 
               <div className="space-y-4 p-6 rounded-lg border bg-white/90 backdrop-blur-sm">
@@ -371,7 +406,7 @@ const KnowledgeBaseViewerV2 = ({
                   <input
                     id="file-upload-empty"
                     type="file"
-                    accept=".txt,text/plain"
+                    accept=".txt,.pdf,text/plain,application/pdf"
                     onChange={handleFileChange}
                     className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                   />
@@ -387,7 +422,7 @@ const KnowledgeBaseViewerV2 = ({
                   )}
                 </div>
 
-                {selectedFile?.type === 'text/plain' && (
+                {isSelectedTextFile && (
                   <>
                     <div className="space-y-2">
                       <Label className="text-sm font-semibold">Preview & Edit</Label>
@@ -416,6 +451,35 @@ const KnowledgeBaseViewerV2 = ({
                       <Button onClick={handleTextUpload} disabled={uploading || !selectedFile} size="lg">
                         {uploading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Upload className="w-4 h-4 mr-2" />}
                         Upload File
+                      </Button>
+                    </div>
+                  </>
+                )}
+
+                {isSelectedPdfFile && (
+                  <>
+                    <div className="flex items-center gap-2">
+                      <Switch id="append-mode-file-pdf" checked={appendMode} onCheckedChange={setAppendMode} />
+                      <Label htmlFor="append-mode-file-pdf" className="text-sm">Append to existing content</Label>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      We extract text from this PDF. Image-only/scanned PDFs will fail until OCR is added.
+                    </p>
+                    <div className="flex justify-end gap-2">
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          setPdfBase64(null)
+                          setSelectedFile(null)
+                          setFileError(null)
+                        }}
+                        disabled={uploadingPdf}
+                      >
+                        Clear
+                      </Button>
+                      <Button onClick={handlePdfUpload} disabled={uploadingPdf || !pdfBase64} size="lg">
+                        {uploadingPdf ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Upload className="w-4 h-4 mr-2" />}
+                        Upload PDF
                       </Button>
                     </div>
                   </>
@@ -629,8 +693,8 @@ const KnowledgeBaseViewerV2 = ({
           {/* File Upload Tab */}
           <TabsContent value="file" className="space-y-4 mt-4">
             <div className="flex items-center justify-between">
-              <p className="text-sm text-muted-foreground">Upload .txt files (PDF coming soon)</p>
-              <Badge variant="outline" className="text-xs">10MB max</Badge>
+              <p className="text-sm text-muted-foreground">Upload .txt or .pdf files (scanned PDFs not yet supported)</p>
+                <Badge variant="outline" className="text-xs">50MB max</Badge>
             </div>
 
             <div className="space-y-4 p-6 rounded-lg border bg-white/90 backdrop-blur-sm">
@@ -639,7 +703,7 @@ const KnowledgeBaseViewerV2 = ({
                 <input
                   id="file-upload-active"
                   type="file"
-                  accept=".txt,text/plain"
+                  accept=".txt,.pdf,text/plain,application/pdf"
                   onChange={handleFileChange}
                   className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                 />
@@ -655,7 +719,7 @@ const KnowledgeBaseViewerV2 = ({
                 )}
               </div>
 
-              {selectedFile?.type === 'text/plain' && (
+              {isSelectedTextFile && (
                 <>
                   <div className="space-y-2">
                     <Label className="text-sm font-semibold">Preview & Edit</Label>
@@ -665,11 +729,11 @@ const KnowledgeBaseViewerV2 = ({
                       className="min-h-[200px] font-mono text-sm"
                     />
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Switch id="append-mode-file-active" checked={appendMode} onCheckedChange={setAppendMode} />
-                    <Label htmlFor="append-mode-file-active" className="text-sm">Append to existing content</Label>
-                  </div>
-                  <div className="flex justify-end gap-2">
+                    <div className="flex items-center gap-2">
+                      <Switch id="append-mode-file-active" checked={appendMode} onCheckedChange={setAppendMode} />
+                      <Label htmlFor="append-mode-file-active" className="text-sm">Append to existing content</Label>
+                    </div>
+                    <div className="flex justify-end gap-2">
                     <Button
                       variant="outline"
                       onClick={() => {
@@ -681,9 +745,38 @@ const KnowledgeBaseViewerV2 = ({
                     >
                       Clear
                     </Button>
-                    <Button onClick={handleTextUpload} disabled={uploading || !selectedFile} size="lg">
-                      {uploading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Upload className="w-4 h-4 mr-2" />}
-                      Upload File
+                      <Button onClick={handleTextUpload} disabled={uploading || !selectedFile} size="lg">
+                        {uploading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Upload className="w-4 h-4 mr-2" />}
+                        Upload File
+                      </Button>
+                    </div>
+                  </>
+                )}
+
+              {isSelectedPdfFile && (
+                <>
+                  <div className="flex items-center gap-2">
+                    <Switch id="append-mode-file-active-pdf" checked={appendMode} onCheckedChange={setAppendMode} />
+                    <Label htmlFor="append-mode-file-active-pdf" className="text-sm">Append to existing content</Label>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    We extract text from this PDF. Image-only/scanned PDFs will fail until OCR is added.
+                  </p>
+                  <div className="flex justify-end gap-2">
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setPdfBase64(null)
+                        setSelectedFile(null)
+                        setFileError(null)
+                      }}
+                      disabled={uploadingPdf}
+                    >
+                      Clear
+                    </Button>
+                    <Button onClick={handlePdfUpload} disabled={uploadingPdf || !pdfBase64} size="lg">
+                      {uploadingPdf ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Upload className="w-4 h-4 mr-2" />}
+                      Upload PDF
                     </Button>
                   </div>
                 </>

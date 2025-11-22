@@ -80,10 +80,10 @@ const securityHeaders = [
 const nextConfig = {
   reactStrictMode: false,
   // Allow larger payloads for Server Actions (paste/upload KB text)
-  // Default is 1MB; raise to 20MB to accommodate knowledge base updates
+  // Default is 1MB; raise to 80MB to accommodate base64-encoded PDF uploads (~50MB file)
   experimental: {
     serverActions: {
-      bodySizeLimit: '20mb',
+      bodySizeLimit: '80mb',
     },
   },
   images: {

@@ -854,12 +854,26 @@ export const onScrapeSelectedSources = async (
 // Upload PDF file and extract text
 export const onUploadPDFKnowledgeBase = async (
   domainId: string,
-  fileBuffer: Buffer,
+  fileInput: Buffer | ArrayBuffer | string,
   filename: string,
   append: boolean = true
 ) => {
   try {
     console.log('[PDF Upload] Processing PDF for domain:', domainId, 'File:', filename)
+
+    // Support Buffer, ArrayBuffer, or base64 string from client
+    const normalizeToBuffer = (input: Buffer | ArrayBuffer | string): Buffer => {
+      if (input instanceof Buffer) return input
+      if (typeof input === 'string') {
+        // Accept raw base64 or data URL
+        const base64 = input.includes(',') ? (input.split(',').pop() || '') : input
+        return Buffer.from(base64, 'base64')
+      }
+      if (input instanceof ArrayBuffer) return Buffer.from(input)
+      throw new Error('Unsupported file input type')
+    }
+
+    const fileBuffer = normalizeToBuffer(fileInput)
 
     // Get domain and plan info
     const domain = await client.domain.findUnique({
