@@ -18,7 +18,7 @@ import Marquee from '@/components/ui/marquee'
 const bebas = Bebas_Neue({ subsets: ['latin'], weight: '400' })
 
 export const metadata: Metadata = {
-  title: 'ChatDock AI — Your 24/7 AI Sales Agent',
+  title: 'ChatDock AI - Your 24/7 AI Sales Agent',
   description:
     'Turn visitors into leads with a 24/7 AI sales agent. Train it on your website and docs to answer questions and book meetings automatically.',
   alternates: {
@@ -49,7 +49,7 @@ export default async function Home() {
               </div>
 
               <p className="text-gray-600 dark:text-gray-400 text-lg sm:text-xl max-w-xl leading-[1.8]">
-                Turn every visitor into a lead. ChatDock trains on your website and docs to answer questions, capture emails, and book meetings—even while you sleep.
+                Turn every visitor into a lead. ChatDock trains on your website and docs to answer questions, capture emails, and book meetings - even while you sleep.
               </p>
 
               {/* CTA and Trust Section - Better visual weight */}
@@ -163,7 +163,7 @@ export default async function Home() {
             </h2>
             <p className="text-brand-primary/70 text-lg max-w-2xl mx-auto">
               Manage chatbots, track conversations, train your knowledge base, and tweak
-              advanced AI settings—all in one place.
+              advanced AI settings all in one place.
             </p>
           </div>
           <div className="max-w-5xl mx-auto rounded-3xl border border-border bg-white dark:bg-gray-900 shadow-shadow overflow-hidden">
@@ -255,7 +255,7 @@ export default async function Home() {
               </div>
               <h3 className="text-xl font-bold text-brand-primary mb-3">Answer product questions instantly</h3>
               <p className="text-brand-primary/70 leading-relaxed">
-                Your AI knows every product detail, shipping policy, and return procedure. Gives accurate answers in seconds—like your best salesperson, but available 24/7.
+                Your AI knows every product detail, shipping policy, and return procedure. Gives accurate answers in seconds, like your best salesperson, but available 24/7.
               </p>
             </div>
 
@@ -267,7 +267,7 @@ export default async function Home() {
               </div>
               <h3 className="text-xl font-bold text-brand-primary mb-3">Book consultations automatically</h3>
               <p className="text-brand-primary/70 leading-relaxed">
-                Great for support and success teams. Qualify visitors, share a booking link, and notify your team for high‑intent conversations—no back‑and‑forth scheduling.
+                Great for support and success teams. Qualify visitors, share a booking link, and notify your team for high‑intent conversations without back‑and‑forth scheduling.
               </p>
             </div>
 
@@ -279,7 +279,7 @@ export default async function Home() {
               </div>
               <h3 className="text-xl font-bold text-brand-primary mb-3">Seamless human handoff</h3>
               <p className="text-brand-primary/70 leading-relaxed">
-                AI handles 80% of questions automatically. For complex issues, it notifies your team and hands off with full context—no repeated questions for customers.
+                AI handles 80% of questions automatically. For complex issues, it notifies your team and hands off with full context without repeated questions for customers.
               </p>
             </div>
 
@@ -301,9 +301,9 @@ export default async function Home() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
                 </svg>
               </div>
-              <h3 className="text-xl font-bold text-brand-primary mb-3">Scale across multiple stores</h3>
+              <h3 className="text-xl font-bold text-brand-primary mb-3">Scale across multiple brands</h3>
               <p className="text-brand-primary/70 leading-relaxed">
-                Scale across multiple sites or brands. Manage assistants in one dashboard—each grounded in the right docs and policies.
+                Scale across multiple sites or brands. Manage assistants in one dashboard - each grounded in the right docs and policies.
               </p>
             </div>
 
@@ -315,7 +315,7 @@ export default async function Home() {
               </div>
               <h3 className="text-xl font-bold text-brand-primary mb-3">AI search over your docs</h3>
               <p className="text-brand-primary/70 leading-relaxed">
-                Answers come from your website and documentation using retrieval‑augmented generation. Keep responses accurate, specific, and on‑brand—without manual tagging.
+                Answers come from your website and documentation using retrieval‑augmented generation. Keep responses accurate, specific, and on‑brand without manual tagging.
               </p>
             </div>
 
@@ -327,7 +327,7 @@ export default async function Home() {
               </div>
               <h3 className="text-xl font-bold text-brand-primary mb-3">24/7 self‑service</h3>
               <p className="text-brand-primary/70 leading-relaxed">
-                Give customers instant answers any time of day. Reduce ticket volume by letting users help themselves—with streaming responses that keep conversations engaging.
+                Give customers instant answers any time of day. Reduce ticket volume by letting users help themselves with streaming responses that keep conversations engaging.
               </p>
             </div>
 
@@ -339,7 +339,7 @@ export default async function Home() {
               </div>
               <h3 className="text-xl font-bold text-brand-primary mb-3">Live handoff when it matters</h3>
               <p className="text-brand-primary/70 leading-relaxed">
-                Switch to a human in real‑time for complex questions or high‑intent visitors. Share a booking link to schedule calls—no back‑and‑forth.
+                Switch to a human in real‑time for complex questions or high‑intent visitors. Share a booking link to schedule calls without back‑and‑forth.
               </p>
             </div>
           </div>
@@ -358,7 +358,7 @@ export default async function Home() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             <div className="bg-white dark:bg-black/40 p-6 rounded-2xl border-2 border-brand-base-300">
               <h3 className="font-semibold text-brand-primary mb-2">Accurate by design</h3>
-              <p className="text-sm text-brand-primary/70">Retrieval‑augmented generation uses your content to answer—no hallucinated guesses.</p>
+              <p className="text-sm text-brand-primary/70">Retrieval‑augmented generation uses your content to answer without hallucinated guesses.</p>
             </div>
             <div className="bg-white dark:bg-black/40 p-6 rounded-2xl border-2 border-brand-base-300">
               <h3 className="font-semibold text-brand-primary mb-2">Streamed, fast replies</h3>
@@ -366,7 +366,7 @@ export default async function Home() {
             </div>
             <div className="bg-white dark:bg-black/40 p-6 rounded-2xl border-2 border-brand-base-300">
               <h3 className="font-semibold text-brand-primary mb-2">Live agent handoff</h3>
-              <p className="text-sm text-brand-primary/70">Escalate to a human instantly for edge cases—no context lost.</p>
+              <p className="text-sm text-brand-primary/70">Escalate to a human instantly for edge cases without losing context.</p>
             </div>
             <div className="bg-white dark:bg-black/40 p-6 rounded-2xl border-2 border-brand-base-300">
               <h3 className="font-semibold text-brand-primary mb-2">Meetings when needed</h3>
