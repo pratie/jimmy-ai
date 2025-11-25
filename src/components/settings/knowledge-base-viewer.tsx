@@ -11,7 +11,7 @@ import { Badge } from '@/components/ui/badge'
 import {
   RefreshCw, FileText, AlertCircle, Loader2, Edit, Save, X, Brain,
   Upload, CheckCircle2, CircleDashed, Link2, FileUp,
-  HelpCircle, ArrowRight, Database, Eye, ChevronDown, ChevronUp
+  HelpCircle, ArrowRight, Database, Eye, ChevronDown, ChevronUp, Globe
 } from 'lucide-react'
 import { useScrapeWebsite, useUpdateKnowledgeBase, useTrainChatbot, useUploadText, useScrapeSelected, useUploadPdf } from '@/hooks/firecrawl/use-scrape'
 import { TrainingSourcesSelector } from './training-sources-selector'
@@ -244,14 +244,14 @@ const KnowledgeBaseViewerV2 = ({
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Plan Limits Display */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-muted/50 rounded-lg">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-main rounded-lg text-white">
             <div className="space-y-2">
               <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Training Sources</span>
+                <span className="text-blue-100">Training Sources</span>
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger>
-                      <HelpCircle className="w-4 h-4 text-muted-foreground" />
+                      <HelpCircle className="w-4 h-4 text-blue-200" />
                     </TooltipTrigger>
                     <TooltipContent>
                       <p className="max-w-xs">
@@ -262,23 +262,23 @@ const KnowledgeBaseViewerV2 = ({
                 </TooltipProvider>
               </div>
               <div className="flex items-baseline gap-2">
-                <span className="text-2xl font-bold">
+                <span className="text-2xl font-bold text-white">
                   {trainingSourcesUsed}
                 </span>
-                <span className="text-muted-foreground">
+                <span className="text-blue-100">
                   / {trainingSourcesLimit === Infinity ? '∞' : trainingSourcesLimit}
                 </span>
               </div>
-              <Progress value={sourcesPercent} className="h-2" />
+              <Progress value={sourcesPercent} className="h-2 bg-black/20" indicatorClassName="bg-white" />
             </div>
 
             <div className="space-y-2">
               <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Knowledge Base Size</span>
+                <span className="text-blue-100">Knowledge Base Size</span>
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger>
-                      <HelpCircle className="w-4 h-4 text-muted-foreground" />
+                      <HelpCircle className="w-4 h-4 text-blue-200" />
                     </TooltipTrigger>
                     <TooltipContent>
                       <p className="max-w-xs">
@@ -289,14 +289,14 @@ const KnowledgeBaseViewerV2 = ({
                 </TooltipProvider>
               </div>
               <div className="flex items-baseline gap-2">
-                <span className="text-2xl font-bold">
+                <span className="text-2xl font-bold text-white">
                   {kbSizeMB.toFixed(2)}
                 </span>
-                <span className="text-muted-foreground">
+                <span className="text-blue-100">
                   / {kbSizeLimit} MB
                 </span>
               </div>
-              <Progress value={kbPercent} className="h-2" />
+              <Progress value={kbPercent} className="h-2 bg-black/20" indicatorClassName="bg-white" />
             </div>
           </div>
 
@@ -329,9 +329,23 @@ const KnowledgeBaseViewerV2 = ({
               </div>
 
               <div className="space-y-4 p-6 rounded-lg border bg-white/90 backdrop-blur-sm">
-                <div className="space-y-2">
-                  <Label className="text-sm font-semibold">Collect Multiple Links</Label>
-                  <p className="text-xs text-muted-foreground mb-2">Discover and select multiple pages from your website</p>
+                {/* Default Domain Display */}
+                <div className="space-y-2 pb-4 border-b border-gray-100">
+                  <Label className="text-sm font-semibold">Primary Website</Label>
+                  <div className="flex items-center gap-3 p-3 bg-blue-50/50 border border-blue-100 rounded-lg">
+                    <div className="p-2 bg-white rounded-full border border-blue-100 shadow-sm">
+                      <Globe className="w-4 h-4 text-blue-600" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900 truncate">{domainName}</p>
+                      <p className="text-xs text-gray-500">Default source for crawling</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-2 pt-2">
+                  <Label className="text-sm font-semibold">Website Pages</Label>
+                  <p className="text-xs text-muted-foreground mb-2">Discover and select specific pages to train on</p>
                   <TrainingSourcesSelector domainId={domainId} />
                 </div>
 
@@ -694,7 +708,7 @@ const KnowledgeBaseViewerV2 = ({
           <TabsContent value="file" className="space-y-4 mt-4">
             <div className="flex items-center justify-between">
               <p className="text-sm text-muted-foreground">Upload .txt or .pdf files (scanned PDFs not yet supported)</p>
-                <Badge variant="outline" className="text-xs">50MB max</Badge>
+              <Badge variant="outline" className="text-xs">50MB max</Badge>
             </div>
 
             <div className="space-y-4 p-6 rounded-lg border bg-white/90 backdrop-blur-sm">
@@ -729,11 +743,11 @@ const KnowledgeBaseViewerV2 = ({
                       className="min-h-[200px] font-mono text-sm"
                     />
                   </div>
-                    <div className="flex items-center gap-2">
-                      <Switch id="append-mode-file-active" checked={appendMode} onCheckedChange={setAppendMode} />
-                      <Label htmlFor="append-mode-file-active" className="text-sm">Append to existing content</Label>
-                    </div>
-                    <div className="flex justify-end gap-2">
+                  <div className="flex items-center gap-2">
+                    <Switch id="append-mode-file-active" checked={appendMode} onCheckedChange={setAppendMode} />
+                    <Label htmlFor="append-mode-file-active" className="text-sm">Append to existing content</Label>
+                  </div>
+                  <div className="flex justify-end gap-2">
                     <Button
                       variant="outline"
                       onClick={() => {
@@ -745,13 +759,13 @@ const KnowledgeBaseViewerV2 = ({
                     >
                       Clear
                     </Button>
-                      <Button onClick={handleTextUpload} disabled={uploading || !selectedFile} size="lg">
-                        {uploading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Upload className="w-4 h-4 mr-2" />}
-                        Upload File
-                      </Button>
-                    </div>
-                  </>
-                )}
+                    <Button onClick={handleTextUpload} disabled={uploading || !selectedFile} size="lg">
+                      {uploading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Upload className="w-4 h-4 mr-2" />}
+                      Upload File
+                    </Button>
+                  </div>
+                </>
+              )}
 
               {isSelectedPdfFile && (
                 <>
