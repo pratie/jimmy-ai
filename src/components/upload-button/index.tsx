@@ -6,6 +6,7 @@ import { Edit, CheckCircle, X, Upload } from 'lucide-react'
 import { ErrorMessage } from '@hookform/error-message'
 import Image from 'next/image'
 import { uploadFile } from '@/lib/kie-api'
+import { Button } from '../ui/button'
 
 type Props = {
   register: UseFormRegister<any>
@@ -75,69 +76,68 @@ const UploadButton = ({ errors, label, register, onUploadComplete }: Props) => {
 
   return (
     <>
-      <div className="flex flex-col gap-3">
-        <div className="flex gap-2 items-center">
-          <Label
-            htmlFor={inputId}
-            className="flex gap-2 p-3 rounded-lg bg-muted text-brand-primary/80 cursor-pointer font-semibold text-sm items-center hover:bg-muted/80 transition-colors"
-          >
-            <Input
-              {...inputRegister}
-              ref={(element) => {
-                inputRef.current = element
-                inputRegister.ref(element)
-              }}
-              className="hidden"
-              type="file"
-              id={inputId}
-              accept="image/*"
-            />
-            <Input
-              {...urlRegister}
-              type="hidden"
-              value={uploadedUrl || ''}
-            />
-            <Edit size={16} />
-            {label}
-          </Label>
-          {selectedFile && !uploadedUrl && (
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={handleUpload}
-                disabled={isUploading}
-                className="flex items-center gap-2 px-3 py-1.5 bg-primary text-primary-foreground text-sm font-medium rounded-md hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                {isUploading ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    Uploading...
-                  </>
-                ) : (
-                  <>
-                    <Upload size={16} />
-                    Upload
-                  </>
-                )}
-              </button>
-            </div>
-          )}
-          {uploadedUrl && (
-            <div className="flex items-center gap-2 text-green-600">
-              <CheckCircle size={16} />
-              <span className="text-sm font-medium">Upload successful</span>
-            </div>
-          )}
-        </div>
+      <div className="flex flex-col gap-4">
+        <Label
+          htmlFor={inputId}
+          className="flex flex-col items-center justify-center h-32 w-full rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer group"
+        >
+          <div className="flex flex-col items-center justify-center pt-5 pb-6">
+            <Upload className="w-8 h-8 mb-3 text-gray-400 group-hover:text-gray-500 transition-colors" />
+            <p className="mb-2 text-sm text-gray-500 font-semibold">
+              <span className="font-bold">Click to upload (Optional)</span> or drag and drop
+            </p>
+            <p className="text-xs text-gray-400">SVG, PNG, JPG or GIF (max. 2MB)</p>
+          </div>
+          <Input
+            {...inputRegister}
+            ref={(element) => {
+              inputRef.current = element
+              inputRegister.ref(element)
+            }}
+            className="hidden"
+            type="file"
+            id={inputId}
+            accept="image/*"
+          />
+          <Input
+            {...urlRegister}
+            type="hidden"
+            value={uploadedUrl || ''}
+          />
+        </Label>
 
-        <p className="text-sm text-brand-primary/50">
-          Recommended size is 300px * 300px, size less than 2MB
-        </p>
+        {selectedFile && !uploadedUrl && (
+          <Button
+            type="button"
+            onClick={handleUpload}
+            disabled={isUploading}
+            className="w-full"
+          >
+            {isUploading ? (
+              <>
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                Uploading...
+              </>
+            ) : (
+              <>
+                <Upload className="w-4 h-4 mr-2" />
+                Upload Selected File
+              </>
+            )}
+          </Button>
+        )}
+
+        {uploadedUrl && (
+          <div className="flex items-center gap-2 text-green-600 bg-green-50 p-3 rounded-md border border-green-100">
+            <CheckCircle size={16} />
+            <span className="text-sm font-medium">Icon uploaded successfully</span>
+          </div>
+        )}
 
         {/* Image Preview */}
-        {previewUrl && selectedFile && (
-          <div className="flex items-start gap-3 p-3 bg-brand-base-100 rounded-lg">
-            <div className="relative w-16 h-16 rounded-lg overflow-hidden border-2 border-brand-base-300">
+        {previewUrl && selectedFile && !uploadedUrl && (
+          <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
+            <div className="relative w-12 h-12 rounded-lg overflow-hidden border border-gray-200">
               <Image
                 src={previewUrl}
                 alt="Preview"
@@ -146,17 +146,17 @@ const UploadButton = ({ errors, label, register, onUploadComplete }: Props) => {
               />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-brand-primary truncate">
+              <p className="text-sm font-medium text-gray-900 truncate">
                 {selectedFile.name}
               </p>
-              <p className="text-xs text-brand-primary/60">
+              <p className="text-xs text-gray-500">
                 {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
               </p>
             </div>
             <button
               type="button"
               onClick={clearSelection}
-              className="p-1 text-brand-primary/60 hover:text-brand-primary transition-colors"
+              className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
             >
               <X size={16} />
             </button>

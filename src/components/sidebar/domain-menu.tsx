@@ -14,13 +14,13 @@ import { getKieImageUrl } from '@/lib/kie-api'
 type Props = {
   min?: boolean
   domains:
-    | {
-        id: string
-        name: string
-        icon: string | null
-      }[]
-    | null
-    | undefined
+  | {
+    id: string
+    name: string
+    icon: string | null
+  }[]
+  | null
+  | undefined
 }
 
 const DomainIcon = ({ icon, name }: { icon: string | null, name: string }) => {
@@ -72,7 +72,7 @@ const DomainMenu = ({ domains, min }: Props) => {
         >
           <Loader loading={loading}>
             <form
-              className="mt-3 w-full md:w-6/12 flex flex-col gap-3"
+              className="mt-5 w-full max-w-lg flex flex-col gap-6"
               onSubmit={onAddDomain}
             >
               <FormGenerator
@@ -91,7 +91,7 @@ const DomainMenu = ({ domains, min }: Props) => {
               />
               <Button
                 type="submit"
-                className="w-full"
+                className="w-full h-12 font-bold text-lg"
               >
                 Add Domain
               </Button>

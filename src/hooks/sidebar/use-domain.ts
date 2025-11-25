@@ -61,14 +61,7 @@ export const useDomain = () => {
     // Check if we have an already uploaded image URL or need to upload a new file
     let iconReference: string = imageUrl || ''
 
-    if (!imageUrl && (!imageFile || imageFile.size === 0)) {
-      toast({
-        title: 'Error',
-        description: 'Image is required',
-      })
-      setLoading(false)
-      return
-    }
+    // Removed mandatory image check - image is now optional
 
     // If no pre-uploaded URL, upload the file
     if (!imageUrl && imageFile && imageFile.size > 0) {
