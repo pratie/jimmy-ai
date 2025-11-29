@@ -24,7 +24,7 @@ export default function PricingSection() {
             Pricing That Scales With You
           </h2>
           <p className="text-slate-400 text-lg max-w-2xl mx-auto mb-8">
-            Simple, transparent pricing. No hidden fees. Choose the plan that&apos;s right for your business.
+            Cheaper than a support agent. Faster than a founder. Simple, transparent pricing that scales with you.
           </p>
 
           {/* Monthly/Yearly Toggle */}

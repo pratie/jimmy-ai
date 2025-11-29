@@ -59,7 +59,7 @@ export default async function Home() {
               </div>
 
               <p className="text-slate-400 text-lg md:text-xl max-w-xl leading-relaxed mx-auto lg:mx-0">
-                Capture leads, support customers, and close deals—automatically. ChatDock trains on your content to answer questions, book meetings, and qualify prospects 24/7.
+                You didn&apos;t start a startup to answer support tickets all day. ChatDock is the AI employee that captures leads, supports customers, and closes deals—24/7, while you focus on building.
               </p>
 
               {/* CTA and Trust Section */}
@@ -231,14 +231,14 @@ export default async function Home() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
             {/* Feature Cards */}
             {[
-              { title: 'Instant Answers, Zero Wait Time', desc: 'Your AI knows every product detail, shipping policy, and return procedure. Gives accurate answers in seconds, like your best salesperson, but available 24/7.' },
-              { title: 'Book consultations automatically', desc: 'Great for support and success teams. Qualify visitors, share a booking link, and notify your team for high‑intent conversations without back‑and‑forth scheduling.' },
-              { title: 'Human Handoff When It Matters', desc: 'AI handles 80% of questions automatically. For complex issues, it notifies your team and hands off with full context without repeated questions for customers.' },
-              { title: 'Track every sale & lead', desc: 'See which conversations turned into sales, what questions customers ask most, and where to optimize. All conversations saved and searchable.' },
-              { title: 'Scale across multiple brands', desc: 'Scale across multiple sites or brands. Manage assistants in one dashboard - each grounded in the right docs and policies.' },
-              { title: 'AI search over your docs', desc: 'Answers come from your website and documentation using retrieval‑augmented generation. Keep responses accurate, specific, and on‑brand without manual tagging.' },
-              { title: '24/7 self‑service', desc: 'Give customers instant answers any time of day. Reduce ticket volume by letting users help themselves with streaming responses that keep conversations engaging.' },
-              { title: 'Live handoff when it matters', desc: 'Switch to a human in real‑time for complex questions or high‑intent visitors. Share a booking link to schedule calls without back‑and‑forth.' }
+              { title: 'Deflect 80% of Support Tickets', desc: 'Your AI answers repetitive questions instantly. Zero wait time for customers, zero distraction for you. It knows every policy, shipping detail, and product spec.' },
+              { title: 'Wake Up to Booked Meetings', desc: 'Qualify leads and book demos automatically while you sleep. Stop chasing prospects and start closing them with high-intent meetings on your calendar.' },
+              { title: 'Human Handoff When It Matters', desc: 'AI handles the routine 80%. For complex issues, it notifies you instantly with full context, so you only step in when you really need to.' },
+              { title: 'Capture Every Missed Opportunity', desc: 'See which conversations turned into sales and where you lost them. All conversations are saved and searchable, giving you a goldmine of customer insights.' },
+              { title: 'Scale Without Hiring', desc: 'Manage support across multiple brands or sites from one dashboard. Add capacity instantly without the overhead of recruiting, training, and managing new agents.' },
+              { title: 'AI That Actually Knows Your Product', desc: 'Answers come directly from your website and docs using RAG. No hallucinations, just accurate, on-brand responses that you can trust.' },
+              { title: '24/7 Self-Service', desc: 'Give customers instant answers at 2 AM. Reduce ticket volume by letting users help themselves with streaming responses that keep them engaged.' },
+              { title: 'Live Handoff & Booking', desc: 'Switch to a human in real-time for high-value deals. Share a booking link to schedule calls without the email back-and-forth.' }
             ].map((feature, i) => (
               <div key={i} className="glass-card p-8 rounded-xl hover:border-white/20 transition-all duration-300 group">
                 <div className="w-10 h-10 bg-white/5 rounded-lg flex items-center justify-center mb-6 group-hover:bg-blue-500/20 transition-colors">
