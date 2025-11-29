@@ -307,7 +307,7 @@ export default async function Home() {
             </p>
             <div className="mt-8 flex justify-center">
               <a href="https://yourwebsitescore.com/certified-websites/chatdock.io" target="_blank" rel="noopener">
-                <img src="https://yourwebsitescore.com/api/badge/chatdock.io" alt="Monitor your website with YourWebsiteScore" style={{ height: '54px', width: 'auto' }} />
+                <img src="https://yourwebsitescore.com/api/badge/chatdock.io" alt="" style={{ height: '54px', width: 'auto' }} />
               </a>
             </div>
           </div>
