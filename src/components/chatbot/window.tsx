@@ -14,9 +14,6 @@ import { Responding } from './responding'
 import { Input } from '../ui/input'
 import { Paperclip, Send, X, ChevronDown, MessageCircle, HelpCircle } from 'lucide-react'
 import { Label } from '../ui/label'
-import { Cuprum } from 'next/font/google'
-
-const cuprum = Cuprum({ subsets: ['latin'], weight: ['400', '700'] })
 
 type Props = {
   errors: any
@@ -35,11 +32,11 @@ type Props = {
   onClose?: () => void
   showBranding?: boolean
   realtimeMode:
-    | {
-        chatroom: string
-        mode: boolean
-      }
-    | undefined
+  | {
+    chatroom: string
+    mode: boolean
+  }
+  | undefined
   helpdesk: {
     id: string
     question: string
@@ -89,19 +86,19 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
     const canSend = !!(contentValue && contentValue.trim().length > 0) || hasImage
 
     const THEME_DEFAULT = {
-      primary: '#1DA1F2',
+      primary: '#0f172a', // slate-900
       surface: '#FFFFFF',
-      text: '#111827',
+      text: '#0f172a', // slate-900
       headerBg: '#FFFFFF',
-      headerText: '#111827',
-      userBubbleBg: '#1DA1F2',
+      headerText: '#0f172a', // slate-900
+      userBubbleBg: '#0f172a', // slate-900
       userBubbleText: '#FFFFFF',
-      botBubbleBg: '#F3F4F6',
-      botBubbleText: '#111827',
+      botBubbleBg: '#f1f5f9', // slate-100
+      botBubbleText: '#0f172a', // slate-900
       inputBg: '#FFFFFF',
-      inputBorder: '#D1D5DB',
-      accent: '#1DA1F2',
-      radius: 10,
+      inputBorder: '#e2e8f0', // slate-200
+      accent: '#0f172a', // slate-900
+      radius: 16,
       shadow: 'sm' as 'none' | 'sm',
     }
     const t = { ...THEME_DEFAULT, ...(themeConfig || {}) }
@@ -124,22 +121,21 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
     return (
       <div
         className={cn(
-        'relative flex flex-col overflow-hidden',
-        cuprum.className,
-        responsive ? 'h-full w-full max-w-none' : 'h-[520px] w-[360px] sm:h-[600px] sm:w-[380px] md:h-[620px] md:w-[420px]'
-      )}
+          'relative flex flex-col overflow-hidden font-sans',
+          responsive ? 'h-full w-full max-w-none' : 'h-[520px] w-[360px] sm:h-[600px] sm:w-[380px] md:h-[620px] md:w-[420px]'
+        )}
         style={{
           backgroundColor: t.surface,
           color: t.text,
           borderRadius: t.radius,
-          boxShadow: t.shadow === 'sm' ? '0 1px 2px rgba(0,0,0,0.06)' : 'none',
-          border: '1px solid #D1D5DB'
+          boxShadow: '0 12px 40px -10px rgba(0,0,0,0.15)', // Sleek modern shadow
+          border: '1px solid rgba(0,0,0,0.08)'
         }}
       >
         {/* Fixed Header */}
-        <div className="flex justify-between items-center px-3 py-2 border-b shrink-0" style={{ backgroundColor: t.headerBg, color: t.headerText }}>
-          <div className="flex gap-2 items-center">
-            <Avatar className="w-9 h-9">
+        <div className="flex justify-between items-center px-4 py-3 border-b border-slate-100 shrink-0" style={{ backgroundColor: t.headerBg, color: t.headerText }}>
+          <div className="flex gap-3 items-center">
+            <Avatar className="w-8 h-8 ring-2 ring-slate-100">
               {botIcon && !avatarError ? (
                 <AvatarImage
                   src={getKieImageUrl(botIcon)}
@@ -147,17 +143,17 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
                   onError={() => setAvatarError(true)}
                 />
               ) : (
-                <AvatarFallback className="bg-blue-500 text-white font-bold text-sm">
+                <AvatarFallback className="bg-slate-900 text-white font-bold text-xs">
                   AI
                 </AvatarFallback>
               )}
             </Avatar>
             <div className="flex flex-col">
-              <h3 className="text-sm font-semibold leading-tight">
+              <h3 className="text-sm font-semibold leading-none mb-1">
                 {domainName || 'Assistant'}
               </h3>
-              <p className="text-xs text-gray-500 flex items-center gap-1">
-                <span className="inline-block w-1.5 h-1.5 rounded-full bg-green-500" aria-hidden="true" />
+              <p className="text-[11px] text-slate-500 flex items-center gap-1.5 font-medium">
+                <span className="inline-block w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_4px_rgba(34,197,94,0.4)]" aria-hidden="true" />
                 Online
               </p>
               {realtimeMode?.mode && (
@@ -174,41 +170,43 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
                 type="button"
                 aria-label="Close chat"
                 onClick={onClose}
-                className="h-8 w-8 inline-flex items-center justify-center rounded-full hover:bg-gray-100 transition"
+                className="h-7 w-7 inline-flex items-center justify-center rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition"
                 title="Close"
               >
-                <X className="w-5 h-5 text-gray-500" />
+                <X className="w-4 h-4" />
               </button>
             )}
           </div>
         </div>
         {/* Tabs and content area - proper flex layout */}
         <Tabs defaultValue="chat" className="flex-1 flex flex-col min-h-0">
-          <TabsList className="mx-2 mt-1 mb-0 grid w-[calc(100%-1rem)] grid-cols-2 bg-transparent border-b">
-            <TabsTrigger
-              value="chat"
-              className="flex items-center justify-center gap-1 rounded-none border-b-2 border-transparent data-[state=active]:border-blue-600 data-[state=active]:text-blue-600 text-gray-600"
-            >
-              <MessageCircle className="w-4 h-4" />
-              Chat
-            </TabsTrigger>
-            <TabsTrigger
-              value="faqs"
-              className="flex items-center justify-center gap-1 rounded-none border-b-2 border-transparent data-[state=active]:border-blue-600 data-[state=active]:text-blue-600 text-gray-600"
-            >
-              <HelpCircle className="w-4 h-4" />
-              FAQs
-            </TabsTrigger>
-          </TabsList>
+          <div className="px-4 pt-2 pb-0 bg-white border-b border-slate-50">
+            <TabsList className="w-full justify-start gap-6 bg-transparent p-0 h-auto">
+              <TabsTrigger
+                value="chat"
+                className="flex items-center gap-1.5 rounded-none border-b-2 border-transparent px-0 py-2 text-sm font-medium text-slate-500 data-[state=active]:border-slate-900 data-[state=active]:text-slate-900 transition-colors"
+              >
+                <MessageCircle className="w-4 h-4" />
+                Chat
+              </TabsTrigger>
+              <TabsTrigger
+                value="faqs"
+                className="flex items-center gap-1.5 rounded-none border-b-2 border-transparent px-0 py-2 text-sm font-medium text-slate-500 data-[state=active]:border-slate-900 data-[state=active]:text-slate-900 transition-colors"
+              >
+                <HelpCircle className="w-4 h-4" />
+                FAQs
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
           <TabsContent value="chat" className="flex-1 flex flex-col min-h-0 m-0">
             {/* Messages area - takes all available space */}
             <div
               style={{ color: textColor || t.text, backgroundColor: t.surface }}
-              className="flex-1 overflow-y-auto px-4 py-3"
+              className="flex-1 overflow-y-auto px-4 py-4 scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent"
               ref={ref}
             >
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-4">
                 {chats.map((chat, key) => (
                   <Bubble
                     key={key}
@@ -232,45 +230,45 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
                 e.preventDefault()
                 onChat()
               }}
-              className="flex px-2 py-2 items-center gap-2 bg-white border-t shrink-0"
+              className="flex px-4 py-4 items-end gap-2 bg-white border-t border-slate-100 shrink-0"
             >
-              <Input
-                {...register('content')}
-                placeholder={`Type a message...`}
-                className="flex-1 h-[40px] rounded-lg px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                style={{ backgroundColor: t.inputBg, border: `1px solid ${t.inputBorder}`, color: t.text }}
-              />
+              <div className="flex-1 relative">
+                <Input
+                  {...register('content')}
+                  placeholder={`Type a message...`}
+                  className="w-full min-h-[44px] rounded-xl px-4 py-2.5 pr-10 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-300 text-sm transition-all shadow-sm"
+                  style={{ backgroundColor: t.inputBg, border: `1px solid ${t.inputBorder}`, color: t.text }}
+                />
+                <Label htmlFor="bot-image" className="absolute right-2 top-1/2 -translate-y-1/2 cursor-pointer p-1.5 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors">
+                  <Paperclip className="w-4 h-4" />
+                  <Input
+                    {...register('image')}
+                    type="file"
+                    id="bot-image"
+                    className="hidden"
+                  />
+                </Label>
+              </div>
               <button
                 type="submit"
-                className="shrink-0 h-[40px] w-[40px] rounded-lg bg-blue-500 hover:bg-blue-600 disabled:bg-blue-300 disabled:cursor-not-allowed text-white flex items-center justify-center transition-colors"
+                className="shrink-0 h-[44px] w-[44px] rounded-xl bg-slate-900 hover:bg-slate-800 disabled:bg-slate-200 disabled:cursor-not-allowed text-white flex items-center justify-center transition-all shadow-sm hover:shadow-md"
                 disabled={!canSend}
                 aria-label="Send"
               >
-                <Send className="w-4 h-4" />
+                <Send className="w-4 h-4 ml-0.5" />
               </button>
-              <Label htmlFor="bot-image" className="cursor-pointer">
-                <div className="h-[40px] w-[40px] rounded-lg border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-colors">
-                  <Paperclip className="w-5 h-5 text-gray-500" />
-                </div>
-                <Input
-                  {...register('image')}
-                  type="file"
-                  id="bot-image"
-                  className="hidden"
-                />
-              </Label>
             </form>
           </TabsContent>
 
-          <TabsContent value="faqs" className="flex-1 overflow-y-auto m-0 p-3">
+          <TabsContent value="faqs" className="flex-1 overflow-y-auto m-0 p-4">
             <div className="space-y-4">
               <div>
-                <CardTitle className="text-lg">Frequently Asked Questions</CardTitle>
-                <CardDescription className="text-sm mt-1">
+                <CardTitle className="text-base font-semibold text-slate-900">Frequently Asked Questions</CardTitle>
+                <CardDescription className="text-sm mt-1 text-slate-500">
                   Find quick answers to common questions
                 </CardDescription>
               </div>
-              <Separator />
+              <Separator className="bg-slate-100" />
               <div className="space-y-3">
                 {helpdesk && helpdesk.length > 0 ? (
                   helpdesk.map((desk) => (
@@ -281,9 +279,9 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
                     />
                   ))
                 ) : (
-                  <div className="text-center py-8 text-gray-500">
-                    <HelpCircle className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                    <p className="text-sm">No FAQs available yet</p>
+                  <div className="text-center py-12 text-slate-400">
+                    <HelpCircle className="w-10 h-10 mx-auto mb-3 opacity-20" />
+                    <p className="text-sm font-medium">No FAQs available yet</p>
                   </div>
                 )}
               </div>
@@ -293,18 +291,17 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
 
         {showBranding && (
           <div
-            className="shrink-0 border-t px-2 py-1.5 text-center"
+            className="shrink-0 border-t border-slate-50 px-2 py-2 text-center"
             style={{ backgroundColor: t.surface }}
           >
             <a
               href="https://chatdock.io/?utm_source=widget&utm_medium=free_badge&utm_campaign=virality"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-1 text-[11px] leading-4 text-gray-400 hover:text-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded"
+              className="inline-flex items-center justify-center gap-1.5 text-[10px] font-medium text-slate-400 hover:text-slate-600 transition-colors"
               aria-label="Powered by ChatDock – Get your AI assistant"
             >
               <span>Powered by ChatDock</span>
-              <span aria-hidden="true">• Free Plan</span>
             </a>
           </div>
         )}
@@ -316,10 +313,10 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
               const el = (ref as any)?.current as HTMLDivElement | null
               if (el) el.scroll({ top: el.scrollHeight, behavior: 'smooth' })
             }}
-            className="absolute bottom-16 right-4 z-20 rounded-full bg-white text-gray-700 px-3 py-1.5 text-sm border border-gray-300 shadow-lg flex items-center gap-1 hover:bg-gray-50 transition"
+            className="absolute bottom-20 right-6 z-20 rounded-full bg-white text-slate-600 px-3 py-1.5 text-xs font-medium border border-slate-200 shadow-lg flex items-center gap-1.5 hover:bg-slate-50 transition-all hover:-translate-y-0.5"
           >
-            <ChevronDown className="w-4 h-4" />
-            <span>Jump to latest</span>
+            <ChevronDown className="w-3 h-3" />
+            <span>Latest</span>
           </button>
         )}
       </div>
