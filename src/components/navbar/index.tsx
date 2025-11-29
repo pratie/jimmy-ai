@@ -6,49 +6,60 @@ import Link from 'next/link'
 
 function NavBar() {
   return (
-    <nav className="fixed top-0 w-full bg-background/80 backdrop-blur-xl z-50 border-b border-border/70">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
-        <div className="flex justify-between items-center">
-          {/* Logo - Responsive sizing */}
-          <div className="flex items-center gap-2 sm:gap-3">
+    <nav className="fixed top-0 w-full bg-white/95 dark:bg-slate-950/95 backdrop-blur-md z-50 border-b border-slate-200/80 dark:border-slate-800/80">
+      <div className="max-w-7xl mx-auto px-6 lg:px-8">
+        <div className="flex justify-between items-center h-16">
+          {/* Logo - Clean and minimal */}
+          <Link href="/" className="flex items-center gap-3 group">
             <Image
               src="/images/logo.svg"
-              alt="ChatDock AI Logo"
-              width={40}
-              height={40}
-              className="w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0"
+              alt="ChatDock AI"
+              width={32}
+              height={32}
+              className="w-8 h-8 transition-transform group-hover:scale-105"
             />
-            <span className="font-extrabold text-base sm:text-lg md:text-xl tracking-tight">
-              <span className="text-main">C</span>hatDock AI
+            <span className="font-semibold text-lg tracking-tight text-slate-900 dark:text-white">
+              ChatDock AI
             </span>
-          </div>
+          </Link>
 
-          {/* Nav links - Hidden on mobile */}
-          <div className="hidden lg:flex gap-8 xl:gap-12 font-bold uppercase text-sm tracking-widest">
-            <a href="#features" className="hover:underline">
+          {/* Nav links - Clean spacing and typography */}
+          <div className="hidden md:flex items-center gap-1">
+            <a
+              href="#features"
+              className="px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800/50"
+            >
               Features
             </a>
-            <a href="#pricing" className="hover:underline">
+            <a
+              href="#pricing"
+              className="px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800/50"
+            >
               Pricing
             </a>
-            <Link href="/blogs" className="hover:underline">
+            <Link
+              href="/blogs"
+              className="px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800/50"
+            >
               Blog
             </Link>
           </div>
 
-          {/* CTA - Responsive padding and text */}
-          <Link
-            href="/auth/sign-up"
-            className="group relative inline-flex items-center justify-center overflow-hidden rounded-full bg-gradient-to-r from-main to-blue-600 px-6 py-2.5 font-bold text-white shadow-lg shadow-blue-500/30 transition-all duration-300 hover:scale-105 hover:shadow-blue-500/50 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2"
-          >
-            <span className="relative flex items-center gap-2">
-              <span className="hidden sm:inline text-sm">Start Free</span>
-              <span className="sm:hidden text-xs">Start</span>
-              <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-              </svg>
-            </span>
-          </Link>
+          {/* CTA - Professional and minimal */}
+          <div className="flex items-center gap-3">
+            <Link
+              href="/auth/sign-in"
+              className="hidden sm:inline-flex px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors"
+            >
+              Sign in
+            </Link>
+            <Link
+              href="/auth/sign-up"
+              className="inline-flex items-center justify-center px-5 py-2 text-sm font-medium text-white bg-slate-900 dark:bg-white dark:text-slate-900 rounded-lg hover:bg-slate-800 dark:hover:bg-slate-100 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 shadow-sm"
+            >
+              Get started
+            </Link>
+          </div>
         </div>
       </div>
     </nav>
