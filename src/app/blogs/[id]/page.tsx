@@ -4,6 +4,7 @@ import { getMonthName } from '@/lib/utils'
 import parse from 'html-react-parser'
 import React from 'react'
 import type { Metadata } from 'next'
+import Link from 'next/link'
 
 // Helper to create a safe description from HTML content
 const toSummary = (html: string | undefined, fallback: string): string => {
@@ -61,6 +62,22 @@ const PostPage = async ({
   return (
     <div className="container flex justify-center my-10">
       <div className="lg:w-6/12 flex flex-col">
+        {/* Back button */}
+        <Link
+          href="/blogs"
+          className="inline-flex items-center gap-2 text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors mb-6 group self-start"
+        >
+          <svg
+            className="w-4 h-4 transition-transform group-hover:-translate-x-1"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+          Back to blog
+        </Link>
+
         <CardDescription>
           {getMonthName(post?.createdAt.getMonth()!)}{' '}
           {post?.createdAt.getDate()} {post?.createdAt.getFullYear()}
