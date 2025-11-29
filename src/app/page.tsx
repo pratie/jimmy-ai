@@ -16,9 +16,9 @@ import Marquee from '@/components/ui/marquee'
 import AnimatedAgentType from '@/components/landing/animated-agent-type'
 
 export const metadata: Metadata = {
-  title: 'ChatDock AI - Your 24/7 AI Sales Agent',
+  title: 'ChatDock AI - Your 24/7 AI Agent for Sales, Support & Lead Gen',
   description:
-    'Turn visitors into leads with a 24/7 AI sales agent. Train it on your website and docs to answer questions and book meetings automatically.',
+    'AI agent that handles sales, support, and lead generation automatically. Train it on your content to answer questions, book meetings, and qualify prospects 24/7.',
   alternates: {
     canonical: '/',
   },
@@ -47,7 +47,7 @@ export default async function Home() {
               </div>
 
               <p className="text-slate-600 dark:text-slate-400 text-base sm:text-lg max-w-xl leading-relaxed">
-                Turn every visitor into a lead. ChatDock trains on your website and docs to answer questions, capture emails, and book meetings - even while you sleep.
+                Capture leads, support customers, and close deals—automatically. ChatDock trains on your content to answer questions, book meetings, and qualify prospects 24/7.
               </p>
 
               {/* CTA and Trust Section */}
@@ -236,10 +236,10 @@ export default async function Home() {
         <div className="container mx-auto px-6 sm:px-8 lg:px-12">
           <div className="text-center mb-16">
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-900 dark:text-white mb-6">
-              Built for growing businesses
+              Sales, support, and lead generation—in one AI agent
             </h2>
             <p className="text-slate-600 dark:text-slate-400 text-lg md:text-xl max-w-3xl mx-auto">
-              Everything you need to sell more, support better, and scale faster
+              Capture more leads, close more deals, and deliver instant support
             </p>
           </div>
 
@@ -385,10 +385,10 @@ export default async function Home() {
         <div className="container mx-auto px-6 sm:px-8 lg:px-12">
           <div className="max-w-4xl mx-auto text-center bg-white dark:bg-slate-900 rounded-2xl p-12 md:p-16 border border-slate-200 dark:border-slate-800">
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-6">
-              Help more customers in less time
+              Convert more leads. Support more customers.
             </h2>
             <p className="text-slate-600 dark:text-slate-400 text-base md:text-lg mb-8 max-w-2xl mx-auto">
-              Support and growth teams use ChatDock AI to deliver instant answers from their content, reduce workload with self‑service, and convert more qualified leads.
+              Sales and support teams use ChatDock AI to qualify prospects, answer questions instantly, and book more meetings—all while reducing manual workload.
             </p>
             <Link href="/auth/sign-up">
               <Button
