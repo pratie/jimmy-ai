@@ -26,8 +26,8 @@ export const metadata: Metadata = {
 
 export default async function Home() {
   return (
-    <main className="min-h-screen dark bg-background text-foreground selection:bg-blue-500/30">
-      <div className="fixed inset-0 z-0 pointer-events-none bg-grid-white/[0.02] bg-[size:50px_50px]" />
+    <main className="min-h-screen bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-50 selection:bg-blue-500/30">
+      <div className="fixed inset-0 z-0 pointer-events-none bg-grid-black/[0.02] dark:bg-grid-white/[0.02] bg-[size:50px_50px]" />
       <NavBar />
 
       {/* Hero Section - Linear Style */}
@@ -40,7 +40,8 @@ export default async function Home() {
             {/* Left Column */}
             <div className="space-y-8 max-w-2xl lg:max-w-none text-center lg:text-left">
               {/* Badge */}
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm text-xs font-medium text-slate-300 mx-auto lg:mx-0">
+              {/* Badge */}
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 backdrop-blur-sm text-xs font-medium text-slate-600 dark:text-slate-300 mx-auto lg:mx-0">
                 <span className="relative flex h-2 w-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
@@ -50,15 +51,15 @@ export default async function Home() {
 
               {/* Main Headline */}
               <div className="space-y-4">
-                <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.1]">
-                  <span className="block text-gradient">
+                <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.1] text-slate-900 dark:text-white">
+                  <span className="block text-blue-600 dark:text-gradient">
                     Your AI <AnimatedAgentType />,
                   </span>
-                  <span className="block text-white">Working 24/7</span>
+                  <span className="block text-slate-900 dark:text-white">Working 24/7</span>
                 </h1>
               </div>
 
-              <p className="text-slate-400 text-lg md:text-xl max-w-xl leading-relaxed mx-auto lg:mx-0">
+              <p className="text-slate-600 dark:text-slate-400 text-lg md:text-xl max-w-xl leading-relaxed mx-auto lg:mx-0">
                 You didn&apos;t start a startup to answer support tickets all day. ChatDock is the AI employee that captures leads, supports customers, and closes deals—24/7, while you focus on building.
               </p>
 
@@ -66,7 +67,7 @@ export default async function Home() {
               <div className="flex flex-col sm:flex-row items-center lg:items-start gap-6 pt-4">
                 <Link href="/auth/sign-up">
                   <Button
-                    className="h-12 px-8 bg-white text-slate-900 hover:bg-slate-200 text-base font-semibold rounded-full transition-all shadow-[0_0_20px_rgba(255,255,255,0.3)] hover:shadow-[0_0_30px_rgba(255,255,255,0.5)]"
+                    className="h-12 px-8 bg-slate-900 text-white hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200 text-base font-semibold rounded-full transition-all shadow-lg hover:shadow-xl"
                   >
                     Build Your Free Agent <ChevronRight className="w-4 h-4 ml-1" />
                   </Button>
@@ -83,7 +84,7 @@ export default async function Home() {
                 </div>
               </div>
 
-              <div className="mt-8 pt-8 border-t border-white/5 flex flex-col sm:flex-row items-center gap-4 text-slate-500">
+              <div className="mt-8 pt-8 border-t border-slate-200 dark:border-white/5 flex flex-col sm:flex-row items-center gap-4 text-slate-500 dark:text-slate-500">
                 <span className="text-xs font-medium uppercase tracking-wider opacity-60">Powered by</span>
                 <div className="flex items-center gap-6 opacity-60 grayscale hover:grayscale-0 transition-all duration-500">
                   <div className="flex items-center gap-2">
@@ -112,12 +113,12 @@ export default async function Home() {
 
                 {/* Floating Dashboard Elements */}
                 <div className="hidden lg:block absolute -right-12 top-20 space-y-4">
-                  <div className="glass-card p-4 rounded-xl w-48 transform rotate-6 hover:rotate-0 transition-transform duration-300">
+                  <div className="glass-card-light dark:glass-card p-4 rounded-xl w-48 transform rotate-6 hover:rotate-0 transition-transform duration-300">
                     <div className="flex items-center gap-2 mb-2">
-                      <span className="text-xs font-medium text-slate-400">Customer Rating</span>
+                      <span className="text-xs font-medium text-slate-500 dark:text-slate-400">Customer Rating</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="text-xl font-bold text-white">4.9</span>
+                      <span className="text-xl font-bold text-slate-900 dark:text-white">4.9</span>
                       <div className="flex gap-0.5">
                         {[...Array(5)].map((_, i) => (
                           <svg key={i} className={`w-3 h-3 ${i < 5 ? 'text-yellow-400' : 'text-slate-700'}`} fill="currentColor" viewBox="0 0 20 20">
@@ -135,7 +136,7 @@ export default async function Home() {
       </section>
 
       {/* Stats Section - Minimalist */}
-      <section className="py-12 border-y border-white/5 bg-white/[0.02]">
+      <section className="py-12 border-y border-slate-200 dark:border-white/5 bg-slate-50/50 dark:bg-white/[0.02]">
         <div className="container mx-auto px-6 sm:px-8 lg:px-12">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12 max-w-6xl mx-auto">
             {[
@@ -145,10 +146,10 @@ export default async function Home() {
               { label: 'To go live', value: '5min' },
             ].map((stat, i) => (
               <div key={i} className="text-center group cursor-default">
-                <div className="text-4xl md:text-5xl font-bold text-white mb-2 group-hover:scale-110 transition-transform duration-300 bg-clip-text text-transparent bg-gradient-to-b from-white to-white/50">
+                <div className="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-2 group-hover:scale-110 transition-transform duration-300 bg-clip-text text-transparent bg-gradient-to-b from-slate-900 to-slate-600 dark:from-white dark:to-white/50">
                   {stat.value}
                 </div>
-                <div className="text-slate-400 text-sm font-medium uppercase tracking-wide">{stat.label}</div>
+                <div className="text-slate-500 dark:text-slate-400 text-sm font-medium uppercase tracking-wide">{stat.label}</div>
               </div>
             ))}
           </div>
@@ -159,15 +160,15 @@ export default async function Home() {
       <section className="py-24 relative">
         <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
           <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4 tracking-tight">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-900 dark:text-white mb-4 tracking-tight">
               See the dashboard
             </h2>
-            <p className="text-slate-400 text-lg max-w-2xl mx-auto">
+            <p className="text-slate-600 dark:text-slate-400 text-lg max-w-2xl mx-auto">
               Manage chatbots, track conversations, train your knowledge base, and tweak
               advanced AI settings all in one place.
             </p>
           </div>
-          <div className="max-w-6xl mx-auto rounded-xl border border-white/10 bg-white/5 shadow-2xl overflow-hidden backdrop-blur-sm">
+          <div className="max-w-6xl mx-auto rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 shadow-2xl overflow-hidden backdrop-blur-sm">
             <AspectRatio ratio={16 / 9}>
               <Image
                 src={DashboardImg}
@@ -189,10 +190,10 @@ export default async function Home() {
       <section className="py-24">
         <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
           <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4 tracking-tight">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-900 dark:text-white mb-4 tracking-tight">
               Works with your site + docs
             </h2>
-            <p className="text-lg text-slate-400 max-w-2xl mx-auto">
+            <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
               Bring your content in minutes. No complex setup.
             </p>
           </div>
@@ -203,12 +204,12 @@ export default async function Home() {
               { icon: '❓', title: 'FAQs', desc: 'Capture common questions/answers to guide fast resolutions.' },
               { icon: '⚙️', title: 'Guardrails', desc: 'On‑brand tone, strict FAQ mode, and live handoff when needed.' }
             ].map((item, i) => (
-              <div key={i} className="glass-card p-6 rounded-xl hover:bg-white/10 transition-colors group">
-                <div className="w-12 h-12 bg-white/5 rounded-lg flex items-center justify-center mb-4 text-2xl group-hover:scale-110 transition-transform">
+              <div key={i} className="glass-card-light dark:glass-card p-6 rounded-xl hover:bg-slate-50 dark:hover:bg-white/10 transition-colors group">
+                <div className="w-12 h-12 bg-slate-100 dark:bg-white/5 rounded-lg flex items-center justify-center mb-4 text-2xl group-hover:scale-110 transition-transform">
                   {item.icon}
                 </div>
-                <h3 className="font-semibold text-white mb-2">{item.title}</h3>
-                <p className="text-sm text-slate-400 leading-relaxed">{item.desc}</p>
+                <h3 className="font-semibold text-slate-900 dark:text-white mb-2">{item.title}</h3>
+                <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">{item.desc}</p>
               </div>
             ))}
           </div>
@@ -220,10 +221,10 @@ export default async function Home() {
         <div className="glow-effect top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px]" />
         <div className="container mx-auto px-6 sm:px-8 lg:px-12 relative z-10">
           <div className="text-center mb-20">
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6 tracking-tight">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-900 dark:text-white mb-6 tracking-tight">
               Sales, support, and lead generation—<span className="text-slate-500">in one AI agent</span>
             </h2>
-            <p className="text-slate-400 text-xl max-w-3xl mx-auto">
+            <p className="text-slate-600 dark:text-slate-400 text-xl max-w-3xl mx-auto">
               Capture more leads, close more deals, and deliver instant support
             </p>
           </div>
@@ -240,12 +241,12 @@ export default async function Home() {
               { title: '24/7 Self-Service', desc: 'Give customers instant answers at 2 AM. Reduce ticket volume by letting users help themselves with streaming responses that keep them engaged.' },
               { title: 'Live Handoff & Booking', desc: 'Switch to a human in real-time for high-value deals. Share a booking link to schedule calls without the email back-and-forth.' }
             ].map((feature, i) => (
-              <div key={i} className="glass-card p-8 rounded-xl hover:border-white/20 transition-all duration-300 group">
-                <div className="w-10 h-10 bg-white/5 rounded-lg flex items-center justify-center mb-6 group-hover:bg-blue-500/20 transition-colors">
+              <div key={i} className="glass-card-light dark:glass-card p-8 rounded-xl hover:border-blue-500/20 dark:hover:border-white/20 transition-all duration-300 group">
+                <div className="w-10 h-10 bg-blue-50 dark:bg-white/5 rounded-lg flex items-center justify-center mb-6 group-hover:bg-blue-500/20 transition-colors">
                   <div className="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]" />
                 </div>
-                <h3 className="text-lg font-semibold text-white mb-3">{feature.title}</h3>
-                <p className="text-sm text-slate-400 leading-relaxed">
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-3">{feature.title}</h3>
+                <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
                   {feature.desc}
                 </p>
               </div>
@@ -258,10 +259,10 @@ export default async function Home() {
       <section className="py-24">
         <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
           <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4 tracking-tight">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-900 dark:text-white mb-4 tracking-tight">
               Why ChatDock AI
             </h2>
-            <p className="text-lg text-slate-400 max-w-2xl mx-auto">
+            <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
               Purpose‑built for accurate answers, fast experiences, and seamless handoffs.
             </p>
           </div>
@@ -272,9 +273,9 @@ export default async function Home() {
               { title: 'Live agent handoff', desc: 'Escalate to a human instantly for edge cases without losing context.' },
               { title: 'Meetings when needed', desc: 'Built‑in booking link lets qualified users schedule time without email back‑and‑forth.' }
             ].map((item, i) => (
-              <div key={i} className="glass-card p-6 rounded-xl">
-                <h3 className="font-semibold text-white mb-2">{item.title}</h3>
-                <p className="text-sm text-slate-400">{item.desc}</p>
+              <div key={i} className="glass-card-light dark:glass-card p-6 rounded-xl">
+                <h3 className="font-semibold text-slate-900 dark:text-white mb-2">{item.title}</h3>
+                <p className="text-sm text-slate-600 dark:text-slate-400">{item.desc}</p>
               </div>
             ))}
           </div>
@@ -288,16 +289,16 @@ export default async function Home() {
       <section className="py-32 relative overflow-hidden">
         <div className="glow-effect top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] opacity-20" />
         <div className="container mx-auto px-6 sm:px-8 lg:px-12 relative z-10">
-          <div className="max-w-4xl mx-auto text-center glass-card rounded-3xl p-12 md:p-20 border border-white/10">
-            <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold text-white mb-8 tracking-tight">
+          <div className="max-w-4xl mx-auto text-center glass-card-light dark:glass-card rounded-3xl p-12 md:p-20 border border-slate-200 dark:border-white/10">
+            <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold text-slate-900 dark:text-white mb-8 tracking-tight">
               Stop Answering the Same Questions
             </h2>
-            <p className="text-slate-400 text-lg md:text-xl mb-10 max-w-2xl mx-auto">
+            <p className="text-slate-600 dark:text-slate-400 text-lg md:text-xl mb-10 max-w-2xl mx-auto">
               Sales and support teams use ChatDock AI to qualify prospects, answer questions instantly, and book more meetings—all while reducing manual workload.
             </p>
             <Link href="/auth/sign-up">
               <Button
-                className="h-14 px-10 bg-white text-slate-900 hover:bg-slate-200 text-lg font-semibold rounded-full shadow-[0_0_20px_rgba(255,255,255,0.2)] hover:shadow-[0_0_30px_rgba(255,255,255,0.4)] transition-all"
+                className="h-14 px-10 bg-slate-900 text-white hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200 text-lg font-semibold rounded-full shadow-lg hover:shadow-xl transition-all"
               >
                 Build Your Free Agent →
               </Button>
@@ -315,13 +316,13 @@ export default async function Home() {
       </section>
 
       {/* Learn more (Blog CTAs) */}
-      <section className="py-24 border-t border-white/5">
+      <section className="py-24 border-t border-slate-200 dark:border-white/5">
         <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
           <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-3 tracking-tight">
+            <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 dark:text-white mb-3 tracking-tight">
               Learn more
             </h2>
-            <p className="text-base text-slate-400">
+            <p className="text-base text-slate-600 dark:text-slate-400">
               Deep dives on setup, RAG accuracy, and support automation.
             </p>
           </div>
@@ -332,11 +333,11 @@ export default async function Home() {
               { href: '/blogs/customer-support-ai', title: 'Customer support AI', desc: 'Reduce ticket volume with AI while keeping human handoff seamless.' }
             ].map((blog, i) => (
               <Link key={i} href={blog.href} className="group">
-                <div className="glass-card h-full p-8 rounded-xl hover:bg-white/10 transition-colors">
-                  <h3 className="font-semibold text-white mb-3 group-hover:text-blue-400 transition-colors">
+                <div className="glass-card-light dark:glass-card h-full p-8 rounded-xl hover:bg-slate-50 dark:hover:bg-white/10 transition-colors">
+                  <h3 className="font-semibold text-slate-900 dark:text-white mb-3 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                     {blog.title}
                   </h3>
-                  <p className="text-sm text-slate-400 leading-relaxed">
+                  <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
                     {blog.desc}
                   </p>
                 </div>

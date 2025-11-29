@@ -20,21 +20,21 @@ export default function PricingSection() {
     >
       <div className="container mx-auto px-6 sm:px-8 lg:px-12 relative z-10">
         <div className="text-center mb-16">
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-6 tracking-tight">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-6 tracking-tight">
             Pricing That Scales With You
           </h2>
-          <p className="text-slate-400 text-lg max-w-2xl mx-auto mb-8">
+          <p className="text-slate-600 dark:text-slate-400 text-lg max-w-2xl mx-auto mb-8">
             Cheaper than a support agent. Faster than a founder. Simple, transparent pricing that scales with you.
           </p>
 
           {/* Monthly/Yearly Toggle */}
           <div className="flex items-center justify-center gap-4 mb-8">
-            <span className={clsx('text-sm font-medium transition-colors', !isYearly ? 'text-white' : 'text-slate-400')}>
+            <span className={clsx('text-sm font-medium transition-colors', !isYearly ? 'text-slate-900 dark:text-white' : 'text-slate-500 dark:text-slate-400')}>
               Monthly
             </span>
             <button
               onClick={() => setIsYearly(!isYearly)}
-              className="relative inline-flex h-7 w-12 items-center rounded-full bg-slate-800 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-2 focus:ring-offset-slate-950"
+              className="relative inline-flex h-7 w-12 items-center rounded-full bg-slate-200 dark:bg-slate-800 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-slate-950"
               data-fast-goal="toggled_yearly_pricing"
             >
               <span
@@ -44,7 +44,7 @@ export default function PricingSection() {
                 )}
               />
             </button>
-            <span className={clsx('text-sm font-medium transition-colors', isYearly ? 'text-white' : 'text-slate-400')}>
+            <span className={clsx('text-sm font-medium transition-colors', isYearly ? 'text-slate-900 dark:text-white' : 'text-slate-500 dark:text-slate-400')}>
               Yearly
               <span className="ml-2 text-xs bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded-full">Save 40%</span>
             </span>
@@ -72,8 +72,8 @@ export default function PricingSection() {
                 className={clsx(
                   'w-full flex flex-col justify-between rounded-xl overflow-hidden transition-all duration-300 border',
                   {
-                    'glass-card border-blue-500/30 shadow-[0_0_30px_rgba(59,130,246,0.1)] relative': isBusiness,
-                    'glass-card border-white/10 hover:border-white/20': !isBusiness,
+                    'glass-card-light dark:glass-card border-blue-500/30 shadow-lg shadow-blue-500/10 dark:shadow-[0_0_30px_rgba(59,130,246,0.1)] relative': isBusiness,
+                    'glass-card-light dark:glass-card border-slate-200 dark:border-white/10 hover:border-blue-500/20 dark:hover:border-white/20': !isBusiness,
                   }
                 )}
               >
@@ -84,8 +84,8 @@ export default function PricingSection() {
                 )}
 
                 <CardHeader className="pb-4">
-                  <CardTitle className="text-xl font-bold text-white mb-2">{card.title}</CardTitle>
-                  <CardDescription className="text-slate-400 text-sm">{card.description}</CardDescription>
+                  <CardTitle className="text-xl font-bold text-slate-900 dark:text-white mb-2">{card.title}</CardTitle>
+                  <CardDescription className="text-slate-600 dark:text-slate-400 text-sm">{card.description}</CardDescription>
                 </CardHeader>
 
                 <CardContent className="pb-6">
@@ -93,7 +93,7 @@ export default function PricingSection() {
                     // Yearly pricing display with psychology
                     <div className="mb-6">
                       <div className="flex items-baseline gap-1 mb-2">
-                        <span className="text-4xl font-bold text-white">${monthlyEquivalent}</span>
+                        <span className="text-4xl font-bold text-slate-900 dark:text-white">${monthlyEquivalent}</span>
                         <span className="text-slate-500 text-sm">/mo</span>
                       </div>
                       {card.price !== '$0' && (
@@ -114,21 +114,21 @@ export default function PricingSection() {
                     // Monthly pricing display
                     <div className="mb-6">
                       <div className="flex items-baseline gap-1">
-                        <span className="text-4xl font-bold text-white">{card.price}</span>
+                        <span className="text-4xl font-bold text-slate-900 dark:text-white">{card.price}</span>
                         {card.duration && <span className="text-slate-500 text-sm">/ {card.duration}</span>}
                       </div>
                     </div>
                   )}
                 </CardContent>
 
-                <CardFooter className="flex flex-col items-start gap-6 pt-4 border-t border-white/5">
+                <CardFooter className="flex flex-col items-start gap-6 pt-4 border-t border-slate-200 dark:border-white/5">
                   <div className="space-y-3 w-full">
                     {card.features.map((feature) => (
                       <div key={feature} className="flex items-start gap-3">
-                        <div className="w-5 h-5 rounded-full bg-blue-500/10 flex items-center justify-center flex-shrink-0 mt-0.5">
-                          <Check className="w-3 h-3 text-blue-400" />
+                        <div className="w-5 h-5 rounded-full bg-blue-50 dark:bg-blue-500/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                          <Check className="w-3 h-3 text-blue-600 dark:text-blue-400" />
                         </div>
-                        <p className="text-slate-300 text-sm leading-tight">{feature}</p>
+                        <p className="text-slate-600 dark:text-slate-300 text-sm leading-tight">{feature}</p>
                       </div>
                     ))}
                   </div>
@@ -139,7 +139,7 @@ export default function PricingSection() {
                       'w-full text-center text-sm font-semibold py-3 px-4 rounded-lg transition-all',
                       isBusiness
                         ? 'bg-blue-600 text-white hover:bg-blue-500 shadow-lg shadow-blue-500/25'
-                        : 'bg-white/5 text-white hover:bg-white/10 border border-white/10'
+                        : 'bg-slate-100 text-slate-900 hover:bg-slate-200 dark:bg-white/5 dark:text-white dark:hover:bg-white/10 border border-slate-200 dark:border-white/10'
                     )}
                     data-fast-goal="clicked_pricing_cta"
                     data-fast-goal-plan={card.title.toLowerCase()}

@@ -5,9 +5,9 @@ import Image from "next/image"
 
 export function Footer() {
   return (
-    <footer className="bg-foreground text-background border-t-4 border-background">
+    <footer className="bg-slate-50 dark:bg-slate-950 text-slate-600 dark:text-slate-400 border-t border-slate-200 dark:border-white/5 transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-6 py-10 md:px-8 md:py-16">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12 mb-8 pb-8 md:mb-12 md:pb-12 border-b-2 border-background">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12 mb-8 pb-8 md:mb-12 md:pb-12 border-b border-slate-200 dark:border-white/5">
           <div>
             <div className="flex items-center gap-3 mb-4">
               <Image
@@ -17,21 +17,21 @@ export function Footer() {
                 height={32}
                 className="w-8 h-8"
               />
-              <span className="font-extrabold text-lg">ChatDock AI</span>
+              <span className="font-extrabold text-lg text-slate-900 dark:text-white">ChatDock AI</span>
             </div>
-            <p className="text-sm font-bold">Your 24/7 AI Sales Agent.</p>
+            <p className="text-sm font-medium">Your 24/7 AI Sales Agent.</p>
           </div>
 
           <div>
-            <h4 className="font-black mb-4 uppercase text-sm tracking-widest">Product</h4>
-            <ul className="space-y-2 text-sm font-bold">
+            <h4 className="font-bold mb-4 uppercase text-xs tracking-widest text-slate-900 dark:text-white">Product</h4>
+            <ul className="space-y-2 text-sm font-medium">
               <li>
-                <a href="#features" className="hover:underline">
+                <a href="#features" className="hover:text-slate-900 dark:hover:text-white transition-colors">
                   Features
                 </a>
               </li>
               <li>
-                <a href="#pricing" className="hover:underline">
+                <a href="#pricing" className="hover:text-slate-900 dark:hover:text-white transition-colors">
                   Pricing
                 </a>
               </li>
@@ -39,10 +39,10 @@ export function Footer() {
           </div>
 
           <div>
-            <h4 className="font-black mb-4 uppercase text-sm tracking-widest">Company</h4>
-            <ul className="space-y-2 text-sm font-bold">
+            <h4 className="font-bold mb-4 uppercase text-xs tracking-widest text-slate-900 dark:text-white">Company</h4>
+            <ul className="space-y-2 text-sm font-medium">
               <li>
-                <Link href="/blogs" className="hover:underline">
+                <Link href="/blogs" className="hover:text-slate-900 dark:hover:text-white transition-colors">
                   Blog
                 </Link>
               </li>
@@ -50,10 +50,10 @@ export function Footer() {
           </div>
 
           <div>
-            <h4 className="font-black mb-4 uppercase text-sm tracking-widest">Legal</h4>
-            <ul className="space-y-2 text-sm font-bold">
+            <h4 className="font-bold mb-4 uppercase text-xs tracking-widest text-slate-900 dark:text-white">Legal</h4>
+            <ul className="space-y-2 text-sm font-medium">
               <li>
-                <a href="https://x.com/snow_stark17" target="_blank" rel="noopener noreferrer" className="hover:underline">
+                <a href="https://x.com/snow_stark17" target="_blank" rel="noopener noreferrer" className="hover:text-slate-900 dark:hover:text-white transition-colors">
                   Contact
                 </a>
               </li>
@@ -61,7 +61,7 @@ export function Footer() {
           </div>
         </div>
 
-        <p className="text-center text-sm font-black uppercase tracking-widest">
+        <p className="text-center text-sm font-medium uppercase tracking-widest opacity-60">
           © 2025 ChatDock AI. All rights reserved.
         </p>
       </div>

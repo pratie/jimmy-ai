@@ -23,7 +23,7 @@ export default function AnimatedAgentType() {
 
     return (
         <span
-            className={`inline-block whitespace-nowrap transition-all duration-500 text-blue-400 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2'
+            className={`inline-block whitespace-nowrap transition-all duration-500 text-blue-600 dark:text-blue-400 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2'
                 }`}
         >
             {agentTypes[currentIndex]}

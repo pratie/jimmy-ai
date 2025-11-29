@@ -102,10 +102,10 @@ export default function HowItWorks() {
         <section className="py-24 md:py-32 relative overflow-hidden">
             <div className="container mx-auto px-4 relative z-10">
                 <div className="text-center mb-20">
-                    <h2 className="text-4xl md:text-5xl font-bold text-brand-primary mb-6 tracking-tight">
+                    <h2 className="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-6 tracking-tight">
                         From zero to AI sales in minutes
                     </h2>
-                    <p className="text-xl text-brand-primary/70 max-w-2xl mx-auto">
+                    <p className="text-xl text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
                         No coding required. Just bring your content, and we handle the rest.
                     </p>
                 </div>
@@ -155,8 +155,8 @@ export default function HowItWorks() {
                                         "hidden md:block w-[45%] text-right pr-12",
                                         !isLeft && "invisible"
                                     )}>
-                                        <h3 className="text-2xl font-bold text-brand-primary mb-2">{step.title}</h3>
-                                        <p className="text-brand-primary/70">{step.description}</p>
+                                        <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">{step.title}</h3>
+                                        <p className="text-slate-600 dark:text-slate-400">{step.description}</p>
                                     </div>
 
                                     {/* Center Icon (Desktop) */}
@@ -177,8 +177,8 @@ export default function HowItWorks() {
                                         "hidden md:block w-[45%] pl-12",
                                         isLeft && "invisible"
                                     )}>
-                                        <h3 className="text-2xl font-bold text-brand-primary mb-2">{step.title}</h3>
-                                        <p className="text-brand-primary/70">{step.description}</p>
+                                        <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">{step.title}</h3>
+                                        <p className="text-slate-600 dark:text-slate-400">{step.description}</p>
                                     </div>
 
                                     {/* Mobile Content Card */}
@@ -194,9 +194,9 @@ export default function HowItWorks() {
                                                 )}>
                                                     <step.icon className="w-5 h-5" />
                                                 </div>
-                                                <h3 className="text-xl font-bold text-brand-primary">{step.title}</h3>
+                                                <h3 className="text-xl font-bold text-slate-900 dark:text-white">{step.title}</h3>
                                             </div>
-                                            <p className="text-brand-primary/70 text-sm leading-relaxed">{step.description}</p>
+                                            <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">{step.description}</p>
                                         </div>
                                     </div>
                                 </div>
