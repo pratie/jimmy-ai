@@ -31,7 +31,7 @@ export default async function Home() {
       <NavBar />
 
       {/* Hero Section - Linear Style */}
-      <section className="relative pt-32 pb-20 md:pt-48 md:pb-32 overflow-hidden">
+      <section className="relative pt-24 pb-20 md:pt-48 md:pb-32 overflow-hidden">
         <div className="glow-effect top-[-20%] left-1/2 -translate-x-1/2 w-[800px] h-[800px]" />
 
         <div className="relative z-10 max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
