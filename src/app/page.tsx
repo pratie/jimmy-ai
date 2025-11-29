@@ -56,7 +56,7 @@ export default async function Home() {
                   <Button
                     className="bg-slate-900 dark:bg-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-100 text-white px-8 py-3 text-base font-medium rounded-lg shadow-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2"
                   >
-                    Get started →
+                    Build Your Free Agent →
                   </Button>
                 </Link>
                 <div className="flex flex-col gap-3 text-base text-gray-600 dark:text-gray-400">
@@ -197,14 +197,14 @@ export default async function Home() {
               <div className="w-10 h-10 bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center">
                 <span className="text-xl">🌐</span>
               </div>
-              <h3 className="font-semibold text-slate-900 dark:text-white">Website crawl</h3>
+              <h3 className="font-semibold text-slate-900 dark:text-white">Instant Website Training</h3>
               <p className="text-sm text-slate-600 dark:text-slate-400">Convert your site into clean, structured knowledge automatically.</p>
             </div>
             <div className="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 transition-colors flex flex-col items-start gap-3">
               <div className="w-10 h-10 bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center">
                 <span className="text-xl">📄</span>
               </div>
-              <h3 className="font-semibold text-slate-900 dark:text-white">PDFs & docs</h3>
+              <h3 className="font-semibold text-slate-900 dark:text-white">Upload Any Document</h3>
               <p className="text-sm text-slate-600 dark:text-slate-400">Upload PDFs or paste text to enrich your knowledge base.</p>
             </div>
             <div className="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 transition-colors flex flex-col items-start gap-3">
@@ -252,7 +252,7 @@ export default async function Home() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                 </svg>
               </div>
-              <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">Answer product questions instantly</h3>
+              <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">Instant Answers, Zero Wait Time</h3>
               <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
                 Your AI knows every product detail, shipping policy, and return procedure. Gives accurate answers in seconds, like your best salesperson, but available 24/7.
               </p>
@@ -276,7 +276,7 @@ export default async function Home() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
                 </svg>
               </div>
-              <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">Seamless human handoff</h3>
+              <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">Human Handoff When It Matters</h3>
               <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
                 AI handles 80% of questions automatically. For complex issues, it notifies your team and hands off with full context without repeated questions for customers.
               </p>
@@ -385,7 +385,7 @@ export default async function Home() {
         <div className="container mx-auto px-6 sm:px-8 lg:px-12">
           <div className="max-w-4xl mx-auto text-center bg-white dark:bg-slate-900 rounded-2xl p-12 md:p-16 border border-slate-200 dark:border-slate-800">
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-6">
-              Convert more leads. Support more customers.
+              Stop Answering the Same Questions
             </h2>
             <p className="text-slate-600 dark:text-slate-400 text-base md:text-lg mb-8 max-w-2xl mx-auto">
               Sales and support teams use ChatDock AI to qualify prospects, answer questions instantly, and book more meetings—all while reducing manual workload.
@@ -394,7 +394,7 @@ export default async function Home() {
               <Button
                 className="bg-slate-900 dark:bg-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-100 text-white px-8 py-3 text-base font-medium rounded-lg shadow-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2"
               >
-                Get started free →
+                Build Your Free Agent →
               </Button>
             </Link>
             <p className="text-slate-500 dark:text-slate-400 text-sm mt-6">
