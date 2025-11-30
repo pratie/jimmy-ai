@@ -3,6 +3,7 @@ import SideBar from '@/components/sidebar'
 import { ChatProvider } from '@/context/user-chat-context'
 import { redirect } from 'next/navigation'
 import React from 'react'
+import DashboardThemeEnforcer from '@/components/dashboard/theme-enforcer'
 
 // Mark the entire (dashboard) segment as dynamic to avoid
 // static generation warnings for auth/headers usage
@@ -38,7 +39,8 @@ const OwnerLayout = async ({ children }: Props) => {
 
     return (
       <ChatProvider>
-        <div className="min-h-screen bg-background flex h-screen w-full">
+        <div className="min-h-screen bg-slate-50 flex h-screen w-full">
+          <DashboardThemeEnforcer />
           <SideBar
             domains={authenticated.domain}
             user={authenticated.user}

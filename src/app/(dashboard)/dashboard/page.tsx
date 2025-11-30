@@ -50,31 +50,31 @@ const Page = async (props: Props) => {
         )}
         <div className="mx-auto max-w-5xl px-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <DashboardCard
-            value={conversations || 0}
-            title="Conversations"
-            icon={<MessageSquare className="w-5 h-5" />}
-          />
-          <DashboardCard
-            value={leads || 0}
-            title="Leads Captured"
-            icon={<PersonIcon />}
-            percentage={leadsConversionRate}
-          />
-          <DashboardCard
-            value={appointments || 0}
-            title="Appointments"
-            icon={<CalIcon />}
-            percentage={appointmentsConversionRate}
-          />
+            <DashboardCard
+              value={conversations || 0}
+              title="Conversations"
+              icon={<MessageSquare className="w-5 h-5" />}
+            />
+            <DashboardCard
+              value={leads || 0}
+              title="Leads Captured"
+              icon={<PersonIcon />}
+              percentage={leadsConversionRate}
+            />
+            <DashboardCard
+              value={appointments || 0}
+              title="Appointments"
+              icon={<CalIcon />}
+              percentage={appointmentsConversionRate}
+            />
           </div>
         </div>
         <div className="w-full py-10">
           <div className="mx-auto max-w-5xl px-4">
-            <div className="relative bg-bg dark:bg-darkBg rounded-base border-2 border-border shadow-shadow p-6">
+            <div className="relative bg-white rounded-base border-2 border-border shadow-shadow p-6">
               <div className="mb-6">
-                <h2 className="font-heading text-xl text-text dark:text-darkText">Plan Usage</h2>
-                <p className="text-sm text-text/70 dark:text-darkText/70 mt-1">
+                <h2 className="font-heading text-xl text-slate-900">Plan Usage</h2>
+                <p className="text-sm text-slate-500 mt-1">
                   A detailed overview of your metrics, usage, customers and more
                 </p>
               </div>
