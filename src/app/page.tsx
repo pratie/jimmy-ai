@@ -359,6 +359,15 @@ export default async function Home() {
         data-margin="24"
         data-size="md"
       />
+      {/* Leadsy Pixel - Landing Page Only */}
+      <Script
+        id="vtag-ai-js"
+        async
+        src="https://r2.leadsy.ai/tag.js"
+        data-pid="19yiPsmzWcmPcmZmm"
+        data-version="062024"
+        strategy="afterInteractive"
+      />
     </main>
   )
 }

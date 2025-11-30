@@ -80,15 +80,7 @@ export default function RootLayout({
             strategy="afterInteractive"
           />
 
-          {/* Leadsy Pixel */}
-          <Script
-            id="vtag-ai-js"
-            async
-            src="https://r2.leadsy.ai/tag.js"
-            data-pid="19yiPsmzWcmPcmZmm"
-            data-version="062024"
-            strategy="afterInteractive"
-          />
+
 
           {/* Organization JSON-LD */}
           <Script id="ld-organization" type="application/ld+json" strategy="afterInteractive">

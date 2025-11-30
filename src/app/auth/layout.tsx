@@ -2,6 +2,7 @@ import { currentUser } from '@clerk/nextjs/server'
 import Image from 'next/image'
 import { redirect } from 'next/navigation'
 import React from 'react'
+import AuthThemeEnforcer from '@/components/auth/theme-enforcer'
 
 type Props = {
   children: React.ReactNode
@@ -15,6 +16,7 @@ const Layout = async ({ children }: Props) => {
 
   return (
     <div className="landing-gradient h-screen flex w-full justify-center items-center">
+      <AuthThemeEnforcer />
       <div className="w-[600px] flex flex-col items-center p-6">
         {children}
       </div>
