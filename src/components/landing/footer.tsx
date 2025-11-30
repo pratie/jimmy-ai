@@ -40,18 +40,25 @@ export function Footer() {
 
           <div>
             <h4 className="font-bold mb-4 uppercase text-xs tracking-widest text-slate-900 dark:text-white">Company</h4>
-            <ul className="space-y-2 text-sm font-medium">
+            <ul className="space-y-2 text-sm font-medium mb-6">
               <li>
                 <Link href="/blogs" className="hover:text-slate-900 dark:hover:text-white transition-colors">
                   Blog
                 </Link>
               </li>
-              <li>
-                <a href="mailto:rishi@chatdock.io" className="hover:text-slate-900 dark:hover:text-white transition-colors">
-                  Custom Solutions
-                </a>
-              </li>
             </ul>
+
+            <div className="flex flex-col gap-1">
+              <p className="text-xs font-medium text-slate-500 dark:text-slate-500">
+                Need custom solutions or setup help?
+              </p>
+              <a
+                href="mailto:rishi@chatdock.io"
+                className="text-sm font-bold text-slate-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+              >
+                Reach out at rishi@chatdock.io
+              </a>
+            </div>
           </div>
 
           <div>
