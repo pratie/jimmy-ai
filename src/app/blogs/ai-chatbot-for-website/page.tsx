@@ -19,6 +19,7 @@ export const metadata: Metadata = {
       'Add an AI chatbot to your website in minutes. Improve conversions, qualify leads, and automate support with BookmyLead AI.',
     type: 'article',
     images: [{ url: '/images/social_graph_img.png', width: 1200, height: 630, alt: 'AI Chatbot for Website' }],
+    url: '/blogs/ai-chatbot-for-website',
   },
   twitter: {
     card: 'summary_large_image',

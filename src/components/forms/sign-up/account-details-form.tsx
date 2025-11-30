@@ -26,7 +26,7 @@ function AccountDetailsForm({ errors, register }: Props) {
           className="flex-shrink-0"
         />
       </div>
-      <h2 className="text-gravel md:text-4xl font-bold">Account details</h2>
+      <h1 className="text-gravel md:text-4xl font-bold">Account details</h1>
       <p className="text-iridium md:text-sm">Enter your email and password</p>
       {USER_REGISTRATION_FORM.map((field) => (
         <FormGenerator

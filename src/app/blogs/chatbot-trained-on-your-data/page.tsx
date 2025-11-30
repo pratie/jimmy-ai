@@ -13,6 +13,7 @@ export const metadata: Metadata = {
       'Use retrieval‑augmented generation to ground responses in your content. Learn setup and best practices.',
     type: 'article',
     images: [{ url: '/images/social_graph_img.png', width: 1200, height: 630, alt: 'Chatbot Trained on Your Data' }],
+    url: '/blogs/chatbot-trained-on-your-data',
   },
   twitter: {
     card: 'summary_large_image',

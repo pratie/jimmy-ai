@@ -13,6 +13,7 @@ export const metadata: Metadata = {
       'Automate first‑line support with an AI assistant trained on your docs. Learn setup, guardrails, and KPIs.',
     type: 'article',
     images: [{ url: '/images/social_graph_img.png', width: 1200, height: 630, alt: 'Customer Support AI' }],
+    url: '/blogs/customer-support-ai',
   },
   twitter: {
     card: 'summary_large_image',

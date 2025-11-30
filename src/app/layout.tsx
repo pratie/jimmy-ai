@@ -42,6 +42,7 @@ export const metadata: Metadata = {
         alt: 'ChatDock · Website AI Assistant',
       },
     ],
+    url: APP_URL,
   },
   twitter: {
     card: 'summary_large_image',

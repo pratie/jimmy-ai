@@ -13,6 +13,7 @@ export const metadata: Metadata = {
       'Deliver instant answers day and night. Configure guardrails, live handoff, and reporting with BookmyLead AI.',
     type: 'article',
     images: [{ url: '/images/social_graph_img.png', width: 1200, height: 630, alt: '24/7 AI Support' }],
+    url: '/blogs/24-7-ai-support',
   },
   twitter: {
     card: 'summary_large_image',
