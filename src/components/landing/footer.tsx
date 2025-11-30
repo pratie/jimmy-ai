@@ -46,6 +46,11 @@ export function Footer() {
                   Blog
                 </Link>
               </li>
+              <li>
+                <a href="mailto:rishi@chatdock.io" className="hover:text-slate-900 dark:hover:text-white transition-colors">
+                  Custom Solutions
+                </a>
+              </li>
             </ul>
           </div>
 
@@ -53,7 +58,7 @@ export function Footer() {
             <h4 className="font-bold mb-4 uppercase text-xs tracking-widest text-slate-900 dark:text-white">Legal</h4>
             <ul className="space-y-2 text-sm font-medium">
               <li>
-                <a href="https://x.com/snow_stark17" target="_blank" rel="noopener noreferrer" className="hover:text-slate-900 dark:hover:text-white transition-colors">
+                <a href="https://x.com/prthpdev" target="_blank" rel="noopener noreferrer" className="hover:text-slate-900 dark:hover:text-white transition-colors">
                   Contact
                 </a>
               </li>
