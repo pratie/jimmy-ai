@@ -71,12 +71,12 @@ function NavBar() {
             >
               Sign in
             </Link>
-            <Link
-              href="/auth/sign-up"
+            <a
+              href="mailto:rishi@chatdock.io"
               className="inline-flex items-center justify-center px-5 py-2 text-sm font-medium text-white bg-slate-900 dark:bg-white dark:text-slate-900 rounded-full hover:bg-slate-800 dark:hover:bg-slate-200 transition-all duration-200 shadow-[0_0_10px_rgba(0,0,0,0.1)] dark:shadow-[0_0_15px_rgba(255,255,255,0.1)]"
             >
-              Get started
-            </Link>
+              Book Demo
+            </a>
           </div>
 
           {/* Mobile Menu Button */}
@@ -142,13 +142,13 @@ function NavBar() {
               >
                 Sign in
               </Link>
-              <Link
-                href="/auth/sign-up"
+              <a
+                href="mailto:rishi@chatdock.io"
                 className="block text-center px-5 py-3 text-base font-medium text-white bg-slate-900 dark:bg-white dark:text-slate-900 rounded-full hover:bg-slate-800 dark:hover:bg-slate-200 transition-all"
                 onClick={() => setIsMenuOpen(false)}
               >
-                Get started
-              </Link>
+                Book Demo
+              </a>
             </div>
           </div>
         </div>

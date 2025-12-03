@@ -53,33 +53,33 @@ export default async function Home() {
               <div className="space-y-4">
                 <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.1] text-slate-900 dark:text-white">
                   <span className="block text-blue-600 dark:text-gradient">
-                    Your AI <AnimatedAgentType />,
+                    We Build Your 24/7
                   </span>
-                  <span className="block text-slate-900 dark:text-white">Working 24/7</span>
+                  <span className="block text-slate-900 dark:text-white">AI Sales Agent</span>
                 </h1>
               </div>
 
               <p className="text-slate-600 dark:text-slate-400 text-lg md:text-xl max-w-xl leading-relaxed mx-auto lg:mx-0">
-                You didn&apos;t start a startup to answer support tickets all day. ChatDock is the AI employee that captures leads, supports customers, and closes deals—24/7, while you focus on building.
+                Stop losing leads while you sleep. We train, customize, and deploy a smart AI agent for your business. 100% Done-For-You.
               </p>
 
               {/* CTA and Trust Section */}
               <div className="flex flex-col sm:flex-row items-center lg:items-start gap-6 pt-4">
-                <Link href="/auth/sign-up">
+                <a href="mailto:rishi@chatdock.io">
                   <Button
                     className="h-12 px-8 bg-slate-900 text-white hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200 text-base font-semibold rounded-full transition-all shadow-lg hover:shadow-xl"
                   >
-                    Build Your Free Agent <ChevronRight className="w-4 h-4 ml-1" />
+                    Get Your Free Demo <ChevronRight className="w-4 h-4 ml-1" />
                   </Button>
-                </Link>
+                </a>
                 <div className="flex flex-col gap-2 text-sm text-slate-500">
                   <div className="flex items-center gap-2">
                     <Check className="w-4 h-4 text-blue-500" />
-                    <span>5-minute setup</span>
+                    <span>Expert setup included</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Check className="w-4 h-4 text-blue-500" />
-                    <span>No credit card required</span>
+                    <span>Results in 24 hours</span>
                   </div>
                 </div>
               </div>
@@ -222,24 +222,24 @@ export default async function Home() {
         <div className="container mx-auto px-6 sm:px-8 lg:px-12 relative z-10">
           <div className="text-center mb-20">
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-900 dark:text-white mb-6 tracking-tight">
-              Sales, support, and lead generation—<span className="text-slate-500">in one AI agent</span>
+              We handle the tech,<span className="text-slate-500"> you get the results</span>
             </h2>
             <p className="text-slate-600 dark:text-slate-400 text-xl max-w-3xl mx-auto">
-              Capture more leads, close more deals, and deliver instant support
+              Our experts build, train, and manage your AI agent so you don't have to lift a finger.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
             {/* Feature Cards */}
             {[
-              { title: 'Deflect 80% of Support Tickets', desc: 'Your AI answers repetitive questions instantly. Zero wait time for customers, zero distraction for you. It knows every policy, shipping detail, and product spec.' },
-              { title: 'Wake Up to Booked Meetings', desc: 'Qualify leads and book demos automatically while you sleep. Stop chasing prospects and start closing them with high-intent meetings on your calendar.' },
-              { title: 'Human Handoff When It Matters', desc: 'AI handles the routine 80%. For complex issues, it notifies you instantly with full context, so you only step in when you really need to.' },
-              { title: 'Capture Every Missed Opportunity', desc: 'See which conversations turned into sales and where you lost them. All conversations are saved and searchable, giving you a goldmine of customer insights.' },
-              { title: 'Scale Without Hiring', desc: 'Manage support across multiple brands or sites from one dashboard. Add capacity instantly without the overhead of recruiting, training, and managing new agents.' },
-              { title: 'AI That Actually Knows Your Product', desc: 'Answers come directly from your website and docs using RAG. No hallucinations, just accurate, on-brand responses that you can trust.' },
-              { title: '24/7 Self-Service', desc: 'Give customers instant answers at 2 AM. Reduce ticket volume by letting users help themselves with streaming responses that keep them engaged.' },
-              { title: 'Live Handoff & Booking', desc: 'Switch to a human in real-time for high-value deals. Share a booking link to schedule calls without the email back-and-forth.' }
+              { title: 'Expertly Trained on Your Data', desc: 'We manually curate your knowledge base from your website and docs. No hallucinations, just accurate, on-brand responses that you can trust.' },
+              { title: 'We Deflect 80% of Support Tickets', desc: 'Your agent answers repetitive questions instantly. Zero wait time for customers, zero distraction for you.' },
+              { title: 'Wake Up to Booked Meetings', desc: 'We configure your agent to qualify leads and book demos automatically while you sleep.' },
+              { title: 'Monthly Optimization', desc: 'We review your chat logs every month and tweak the AI to improve conversion rates and accuracy.' },
+              { title: 'Scale Your Team Instantly', desc: 'Add capacity instantly without the overhead of recruiting, training, and managing new agents.' },
+              { title: 'Capture Every Missed Opportunity', desc: 'See which conversations turned into sales and where you lost them. We provide weekly insights reports.' },
+              { title: '24/7 Self-Service', desc: 'Give customers instant answers at 2 AM. Reduce ticket volume by letting users help themselves.' },
+              { title: 'Seamless Human Handoff', desc: 'We set up real-time notifications so you can jump in for high-value deals instantly.' }
             ].map((feature, i) => (
               <div key={i} className="glass-card-light dark:glass-card p-8 rounded-xl hover:border-blue-500/20 dark:hover:border-white/20 transition-all duration-300 group">
                 <div className="w-10 h-10 bg-blue-50 dark:bg-white/5 rounded-lg flex items-center justify-center mb-6 group-hover:bg-blue-500/20 transition-colors">
@@ -296,13 +296,13 @@ export default async function Home() {
             <p className="text-slate-600 dark:text-slate-400 text-lg md:text-xl mb-10 max-w-2xl mx-auto">
               Sales and support teams use ChatDock AI to qualify prospects, answer questions instantly, and book more meetings—all while reducing manual workload.
             </p>
-            <Link href="/auth/sign-up">
+            <a href="mailto:rishi@chatdock.io">
               <Button
                 className="h-14 px-10 bg-slate-900 text-white hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200 text-lg font-semibold rounded-full shadow-lg hover:shadow-xl transition-all"
               >
-                Build Your Free Agent →
+                Get Your Free Demo →
               </Button>
-            </Link>
+            </a>
             <p className="text-slate-500 text-sm mt-8 font-medium">
               Free forever plan • Live in 5 minutes • No credit card needed
             </p>
