@@ -225,7 +225,7 @@ export default async function Home() {
               We handle the tech,<span className="text-slate-500"> you get the results</span>
             </h2>
             <p className="text-slate-600 dark:text-slate-400 text-xl max-w-3xl mx-auto">
-              Our experts build, train, and manage your AI agent so you don't have to lift a finger.
+              Our experts build, train, and manage your AI agent so you don&apos;t have to lift a finger.
             </p>
           </div>
 
