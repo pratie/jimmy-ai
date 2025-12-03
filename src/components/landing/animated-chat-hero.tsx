@@ -23,11 +23,11 @@ interface AnimatedChatHeroProps {
 }
 
 const DEFAULT_SCRIPT: ChatMessage[] = [
-  { role: 'assistant', content: 'Welcome! 👋 How can I help you today?' },
-  { role: 'user', content: "I'm looking to add an AI assistant to my site" },
-  { role: 'assistant', content: 'Great! We train on your website, docs, and FAQs to answer with your exact info.' },
-  { role: 'user', content: 'Can it capture emails and book calls?' },
-  { role: 'assistant', content: 'Yes. We qualify visitors, collect email, and can book a time on your calendar.' },
+  { role: 'assistant', content: 'Welcome! 👋 Looking to grow your business?' },
+  { role: 'user', content: "Yes, I need more leads from my website." },
+  { role: 'assistant', content: 'I can help. I qualify visitors 24/7 and book meetings for you.' },
+  { role: 'user', content: 'Do I need to set this up myself?' },
+  { role: 'assistant', content: 'Nope! Our team handles everything. You just get the leads. 🚀' },
 ]
 
 export default function AnimatedChatHero({
