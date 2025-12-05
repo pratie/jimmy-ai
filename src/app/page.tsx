@@ -55,12 +55,12 @@ export default async function Home() {
                   <span className="block text-blue-600 dark:text-gradient">
                     We Build Your 24/7
                   </span>
-                  <span className="block text-slate-900 dark:text-white">AI Sales Agent</span>
+                  <span className="block text-slate-900 dark:text-white">AI <AnimatedAgentType /> Agent</span>
                 </h1>
               </div>
 
               <p className="text-slate-600 dark:text-slate-400 text-lg md:text-xl max-w-xl leading-relaxed mx-auto lg:mx-0">
-                Stop losing leads while you sleep. We train, customize, and deploy a smart AI agent for your business. 100% Done-For-You.
+                Answer customers. Capture leads. Book meetings. All while you sleep. 100% Done-For-You.
               </p>
 
               {/* CTA and Trust Section */}
@@ -232,14 +232,14 @@ export default async function Home() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
             {/* Feature Cards */}
             {[
-              { title: 'Expertly Trained on Your Data', desc: 'We manually curate your knowledge base from your website and docs. No hallucinations, just accurate, on-brand responses that you can trust.' },
-              { title: 'We Deflect 80% of Support Tickets', desc: 'Your agent answers repetitive questions instantly. Zero wait time for customers, zero distraction for you.' },
-              { title: 'Wake Up to Booked Meetings', desc: 'We configure your agent to qualify leads and book demos automatically while you sleep.' },
-              { title: 'Monthly Optimization', desc: 'We review your chat logs every month and tweak the AI to improve conversion rates and accuracy.' },
-              { title: 'Scale Your Team Instantly', desc: 'Add capacity instantly without the overhead of recruiting, training, and managing new agents.' },
-              { title: 'Capture Every Missed Opportunity', desc: 'See which conversations turned into sales and where you lost them. We provide weekly insights reports.' },
-              { title: '24/7 Self-Service', desc: 'Give customers instant answers at 2 AM. Reduce ticket volume by letting users help themselves.' },
-              { title: 'Seamless Human Handoff', desc: 'We set up real-time notifications so you can jump in for high-value deals instantly.' }
+              { title: 'Trained on Your Data', desc: 'We curate your knowledge base from your website and docs. Accurate, on-brand responses every time.' },
+              { title: 'Deflect 80% of Tickets', desc: 'Answer repetitive questions instantly. Zero wait time for customers, zero distraction for you.' },
+              { title: 'Qualify Leads & Book Meetings', desc: 'Capture emails, qualify prospects, and schedule demos automatically while you sleep.' },
+              { title: 'Monthly Performance Reviews', desc: 'We review your chat logs, tweak the AI, and send you weekly ROI reports.' },
+              { title: '24/7 Availability', desc: 'Give customers instant answers at 2 AM. Your AI never sleeps, never takes a break.' },
+              { title: 'Seamless Human Handoff', desc: 'Get notified in real-time for complex issues. Jump in when you need to.' },
+              { title: 'Real-Time Analytics', desc: 'See which questions are asked most, where you lose customers, and how much time you save.' },
+              { title: 'Multi-Channel Ready', desc: 'Deploy on your website, embed in apps, or connect to WhatsApp and more.' }
             ].map((feature, i) => (
               <div key={i} className="glass-card-light dark:glass-card p-8 rounded-xl hover:border-blue-500/20 dark:hover:border-white/20 transition-all duration-300 group">
                 <div className="w-10 h-10 bg-blue-50 dark:bg-white/5 rounded-lg flex items-center justify-center mb-6 group-hover:bg-blue-500/20 transition-colors">
