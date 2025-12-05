@@ -8,7 +8,7 @@ import Link from 'next/link'
 import PricingSection from '@/components/landing/pricing-section'
 import Script from 'next/script'
 import HowItWorks from '@/components/landing/how-it-works'
-import { Check, ChevronRight } from 'lucide-react'
+import { Check, ChevronRight, Shield, Zap, Clock, Users, BarChart3, Globe, MessageSquare, ArrowRight } from 'lucide-react'
 import { Footer } from '@/components/landing/footer'
 import AnimatedChatHero from '@/components/landing/animated-chat-hero'
 import { OpenAIIcon, AnthropicIcon, GoogleIcon } from '@/components/icons/provider-icons'
@@ -26,119 +26,105 @@ export const metadata: Metadata = {
 
 export default async function Home() {
   return (
-    <main className="min-h-screen bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-50 selection:bg-blue-500/30">
+    <main className="min-h-screen bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-50 selection:bg-slate-200 selection:text-slate-900">
       <div className="fixed inset-0 z-0 pointer-events-none bg-grid-black/[0.02] dark:bg-grid-white/[0.02] bg-[size:50px_50px]" />
       <NavBar />
 
-      {/* Hero Section - Linear Style */}
-      <section className="relative pt-24 pb-20 md:pt-48 md:pb-32 overflow-hidden">
-        <div className="glow-effect top-[-20%] left-1/2 -translate-x-1/2 w-[800px] h-[800px]" />
+      {/* Hero Section - Centered Minimalist 'Google Antigravity' Style */}
+      <section className="relative pt-32 pb-20 md:pt-48 md:pb-32 overflow-hidden bg-white dark:bg-slate-950">
+        {/* Subtle Particle/Confetti Background (Monochrome) */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          {/* Custom SVG Particles for 'Antigravity' feel */}
+          <svg className="absolute w-full h-full opacity-30" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <pattern id="particles" x="0" y="0" width="100" height="100" patternUnits="userSpaceOnUse">
+                <circle cx="10" cy="10" r="1.5" className="fill-slate-400" opacity="0.4" />
+                <circle cx="60" cy="40" r="1" className="fill-slate-500" opacity="0.3" />
+                <circle cx="30" cy="70" r="1.5" className="fill-slate-300" opacity="0.4" />
+                <circle cx="90" cy="20" r="1" className="fill-slate-400" opacity="0.3" />
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#particles)" />
+          </svg>
+        </div>
 
-        <div className="relative z-10 max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-
-            {/* Left Column */}
-            <div className="space-y-8 max-w-2xl lg:max-w-none text-center lg:text-left">
-              {/* Badge */}
-              {/* Badge */}
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 backdrop-blur-sm text-xs font-medium text-slate-600 dark:text-slate-300 mx-auto lg:mx-0">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
-                </span>
-                New: Multi-Agent Support
-              </div>
-
-              {/* Main Headline */}
-              <div className="space-y-4">
-                <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.1] text-slate-900 dark:text-white">
-                  <span className="block text-blue-600 dark:text-gradient">
-                    We Build Your 24/7
-                  </span>
-                  <span className="block text-slate-900 dark:text-white">AI <AnimatedAgentType /> Agent</span>
-                </h1>
-              </div>
-
-              <p className="text-slate-600 dark:text-slate-400 text-lg md:text-xl max-w-xl leading-relaxed mx-auto lg:mx-0">
-                Answer customers. Capture leads. Book meetings. All while you sleep. 100% Done-For-You.
-              </p>
-
-              {/* CTA and Trust Section */}
-              <div className="flex flex-col sm:flex-row items-center lg:items-start gap-6 pt-4">
-                <a href="mailto:rishi@chatdock.io">
-                  <Button
-                    className="h-12 px-8 bg-slate-900 text-white hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200 text-base font-semibold rounded-full transition-all shadow-lg hover:shadow-xl"
-                  >
-                    Get Your Free Demo <ChevronRight className="w-4 h-4 ml-1" />
-                  </Button>
-                </a>
-                <div className="flex flex-col gap-2 text-sm text-slate-500">
-                  <div className="flex items-center gap-2">
-                    <Check className="w-4 h-4 text-blue-500" />
-                    <span>Expert setup included</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Check className="w-4 h-4 text-blue-500" />
-                    <span>Results in 24 hours</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-8 pt-8 border-t border-slate-200 dark:border-white/5 flex flex-col sm:flex-row items-center gap-4 text-slate-500 dark:text-slate-500">
-                <span className="text-xs font-medium uppercase tracking-wider opacity-60">Powered by</span>
-                <div className="flex items-center gap-6 opacity-60 grayscale hover:grayscale-0 transition-all duration-500">
-                  <div className="flex items-center gap-2">
-                    <OpenAIIcon size={16} />
-                    <span className="text-xs font-medium">OpenAI</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <AnthropicIcon size={16} />
-                    <span className="text-xs font-medium">Anthropic</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <GoogleIcon size={16} />
-                    <span className="text-xs font-medium">Gemini</span>
-                  </div>
-                </div>
-              </div>
+        <div className="relative z-10 max-w-5xl mx-auto px-6 sm:px-8 lg:px-12 text-center">
+          {/* Logo/Badge Centered */}
+          <div className="flex justify-center mb-8">
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-transparent text-sm font-medium text-slate-600 dark:text-slate-400">
+              <span className="flex h-2 w-2 relative">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-slate-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-slate-600 dark:bg-slate-400"></span>
+              </span>
+              ChatDock AI
             </div>
+          </div>
 
-            {/* Right Column - Animated Chat Demo */}
-            <div className="relative w-full max-w-[500px] mx-auto lg:mx-0 lg:ml-auto perspective-1000">
-              <div className="relative transform transition-transform hover:scale-[1.02] duration-500">
-                <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl blur opacity-20 animate-pulse"></div>
-                <div className="relative bg-slate-950 rounded-2xl border border-white/10 shadow-2xl overflow-hidden">
-                  <AnimatedChatHero density="cozy" title="ChatDock AI Assistant" />
-                </div>
+          {/* Main Headline - Centered, Massive, Bold */}
+          <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-medium tracking-tight text-slate-900 dark:text-white mb-8 leading-[1.1]">
+            Experience automated<br />
+            <span className="text-slate-900 dark:text-white">customer success</span>
+          </h1>
 
-                {/* Floating Dashboard Elements */}
-                <div className="hidden lg:block absolute -right-12 top-20 space-y-4">
-                  <div className="glass-card-light dark:glass-card p-4 rounded-xl w-48 transform rotate-6 hover:rotate-0 transition-transform duration-300">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="text-xs font-medium text-slate-500 dark:text-slate-400">Customer Rating</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xl font-bold text-slate-900 dark:text-white">4.9</span>
-                      <div className="flex gap-0.5">
-                        {[...Array(5)].map((_, i) => (
-                          <svg key={i} className={`w-3 h-3 ${i < 5 ? 'text-yellow-400' : 'text-slate-700'}`} fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                          </svg>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
+          {/* Subheadline */}
+          <p className="text-xl text-slate-600 dark:text-slate-400 max-w-2xl mx-auto mb-12 leading-relaxed font-normal">
+            Stop losing leads while you sleep. We train, customize, and deploy a smart AI agent for your business. 100% Done-For-You.
+          </p>
+
+          {/* Buttons - Centered Pill Style */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <a href="mailto:rishi@chatdock.io">
+              <Button
+                className="h-14 px-8 bg-slate-900 text-white hover:bg-black dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200 text-lg font-medium rounded-full transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5"
+              >
+                Get Your Free Demo
+              </Button>
+            </a>
+            <a href="#features">
+              <Button
+                variant="outline"
+                className="h-14 px-8 bg-slate-100 text-slate-900 border-none hover:bg-slate-200 dark:bg-white/10 dark:text-white dark:hover:bg-white/20 text-lg font-medium rounded-full transition-all"
+              >
+                Explore use cases
+              </Button>
+            </a>
+          </div>
+
+          {/* Chat Demo - Floating Below (Optional, usually reference doesn't have it immediately, but good for context) */}
+          <div className="mt-20 relative w-full max-w-[500px] mx-auto lg:mx-0 lg:ml-auto perspective-1000">
+            <div className="relative transform transition-transform hover:scale-[1.02] duration-500">
+              <div className="absolute -inset-1 bg-gradient-to-r from-slate-200 to-gray-200 dark:from-slate-800 dark:to-gray-800 rounded-2xl blur opacity-20 animate-pulse"></div>
+              <div className="relative bg-slate-950 rounded-2xl border border-white/10 shadow-2xl overflow-hidden">
+                <AnimatedChatHero density="cozy" title="ChatDock AI Assistant" />
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Stats Section - Minimalist */}
-      <section className="py-12 border-y border-slate-200 dark:border-white/5 bg-slate-50/50 dark:bg-white/[0.02]">
+      {/* Social Proof Section */}
+      <section className="py-16 border-b border-slate-200 dark:border-white/5">
         <div className="container mx-auto px-6 sm:px-8 lg:px-12">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12 max-w-6xl mx-auto">
+          <div className="text-center mb-8">
+            <p className="text-sm font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+              Trusted by growing teams worldwide
+            </p>
+          </div>
+          <div className="flex flex-wrap justify-center items-center gap-8 md:gap-16 opacity-60 grayscale hover:grayscale-0 hover:opacity-100 transition-all duration-500">
+            {/* Placeholder logos - replace with actual customer logos */}
+            {['TechCorp', 'StartupXYZ', 'AgencyPro', 'SaaS Inc', 'Digital Co'].map((company) => (
+              <div key={company} className="text-xl font-bold text-slate-400 dark:text-slate-500">
+                {company}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Stats Section - Minimalist / Monochrome */}
+      <section className="py-20 border-b border-slate-100 dark:border-white/5">
+        <div className="container mx-auto px-6 sm:px-8 lg:px-12">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12 max-w-5xl mx-auto">
             {[
               { label: 'Higher conversion', value: '67%' },
               { label: 'Fewer tickets', value: '40%' },
@@ -146,10 +132,10 @@ export default async function Home() {
               { label: 'To go live', value: '5min' },
             ].map((stat, i) => (
               <div key={i} className="text-center group cursor-default">
-                <div className="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-2 group-hover:scale-110 transition-transform duration-300 bg-clip-text text-transparent bg-gradient-to-b from-slate-900 to-slate-600 dark:from-white dark:to-white/50">
+                <div className="text-5xl md:text-6xl font-bold mb-3 text-slate-900 dark:text-white tracking-tight">
                   {stat.value}
                 </div>
-                <div className="text-slate-500 dark:text-slate-400 text-sm font-medium uppercase tracking-wide">{stat.label}</div>
+                <div className="text-slate-500 text-sm font-medium uppercase tracking-wider">{stat.label}</div>
               </div>
             ))}
           </div>
@@ -229,23 +215,23 @@ export default async function Home() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
-            {/* Feature Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
+            {/* Feature Cards - Minimalist */}
             {[
-              { title: 'Trained on Your Data', desc: 'We curate your knowledge base from your website and docs. Accurate, on-brand responses every time.' },
-              { title: 'Deflect 80% of Tickets', desc: 'Answer repetitive questions instantly. Zero wait time for customers, zero distraction for you.' },
-              { title: 'Qualify Leads & Book Meetings', desc: 'Capture emails, qualify prospects, and schedule demos automatically while you sleep.' },
-              { title: 'Monthly Performance Reviews', desc: 'We review your chat logs, tweak the AI, and send you weekly ROI reports.' },
-              { title: '24/7 Availability', desc: 'Give customers instant answers at 2 AM. Your AI never sleeps, never takes a break.' },
-              { title: 'Seamless Human Handoff', desc: 'Get notified in real-time for complex issues. Jump in when you need to.' },
-              { title: 'Real-Time Analytics', desc: 'See which questions are asked most, where you lose customers, and how much time you save.' },
-              { title: 'Multi-Channel Ready', desc: 'Deploy on your website, embed in apps, or connect to WhatsApp and more.' }
+              { title: 'Trained on Your Data', desc: 'We curate your knowledge base from your website and docs. Accurate, on-brand responses.', icon: Shield },
+              { title: 'Deflect 80% of Tickets', desc: 'Answer repetitive questions instantly. Zero wait time for customers.', icon: MessageSquare },
+              { title: 'Qualify & Book Meetings', desc: 'Capture emails, qualify prospects, and schedule demos automatically.', icon: Users },
+              { title: 'Monthly Optimization', desc: 'We review your chat logs and tweak the AI for better results.', icon: Zap },
+              { title: '24/7 Availability', desc: 'Give customers instant answers at 2 AM. Always on, always ready.', icon: Clock },
+              { title: 'Human Handoff', desc: 'Get notified in real-time for complex issues. Jump in when needed.', icon: ArrowRight },
+              { title: 'Real-Time Analytics', desc: 'See which questions are asked most and where you lose customers.', icon: BarChart3 },
+              { title: 'Multi-Channel Ready', desc: 'Deploy on your website, apps, WhatsApp and more.', icon: Globe }
             ].map((feature, i) => (
-              <div key={i} className="glass-card-light dark:glass-card p-8 rounded-xl hover:border-blue-500/20 dark:hover:border-white/20 transition-all duration-300 group">
-                <div className="w-10 h-10 bg-blue-50 dark:bg-white/5 rounded-lg flex items-center justify-center mb-6 group-hover:bg-blue-500/20 transition-colors">
-                  <div className="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]" />
+              <div key={i} className="group relative p-6 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-white/10 rounded-xl hover:border-slate-400 dark:hover:border-white/30 transition-all duration-200">
+                <div className="w-10 h-10 rounded-lg bg-slate-100 dark:bg-white/5 flex items-center justify-center mb-5 text-slate-900 dark:text-white group-hover:bg-slate-200 dark:group-hover:bg-white/10 transition-colors">
+                  <feature.icon className="w-5 h-5" strokeWidth={1.5} />
                 </div>
-                <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-3">{feature.title}</h3>
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">{feature.title}</h3>
                 <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
                   {feature.desc}
                 </p>
@@ -285,28 +271,27 @@ export default async function Home() {
       {/* Pricing Section */}
       <PricingSection />
 
-      {/* Final CTA - Clean and professional */}
-      <section className="py-32 relative overflow-hidden">
-        <div className="glow-effect top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] opacity-20" />
+      {/* Final CTA - Minimalist */}
+      <section className="py-32 relative overflow-hidden bg-white dark:bg-slate-950">
         <div className="container mx-auto px-6 sm:px-8 lg:px-12 relative z-10">
-          <div className="max-w-4xl mx-auto text-center glass-card-light dark:glass-card rounded-3xl p-12 md:p-20 border border-slate-200 dark:border-white/10">
+          <div className="max-w-4xl mx-auto text-center border border-slate-200 dark:border-white/10 rounded-2xl p-12 md:p-20 bg-slate-50/50 dark:bg-white/[0.02]">
             <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold text-slate-900 dark:text-white mb-8 tracking-tight">
-              Stop Answering the Same Questions
+              Stop Answering the<br />Same Questions
             </h2>
             <p className="text-slate-600 dark:text-slate-400 text-lg md:text-xl mb-10 max-w-2xl mx-auto">
-              Sales and support teams use ChatDock AI to qualify prospects, answer questions instantly, and book more meetings—all while reducing manual workload.
+              Let AI handle the routine. You focus on growing your business.
             </p>
             <a href="mailto:rishi@chatdock.io">
               <Button
-                className="h-14 px-10 bg-slate-900 text-white hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200 text-lg font-semibold rounded-full shadow-lg hover:shadow-xl transition-all"
+                className="h-14 px-12 bg-slate-900 text-white hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200 text-lg font-medium rounded-full shadow-sm hover:shadow-md transition-all"
               >
-                Get Your Free Demo →
+                Get Your Free Demo <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
             </a>
             <p className="text-slate-500 text-sm mt-8 font-medium">
-              Free forever plan • Live in 5 minutes • No credit card needed
+              ✓ Expert setup included • ✓ Results in 24 hours • ✓ No risk
             </p>
-            <div className="mt-8 flex justify-center">
+            <div className="mt-8 flex justify-center opacity-80 hover:opacity-100 transition-opacity">
               <a href="https://yourwebsitescore.com/certified-websites/chatdock.io" target="_blank" rel="noopener">
                 <img src="https://yourwebsitescore.com/api/badge/chatdock.io" alt="" style={{ height: '54px', width: 'auto' }} />
               </a>
@@ -335,6 +320,11 @@ export default async function Home() {
               <Link key={i} href={blog.href} className="group">
                 <div className="glass-card-light dark:glass-card h-full p-8 rounded-xl hover:bg-slate-50 dark:hover:bg-white/10 transition-colors">
                   <h3 className="font-semibold text-slate-900 dark:text-white mb-3 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                    {[...Array(5)].map((_, starIndex) => (
+                      <svg key={starIndex} className={`w-3 h-3 inline-block mr-0.5 ${starIndex < 5 ? 'text-slate-900 dark:text-white' : 'text-slate-300 dark:text-slate-700'}`} fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.538 1.118l-2.8-2.034a1 1 0 00-1.176 0l-2.8 2.034c-.783.57-1.838-.197-1.538-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.381-1.81.588-1.81h3.462a1 1 0 00.95-.69l1.07-3.292z" />
+                      </svg>
+                    ))}
                     {blog.title}
                   </h3>
                   <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">

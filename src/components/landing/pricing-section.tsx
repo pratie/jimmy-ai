@@ -22,8 +22,8 @@ export default function PricingSection() {
         </div>
 
         <div className="max-w-lg mx-auto">
-          <Card className="w-full flex flex-col justify-between rounded-xl overflow-hidden transition-all duration-300 border glass-card-light dark:glass-card border-blue-500/30 shadow-lg shadow-blue-500/10 dark:shadow-[0_0_30px_rgba(59,130,246,0.1)] relative">
-            <div className="absolute top-0 right-0 bg-blue-600 text-white px-3 py-1 text-xs font-semibold rounded-bl-lg">
+          <Card className="w-full flex flex-col justify-between rounded-xl overflow-hidden transition-all duration-300 border glass-card-light dark:glass-card border-slate-200 dark:border-white/10 shadow-lg relative">
+            <div className="absolute top-0 right-0 bg-slate-900 text-white px-3 py-1 text-xs font-semibold rounded-bl-lg">
               Most Popular
             </div>
 
@@ -57,8 +57,8 @@ export default function PricingSection() {
                   'Unlimited Conversations'
                 ].map((feature) => (
                   <div key={feature} className="flex items-center gap-3">
-                    <div className="w-5 h-5 rounded-full bg-blue-100 dark:bg-blue-500/20 flex items-center justify-center flex-shrink-0">
-                      <Check className="w-3 h-3 text-blue-600 dark:text-blue-400" />
+                    <div className="w-5 h-5 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center flex-shrink-0">
+                      <Check className="w-3 h-3 text-slate-900 dark:text-white" />
                     </div>
                     <p className="text-slate-700 dark:text-slate-300 text-sm font-medium">{feature}</p>
                   </div>
@@ -67,7 +67,7 @@ export default function PricingSection() {
 
               <div className="w-full px-4 pb-4">
                 <a href="mailto:rishi@chatdock.io" className="block w-full">
-                  <Button className="w-full h-12 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-lg shadow-lg shadow-blue-500/25 transition-all">
+                  <Button className="w-full h-12 bg-slate-900 hover:bg-black text-white font-medium rounded-lg shadow-md transition-all">
                     Get Started Now
                   </Button>
                 </a>

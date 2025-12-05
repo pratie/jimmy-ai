@@ -9,29 +9,29 @@ const steps = [
         icon: User,
         title: 'Book a Strategy Call',
         description: 'Schedule a free 15-minute call. We analyze your website and sales goals.',
-        color: 'bg-blue-500',
-        gradient: 'from-blue-500 to-blue-600',
+        color: 'bg-slate-900',
+        gradient: 'from-slate-800 to-black',
     },
     {
         icon: Brain,
         title: 'We Build Your Agent',
         description: 'Our experts train your AI on your docs, FAQs, and brand voice. 100% Done-For-You.',
-        color: 'bg-indigo-500',
-        gradient: 'from-indigo-500 to-indigo-600',
+        color: 'bg-slate-900',
+        gradient: 'from-slate-800 to-black',
     },
     {
         icon: Zap,
         title: 'Review & Launch',
         description: 'We test it together, refine the answers, and deploy it to your site in one click.',
-        color: 'bg-purple-500',
-        gradient: 'from-purple-500 to-purple-600',
+        color: 'bg-slate-900',
+        gradient: 'from-slate-800 to-black',
     },
     {
         icon: BarChart3,
         title: 'We Optimize Monthly',
         description: 'We review your chat logs, tweak the AI, and send you weekly ROI reports.',
-        color: 'bg-green-500',
-        gradient: 'from-green-500 to-green-600',
+        color: 'bg-slate-900',
+        gradient: 'from-slate-800 to-black',
     },
 ]
 
@@ -100,7 +100,7 @@ export default function HowItWorks() {
                     {/* Central Beam (Desktop) */}
                     <div className="absolute left-1/2 top-0 bottom-0 w-1 bg-gray-200 dark:bg-gray-800 -translate-x-1/2 hidden md:block rounded-full overflow-hidden">
                         <div
-                            className="w-full bg-gradient-to-b from-blue-500 via-purple-500 to-amber-500 transition-all duration-1000 ease-out"
+                            className="w-full bg-slate-900 dark:bg-white transition-all duration-1000 ease-out"
                             style={{ height: `${((activeStep + 1) / steps.length) * 100}%` }}
                         />
                     </div>
@@ -108,7 +108,7 @@ export default function HowItWorks() {
                     {/* Mobile Beam (Left aligned) */}
                     <div className="absolute left-8 top-0 bottom-0 w-1 bg-gray-200 dark:bg-gray-800 md:hidden rounded-full overflow-hidden">
                         <div
-                            className="w-full bg-gradient-to-b from-blue-500 via-purple-500 to-amber-500 transition-all duration-1000 ease-out"
+                            className="w-full bg-slate-900 dark:bg-white transition-all duration-1000 ease-out"
                             style={{ height: `${((activeStep + 1) / steps.length) * 100}%` }}
                         />
                     </div>
@@ -171,12 +171,12 @@ export default function HowItWorks() {
                                     <div className="md:hidden pl-16 w-full">
                                         <div className={cn(
                                             "bg-white dark:bg-gray-900 p-6 rounded-2xl border-2 transition-all duration-500 shadow-sm",
-                                            isActive ? "border-brand-primary/10 shadow-md" : "border-transparent"
+                                            isActive ? "border-slate-200 dark:border-white/20 shadow-md" : "border-transparent"
                                         )}>
                                             <div className="flex items-center gap-3 mb-3">
                                                 <div className={cn(
                                                     "p-2 rounded-lg bg-gray-100 dark:bg-gray-800",
-                                                    isActive && `bg-gradient-to-br ${step.gradient} text-white`
+                                                    isActive && `bg-slate-900 dark:bg-white text-white dark:text-black`
                                                 )}>
                                                     <step.icon className="w-5 h-5" />
                                                 </div>

@@ -29,8 +29,10 @@ body::before {
 @layer base {
   :root {
     /* Linear-inspired Light Mode (Clean, High Contrast) */
-    --background: 0 0% 100%;           /* Pure White */
-    --foreground: 222 47% 11%;         /* Slate 900 */
+    --background: 0 0% 100%;
+    /* Pure White */
+    --foreground: 222 47% 11%;
+    /* Slate 900 */
 
     --card: 0 0% 100%;
     --card-foreground: 222 47% 11%;
@@ -38,7 +40,8 @@ body::before {
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
 
-    --primary: 222 47% 11%;            /* Slate 900 (Black-ish) */
+    --primary: 222 47% 11%;
+    /* Slate 900 (Black-ish) */
     --primary-foreground: 0 0% 100%;
 
     --secondary: 210 40% 96.1%;
@@ -65,10 +68,12 @@ body::before {
 
   .dark {
     /* Linear-inspired Dark Mode (Rich, Deep Slate) */
-    --background: 224 71% 4%;          /* #03060D (Deepest Slate) */
+    --background: 224 71% 4%;
+    /* #03060D (Deepest Slate) */
     --foreground: 210 40% 98%;
 
-    --card: 222 47% 6%;                /* Slightly lighter than bg */
+    --card: 222 47% 6%;
+    /* Slightly lighter than bg */
     --card-foreground: 210 40% 98%;
 
     --popover: 222 47% 6%;
@@ -89,7 +94,8 @@ body::before {
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 217.2 32.6% 12%;         /* Very subtle border */
+    --border: 217.2 32.6% 12%;
+    /* Very subtle border */
     --input: 217.2 32.6% 17.5%;
     --ring: 212.7 26.8% 83.9%;
 
@@ -99,6 +105,7 @@ body::before {
 }
 
 @layer utilities {
+
   /* Linear-style Grid Background */
   .bg-grid-white\/\[0\.02\] {
     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' width='32' height='32' fill='none' stroke='rgb(255 255 255 / 0.02)'%3e%3cpath d='M0 .5H31.5V32'/%3e%3c/svg%3e");
@@ -117,19 +124,67 @@ body::before {
     @apply bg-clip-text text-transparent bg-gradient-to-b from-slate-900 to-slate-600;
   }
 
-  /* Glassmorphism Card */
+  /* Premium Text Gradient (Subtle Slate/Gray) */
+  .text-gradient-premium {
+    @apply bg-clip-text text-transparent bg-gradient-to-b from-slate-900 to-slate-600 dark:from-white dark:to-slate-400;
+  }
+
+  /* Glassmorphism Card (Cleaner) */
   .glass-card {
-    @apply bg-white/5 border border-white/10 backdrop-blur-sm shadow-xl;
+    @apply bg-white/5 border border-white/10 backdrop-blur-sm;
   }
 
   .glass-card-light {
-    @apply bg-white/60 border border-slate-200/60 backdrop-blur-sm shadow-sm;
+    @apply bg-white border border-slate-200 shadow-sm;
   }
 
-  /* Glow Effects */
+  /* Enhanced Glow Effects (Subtle/Monochrome) */
   .glow-effect {
     @apply absolute -z-10 opacity-40 blur-[100px];
-    background: radial-gradient(circle, rgba(56, 189, 248, 0.3) 0%, rgba(0, 0, 0, 0) 70%);
+    background: radial-gradient(circle, rgba(148, 163, 184, 0.2) 0%, rgba(0, 0, 0, 0) 60%);
+  }
+
+  .glow-effect-strong {
+    @apply absolute -z-10 opacity-30 blur-[120px];
+    background: radial-gradient(circle at center, rgba(56, 189, 248, 0.15) 0%, rgba(255, 255, 255, 0) 70%);
+  }
+
+  @keyframes glow-pulse {
+
+    0%,
+    100% {
+      opacity: 0.3;
+    }
+
+    50% {
+      opacity: 0.4;
+    }
+  }
+
+  /* Premium Button Glow (Subtle White/Shadow) */
+  .btn-glow {
+    @apply relative overflow-hidden transition-all duration-300;
+  }
+
+  .btn-glow:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transform: translateY(-1px);
+  }
+
+  /* Animated Border Gradient (Removed/Simplified) */
+  .border-gradient {
+    border: 1px solid var(--border);
+  }
+
+  /* Card Hover Glow (Subtle Border) */
+  .card-hover-glow {
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+  }
+
+  .card-hover-glow:hover {
+    border-color: rgba(148, 163, 184, 0.4);
+    background-color: rgba(255, 255, 255, 0.02);
   }
 
   .shadow-shadow {
@@ -173,15 +228,24 @@ body::before {
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
   }
-  main, #__next, #root {
+
+  main,
+  #__next,
+  #root {
     position: relative;
     z-index: 1;
   }
 
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     @apply font-semibold text-slate-900 dark:text-white;
   }
 
@@ -197,7 +261,9 @@ body::before {
     @apply text-2xl font-semibold;
   }
 
-  button, a.btn, .btn {
+  button,
+  a.btn,
+  .btn {
     @apply font-semibold;
   }
 }
@@ -214,22 +280,27 @@ body::before {
 }
 
 .chat-bubble {
-  background: #f3f4f6; /* gray-100 */
+  background: #f3f4f6;
+  /* gray-100 */
   padding: 10px 14px;
   border-radius: 12px;
   border-bottom-left-radius: 6px;
   display: inline-block;
   box-shadow: none;
-  border: 1px solid #e5e7eb; /* gray-200 */
+  border: 1px solid #e5e7eb;
+  /* gray-200 */
 }
+
 .typing {
   align-items: center;
   display: flex;
   height: 17px;
 }
+
 .typing .dot {
   animation: mercuryTypingAnimation 1.8s infinite ease-in-out;
-  background-color: #9ca3af; /* slate-400 */
+  background-color: #9ca3af;
+  /* slate-400 */
   border-radius: 50%;
   height: 6px;
   margin-right: 4px;
@@ -237,15 +308,19 @@ body::before {
   width: 6px;
   display: inline-block;
 }
+
 .typing .dot:nth-child(1) {
   animation-delay: 200ms;
 }
+
 .typing .dot:nth-child(2) {
   animation-delay: 300ms;
 }
+
 .typing .dot:nth-child(3) {
   animation-delay: 400ms;
 }
+
 .typing .dot:last-child {
   margin-right: 0;
 }
@@ -253,15 +328,20 @@ body::before {
 @keyframes mercuryTypingAnimation {
   0% {
     transform: translateY(0px);
-    background-color: #9ca3af; /* slate-400 */
+    background-color: #9ca3af;
+    /* slate-400 */
   }
+
   28% {
     transform: translateY(-6px);
-    background-color: #cbd5e1; /* slate-300 */
+    background-color: #cbd5e1;
+    /* slate-300 */
   }
+
   44% {
     transform: translateY(0px);
-    background-color: #94a3b8; /* slate-400 slightly darker */
+    background-color: #94a3b8;
+    /* slate-400 slightly darker */
   }
 }
 

@@ -139,13 +139,13 @@ export default function AnimatedChatHero({
       {/* Header */}
       <div className="relative overflow-hidden bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 dark:from-black dark:via-gray-950 dark:to-black rounded-t-2xl border-b border-gray-700/50">
         <div className="h-[60px] w-full flex items-center gap-3 px-5">
-          <div className="h-10 w-10 rounded-full bg-main/20 backdrop-blur-sm flex items-center justify-center ring-2 ring-main/40 overflow-hidden">
-            <Image src="/images/logo.svg" alt="ChatDock AI" width={24} height={24} className="opacity-95" />
+          <div className="h-10 w-10 rounded-full bg-slate-800 backdrop-blur-sm flex items-center justify-center ring-2 ring-slate-700 overflow-hidden">
+            <Image src="/images/logo.svg" alt="ChatDock AI" width={24} height={24} className="opacity-95 grayscale" />
           </div>
           <div>
             <div className="text-white font-semibold text-[15px] leading-tight">{title}</div>
             <div className="text-[11px] text-gray-400 flex items-center gap-1.5">
-              <span className="inline-flex h-1.5 w-1.5 rounded-full bg-green-400 shadow-[0_0_4px_rgba(74,222,128,0.5)] animate-pulse" />
+              <span className="inline-flex h-1.5 w-1.5 rounded-full bg-slate-400 animate-pulse" />
               <span>Online now</span>
             </div>
           </div>
@@ -219,13 +219,13 @@ export default function AnimatedChatHero({
 function Avatar({ who }: { who: Role }) {
   if (who === 'assistant') {
     return (
-      <div className="h-8 w-8 flex-shrink-0 rounded-full bg-main/10 shadow-sm grid place-items-center ring-1 ring-main/30 overflow-hidden">
+      <div className="h-8 w-8 flex-shrink-0 rounded-full bg-slate-100 dark:bg-slate-800 shadow-sm grid place-items-center ring-1 ring-slate-200 dark:ring-slate-700 overflow-hidden">
         <Image
           src="/images/logo.svg"
           alt="ChatDock AI"
           width={20}
           height={20}
-          className="opacity-90"
+          className="opacity-90 grayscale"
         />
       </div>
     )

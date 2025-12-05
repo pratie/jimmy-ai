@@ -54,7 +54,7 @@ export function Footer() {
               </p>
               <a
                 href="mailto:rishi@chatdock.io"
-                className="text-sm font-bold text-slate-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                className="text-sm font-bold text-slate-900 dark:text-white hover:underline transition-all"
               >
                 Reach out at rishi@chatdock.io
               </a>
