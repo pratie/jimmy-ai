@@ -122,7 +122,7 @@ export default async function Home() {
                   Embed it. Share it. Integrate it.
                 </h3>
                 <p className="text-lg text-slate-600 dark:text-slate-400 leading-relaxed">
-                  Don't just hide it in a widget. Use your agent as a standalone web app, or connect it directly to your team's workflow.
+                  Don&apos;t just hide it in a widget. Use your agent as a standalone web app, or connect it directly to your team&apos;s workflow.
                 </p>
               </div>
 
