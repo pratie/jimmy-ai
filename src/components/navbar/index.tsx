@@ -8,6 +8,11 @@ import Link from 'next/link'
 
 function NavBar() {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false)
+  const [mounted, setMounted] = React.useState(false)
+
+  React.useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const { setTheme, theme } = useTheme()
 
@@ -59,11 +64,11 @@ function NavBar() {
               className="p-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors rounded-full hover:bg-slate-100 dark:hover:bg-white/5"
               aria-label="Toggle theme"
             >
-              {theme === 'dark' ? (
+              {mounted && (theme === 'dark' ? (
                 <Sun className="w-5 h-5" />
               ) : (
                 <Moon className="w-5 h-5" />
-              )}
+              ))}
             </button>
             <Link
               href="/auth/sign-in"
@@ -85,11 +90,11 @@ function NavBar() {
               onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
               className="p-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
             >
-              {theme === 'dark' ? (
+              {mounted && (theme === 'dark' ? (
                 <Sun className="w-5 h-5" />
               ) : (
                 <Moon className="w-5 h-5" />
-              )}
+              ))}
             </button>
             <button
               className="p-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"

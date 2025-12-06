@@ -14,6 +14,7 @@ import AnimatedChatHero from '@/components/landing/animated-chat-hero'
 import { OpenAIIcon, AnthropicIcon, GoogleIcon } from '@/components/icons/provider-icons'
 import Marquee from '@/components/ui/marquee'
 import AnimatedAgentType from '@/components/landing/animated-agent-type'
+import WhatsAppPreview from '@/components/landing/whatsapp-preview'
 
 export const metadata: Metadata = {
   title: 'ChatDock AI - Your 24/7 AI Agent for Sales, Support & Lead Gen',
@@ -91,13 +92,41 @@ export default async function Home() {
           </div>
 
           {/* Chat Demo - Floating Below (Optional, usually reference doesn't have it immediately, but good for context) */}
-          <div className="mt-20 relative w-full max-w-[500px] mx-auto lg:mx-0 lg:ml-auto perspective-1000">
-            <div className="relative transform transition-transform hover:scale-[1.02] duration-500">
-              <div className="absolute -inset-1 bg-gradient-to-r from-slate-200 to-gray-200 dark:from-slate-800 dark:to-gray-800 rounded-2xl blur opacity-20 animate-pulse"></div>
-              <div className="relative bg-slate-950 rounded-2xl border border-white/10 shadow-2xl overflow-hidden">
-                <AnimatedChatHero density="cozy" title="ChatDock AI Assistant" />
+          {/* Omnichannel Previews - Side by Side leveraging space */}
+          <div className="mt-24 grid md:grid-cols-2 gap-12 items-end max-w-6xl mx-auto perspective-1000">
+
+            {/* Left: Web Chat (Desktop View) */}
+            <div className="relative group">
+              <div className="absolute -top-12 left-0 text-slate-500 dark:text-slate-400 text-sm font-medium uppercase tracking-wider mb-4 flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-slate-400 animate-pulse" />
+                Website Widget
+              </div>
+              <div className="relative transform transition-transform group-hover:scale-[1.01] duration-500 z-10">
+                <div className="absolute -inset-1 bg-gradient-to-r from-slate-200 to-gray-200 dark:from-slate-800 dark:to-gray-800 rounded-[2.5rem] blur opacity-30 animate-pulse"></div>
+                <AnimatedChatHero
+                  density="cozy"
+                  title="ChatDock AI Assistant"
+                  className="h-[500px] shadow-2xl border border-slate-200 dark:border-white/10 rounded-[2rem]"
+                />
               </div>
             </div>
+
+            {/* Right: WhatsApp (Mobile View) - Fits the 'space left' */}
+            <div className="relative group hidden md:block">
+              <div className="absolute -top-12 left-0 text-slate-500 dark:text-slate-400 text-sm font-medium uppercase tracking-wider mb-4 flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-slate-400 animate-pulse" />
+                WhatsApp Integration
+              </div>
+              <div className="relative transform transition-transform group-hover:-translate-y-2 duration-500 z-20">
+                <WhatsAppPreview />
+              </div>
+              {/* Decorative floating elements for Linear feel */}
+              <div className="absolute top-20 -right-12 glass-card-light dark:glass-card p-4 rounded-xl flex items-center gap-3 shadow-lg transform rotate-3 hover:rotate-0 transition-transform duration-500">
+                <div className="w-8 h-8 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold text-xs">AI</div>
+                <div className="text-xs font-medium text-slate-600 dark:text-slate-300">Syncing...</div>
+              </div>
+            </div>
+
           </div>
         </div>
       </section>
