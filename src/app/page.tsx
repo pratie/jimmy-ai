@@ -14,7 +14,7 @@ import AnimatedChatHero from '@/components/landing/animated-chat-hero'
 import { OpenAIIcon, AnthropicIcon, GoogleIcon } from '@/components/icons/provider-icons'
 import Marquee from '@/components/ui/marquee'
 import AnimatedAgentType from '@/components/landing/animated-agent-type'
-import AnimatedAgentType from '@/components/landing/animated-agent-type'
+
 
 export const metadata: Metadata = {
   title: 'ChatDock AI - Your 24/7 AI Agent for Sales, Support & Lead Gen',
