@@ -14,7 +14,7 @@ import AnimatedChatHero from '@/components/landing/animated-chat-hero'
 import { OpenAIIcon, AnthropicIcon, GoogleIcon } from '@/components/icons/provider-icons'
 import Marquee from '@/components/ui/marquee'
 import AnimatedAgentType from '@/components/landing/animated-agent-type'
-import WhatsAppPreview from '@/components/landing/whatsapp-preview'
+import AnimatedAgentType from '@/components/landing/animated-agent-type'
 
 export const metadata: Metadata = {
   title: 'ChatDock AI - Your 24/7 AI Agent for Sales, Support & Lead Gen',
@@ -111,19 +111,38 @@ export default async function Home() {
               </div>
             </div>
 
-            {/* Right: WhatsApp (Mobile View) - Fits the 'space left' */}
-            <div className="relative group hidden md:block">
-              <div className="absolute -top-12 left-0 text-slate-500 dark:text-slate-400 text-sm font-medium uppercase tracking-wider mb-4 flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-slate-400 animate-pulse" />
-                WhatsApp Integration
+            {/* Right: Integration Text Options */}
+            <div className="flex flex-col justify-center h-full pb-12 pl-0 md:pl-12">
+              <div className="mb-8">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-6">
+                  <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
+                  Flexible Deployment
+                </div>
+                <h3 className="text-3xl font-bold text-slate-900 dark:text-white mb-4">
+                  Embed it. Share it. Integrate it.
+                </h3>
+                <p className="text-lg text-slate-600 dark:text-slate-400 leading-relaxed">
+                  Don't just hide it in a widget. Use your agent as a standalone web app, or connect it directly to your team's workflow.
+                </p>
               </div>
-              <div className="relative transform transition-transform group-hover:-translate-y-2 duration-500 z-20">
-                <WhatsAppPreview />
-              </div>
-              {/* Decorative floating elements for Linear feel */}
-              <div className="absolute top-20 -right-12 glass-card-light dark:glass-card p-4 rounded-xl flex items-center gap-3 shadow-lg transform rotate-3 hover:rotate-0 transition-transform duration-500">
-                <div className="w-8 h-8 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold text-xs">AI</div>
-                <div className="text-xs font-medium text-slate-600 dark:text-slate-300">Syncing...</div>
+
+              <div className="grid grid-cols-1 gap-3">
+                {[
+                  { label: 'Website Widget', icon: '💻' },
+                  { label: 'Full-Screen Web App', icon: '🔗' },
+                  { label: 'Slack Integration', icon: '💬' },
+                  { label: 'WhatsApp Integration', icon: '📱' }
+                ].map((item) => (
+                  <div key={item.label} className="group flex items-center gap-4 p-4 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-white/5 hover:border-slate-300 dark:hover:border-white/20 transition-all duration-300">
+                    <div className="w-10 h-10 rounded-lg bg-white dark:bg-slate-800 shadow-sm flex items-center justify-center text-lg">
+                      {item.icon}
+                    </div>
+                    <span className="font-semibold text-slate-700 dark:text-slate-200">{item.label}</span>
+                    <div className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity text-slate-400">
+                      <ChevronRight className="w-4 h-4" />
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
 
@@ -322,7 +341,8 @@ export default async function Home() {
             </p>
             <div className="mt-8 flex justify-center opacity-80 hover:opacity-100 transition-opacity">
               <a href="https://yourwebsitescore.com/certified-websites/chatdock.io" target="_blank" rel="noopener">
-                <img src="https://yourwebsitescore.com/api/badge/chatdock.io" alt="" style={{ height: '54px', width: 'auto' }} />
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="https://yourwebsitescore.com/api/badge/chatdock.io" alt="Website Score" style={{ height: '54px', width: 'auto' }} />
               </a>
             </div>
           </div>
