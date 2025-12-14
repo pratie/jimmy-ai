@@ -66,7 +66,7 @@ export default function PricingSection() {
               </div>
 
               <div className="w-full px-4 pb-4">
-                <a href="mailto:rishi@chatdock.io" className="block w-full">
+                <a href="https://cal.com/prathap-reddy-caxwn4/15min" target="_blank" rel="noopener noreferrer" className="block w-full">
                   <Button className="w-full h-12 bg-slate-900 hover:bg-black text-white font-medium rounded-lg shadow-md transition-all">
                     Get Started Now
                   </Button>

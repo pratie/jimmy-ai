@@ -74,7 +74,7 @@ export default async function Home() {
 
           {/* Buttons - Centered Pill Style */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <a href="mailto:rishi@chatdock.io">
+            <a href="https://cal.com/prathap-reddy-caxwn4/15min" target="_blank" rel="noopener noreferrer">
               <Button
                 className="h-14 px-8 bg-slate-900 text-white hover:bg-black dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200 text-lg font-medium rounded-full transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5"
               >
@@ -329,7 +329,7 @@ export default async function Home() {
             <p className="text-slate-600 dark:text-slate-400 text-lg md:text-xl mb-10 max-w-2xl mx-auto">
               Let AI handle the routine. You focus on growing your business.
             </p>
-            <a href="mailto:rishi@chatdock.io">
+            <a href="https://cal.com/prathap-reddy-caxwn4/15min" target="_blank" rel="noopener noreferrer">
               <Button
                 className="h-14 px-12 bg-slate-900 text-white hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200 text-lg font-medium rounded-full shadow-sm hover:shadow-md transition-all"
               >

@@ -53,10 +53,12 @@ export function Footer() {
                 Need custom solutions or setup help?
               </p>
               <a
-                href="mailto:rishi@chatdock.io"
+                href="https://cal.com/prathap-reddy-caxwn4/15min"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="text-sm font-bold text-slate-900 dark:text-white hover:underline transition-all"
               >
-                Reach out at rishi@chatdock.io
+                Book a demo call
               </a>
             </div>
           </div>
