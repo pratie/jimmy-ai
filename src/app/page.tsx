@@ -339,12 +339,7 @@ export default async function Home() {
             <p className="text-slate-500 text-sm mt-8 font-medium">
               ✓ Expert setup included • ✓ Results in 24 hours • ✓ No risk
             </p>
-            <div className="mt-8 flex justify-center opacity-80 hover:opacity-100 transition-opacity">
-              <a href="https://yourwebsitescore.com/certified-websites/chatdock.io" target="_blank" rel="noopener">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="https://yourwebsitescore.com/api/badge/chatdock.io" alt="Website Score" style={{ height: '54px', width: 'auto' }} />
-              </a>
-            </div>
+
           </div>
         </div>
       </section>
