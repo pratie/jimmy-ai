@@ -122,7 +122,7 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
       <div
         className={cn(
           'relative flex flex-col overflow-hidden font-sans',
-          responsive ? 'h-full w-full max-w-none' : 'h-[520px] w-[360px] sm:h-[600px] sm:w-[380px] md:h-[620px] md:w-[420px]'
+          responsive ? 'h-full w-full max-w-none' : 'h-[580px] w-[380px] sm:h-[680px] sm:w-[420px] md:h-[720px] md:w-[440px]'
         )}
         style={{
           backgroundColor: t.surface,
@@ -299,9 +299,9 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center justify-center gap-1.5 text-[10px] font-medium text-slate-400 hover:text-slate-600 transition-colors"
-              aria-label="Powered by ChatDock – Get your AI assistant"
+              aria-label="Powered by chatdock.io – Get your AI assistant"
             >
-              <span>Powered by ChatDock</span>
+              <span>Powered by chatdock.io</span>
             </a>
           </div>
         )}

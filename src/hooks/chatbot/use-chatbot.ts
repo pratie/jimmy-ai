@@ -51,25 +51,25 @@ export const useChatBot = (options?: UseChatBotOptions) => {
   })
   const [currentBot, setCurrentBot] = useState<
     | {
-        name: string
+      name: string
+      icon: string | null
+      showBranding?: boolean
+      chatBot: {
+        id: string
         icon: string | null
-        showBranding?: boolean
-        chatBot: {
-          id: string
-          icon: string | null
-          welcomeMessage: string | null
-          background: string | null
-          textColor: string | null
-          theme?: any | null
-          helpdesk: boolean
-        } | null
-        helpdesk: {
-          id: string
-          question: string
-          answer: string
-          domainId: string | null
-        }[]
-      }
+        welcomeMessage: string | null
+        background: string | null
+        textColor: string | null
+        theme?: any | null
+        helpdesk: boolean
+      } | null
+      helpdesk: {
+        id: string
+        question: string
+        answer: string
+        domainId: string | null
+      }[]
+    }
     | undefined
   >()
   const messageWindowRef = useRef<HTMLDivElement | null>(null)
@@ -102,8 +102,8 @@ export const useChatBot = (options?: UseChatBotOptions) => {
     if (!disablePostMessage) {
       postToParent(
         JSON.stringify({
-          width: botOpened ? 550 : 80,
-          height: botOpened ? 800 : 80,
+          width: botOpened ? 600 : 80,
+          height: botOpened ? 850 : 80,
         })
       )
     }
