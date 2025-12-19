@@ -80,7 +80,7 @@ export const onGetCurrentChatBot = async (id: string) => {
       // Determine if we should show attribution badge
       // Default to true if no subscription found (treat as FREE)
       const plan = chatbot.User?.subscription?.plan || 'FREE'
-      const showBranding = plan === 'FREE'
+      const showBranding = true // Always show branding as requested
 
       // Avoid leaking nested User object to client; return only needed fields + flag
       const { User, ...rest } = chatbot as any
@@ -361,15 +361,15 @@ export const onAiChatBotAssistant = async (
                   },
                   chatRoom: anonymousChatRoomId
                     ? {
-                        // Link existing anonymous chat room to customer
-                        connect: { id: anonymousChatRoomId },
-                      }
+                      // Link existing anonymous chat room to customer
+                      connect: { id: anonymousChatRoomId },
+                    }
                     : {
-                        // Create new chat room if no anonymous history
-                        create: {
-                          domainId: id,
-                        },
+                      // Create new chat room if no anonymous history
+                      create: {
+                        domainId: id,
                       },
+                    },
                 },
               },
             },
@@ -389,9 +389,8 @@ export const onAiChatBotAssistant = async (
             devLog('[Bot] New customer created, linked anonymous history')
             const response = {
               role: 'assistant',
-              content: `Welcome aboard ${
-                customerEmail.split('@')[0]
-              }! I'm glad to connect with you. Is there anything you need help with?`,
+              content: `Welcome aboard ${customerEmail.split('@')[0]
+                }! I'm glad to connect with you. Is there anything you need help with?`,
             }
             return { response }
           }
@@ -402,7 +401,7 @@ export const onAiChatBotAssistant = async (
             message,
             author
           )
-          
+
           onRealTimeChat(
             checkCustomer.customer[0].chatRoom[0].id,
             message,
