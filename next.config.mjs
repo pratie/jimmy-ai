@@ -114,8 +114,29 @@ const nextConfig = {
   },
   async headers() {
     return [
+      // Allow /chatbot to be embedded in iframes on any site
       {
-        source: '/(.*)',
+        source: '/chatbot/:path*',
+        headers: [
+          {
+            key: 'Content-Security-Policy',
+            value: "frame-ancestors *",
+          },
+          // Explicitly remove X-Frame-Options by not including it
+        ],
+      },
+      {
+        source: '/chatbot',
+        headers: [
+          {
+            key: 'Content-Security-Policy',
+            value: "frame-ancestors *",
+          },
+        ],
+      },
+      // Apply security headers to all other routes
+      {
+        source: '/((?!chatbot).*)',
         headers: securityHeaders,
       },
     ]
