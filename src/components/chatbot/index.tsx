@@ -58,6 +58,7 @@ const AiChatBot = (props: Props) => {
               onResponding={onAiTyping}
               botIcon={currentBot?.chatBot?.icon || currentBot?.icon || null}
               showBranding={Boolean(currentBot?.showBranding)}
+              responsive={typeof window !== 'undefined' && window.innerWidth < 640}
               onClose={onOpenChatBot}
             />
           </Loader>

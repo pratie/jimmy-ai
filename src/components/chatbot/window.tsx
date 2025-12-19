@@ -127,9 +127,9 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
         style={{
           backgroundColor: t.surface,
           color: t.text,
-          borderRadius: t.radius,
-          boxShadow: '0 12px 40px -10px rgba(0,0,0,0.15)', // Sleek modern shadow
-          border: '1px solid rgba(0,0,0,0.08)'
+          borderRadius: responsive ? 0 : t.radius,
+          boxShadow: responsive ? 'none' : '0 12px 40px -10px rgba(0,0,0,0.15)',
+          border: responsive ? 'none' : '1px solid rgba(0,0,0,0.08)'
         }}
       >
         {/* Fixed Header */}
