@@ -102,8 +102,8 @@ export const useChatBot = (options?: UseChatBotOptions) => {
     if (!disablePostMessage) {
       postToParent(
         JSON.stringify({
-          width: botOpened ? 600 : 80,
-          height: botOpened ? 850 : 80,
+          width: botOpened ? 400 : 80,
+          height: botOpened ? 700 : 80,
         })
       )
     }

@@ -121,8 +121,7 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
     return (
       <div
         className={cn(
-          'relative flex flex-col overflow-hidden font-sans',
-          responsive ? 'h-full w-full max-w-none' : 'h-[580px] w-[380px] sm:h-[680px] sm:w-[420px] md:h-[720px] md:w-[440px]'
+          'relative flex flex-col overflow-hidden font-sans h-full w-full'
         )}
         style={{
           backgroundColor: t.surface,
@@ -133,9 +132,9 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
         }}
       >
         {/* Fixed Header */}
-        <div className="flex justify-between items-center px-4 py-3 border-b border-slate-100 shrink-0" style={{ backgroundColor: t.headerBg, color: t.headerText }}>
-          <div className="flex gap-3 items-center">
-            <Avatar className="w-8 h-8 ring-2 ring-slate-100">
+        <div className="flex justify-between items-center px-6 py-5 border-b border-slate-100 shrink-0" style={{ backgroundColor: t.headerBg, color: t.headerText }}>
+          <div className="flex gap-4 items-center">
+            <Avatar className="w-12 h-12 ring-4 ring-slate-50">
               {botIcon && !avatarError ? (
                 <AvatarImage
                   src={getKieImageUrl(botIcon)}
@@ -143,17 +142,17 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
                   onError={() => setAvatarError(true)}
                 />
               ) : (
-                <AvatarFallback className="bg-slate-900 text-white font-bold text-xs">
+                <AvatarFallback className="bg-slate-900 text-white font-bold text-sm">
                   AI
                 </AvatarFallback>
               )}
             </Avatar>
             <div className="flex flex-col">
-              <h3 className="text-sm font-semibold leading-none mb-1">
+              <h3 className="text-base font-bold leading-tight mb-0.5">
                 {domainName || 'Assistant'}
               </h3>
-              <p className="text-[11px] text-slate-500 flex items-center gap-1.5 font-medium">
-                <span className="inline-block w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_4px_rgba(34,197,94,0.4)]" aria-hidden="true" />
+              <p className="text-[12px] text-slate-500 flex items-center gap-1.5 font-semibold">
+                <span className="inline-block w-2 h-2 rounded-full bg-green-500 shadow-[0_0_6px_rgba(34,197,94,0.4)]" aria-hidden="true" />
                 Online
               </p>
               {realtimeMode?.mode && (
@@ -298,7 +297,7 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
               href="https://chatdock.io/?utm_source=widget&utm_medium=free_badge&utm_campaign=virality"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-1.5 text-[10px] font-medium text-slate-400 hover:text-slate-600 transition-colors"
+              className="inline-flex items-center justify-center gap-1.5 text-[11px] font-bold text-slate-400 hover:text-slate-600 transition-colors uppercase tracking-wider"
               aria-label="Powered by chatdock.io – Get your AI assistant"
             >
               <span>Powered by chatdock.io</span>
