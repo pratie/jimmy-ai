@@ -37,7 +37,7 @@ const AiChatBot = (props: Props) => {
   return (
     <div className="fixed inset-0 flex flex-col justify-end items-end p-0 pointer-events-none bg-transparent">
       {botOpened && (
-        <div className="relative pointer-events-auto bg-transparent">
+        <div className="absolute inset-0 pointer-events-auto bg-transparent">
           {/* Defer loading spinner to the chat window area */}
           <Loader loading={loading}>
             <BotWindow
