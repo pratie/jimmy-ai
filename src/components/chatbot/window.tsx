@@ -124,11 +124,11 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
           'relative flex flex-col overflow-hidden font-sans h-full w-full'
         )}
         style={{
-          backgroundColor: t.surface,
+          backgroundColor: t.surface || '#FFFFFF',
           color: t.text,
           borderRadius: responsive ? 0 : t.radius,
-          boxShadow: responsive ? 'none' : '0 12px 40px -10px rgba(0,0,0,0.15)',
-          border: responsive ? 'none' : '1px solid rgba(0,0,0,0.08)'
+          boxShadow: responsive ? 'none' : '0 20px 50px -12px rgba(0,0,0,0.2)',
+          border: responsive ? 'none' : '1px solid rgba(0,0,0,0.15)'
         }}
       >
         {/* Fixed Header */}
