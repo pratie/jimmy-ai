@@ -260,7 +260,7 @@ const SettingsForm = ({ id, name, chatBot, plan, trainingSourcesUsed, knowledgeB
             <div className="flex items-center justify-between border-b border-sauce-grid pb-4">
               <div className="space-y-1">
                 <h2 className="font-bold text-xl text-sauce-black tracking-tight">Appearance</h2>
-                <p className="text-xs text-sauce-gray/60 font-medium">Customize your agent's visual identity</p>
+                <p className="text-xs text-sauce-gray/60 font-medium">Customize your agent&apos;s visual identity</p>
               </div>
               <div className="flex gap-1.5 bg-sauce-purple/10 rounded-full px-3 py-1 text-[10px] items-center font-bold text-sauce-purple uppercase tracking-wider">
                 <PremiumBadge />

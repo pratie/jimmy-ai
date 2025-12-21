@@ -300,7 +300,7 @@ const KnowledgeBaseViewerV2 = ({
                     </TooltipTrigger>
                     <TooltipContent>
                       <p className="max-w-xs text-xs">
-                        Total size of all extracted knowledge currently stored in your agent's brain
+                        Total size of all extracted knowledge currently stored in your agent&apos;s brain
                       </p>
                     </TooltipContent>
                   </Tooltip>
