@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
+import { cn } from '@/lib/utils'
 import ReactMarkdown from 'react-markdown'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -243,77 +244,99 @@ const KnowledgeBaseViewerV2 = ({
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Plan Limits Display */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-main rounded-lg text-white">
-            <div className="space-y-2">
+          {/* Plan Limits Display - Reimagined for High-Ticket */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 bg-gradient-to-br from-sauce-purple to-sauce-purple-dark rounded-2xl text-white shadow-shadow relative overflow-hidden group">
+            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+              <Brain className="w-24 h-24" />
+            </div>
+
+            <div className="relative z-10 space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-white/70">Agent Knowledge Base</span>
+                <Badge className="bg-white/20 hover:bg-white/30 text-white border-0 text-[10px]">Active</Badge>
+              </div>
               <div className="flex items-center justify-between text-sm">
-                <span className="text-blue-100">Training Sources</span>
+                <span className="font-medium">Training Sources</span>
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger>
-                      <HelpCircle className="w-4 h-4 text-blue-200" />
+                      <HelpCircle className="w-3.5 h-3.5 text-white/50" />
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p className="max-w-xs">
-                        Number of pages, PDFs, or text files you can use to train your chatbot
+                      <p className="max-w-xs text-xs">
+                        Number of pages, PDFs, or text files you can use to train your autonomous agent
                       </p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
               </div>
               <div className="flex items-baseline gap-2">
-                <span className="text-2xl font-bold text-white">
+                <span className="text-3xl font-bold font-heading">
                   {trainingSourcesUsed}
                 </span>
-                <span className="text-blue-100">
+                <span className="text-white/50 text-sm">
                   / {trainingSourcesLimit === Infinity ? '∞' : trainingSourcesLimit}
                 </span>
               </div>
-              <Progress value={sourcesPercent} className="h-2 bg-black/20" indicatorClassName="bg-white" />
+              <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-white transition-all duration-1000 ease-out"
+                  style={{ width: `${sourcesPercent}%` }}
+                />
+              </div>
             </div>
 
-            <div className="space-y-2">
+            <div className="relative z-10 space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-white/70">Memory Capacity</span>
+                <Eye className="w-3.5 h-3.5 text-white/30" />
+              </div>
               <div className="flex items-center justify-between text-sm">
-                <span className="text-blue-100">Knowledge Base Size</span>
+                <span className="font-medium">Digital Brain Size</span>
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger>
-                      <HelpCircle className="w-4 h-4 text-blue-200" />
+                      <HelpCircle className="w-3.5 h-3.5 text-white/50" />
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p className="max-w-xs">
-                        Total size of all content stored for your chatbot
+                      <p className="max-w-xs text-xs">
+                        Total size of all extracted knowledge currently stored in your agent's brain
                       </p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
               </div>
               <div className="flex items-baseline gap-2">
-                <span className="text-2xl font-bold text-white">
+                <span className="text-3xl font-bold font-heading">
                   {kbSizeMB.toFixed(2)}
                 </span>
-                <span className="text-blue-100">
+                <span className="text-white/50 text-sm">
                   / {kbSizeLimit} MB
                 </span>
               </div>
-              <Progress value={kbPercent} className="h-2 bg-black/20" indicatorClassName="bg-white" />
+              <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-white transition-all duration-1000 ease-out"
+                  style={{ width: `${kbPercent}%` }}
+                />
+              </div>
             </div>
           </div>
 
           {/* Tab-based Training Methods */}
           <Tabs defaultValue="websites" className="w-full">
-            <TabsList className="grid w-full grid-cols-3 h-auto">
-              <TabsTrigger value="websites" className="flex items-center gap-1 md:gap-2 text-xs md:text-sm px-2 py-2">
-                <Link2 className="w-3 h-3 md:w-4 md:h-4" />
+            <TabsList className="inline-flex w-auto self-start gap-1 rounded-xl bg-sauce-grid/50 p-1 border border-sauce-grid/20 h-auto">
+              <TabsTrigger value="websites" className="rounded-lg px-4 py-2 text-xs font-bold transition-all data-[state=active]:bg-white data-[state=active]:text-sauce-purple data-[state=active]:shadow-sm flex items-center gap-2">
+                <Globe className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">Websites</span>
                 <span className="sm:hidden">Web</span>
               </TabsTrigger>
-              <TabsTrigger value="text" className="flex items-center gap-1 md:gap-2 text-xs md:text-sm px-2 py-2">
-                <FileText className="w-3 h-3 md:w-4 md:h-4" />
+              <TabsTrigger value="text" className="rounded-lg px-4 py-2 text-xs font-bold transition-all data-[state=active]:bg-white data-[state=active]:text-sauce-purple data-[state=active]:shadow-sm flex items-center gap-2">
+                <FileText className="w-3.5 h-3.5" />
                 Text
               </TabsTrigger>
-              <TabsTrigger value="file" className="flex items-center gap-1 md:gap-2 text-xs md:text-sm px-2 py-2">
-                <FileUp className="w-3 h-3 md:w-4 md:h-4" />
+              <TabsTrigger value="file" className="rounded-lg px-4 py-2 text-xs font-bold transition-all data-[state=active]:bg-white data-[state=active]:text-sauce-purple data-[state=active]:shadow-sm flex items-center gap-2">
+                <FileUp className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">File Upload</span>
                 <span className="sm:hidden">File</span>
               </TabsTrigger>
@@ -549,6 +572,10 @@ const KnowledgeBaseViewerV2 = ({
   // View mode with knowledge base
   const preview = knowledgeBase.slice(0, 1000)
   const displayText = showFull ? knowledgeBase : preview
+  const sourcesPercent = trainingSourcesLimit && trainingSourcesLimit !== Infinity
+    ? Math.min(100, (trainingSourcesUsed / trainingSourcesLimit) * 100)
+    : 0
+  const kbPercent = kbSizeLimit ? Math.min(100, (kbSizeMB / kbSizeLimit) * 100) : 0
 
   return (
     <Card className="w-full">
@@ -589,42 +616,56 @@ const KnowledgeBaseViewerV2 = ({
       </CardHeader>
 
       <CardContent className="space-y-4">
-        {/* Usage Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-muted/30 rounded-lg">
-          <div className="space-y-1">
+        {/* Usage Stats (Glassmorphism look) */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 rounded-xl border border-sauce-grid/20 bg-sauce-grid/10">
+          <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">Sources Used</span>
-              <Badge variant={sourcesPercent > 80 ? 'destructive' : 'secondary'}>
-                {trainingSourcesUsed} / {trainingSourcesLimit === Infinity ? '∞' : trainingSourcesLimit}
-              </Badge>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-sauce-gray/60">Sources Used</span>
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs font-bold text-sauce-black">{trainingSourcesUsed}</span>
+                <span className="text-[10px] font-medium text-sauce-gray/40">/ {trainingSourcesLimit === Infinity ? '∞' : trainingSourcesLimit}</span>
+              </div>
             </div>
-            {trainingSourcesLimit !== Infinity && <Progress value={sourcesPercent} className="h-1.5" />}
+            {trainingSourcesLimit !== Infinity && (
+              <div className="h-1 bg-sauce-grid rounded-full overflow-hidden">
+                <div
+                  className={cn("h-full transition-all duration-500", sourcesPercent > 80 ? 'bg-accent-red' : 'bg-sauce-purple')}
+                  style={{ width: `${sourcesPercent}%` }}
+                />
+              </div>
+            )}
           </div>
-          <div className="space-y-1">
+          <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">Storage Used</span>
-              <Badge variant={kbPercent > 80 ? 'destructive' : 'secondary'}>
-                {kbSizeMB.toFixed(2)} / {kbSizeLimit} MB
-              </Badge>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-sauce-gray/60">Total Storage</span>
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs font-bold text-sauce-black">{kbSizeMB.toFixed(2)}</span>
+                <span className="text-[10px] font-medium text-sauce-gray/40">/ {kbSizeLimit} MB</span>
+              </div>
             </div>
-            <Progress value={kbPercent} className="h-1.5" />
+            <div className="h-1 bg-sauce-grid rounded-full overflow-hidden">
+              <div
+                className={cn("h-full transition-all duration-500", kbPercent > 80 ? 'bg-accent-red' : 'bg-sauce-purple')}
+                style={{ width: `${kbPercent}%` }}
+              />
+            </div>
           </div>
         </div>
 
         {/* Tab-based Training Methods */}
         <Tabs defaultValue="websites" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 h-auto">
-            <TabsTrigger value="websites" className="flex items-center gap-1 md:gap-2 text-xs md:text-sm px-2 py-2">
-              <Link2 className="w-3 h-3 md:w-4 md:h-4" />
+          <TabsList className="inline-flex w-auto self-start gap-1 rounded-xl bg-sauce-grid/50 p-1 border border-sauce-grid/20 h-auto">
+            <TabsTrigger value="websites" className="rounded-lg px-4 py-2 text-xs font-bold transition-all data-[state=active]:bg-white data-[state=active]:text-sauce-purple data-[state=active]:shadow-sm flex items-center gap-2">
+              <Globe className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Websites</span>
               <span className="sm:hidden">Web</span>
             </TabsTrigger>
-            <TabsTrigger value="text" className="flex items-center gap-1 md:gap-2 text-xs md:text-sm px-2 py-2">
-              <FileText className="w-3 h-3 md:w-4 md:h-4" />
+            <TabsTrigger value="text" className="rounded-lg px-4 py-2 text-xs font-bold transition-all data-[state=active]:bg-white data-[state=active]:text-sauce-purple data-[state=active]:shadow-sm flex items-center gap-2">
+              <FileText className="w-3.5 h-3.5" />
               Text
             </TabsTrigger>
-            <TabsTrigger value="file" className="flex items-center gap-1 md:gap-2 text-xs md:text-sm px-2 py-2">
-              <FileUp className="w-3 h-3 md:w-4 md:h-4" />
+            <TabsTrigger value="file" className="rounded-lg px-4 py-2 text-xs font-bold transition-all data-[state=active]:bg-white data-[state=active]:text-sauce-purple data-[state=active]:shadow-sm flex items-center gap-2">
+              <FileUp className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">File Upload</span>
               <span className="sm:hidden">File</span>
             </TabsTrigger>

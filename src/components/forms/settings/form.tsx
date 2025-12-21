@@ -13,10 +13,16 @@ import KnowledgeBaseViewer from '@/components/settings/knowledge-base-viewer'
 import { BotModeSelector } from '@/components/settings/bot-mode-selector'
 import { BrandVoiceSettings } from '@/components/settings/brand-voice-settings'
 import { onGetEmbeddingStatus } from '@/actions/firecrawl'
-import AppearanceSettings from './appearance'
-import { CheckCircle2, CircleDashed } from 'lucide-react'
-import HelpDesk from './help-desk'
+import {
+  ArrowRight,
+  CheckCircle2,
+  CircleDashed,
+} from 'lucide-react'
+import { cn } from '@/lib/utils'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import HelpDesk from './help-desk'
+import AppearanceSettings from './appearance'
+import { getPlanLimits } from '@/lib/plans'
 
 const WelcomeMessage = dynamic(
   () => import('./greetings-message').then((props) => props.default),
@@ -25,12 +31,10 @@ const WelcomeMessage = dynamic(
   }
 )
 
-import { PlanType, getPlanLimits } from '@/lib/plans'
-
 type Props = {
   id: string
   name: string
-  plan: PlanType
+  plan: any
   chatBot: {
     id: string
     icon: string | null
@@ -69,18 +73,18 @@ const SettingsForm = ({ id, name, chatBot, plan, trainingSourcesUsed, knowledgeB
 
   useEffect(() => {
     let mounted = true
-    ;(async () => {
-      try {
-        const res = await onGetEmbeddingStatus(id)
-        if (mounted && res?.status === 200 && res.data) {
-          const status = res.data.status
-          if (status === 'not_started' || status === 'processing' || status === 'completed' || status === 'failed') {
-            setEmbedStatus(status)
+      ; (async () => {
+        try {
+          const res = await onGetEmbeddingStatus(id)
+          if (mounted && res?.status === 200 && res.data) {
+            const status = res.data.status
+            if (status === 'not_started' || status === 'processing' || status === 'completed' || status === 'failed') {
+              setEmbedStatus(status)
+            }
+            setHasEmbeddings(!!res.data.hasEmbeddings)
           }
-          setHasEmbeddings(!!res.data.hasEmbeddings)
-        }
-      } catch {}
-    })()
+        } catch { }
+      })()
     return () => { mounted = false }
   }, [id])
 
@@ -96,33 +100,72 @@ const SettingsForm = ({ id, name, chatBot, plan, trainingSourcesUsed, knowledgeB
     { key: 'domain', label: '3) Embed & Preview', completed: trainDone, description: 'Go live' },
   ]
 
+  const totalSteps = checklistItems.length
+  const completedSteps = checklistItems.filter(item => item.completed).length
+  const progressPercent = Math.round((completedSteps / totalSteps) * 100)
+
   return (
     <form className="flex flex-col gap-8 pb-10" onSubmit={onUpdateSettings}>
-      {/* Setup Checklist */}
-      <div className="flex flex-col gap-2 rounded-lg border border-sauce-cyan/40 bg-white px-4 py-3 shadow-sm">
-        <div className="flex items-center justify-between">
-          <h2 className="font-semibold text-lg text-sauce-black">Setup Checklist</h2>
-          <Button asChild variant="outline" size="sm">
-            <a href={`/preview/${id}`} target="_blank" rel="noopener noreferrer">Live Preview ↗</a>
-          </Button>
+      {/* Premium Setup Checklist */}
+      <div className="flex flex-col gap-5 rounded-2xl border border-sauce-grid bg-white p-6 shadow-shadow transition-all duration-300">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <h2 className="font-bold text-xl text-sauce-black tracking-tight flex items-center gap-2">
+              Agent Setup Progress
+              <span className="text-sm font-medium px-2 py-0.5 bg-sauce-purple/10 text-sauce-purple rounded-full">
+                {progressPercent}%
+              </span>
+            </h2>
+            <p className="text-xs text-sauce-gray/60 font-medium">Complete these steps to launch your autonomous AI agent</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="hidden md:block w-32 h-1.5 bg-sauce-grid rounded-full overflow-hidden">
+              <div
+                className="h-full bg-sauce-purple transition-all duration-500 ease-out"
+                style={{ width: `${progressPercent}%` }}
+              />
+            </div>
+            <Button asChild variant="outline" size="sm" className="rounded-xl border-sauce-grid hover:bg-sauce-mint/30 transition-colors">
+              <a href={`/preview/${id}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+                Live Preview <ArrowRight className="w-3 h-3" />
+              </a>
+            </Button>
+          </div>
         </div>
-        <div className="grid grid-cols-1 gap-2 mt-1 md:grid-cols-3">
+
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           {checklistItems.map((item) => (
             <button
               type="button"
               key={item.key}
               onClick={() => setActiveTab(item.key)}
-              className="flex items-center justify-between rounded-md border border-sauce-cyan/30 bg-white px-2.5 py-1.5 text-left text-xs transition hover:bg-sauce-mint/20"
+              className={cn(
+                "group flex flex-col gap-3 rounded-xl border p-4 text-left transition-all duration-300",
+                item.completed
+                  ? "border-accent-green/20 bg-accent-green/5 hover:bg-accent-green/10"
+                  : "border-sauce-grid bg-white hover:border-sauce-purple/30 hover:shadow-md",
+                activeTab === item.key && !item.completed && "ring-2 ring-sauce-purple/20 border-sauce-purple/40"
+              )}
             >
-              <div className="flex items-center gap-1.5 font-medium text-sauce-black">
-                {item.completed ? (
-                  <CheckCircle2 className="w-3.5 h-3.5 text-accent-green" />
-                ) : (
-                  <CircleDashed className="w-3.5 h-3.5 text-sauce-gray" />
+              <div className="flex items-center justify-between w-full">
+                <div className={cn(
+                  "p-2 rounded-lg transition-colors",
+                  item.completed ? "bg-accent-green/20 text-accent-green" : "bg-sauce-grid text-sauce-gray/50 group-hover:bg-sauce-purple/10 group-hover:text-sauce-purple"
+                )}>
+                  {item.completed ? (
+                    <CheckCircle2 className="w-4 h-4" />
+                  ) : (
+                    <CircleDashed className="w-4 h-4" />
+                  )}
+                </div>
+                {item.completed && (
+                  <span className="text-[10px] font-bold text-accent-green uppercase tracking-wider">Completed</span>
                 )}
-                <span>{item.label}</span>
               </div>
-              <span className="text-[10px] text-sauce-gray">{item.description}</span>
+              <div className="space-y-0.5">
+                <h3 className="font-bold text-sm text-sauce-black">{item.label}</h3>
+                <p className="text-[11px] text-sauce-gray/60 font-medium leading-tight">{item.description}</p>
+              </div>
             </button>
           ))}
         </div>
@@ -133,36 +176,36 @@ const SettingsForm = ({ id, name, chatBot, plan, trainingSourcesUsed, knowledgeB
         onValueChange={(value) => setActiveTab(value as TabKey)}
         className="flex flex-col gap-6"
       >
-        <TabsList className="flex w-full flex-wrap items-center gap-2 rounded-2xl bg-muted/60 p-1">
+        <TabsList className="inline-flex w-auto self-start gap-1 rounded-xl bg-sauce-grid/50 p-1 border border-sauce-grid/20">
           <TabsTrigger
             value="knowledge"
-            className="flex-1 rounded-xl text-xs font-semibold data-[state=active]:bg-white"
+            className="rounded-lg px-4 py-2 text-xs font-bold transition-all data-[state=active]:bg-white data-[state=active]:text-sauce-purple data-[state=active]:shadow-sm"
           >
             Knowledge Base
           </TabsTrigger>
           <TabsTrigger
             value="behavior"
-            className="flex-1 rounded-xl text-xs font-semibold data-[state=active]:bg-white"
+            className="rounded-lg px-4 py-2 text-xs font-bold transition-all data-[state=active]:bg-white data-[state=active]:text-sauce-purple data-[state=active]:shadow-sm"
           >
             AI Behavior
           </TabsTrigger>
           <TabsTrigger
             value="appearance"
-            className="flex-1 rounded-xl text-xs font-semibold data-[state=active]:bg-white"
+            className="rounded-lg px-4 py-2 text-xs font-bold transition-all data-[state=active]:bg-white data-[state=active]:text-sauce-purple data-[state=active]:shadow-sm"
           >
             Appearance
           </TabsTrigger>
           <TabsTrigger
             value="domain"
-            className="flex-1 rounded-xl text-xs font-semibold data-[state=active]:bg-white"
+            className="rounded-lg px-4 py-2 text-xs font-bold transition-all data-[state=active]:bg-white data-[state=active]:text-sauce-purple data-[state=active]:shadow-sm"
           >
             Domain & Embed
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="knowledge" className="mt-0">
-          <div className="flex flex-col gap-2.5 rounded-lg border border-sauce-cyan/40 bg-white px-4 py-3.5 shadow-sm">
-            <h2 className="font-semibold text-lg text-sauce-black">Knowledge Base</h2>
+          <div className="flex flex-col gap-4 rounded-2xl border border-sauce-grid bg-white p-6 shadow-shadow">
+            <h2 className="font-bold text-xl text-sauce-black tracking-tight">Knowledge Base</h2>
             <KnowledgeBaseViewer
               domainId={id}
               domainName={name}
@@ -178,18 +221,18 @@ const SettingsForm = ({ id, name, chatBot, plan, trainingSourcesUsed, knowledgeB
           </div>
         </TabsContent>
 
-        <TabsContent value="behavior" className="mt-0 space-y-5">
-          <div className="flex flex-col gap-2.5 rounded-lg border border-sauce-cyan/40 bg-white px-4 py-3.5 shadow-sm">
-            <div className="flex items-center justify-between">
-              <h2 className="font-semibold text-lg text-sauce-black">AI Behavior Settings</h2>
-              <a
-                href={`/settings/${name}/advanced`}
-                className="text-xs underline text-sauce-black hover:text-sauce-purple"
-              >
-                Advanced settings ↗
-              </a>
+        <TabsContent value="behavior" className="mt-0 space-y-6">
+          <div className="flex flex-col gap-6 rounded-2xl border border-sauce-grid bg-white p-6 shadow-shadow">
+            <div className="flex items-center justify-between border-b border-sauce-grid pb-4">
+              <div className="space-y-1">
+                <h2 className="font-bold text-xl text-sauce-black tracking-tight">AI Behavior</h2>
+                <p className="text-xs text-sauce-gray/60 font-medium">Configure how your agent interacts with customers</p>
+              </div>
+              <Button asChild variant="ghost" size="sm" className="text-xs font-bold text-sauce-purple hover:bg-sauce-purple/5">
+                <a href={`/settings/${name}/advanced`}>Advanced Settings <ArrowRight className="ml-2 w-3 h-3" /></a>
+              </Button>
             </div>
-            <div className="grid gap-6 mt-1 md:grid-cols-2">
+            <div className="grid gap-8 md:grid-cols-2">
               <div className="col-span-1">
                 <BotModeSelector
                   domainId={id}
@@ -206,41 +249,43 @@ const SettingsForm = ({ id, name, chatBot, plan, trainingSourcesUsed, knowledgeB
             </div>
           </div>
 
-          <div className="flex flex-col gap-2.5 rounded-lg border border-sauce-cyan/40 bg-white px-4 py-3.5 shadow-sm">
-            <h2 className="font-semibold text-lg text-sauce-black">FAQs</h2>
+          <div className="flex flex-col gap-4 rounded-2xl border border-sauce-grid bg-white p-6 shadow-shadow">
+            <h2 className="font-bold text-xl text-sauce-black tracking-tight">Help Desk (FAQs)</h2>
             <HelpDesk id={id} />
           </div>
         </TabsContent>
 
         <TabsContent value="appearance" className="mt-0">
-          <div className="flex flex-col gap-2.5 rounded-lg border border-sauce-cyan/40 bg-white px-4 py-3.5 shadow-sm">
-            <div className="flex gap-3 items-center">
-              <h2 className="font-semibold text-lg text-sauce-black">Chatbot Settings</h2>
-              <div className="flex gap-1 bg-sauce-purple/10 rounded-full px-2.5 py-0.5 text-[10px] items-center font-semibold text-sauce-purple">
+          <div className="flex flex-col gap-6 rounded-2xl border border-sauce-grid bg-white p-6 shadow-shadow">
+            <div className="flex items-center justify-between border-b border-sauce-grid pb-4">
+              <div className="space-y-1">
+                <h2 className="font-bold text-xl text-sauce-black tracking-tight">Appearance</h2>
+                <p className="text-xs text-sauce-gray/60 font-medium">Customize your agent's visual identity</p>
+              </div>
+              <div className="flex gap-1.5 bg-sauce-purple/10 rounded-full px-3 py-1 text-[10px] items-center font-bold text-sauce-purple uppercase tracking-wider">
                 <PremiumBadge />
-                Premium
+                Enterprise
               </div>
             </div>
-            <Separator orientation="horizontal" />
-            <div className="grid gap-6 md:grid-cols-2">
-              <div className="col-span-1 flex flex-col gap-5 order-last md:order-first">
+            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+              <div className="col-span-1 lg:col-span-1 flex flex-col gap-6">
                 <EditChatbotIcon chatBot={chatBot} register={register} errors={errors} />
                 <WelcomeMessage message={chatBot?.welcomeMessage!} register={register} errors={errors} />
               </div>
-              <div className="col-span-1">
+              <div className="col-span-1 lg:col-span-2">
                 <AppearanceSettings domainId={id} current={chatBot?.theme as any} />
               </div>
             </div>
           </div>
         </TabsContent>
 
-        <TabsContent value="domain" className="mt-0 space-y-5">
-          <div className="flex flex-col gap-2.5 rounded-lg border border-sauce-cyan/40 bg-white px-4 py-3.5 shadow-sm">
-            <h2 className="font-semibold text-lg text-sauce-black">Domain Settings</h2>
+        <TabsContent value="domain" className="mt-0 space-y-6">
+          <div className="flex flex-col gap-6 rounded-2xl border border-sauce-grid bg-white p-6 shadow-shadow">
+            <h2 className="font-bold text-xl text-sauce-black tracking-tight border-b border-sauce-grid pb-4">Domain Settings</h2>
             <DomainUpdate name={name} register={register} errors={errors} />
           </div>
-          <div className="flex flex-col gap-2.5 rounded-lg border border-sauce-cyan/40 bg-white px-4 py-3.5 shadow-sm">
-            <h2 className="font-semibold text-lg text-sauce-black">Embed & Preview</h2>
+          <div className="flex flex-col gap-6 rounded-2xl border border-sauce-grid bg-white p-6 shadow-shadow">
+            <h2 className="font-bold text-xl text-sauce-black tracking-tight border-b border-sauce-grid pb-4">Embed & Launch</h2>
             <CodeSnippet id={id} />
           </div>
         </TabsContent>
