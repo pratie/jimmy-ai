@@ -166,10 +166,10 @@ const KnowledgeBaseViewerV2 = ({
   const sourcesRemaining = trainingSourcesLimit === Infinity
     ? Infinity
     : trainingSourcesLimit - trainingSourcesUsed
-  const sourcesPercent = trainingSourcesLimit === Infinity
-    ? 0
-    : (trainingSourcesUsed / trainingSourcesLimit) * 100
-  const kbPercent = (kbSizeMB / kbSizeLimit) * 100
+  const sourcesPercent = trainingSourcesLimit && trainingSourcesLimit !== Infinity
+    ? Math.min(100, (trainingSourcesUsed / trainingSourcesLimit) * 100)
+    : 0
+  const kbPercent = kbSizeLimit ? Math.min(100, (kbSizeMB / kbSizeLimit) * 100) : 0
   const isSelectedTextFile = selectedFile
     ? selectedFile.type === 'text/plain' || selectedFile.name.toLowerCase().endsWith('.txt')
     : false
@@ -572,10 +572,6 @@ const KnowledgeBaseViewerV2 = ({
   // View mode with knowledge base
   const preview = knowledgeBase.slice(0, 1000)
   const displayText = showFull ? knowledgeBase : preview
-  const sourcesPercent = trainingSourcesLimit && trainingSourcesLimit !== Infinity
-    ? Math.min(100, (trainingSourcesUsed / trainingSourcesLimit) * 100)
-    : 0
-  const kbPercent = kbSizeLimit ? Math.min(100, (kbSizeMB / kbSizeLimit) * 100) : 0
 
   return (
     <Card className="w-full">
