@@ -74,73 +74,76 @@ const AdvancedAISettings = ({
   }
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-6 text-white">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold">Advanced AI Settings</h1>
-        <a href={`/settings/${domainName}`} className="text-sm underline">Back to Settings</a>
+        <h1 className="text-2xl font-bold tracking-tight text-white">Advanced AI Settings</h1>
+        <a href={`/settings/${domainName}`} className="text-sm text-white/60 hover:text-white underline transition-colors">Back to Settings</a>
       </div>
 
-      {/* LLM Provider */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Model & Temperature</CardTitle>
-          <CardDescription>Choose your AI model provider and set response creativity</CardDescription>
+      {/* Model Provider Config */}
+      <Card className="bg-card border-white/[0.04] shadow-[0_20px_45px_rgba(0,0,0,0.5)]">
+        <CardHeader className="border-b border-white/[0.04] pb-4">
+          <CardTitle className="text-white">Model & Temperature</CardTitle>
+          <CardDescription className="text-white/60">Choose your AI model provider and set response creativity</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-6">
           <Loader loading={savingModel}>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label htmlFor="llm-model">Model</Label>
+                <Label htmlFor="llm-model" className="text-white/80 font-medium">Model</Label>
                 <div className="relative">
                   <select
                     id="llm-model"
                     value={model}
                     onChange={(e) => setModel(e.target.value)}
-                    className="w-full px-3 py-2 pl-10 border-2 rounded-md border-brand-base-300 bg-white/95 text-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/40 appearance-none"
+                    className="w-full px-3 py-2.5 pl-10 border border-white/[0.08] rounded-xl bg-white/5 text-white focus:outline-none focus:ring-2 focus:ring-[#0071E3]/40 appearance-none"
                   >
-                    <optgroup label="OpenAI">
+                    <optgroup label="OpenAI" className="bg-[#09090b]">
                       {OPENAI_MODELS.map((m) => (
-                        <option key={m.id} value={m.id}>
+                        <option key={m.id} value={m.id} className="bg-[#09090b] text-white">
                           {m.name} ({m.contextWindow.toLocaleString()} tokens)
                         </option>
                       ))}
                     </optgroup>
-                    <optgroup label="Anthropic Claude">
+                    <optgroup label="Anthropic Claude" className="bg-[#09090b]">
                       {ANTHROPIC_MODELS.map((m) => (
-                        <option key={m.id} value={m.id}>
+                        <option key={m.id} value={m.id} className="bg-[#09090b] text-white">
                           {m.name} ({m.contextWindow.toLocaleString()} tokens)
                         </option>
                       ))}
                     </optgroup>
-                    <optgroup label="Google Gemini">
+                    <optgroup label="Google Gemini" className="bg-[#09090b]">
                       {GOOGLE_MODELS.map((m) => (
-                        <option key={m.id} value={m.id}>
+                        <option key={m.id} value={m.id} className="bg-[#09090b] text-white">
                           {m.name} ({m.contextWindow.toLocaleString()} tokens)
                         </option>
                       ))}
                     </optgroup>
                   </select>
                   <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
-                    {model.startsWith('gpt-') && <OpenAIIcon size={18} className="text-brand-primary" />}
-                    {model.startsWith('claude-') && <AnthropicIcon size={18} className="text-brand-primary" />}
-                    {model.startsWith('gemini-') && <GoogleIcon size={18} className="text-brand-primary" />}
+                    {model.startsWith('gpt-') && <OpenAIIcon size={18} className="text-white" />}
+                    {model.startsWith('claude-') && <AnthropicIcon size={18} className="text-white" />}
+                    {model.startsWith('gemini-') && <GoogleIcon size={18} className="text-white" />}
                   </div>
                 </div>
-                <p className="text-xs text-brand-primary/60">
+                <p className="text-xs text-white/40">
                   Multi-provider support: OpenAI, Anthropic Claude & Google Gemini
                 </p>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="temperature">Temperature</Label>
-                <input
-                  id="temperature"
-                  type="range"
-                  min={0}
-                  max={1}
-                  step={0.1}
-                  value={temperature}
-                  onChange={(e) => setTemperature(parseFloat(e.target.value))}
-                />
+                <Label htmlFor="temperature" className="text-white/80 font-medium">Temperature</Label>
+                <div className="py-2">
+                  <input
+                    id="temperature"
+                    type="range"
+                    min={0}
+                    max={1}
+                    step={0.1}
+                    value={temperature}
+                    onChange={(e) => setTemperature(parseFloat(e.target.value))}
+                    className="w-full accent-[#0071E3] bg-white/10 h-1.5 rounded-full appearance-none cursor-pointer"
+                  />
+                </div>
                 <div className="flex items-center gap-2">
                   <Input
                     type="number"
@@ -149,43 +152,43 @@ const AdvancedAISettings = ({
                     step={0.1}
                     value={temperature}
                     onChange={(e) => setTemperature(Number(e.target.value))}
-                    className="w-24"
+                    className="w-24 bg-white/5 border-white/[0.08] text-white rounded-xl"
                   />
-                  <span className="text-xs text-brand-primary/60">0 = precise, 1 = creative</span>
+                  <span className="text-xs text-white/40">0 = precise, 1 = creative</span>
                 </div>
               </div>
             </div>
-            <Button className="mt-4" onClick={onSaveModel} disabled={savingModel}>Save Model</Button>
+            <Button className="mt-6 bg-[#0071E3] hover:bg-[#0071E3]/90 text-white font-semibold rounded-xl shadow-[0_4px_12px_rgba(0,113,227,0.3)]" onClick={onSaveModel} disabled={savingModel}>Save Model</Button>
           </Loader>
         </CardContent>
       </Card>
 
       {/* Per-mode prompt overrides */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Mode Prompts</CardTitle>
-          <CardDescription>Customize the instruction block for each bot mode</CardDescription>
+      <Card className="bg-card border-white/[0.04] shadow-[0_20px_45px_rgba(0,0,0,0.5)]">
+        <CardHeader className="border-b border-white/[0.04] pb-4">
+          <CardTitle className="text-white">Mode Prompts</CardTitle>
+          <CardDescription className="text-white/60">Customize the instruction block for each bot mode</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-6">
           <Loader loading={savingPrompts}>
-            <div className="space-y-5">
+            <div className="space-y-6">
               <div className="space-y-2">
-                <Label>Sales Agent</Label>
-                <Textarea value={sales} onChange={(e) => setSales(e.target.value)} rows={8} />
+                <Label className="text-white/80 font-medium">Sales Agent</Label>
+                <Textarea value={sales} onChange={(e) => setSales(e.target.value)} rows={8} className="bg-white/5 border-white/[0.08] text-white rounded-xl placeholder:text-white/30" />
               </div>
               <div className="space-y-2">
-                <Label>Support Agent</Label>
-                <Textarea value={support} onChange={(e) => setSupport(e.target.value)} rows={8} />
+                <Label className="text-white/80 font-medium">Support Agent</Label>
+                <Textarea value={support} onChange={(e) => setSupport(e.target.value)} rows={8} className="bg-white/5 border-white/[0.08] text-white rounded-xl placeholder:text-white/30" />
               </div>
               <div className="space-y-2">
-                <Label>Lead Qualifier</Label>
-                <Textarea value={qualifier} onChange={(e) => setQualifier(e.target.value)} rows={8} />
+                <Label className="text-white/80 font-medium">Lead Qualifier</Label>
+                <Textarea value={qualifier} onChange={(e) => setQualifier(e.target.value)} rows={8} className="bg-white/5 border-white/[0.08] text-white rounded-xl placeholder:text-white/30" />
               </div>
               <div className="space-y-2">
-                <Label>FAQ Only</Label>
-                <Textarea value={faq} onChange={(e) => setFaq(e.target.value)} rows={8} />
+                <Label className="text-white/80 font-medium">FAQ Only</Label>
+                <Textarea value={faq} onChange={(e) => setFaq(e.target.value)} rows={8} className="bg-white/5 border-white/[0.08] text-white rounded-xl placeholder:text-white/30" />
               </div>
-              <Button onClick={onSavePrompts} disabled={savingPrompts} className="w-full">Save Mode Prompts</Button>
+              <Button onClick={onSavePrompts} disabled={savingPrompts} className="w-full bg-[#0071E3] hover:bg-[#0071E3]/90 text-white font-semibold rounded-xl shadow-[0_4px_12px_rgba(0,113,227,0.3)]">Save Mode Prompts</Button>
             </div>
           </Loader>
         </CardContent>

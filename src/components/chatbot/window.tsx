@@ -31,6 +31,7 @@ type Props = {
   responsive?: boolean
   onClose?: () => void
   showBranding?: boolean
+  agencyName?: string
   realtimeMode:
   | {
     chatroom: string
@@ -75,6 +76,7 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
       responsive,
       onClose,
       showBranding,
+      agencyName,
     },
     ref
   ) => {
@@ -294,13 +296,13 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
             style={{ backgroundColor: t.surface }}
           >
             <a
-              href="https://chatdock.io/?utm_source=widget&utm_medium=free_badge&utm_campaign=virality"
-              target="_blank"
-              rel="noopener noreferrer"
+              href={agencyName ? '#' : "https://chatdock.io/?utm_source=widget&utm_medium=free_badge&utm_campaign=virality"}
+              target={agencyName ? undefined : "_blank"}
+              rel={agencyName ? undefined : "noopener noreferrer"}
               className="inline-flex items-center justify-center gap-1.5 text-[11px] font-bold text-slate-400 hover:text-slate-600 transition-colors uppercase tracking-wider"
-              aria-label="Powered by chatdock.io – Get your AI assistant"
+              aria-label={`Powered by ${agencyName || 'chatdock.io'} – Get your AI assistant`}
             >
-              <span>Powered by chatdock.io</span>
+              <span>Powered by {agencyName || 'chatdock.io'}</span>
             </a>
           </div>
         )}

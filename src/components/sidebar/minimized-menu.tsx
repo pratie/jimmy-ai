@@ -74,19 +74,19 @@ export const MinMenu = ({
                 <User className="w-5 h-5 text-white" />
               </button>
               {showDropdown && (
-                <div className="absolute bottom-full left-full ml-2 mb-0 bg-white/95 backdrop-blur-sm border border-white/40 rounded-lg shadow-lg overflow-hidden w-48">
-                  <div className="px-4 py-3 border-b border-white/40">
-                    <p className="text-sm font-medium text-brand-primary truncate">{user.fullname}</p>
-                    <p className="text-xs text-brand-primary/70 truncate">{user.email}</p>
+                <div className="absolute bottom-full left-full ml-2 mb-0 bg-[#09090b]/95 backdrop-blur border border-white/[0.08] rounded-base shadow-shadow overflow-hidden w-48">
+                  <div className="px-4 py-3 border-b border-white/[0.08]">
+                    <p className="text-sm font-medium text-white truncate">{user.fullname}</p>
+                    <p className="text-xs text-white/60 truncate">{user.email}</p>
                   </div>
                   <button
                     onClick={() => {
                       setShowDropdown(false)
                       onSignOut()
                     }}
-                    className="flex items-center gap-2 px-4 py-2 w-full hover:bg-brand-base-100 transition-colors text-left text-brand-primary"
+                    className="flex items-center gap-2 px-4 py-2.5 w-full hover:bg-white/10 transition-colors text-left text-white/95"
                   >
-                    <LogOut className="w-4 h-4" />
+                    <LogOut className="w-4 h-4 text-white/70" />
                     <span className="text-sm">Sign out</span>
                   </button>
                 </div>

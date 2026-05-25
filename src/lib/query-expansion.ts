@@ -1,7 +1,11 @@
 // Query expansion using Vercel AI SDK (OpenAI provider)
 // Generates alternative phrasings to improve RAG recall
 
-import { openai } from '@ai-sdk/openai'
+import { createOpenAI } from '@ai-sdk/openai'
+
+const openai = createOpenAI({
+  apiKey: process.env.OPENAI_API_KEY || 'build_time_dummy_openai_key'
+})
 import { generateObject } from 'ai'
 import { z } from 'zod'
 

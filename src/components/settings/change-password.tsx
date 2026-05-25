@@ -40,7 +40,7 @@ const ChangePassword = (props: Props) => {
             type="text"
             inputType="input"
           />
-          <Button className="bg-brand-accent text-white font-semibold hover:bg-brand-accent/90">
+          <Button className="bg-[#0071E3] hover:bg-[#0071E3]/90 text-white font-semibold shadow-[0_4px_12px_rgba(0,113,227,0.3)]">
             <Loader loading={loading}>Change Password</Loader>
           </Button>
         </div>

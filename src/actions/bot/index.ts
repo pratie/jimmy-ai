@@ -55,6 +55,8 @@ export const onGetCurrentChatBot = async (id: string) => {
         // Used to determine branding gate by plan
         User: {
           select: {
+            agencyName: true,
+            hideBranding: true,
             subscription: {
               select: {
                 plan: true,
@@ -78,14 +80,16 @@ export const onGetCurrentChatBot = async (id: string) => {
 
     if (chatbot) {
       // Determine if we should show attribution badge
-      // Default to true if no subscription found (treat as FREE)
       const plan = chatbot.User?.subscription?.plan || 'FREE'
-      const showBranding = true // Always show branding as requested
+      const canHideBranding = plan === 'PRO' || plan === 'BUSINESS'
+      const showBranding = canHideBranding ? !chatbot.User?.hideBranding : true
+      const agencyName = chatbot.User?.agencyName || 'ChatDock'
 
       // Avoid leaking nested User object to client; return only needed fields + flag
       const { User, ...rest } = chatbot as any
-      return { ...rest, showBranding }
+      return { ...rest, showBranding, agencyName }
     }
+
   } catch (error) {
     devError('[Bot] Error fetching chatbot:', error)
   }

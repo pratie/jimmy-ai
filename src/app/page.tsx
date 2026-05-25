@@ -8,18 +8,14 @@ import Link from 'next/link'
 import PricingSection from '@/components/landing/pricing-section'
 import Script from 'next/script'
 import HowItWorks from '@/components/landing/how-it-works'
-import { Check, ChevronRight, Shield, Zap, Clock, Users, BarChart3, Globe, MessageSquare, ArrowRight } from 'lucide-react'
+import { Check, ChevronRight, Shield, Zap, Clock, Users, BarChart3, Globe, MessageSquare, ArrowRight, Sparkles, DollarSign, Calendar } from 'lucide-react'
 import { Footer } from '@/components/landing/footer'
-import AnimatedChatHero from '@/components/landing/animated-chat-hero'
-import { OpenAIIcon, AnthropicIcon, GoogleIcon } from '@/components/icons/provider-icons'
-import Marquee from '@/components/ui/marquee'
-import AnimatedAgentType from '@/components/landing/animated-agent-type'
-
+import InteractivePreviewChat from '@/components/landing/interactive-preview-chat'
 
 export const metadata: Metadata = {
-  title: 'ChatDock AI - Your 24/7 AI Agent for Sales, Support & Lead Gen',
+  title: 'ChatDock AI - White-Label Transactional Chatbot Reseller Platform for AI Agencies',
   description:
-    'AI agent that handles sales, support, and lead generation automatically. Train it on your content to answer questions, book meetings, and qualify prospects 24/7.',
+    'Build, brand, and resell custom RAG chatbots that natively book meetings and close sales. Give your clients a fully white-labeled dashboard under your own domain.',
   alternates: {
     canonical: '/',
   },
@@ -27,188 +23,111 @@ export const metadata: Metadata = {
 
 export default async function Home() {
   return (
-    <main className="min-h-screen bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-50 selection:bg-slate-200 selection:text-slate-900">
-      <div className="fixed inset-0 z-0 pointer-events-none bg-grid-black/[0.02] dark:bg-grid-white/[0.02] bg-[size:50px_50px]" />
+    <main className="min-h-screen bg-[#050507] text-[#F5F5F7] selection:bg-[#0071E3] selection:text-white relative overflow-x-hidden font-sans antialiased">
+      {/* Faint Premium Grid Layer */}
+      <div className="absolute inset-0 z-0 pointer-events-none bg-grid-white/[0.005] bg-[size:60px_60px]" />
+
+      {/* Restrained Premium Ambient Background Glow */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-[600px] pointer-events-none -z-10 overflow-hidden">
+        <div className="absolute top-[-25%] left-[25%] w-[50%] h-[50%] rounded-full bg-[#0071E3]/5 blur-[120px]" />
+      </div>
+
       <NavBar />
 
-      {/* Hero Section - Centered Minimalist 'Google Antigravity' Style */}
-      <section className="relative pt-32 pb-20 md:pt-48 md:pb-32 overflow-hidden bg-white dark:bg-slate-950">
-        {/* Subtle Particle/Confetti Background (Monochrome) */}
-        <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          {/* Custom SVG Particles for 'Antigravity' feel */}
-          <svg className="absolute w-full h-full opacity-30" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <pattern id="particles" x="0" y="0" width="100" height="100" patternUnits="userSpaceOnUse">
-                <circle cx="10" cy="10" r="1.5" className="fill-slate-400" opacity="0.4" />
-                <circle cx="60" cy="40" r="1" className="fill-slate-500" opacity="0.3" />
-                <circle cx="30" cy="70" r="1.5" className="fill-slate-300" opacity="0.4" />
-                <circle cx="90" cy="20" r="1" className="fill-slate-400" opacity="0.3" />
-              </pattern>
-            </defs>
-            <rect width="100%" height="100%" fill="url(#particles)" />
-          </svg>
-        </div>
-
+      {/* Hero Section */}
+      <section className="relative pt-36 pb-20 md:pt-52 md:pb-32 overflow-hidden">
         <div className="relative z-10 max-w-5xl mx-auto px-6 sm:px-8 lg:px-12 text-center">
-          {/* Logo/Badge Centered */}
+
+          {/* Glowing Minimalist Badge */}
           <div className="flex justify-center mb-8">
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-transparent text-sm font-medium text-slate-600 dark:text-slate-400">
-              <span className="flex h-2 w-2 relative">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-slate-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-slate-600 dark:bg-slate-400"></span>
-              </span>
-              ChatDock AI
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/[0.02] border border-white/[0.05] text-[11px] font-medium tracking-widest uppercase text-[#86868B]">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#0071E3] animate-pulse" />
+              Agency Reseller Platform
             </div>
           </div>
 
-          {/* Main Headline - Centered, Massive, Bold */}
-          <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-medium tracking-tight text-slate-900 dark:text-white mb-8 leading-[1.1]">
-            Experience automated<br />
-            <span className="text-slate-900 dark:text-white">customer success</span>
+          {/* Main Headline - Brushed Titanium Aesthetic */}
+          <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-[5.5rem] font-bold tracking-tight text-white mb-6 leading-[1.03]">
+            The White-Label Transactional<br />
+            <span className="bg-gradient-to-b from-white via-[#E2E8F0] to-[#94A3B8] bg-clip-text text-transparent">AI Chatbot Platform.</span>
           </h1>
 
           {/* Subheadline */}
-          <p className="text-xl text-slate-600 dark:text-slate-400 max-w-2xl mx-auto mb-12 leading-relaxed font-normal">
-            Stop losing leads while you sleep. We train, customize, and deploy a smart AI agent for your business. 100% Done-For-You.
+          <p className="text-lg md:text-xl text-[#86868B] max-w-3xl mx-auto mb-16 leading-relaxed font-normal">
+            Build, brand, and resell custom RAG chatbots that natively book meetings and close sales. Give your clients a fully white-labeled customer portal under your own custom domain. No code required.
           </p>
 
-          {/* Buttons - Centered Pill Style */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <a href="https://cal.com/prathap-reddy-caxwn4/15min" target="_blank" rel="noopener noreferrer">
-              <Button
-                className="h-14 px-8 bg-slate-900 text-white hover:bg-black dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200 text-lg font-medium rounded-full transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5"
-              >
-                Get Your Free Demo
-              </Button>
-            </a>
-            <a href="#features">
-              <Button
-                variant="outline"
-                className="h-14 px-8 bg-slate-100 text-slate-900 border-none hover:bg-slate-200 dark:bg-white/10 dark:text-white dark:hover:bg-white/20 text-lg font-medium rounded-full transition-all"
-              >
-                Explore use cases
-              </Button>
-            </a>
-          </div>
-
-          {/* Chat Demo - Floating Below (Optional, usually reference doesn't have it immediately, but good for context) */}
-          {/* Omnichannel Previews - Side by Side leveraging space */}
-          <div className="mt-24 grid md:grid-cols-2 gap-12 items-end max-w-6xl mx-auto perspective-1000">
-
-            {/* Left: Web Chat (Desktop View) */}
-            <div className="relative group">
-              <div className="absolute -top-12 left-0 text-slate-500 dark:text-slate-400 text-sm font-medium uppercase tracking-wider mb-4 flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-slate-400 animate-pulse" />
-                Website Widget
-              </div>
-              <div className="relative transform transition-transform group-hover:scale-[1.01] duration-500 z-10">
-                <div className="absolute -inset-1 bg-gradient-to-r from-slate-200 to-gray-200 dark:from-slate-800 dark:to-gray-800 rounded-[2.5rem] blur opacity-30 animate-pulse"></div>
-                <AnimatedChatHero
-                  density="cozy"
-                  title="ChatDock AI Assistant"
-                  className="h-[500px] shadow-2xl border border-slate-200 dark:border-white/10 rounded-[2rem]"
-                />
-              </div>
+          {/* Spotlight Scraper Sandbox */}
+          <div className="max-w-2xl mx-auto relative group">
+            {/* Elegant deep blue focus shadow */}
+            <div className="absolute -inset-1.5 bg-[#0071E3]/5 rounded-[2.2rem] blur-[15px] opacity-30 group-hover:opacity-50 transition duration-500"></div>
+            <div className="relative">
+              <InteractivePreviewChat />
             </div>
-
-            {/* Right: Integration Text Options */}
-            <div className="flex flex-col justify-center h-full pb-12 pl-0 md:pl-12">
-              <div className="mb-8">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-6">
-                  <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
-                  Flexible Deployment
-                </div>
-                <h3 className="text-3xl font-bold text-slate-900 dark:text-white mb-4">
-                  Embed it. Share it. Integrate it.
-                </h3>
-                <p className="text-lg text-slate-600 dark:text-slate-400 leading-relaxed">
-                  Don&apos;t just hide it in a widget. Use your agent as a standalone web app, or connect it directly to your team&apos;s workflow.
-                </p>
-              </div>
-
-              <div className="grid grid-cols-1 gap-3">
-                {[
-                  { label: 'Website Widget', icon: '💻' },
-                  { label: 'Full-Screen Web App', icon: '🔗' },
-                  { label: 'Slack Integration', icon: '💬' },
-                  { label: 'WhatsApp Integration', icon: '📱' }
-                ].map((item) => (
-                  <div key={item.label} className="group flex items-center gap-4 p-4 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-white/5 hover:border-slate-300 dark:hover:border-white/20 transition-all duration-300">
-                    <div className="w-10 h-10 rounded-lg bg-white dark:bg-slate-800 shadow-sm flex items-center justify-center text-lg">
-                      {item.icon}
-                    </div>
-                    <span className="font-semibold text-slate-700 dark:text-slate-200">{item.label}</span>
-                    <div className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity text-slate-400">
-                      <ChevronRight className="w-4 h-4" />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
           </div>
         </div>
       </section>
 
-      {/* Social Proof Section */}
-      <section className="py-16 border-b border-slate-200 dark:border-white/5">
+      {/* Niche Targets / Proof */}
+      <section className="py-16 border-b border-white/[0.03] relative">
         <div className="container mx-auto px-6 sm:px-8 lg:px-12">
           <div className="text-center mb-8">
-            <p className="text-sm font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-              Trusted by growing teams worldwide
+            <p className="text-xs font-semibold text-[#86868B] uppercase tracking-widest">
+              Optimized for high-ticket local business verticals
             </p>
           </div>
-          <div className="flex flex-wrap justify-center items-center gap-8 md:gap-16 opacity-60 grayscale hover:grayscale-0 hover:opacity-100 transition-all duration-500">
-            {/* Placeholder logos - replace with actual customer logos */}
-            {['TechCorp', 'StartupXYZ', 'AgencyPro', 'SaaS Inc', 'Digital Co'].map((company) => (
-              <div key={company} className="text-xl font-bold text-slate-400 dark:text-slate-500">
-                {company}
+          <div className="flex flex-wrap justify-center items-center gap-8 md:gap-16 text-[#86868B]/70 text-sm font-semibold tracking-wider uppercase">
+            {['Dental Services', 'Medical Clinics', 'Legal Consultancies', 'Home Contractors', 'E-Commerce Stores'].map((niche) => (
+              <div key={niche} className="hover:text-white transition-colors duration-300 cursor-default">
+                {niche}
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Stats Section - Minimalist / Monochrome */}
-      <section className="py-20 border-b border-slate-100 dark:border-white/5">
+      {/* Stats Section */}
+      <section className="py-20 border-b border-white/[0.03] relative">
         <div className="container mx-auto px-6 sm:px-8 lg:px-12">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12 max-w-5xl mx-auto">
             {[
-              { label: 'Higher conversion', value: '67%' },
-              { label: 'Fewer tickets', value: '40%' },
-              { label: 'Customer support', value: '24/7' },
-              { label: 'To go live', value: '5min' },
+              { label: 'Increase Bookings', value: '+67%' },
+              { label: 'Auto-Resolved Tickets', value: '80%' },
+              { label: 'SaaS Gross Margin', value: '98%' },
+              { label: 'Client Set-Up Time', value: '< 5m' },
             ].map((stat, i) => (
               <div key={i} className="text-center group cursor-default">
-                <div className="text-5xl md:text-6xl font-bold mb-3 text-slate-900 dark:text-white tracking-tight">
+                <div className="text-5xl md:text-6xl font-semibold mb-3 text-white tracking-tight">
                   {stat.value}
                 </div>
-                <div className="text-slate-500 text-sm font-medium uppercase tracking-wider">{stat.label}</div>
+                <div className="text-[#86868B] text-[11px] font-bold uppercase tracking-wider">{stat.label}</div>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Product Preview - Dashboard Screenshot */}
-      <section className="py-24 relative">
+      {/* Dashboard Preview Section */}
+      <section className="py-28 relative">
         <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-900 dark:text-white mb-4 tracking-tight">
-              See the dashboard
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.02] border border-white/[0.05] text-[11px] font-medium tracking-widest uppercase text-[#86868B] mb-4">
+              Command Center
+            </div>
+            <h2 className="text-3xl sm:text-4xl lg:text-[3.5rem] font-bold text-white mb-4 tracking-tight leading-tight">
+              A complete portal for you & your clients
             </h2>
-            <p className="text-slate-600 dark:text-slate-400 text-lg max-w-2xl mx-auto">
-              Manage chatbots, track conversations, train your knowledge base, and tweak
-              advanced AI settings all in one place.
+            <p className="text-[#86868B] text-lg max-w-2xl mx-auto leading-relaxed">
+              Manage client domains, track chats, train RAG embeddings, and customize widget branding inside your white-labeled agency core.
             </p>
           </div>
-          <div className="max-w-6xl mx-auto rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 shadow-2xl overflow-hidden backdrop-blur-sm">
-            <AspectRatio ratio={16 / 9}>
+          <div className="max-w-5xl mx-auto rounded-2xl border border-white/[0.04] bg-[#0F1015]/40 p-2 shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden backdrop-blur-2xl relative group">
+            <AspectRatio ratio={16 / 9} className="overflow-hidden rounded-xl">
               <Image
                 src={DashboardImg}
-                alt="ChatDock dashboard screenshot"
+                alt="ChatDock white label dashboard"
                 fill
-                className="object-contain"
+                className="object-contain transition-transform duration-700 group-hover:scale-[1.01]"
                 priority={false}
                 sizes="(min-width: 1280px) 1024px, (min-width: 768px) 80vw, 100vw"
               />
@@ -217,70 +136,75 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* How It Works - Interactive Flow */}
+      {/* How It Works */}
       <HowItWorks />
 
-      {/* Works with your site + docs */}
-      <section className="py-24">
+      {/* Dynamic Data Sourcing */}
+      <section className="py-28 relative border-t border-white/[0.03]">
         <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-900 dark:text-white mb-4 tracking-tight">
-              Works with your site + docs
+          <div className="text-center mb-20">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.02] border border-white/[0.05] text-[11px] font-medium tracking-widest uppercase text-[#86868B] mb-4">
+              Knowledge Base
+            </div>
+            <h2 className="text-3xl sm:text-4xl lg:text-[3.5rem] font-bold text-white mb-4 tracking-tight">
+              Dynamic scraping, instant embeddings
             </h2>
-            <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
-              Bring your content in minutes. No complex setup.
+            <p className="text-lg text-[#86868B] max-w-2xl mx-auto leading-relaxed">
+              Train client bots in seconds using our multi-channel RAG engine.
             </p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
-              { icon: '🌐', title: 'Instant Website Training', desc: 'Convert your site into clean, structured knowledge automatically.' },
-              { icon: '📄', title: 'Upload Any Document', desc: 'Upload PDFs or paste text to enrich your knowledge base.' },
-              { icon: '❓', title: 'FAQs', desc: 'Capture common questions/answers to guide fast resolutions.' },
-              { icon: '⚙️', title: 'Guardrails', desc: 'On‑brand tone, strict FAQ mode, and live handoff when needed.' }
+              { icon: '🌐', title: 'Deep URL Scraping', desc: 'Paste any website link. We automatically discover subpages and extract structured text.' },
+              { icon: '📄', title: 'Document Ingestion', desc: 'Upload client documents (PDFs, DOCX, TXT) to instantly load specific policies.' },
+              { icon: '❓', title: 'Active FAQs', desc: 'Input custom question/answer guardrails for highly predictable, on-brand responses.' },
+              { icon: '🛡️', title: 'Advanced Guardrails', desc: 'Tweak brand tone, control temperature limits, or toggle strict FAQ mode.' }
             ].map((item, i) => (
-              <div key={i} className="glass-card-light dark:glass-card p-6 rounded-xl hover:bg-slate-50 dark:hover:bg-white/10 transition-colors group">
-                <div className="w-12 h-12 bg-slate-100 dark:bg-white/5 rounded-lg flex items-center justify-center mb-4 text-2xl group-hover:scale-110 transition-transform">
+              <div key={i} className="bg-[#0F1015]/40 border border-white/[0.04] p-6 rounded-2xl hover:bg-[#16161D]/60 hover:border-white/[0.08] transition-all duration-300 backdrop-blur-2xl group">
+                <div className="w-12 h-12 bg-white/[0.02] border border-white/[0.04] rounded-xl flex items-center justify-center mb-4 text-2xl group-hover:bg-[#0071E3]/10 group-hover:border-[#0071E3]/20 transition-all duration-300">
                   {item.icon}
                 </div>
-                <h3 className="font-semibold text-slate-900 dark:text-white mb-2">{item.title}</h3>
-                <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">{item.desc}</p>
+                <h3 className="font-bold text-white mb-2 text-lg">{item.title}</h3>
+                <p className="text-sm text-[#86868B] leading-relaxed">{item.desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Features Grid - Linear Style */}
-      <section id="features" className="py-32 relative">
-        <div className="glow-effect top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px]" />
+      {/* Features Grid - Reseller and B2B Agency Focused */}
+      <section id="features" className="py-32 border-t border-b border-white/[0.03] relative">
         <div className="container mx-auto px-6 sm:px-8 lg:px-12 relative z-10">
-          <div className="text-center mb-20">
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-900 dark:text-white mb-6 tracking-tight">
-              We handle the tech,<span className="text-slate-500"> you get the results</span>
+
+          <div className="text-center mb-24">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.02] border border-white/[0.05] text-[11px] font-medium tracking-widest uppercase text-[#86868B] mb-4">
+              Reseller Platform
+            </div>
+            <h2 className="text-3xl sm:text-4xl lg:text-[3.5rem] font-bold text-white mb-6 tracking-tight leading-tight">
+              Engineered for high-margin SaaS revenue
             </h2>
-            <p className="text-slate-600 dark:text-slate-400 text-xl max-w-3xl mx-auto">
-              Our experts build, train, and manage your AI agent so you don&apos;t have to lift a finger.
+            <p className="text-[#86868B] text-xl max-w-3xl mx-auto leading-relaxed">
+              Everything you need to deliver, brand, and scale client chatbots under your own company label.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
-            {/* Feature Cards - Minimalist */}
             {[
-              { title: 'Trained on Your Data', desc: 'We curate your knowledge base from your website and docs. Accurate, on-brand responses.', icon: Shield },
-              { title: 'Deflect 80% of Tickets', desc: 'Answer repetitive questions instantly. Zero wait time for customers.', icon: MessageSquare },
-              { title: 'Qualify & Book Meetings', desc: 'Capture emails, qualify prospects, and schedule demos automatically.', icon: Users },
-              { title: 'Monthly Optimization', desc: 'We review your chat logs and tweak the AI for better results.', icon: Zap },
-              { title: '24/7 Availability', desc: 'Give customers instant answers at 2 AM. Always on, always ready.', icon: Clock },
-              { title: 'Human Handoff', desc: 'Get notified in real-time for complex issues. Jump in when needed.', icon: ArrowRight },
-              { title: 'Real-Time Analytics', desc: 'See which questions are asked most and where you lose customers.', icon: BarChart3 },
-              { title: 'Multi-Channel Ready', desc: 'Deploy on your website, apps, WhatsApp and more.', icon: Globe }
+              { title: '100% White-Label Branding', desc: 'Custom logos, tailored color schemes, and custom domains map directly to your brand.', icon: Globe },
+              { title: 'Conversational Commerce', desc: 'Natively showcase products and take checkouts directly inside the chatbot window.', icon: DollarSign },
+              { title: 'Appointment Booking', desc: 'Integrated slot scheduling allows leads to book meetings without email back-and-forths.', icon: Calendar },
+              { title: 'Embed Attribution Toggle', desc: 'Remove all branding footers or white-label them as "Powered by [Your Agency]".', icon: Shield },
+              { title: 'Real-Time Human Handoff', desc: 'Let your clients take control of hot chats in real-time when leads require human answers.', icon: Sparkles },
+              { title: 'Multi-Tenant Client Portals', desc: 'Invite clients to their own branded dashboard to check booking logs and conversations.', icon: Users },
+              { title: 'Conversational Statistics', desc: 'Review daily chats, track qualified leads, and prove concrete ROI to your clients.', icon: BarChart3 },
+              { title: 'Sub-Second Streaming', desc: 'Powered by PgVector and Gemini 2.5 Flash Lite for ultra-fast, natural streaming replies.', icon: Zap }
             ].map((feature, i) => (
-              <div key={i} className="group relative p-6 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-white/10 rounded-xl hover:border-slate-400 dark:hover:border-white/30 transition-all duration-200">
-                <div className="w-10 h-10 rounded-lg bg-slate-100 dark:bg-white/5 flex items-center justify-center mb-5 text-slate-900 dark:text-white group-hover:bg-slate-200 dark:group-hover:bg-white/10 transition-colors">
+              <div key={i} className="group relative p-6 bg-[#0F1015]/40 border border-white/[0.04] rounded-2xl hover:border-white/[0.08] hover:bg-[#16161D]/60 transition-all duration-300">
+                <div className="w-10 h-10 rounded-xl bg-white/[0.02] border border-white/[0.04] flex items-center justify-center mb-5 text-[#0071E3] group-hover:bg-[#0071E3]/10 group-hover:border-[#0071E3]/20 transition-all duration-300">
                   <feature.icon className="w-5 h-5" strokeWidth={1.5} />
                 </div>
-                <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">{feature.title}</h3>
-                <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                <h3 className="text-lg font-bold text-white mb-2">{feature.title}</h3>
+                <p className="text-sm text-[#86868B] leading-relaxed">
                   {feature.desc}
                 </p>
               </div>
@@ -289,27 +213,30 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* Why ChatDock AI - Clean design */}
-      <section className="py-24">
+      {/* Why ChatDock Section */}
+      <section className="py-28 relative">
         <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-900 dark:text-white mb-4 tracking-tight">
-              Why ChatDock AI
+          <div className="text-center mb-20">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.02] border border-white/[0.05] text-[11px] font-medium tracking-widest uppercase text-[#86868B] mb-4">
+              Our Edge
+            </div>
+            <h2 className="text-3xl sm:text-4xl lg:text-[3.5rem] font-bold text-white mb-4 tracking-tight">
+              Why agencies choose ChatDock
             </h2>
-            <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
-              Purpose‑built for accurate answers, fast experiences, and seamless handoffs.
+            <p className="text-lg text-[#86868B] max-w-2xl mx-auto leading-relaxed">
+              Purpose-built to deliver conversions, low operational costs, and high gross margins.
             </p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
-              { title: 'Accurate by design', desc: 'Retrieval‑augmented generation uses your content to answer without hallucinated guesses.' },
-              { title: 'Streamed, fast replies', desc: 'Sub‑second time‑to‑first‑token keeps users engaged with natural, flowing responses.' },
-              { title: 'Live agent handoff', desc: 'Escalate to a human instantly for edge cases without losing context.' },
-              { title: 'Meetings when needed', desc: 'Built‑in booking link lets qualified users schedule time without email back‑and‑forth.' }
+              { title: 'High-Ticket Value', desc: 'Avoid basic Q&A bots. Deliver conversational pipelines that natively book meetings and close invoices.' },
+              { title: 'Ultra-Low Cost Base', desc: 'Leverage hyper-optimized API endpoints so supporting thousands of chats costs pennies.' },
+              { title: 'Dynamic Style Sync', desc: 'Sync widget and dashboard designs with your agency colors in one click.' },
+              { title: 'Zero Operations Overhead', desc: 'Our scraper and PgVector embedding engines handle the engineering so you can focus on sales.' }
             ].map((item, i) => (
-              <div key={i} className="glass-card-light dark:glass-card p-6 rounded-xl">
-                <h3 className="font-semibold text-slate-900 dark:text-white mb-2">{item.title}</h3>
-                <p className="text-sm text-slate-600 dark:text-slate-400">{item.desc}</p>
+              <div key={i} className="bg-[#0F1015]/40 border border-white/[0.04] p-6 rounded-2xl backdrop-blur-2xl">
+                <h3 className="font-bold text-white mb-2 text-base">{item.title}</h3>
+                <p className="text-sm text-[#86868B] leading-relaxed">{item.desc}</p>
               </div>
             ))}
           </div>
@@ -319,59 +246,60 @@ export default async function Home() {
       {/* Pricing Section */}
       <PricingSection />
 
-      {/* Final CTA - Minimalist */}
-      <section className="py-32 relative overflow-hidden bg-white dark:bg-slate-950">
+      {/* Final CTA */}
+      <section className="py-32 relative overflow-hidden border-t border-white/[0.03]">
         <div className="container mx-auto px-6 sm:px-8 lg:px-12 relative z-10">
-          <div className="max-w-4xl mx-auto text-center border border-slate-200 dark:border-white/10 rounded-2xl p-12 md:p-20 bg-slate-50/50 dark:bg-white/[0.02]">
-            <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold text-slate-900 dark:text-white mb-8 tracking-tight">
-              Stop Answering the<br />Same Questions
-            </h2>
-            <p className="text-slate-600 dark:text-slate-400 text-lg md:text-xl mb-10 max-w-2xl mx-auto">
-              Let AI handle the routine. You focus on growing your business.
-            </p>
-            <a href="https://cal.com/prathap-reddy-caxwn4/15min" target="_blank" rel="noopener noreferrer">
-              <Button
-                className="h-14 px-12 bg-slate-900 text-white hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200 text-lg font-medium rounded-full shadow-sm hover:shadow-md transition-all"
-              >
-                Get Your Free Demo <ArrowRight className="w-5 h-5 ml-2" />
-              </Button>
-            </a>
-            <p className="text-slate-500 text-sm mt-8 font-medium">
-              ✓ Expert setup included • ✓ Results in 24 hours • ✓ No risk
-            </p>
+          <div className="max-w-4xl mx-auto text-center border border-white/[0.04] rounded-3xl p-12 md:p-20 bg-[#0F1015]/40 backdrop-blur-2xl relative overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
+            <div className="absolute top-[-30%] left-1/2 -translate-x-1/2 w-[350px] h-[350px] bg-[#0071E3]/5 blur-[80px] rounded-full pointer-events-none" />
 
+            <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold text-white mb-8 tracking-tight leading-tight">
+              Launch Your White-Label<br />Agency Business Today
+            </h2>
+            <p className="text-[#86868B] text-lg md:text-xl mb-10 max-w-2xl mx-auto leading-relaxed">
+              Start reselling custom transactional AI chatbots to your local clients and unlock high-margin recurring MRR.
+            </p>
+            <Link href="/auth/sign-up">
+              <Button
+                className="h-14 px-12 bg-white text-slate-950 hover:bg-slate-200 text-lg font-bold rounded-full shadow-[0_0_30px_rgba(255,255,255,0.08)] transition-all duration-300"
+              >
+                Create Reseller Account <ArrowRight className="w-5 h-5 ml-2" />
+              </Button>
+            </Link>
+            <p className="text-[#86868B] text-xs mt-8 font-medium">
+              ✓ No credit card required • ✓ Fully brandable under your domain • ✓ 100 free monthly credits included
+            </p>
           </div>
         </div>
       </section>
 
-      {/* Learn more (Blog CTAs) */}
-      <section className="py-24 border-t border-slate-200 dark:border-white/5">
+      {/* Learn more (Blog Articles) */}
+      <section className="py-24 border-t border-white/[0.03] relative">
         <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 dark:text-white mb-3 tracking-tight">
-              Learn more
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-3 tracking-tight">
+              Agency Masterclass
             </h2>
-            <p className="text-base text-slate-600 dark:text-slate-400">
-              Deep dives on setup, RAG accuracy, and support automation.
+            <p className="text-base text-[#86868B]">
+              Deep dives on reseller setups, transactional RAG workflows, and conversion metrics.
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[
-              { href: '/blogs/how-to-train-an-ai-website-chatbot-on-your-docs', title: 'Train an AI chatbot on your docs', desc: 'Step‑by‑step: connect sources, chunk content, and ensure accurate answers.' },
-              { href: '/blogs/ai-chatbot-for-website', title: 'AI chatbot for your website', desc: 'Benefits, setup, and best practices for 24/7 self‑service.' },
-              { href: '/blogs/customer-support-ai', title: 'Customer support AI', desc: 'Reduce ticket volume with AI while keeping human handoff seamless.' }
+              { href: '/blogs/how-to-train-an-ai-website-chatbot-on-your-docs', title: 'Scaling Agency Recurring Revenue', desc: 'A step-by-step masterclass on pricing, packaging, and delivering high-ticket custom bots.' },
+              { href: '/blogs/ai-chatbot-for-website', title: 'Transactional Bot Setups', desc: 'How to configure native e-commerce checkouts and calendars inside your client widgets.' },
+              { href: '/blogs/customer-support-ai', title: 'Building Bulletproof RAG', desc: 'Ensure accurate, hallucination-free answers using our PgVector crawl engines.' }
             ].map((blog, i) => (
               <Link key={i} href={blog.href} className="group">
-                <div className="glass-card-light dark:glass-card h-full p-8 rounded-xl hover:bg-slate-50 dark:hover:bg-white/10 transition-colors">
-                  <h3 className="font-semibold text-slate-900 dark:text-white mb-3 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                <div className="bg-[#0F1015]/40 border border-white/[0.04] h-full p-8 rounded-2xl hover:border-white/[0.08] hover:bg-[#16161D]/60 transition-all duration-300">
+                  <h3 className="font-bold text-white mb-3 text-lg group-hover:text-[#0071E3] transition-colors">
                     {[...Array(5)].map((_, starIndex) => (
-                      <svg key={starIndex} className={`w-3 h-3 inline-block mr-0.5 ${starIndex < 5 ? 'text-slate-900 dark:text-white' : 'text-slate-300 dark:text-slate-700'}`} fill="currentColor" viewBox="0 0 20 20">
+                      <svg key={starIndex} className="w-3.5 h-3.5 inline-block mr-0.5 text-[#0071E3]" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.538 1.118l-2.8-2.034a1 1 0 00-1.176 0l-2.8 2.034c-.783.57-1.838-.197-1.538-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.381-1.81.588-1.81h3.462a1 1 0 00.95-.69l1.07-3.292z" />
                       </svg>
                     ))}
-                    {blog.title}
+                    <span className="ml-1">{blog.title}</span>
                   </h3>
-                  <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                  <p className="text-sm text-[#86868B] leading-relaxed">
                     {blog.desc}
                   </p>
                 </div>

@@ -30,15 +30,15 @@ const MaxMenu = ({ current, domains, onExpand, onSignOut, user }: Props) => {
     <div className="py-4 px-5 flex flex-col h-full text-white">
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-3 animate-fade-in opacity-0 delay-300 fill-mode-forwards">
-          <Image
-            src="/images/logo.svg"
-            alt="Logo"
-            sizes="100vw"
-            style={{ width: '40px', height: 'auto' }}
-            width={0}
-            height={0}
-          />
-          <span className="text-lg font-semibold tracking-tight">ChatDock AI</span>
+          <div className="relative w-8 h-8">
+            <Image
+              src="/images/logo.png"
+              alt="Logo"
+              fill
+              className="object-contain rounded-lg"
+            />
+          </div>
+          <span className="text-lg font-bold tracking-tight">ChatDock AI</span>
         </div>
         <Menu
           className="cursor-pointer animate-fade-in opacity-0 delay-300 fill-mode-forwards text-white/70 hover:text-white"
@@ -47,7 +47,7 @@ const MaxMenu = ({ current, domains, onExpand, onSignOut, user }: Props) => {
       </div>
       <div className="animate-fade-in opacity-0 delay-300 fill-mode-forwards flex flex-col justify-between h-full pt-10">
         <div className="flex flex-col">
-          <p className="text-xs text-white mb-3 font-heading tracking-[0.08em]">MENU</p>
+          <p className="text-xs text-white/60 mb-3 font-heading tracking-[0.08em]">MENU</p>
           {SIDE_BAR_MENU.map((menu, key) => (
             <MenuItem
               size="max"
@@ -86,19 +86,19 @@ const MaxMenu = ({ current, domains, onExpand, onSignOut, user }: Props) => {
                 </div>
               </button>
               {showDropdown && (
-                <div className="absolute bottom-full left-0 right-0 mb-2 bg-white/95 backdrop-blur border border-white/40 rounded-base shadow-shadow overflow-hidden">
-                  <div className="px-4 py-3 border-b border-white/30">
-                    <p className="text-sm font-heading text-brand-primary">{user.fullname}</p>
-                    <p className="text-xs text-brand-primary/70">{user.email}</p>
+                <div className="absolute bottom-full left-0 right-0 mb-2 bg-[#09090b]/95 backdrop-blur border border-white/[0.08] rounded-base shadow-shadow overflow-hidden">
+                  <div className="px-4 py-3 border-b border-white/[0.08]">
+                    <p className="text-sm font-heading text-white">{user.fullname}</p>
+                    <p className="text-xs text-white/60">{user.email}</p>
                   </div>
                   <button
                     onClick={() => {
                       setShowDropdown(false)
                       onSignOut()
                     }}
-                    className="flex items-center gap-2 px-4 py-2 w-full hover:bg-brand-base-100 transition-all text-left font-base text-brand-primary"
+                    className="flex items-center gap-2 px-4 py-2.5 w-full hover:bg-white/10 transition-all text-left font-base text-white/95"
                   >
-                    <LogOut className="w-4 h-4" />
+                    <LogOut className="w-4 h-4 text-white/70" />
                     <span className="text-sm">Sign out</span>
                   </button>
                 </div>

@@ -711,3 +711,75 @@ export const onCreateNewDomainProduct = async (
     console.log(error)
   }
 }
+
+export const onUpdateWhiteLabelSettings = async (values: {
+  agencyName?: string
+  agencyLogo?: string
+  agencyColor?: string
+  agencyDomain?: string
+  hideBranding?: boolean
+}) => {
+  try {
+    const user = await currentUser()
+    if (!user) return { status: 401, message: 'Unauthorized' }
+
+    const updated = await client.user.update({
+      where: {
+        clerkId: user.id,
+      },
+      data: {
+        agencyName: values.agencyName,
+        agencyLogo: values.agencyLogo,
+        agencyColor: values.agencyColor,
+        agencyDomain: values.agencyDomain,
+        hideBranding: values.hideBranding,
+      },
+    })
+
+    if (updated) {
+      return {
+        status: 200,
+        message: 'Branding settings updated successfully',
+        data: {
+          agencyName: updated.agencyName,
+          agencyLogo: updated.agencyLogo,
+          agencyColor: updated.agencyColor,
+          agencyDomain: updated.agencyDomain,
+          hideBranding: updated.hideBranding,
+        }
+      }
+    }
+    return { status: 400, message: 'Failed to update settings' }
+  } catch (error) {
+    console.log(error)
+    return { status: 500, message: 'Internal server error' }
+  }
+}
+
+export const onGetWhiteLabelSettings = async () => {
+  try {
+    const user = await currentUser()
+    if (!user) return { status: 401, message: 'Unauthorized' }
+
+    const profile = await client.user.findUnique({
+      where: {
+        clerkId: user.id,
+      },
+      select: {
+        agencyName: true,
+        agencyLogo: true,
+        agencyColor: true,
+        agencyDomain: true,
+        hideBranding: true,
+      },
+    })
+
+    return {
+      status: 200,
+      data: profile,
+    }
+  } catch (error) {
+    console.log(error)
+    return { status: 500, message: 'Internal server error' }
+  }
+}

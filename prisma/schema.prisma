@@ -17,6 +17,11 @@ model User {
   updatedAt      DateTime   @updatedAt
   dodoMerchantId String?
   email          String?
+  agencyName     String?    @default("ChatDock")
+  agencyLogo     String?
+  agencyColor    String?    @default("#0f172a")
+  agencyDomain   String?    @unique
+  hideBranding   Boolean    @default(false)
   Account        Account[]
   subscription   Billings?
   campaign       Campaign[]

@@ -6,7 +6,7 @@ import { countTokens } from './tokens'
 
 // Create OpenAI client (same setup as your chatbot)
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+  apiKey: process.env.OPENAI_API_KEY || 'build_time_dummy_openai_key',
 })
 
 /**

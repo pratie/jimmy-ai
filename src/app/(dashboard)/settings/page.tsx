@@ -3,6 +3,7 @@ import InfoBar from '@/components/infobar'
 import BillingSettings from '@/components/settings/billing-settings'
 import ChangePassword from '@/components/settings/change-password'
 import PaymentSuccess from '@/components/settings/payment-success'
+import WhiteLabelBranding from '@/components/settings/white-label-form'
 import { PlanType } from '@/lib/plans'
 import React from 'react'
 
@@ -29,6 +30,7 @@ const Page = async ({
           />
         )}
         <BillingSettings />
+        <WhiteLabelBranding />
         <ChangePassword />
       </div>
     </>

@@ -69,6 +69,7 @@ function setDomainInCache(domainId: string, value: DomainConfig) {
 }
 
 export const maxDuration = 30
+export const dynamic = 'force-dynamic'
 
 // Helper to remove markdown bold syntax from text
 function removeMarkdownBold(text: string): string {

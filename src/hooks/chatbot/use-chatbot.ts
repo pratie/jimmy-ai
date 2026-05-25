@@ -54,6 +54,7 @@ export const useChatBot = (options?: UseChatBotOptions) => {
       name: string
       icon: string | null
       showBranding?: boolean
+      agencyName?: string
       chatBot: {
         id: string
         icon: string | null

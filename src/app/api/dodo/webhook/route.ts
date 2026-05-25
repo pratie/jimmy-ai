@@ -3,7 +3,14 @@ import { NextRequest, NextResponse } from 'next/server'
 import { Webhook } from 'standardwebhooks'
 import { PlanType } from '@/lib/plans'
 
-const webhook = new Webhook(process.env.DODO_WEBHOOK_SECRET!)
+let webhookInstance: Webhook | null = null
+
+function getWebhookInstance() {
+  if (!webhookInstance) {
+    webhookInstance = new Webhook(process.env.DODO_WEBHOOK_SECRET || 'build_time_dummy_secret')
+  }
+  return webhookInstance
+}
 
 // Map old Dodo plan names to new PlanType
 function mapDodoPlanToNew(dodoPlan: string): PlanType {
@@ -26,7 +33,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Verify webhook signature
-    await webhook.verify(rawBody, webhookHeaders)
+    await getWebhookInstance().verify(rawBody, webhookHeaders)
     const payload = JSON.parse(rawBody)
 
     console.log('Dodo webhook received:', payload.type)

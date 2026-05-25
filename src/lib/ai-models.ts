@@ -1,8 +1,21 @@
 // src/lib/ai-models.ts
 // Multi-provider AI model registry for Vercel AI SDK
-import { openai } from '@ai-sdk/openai'
-import { anthropic } from '@ai-sdk/anthropic'
-import { google } from '@ai-sdk/google'
+import { createOpenAI } from '@ai-sdk/openai'
+import { createAnthropic } from '@ai-sdk/anthropic'
+import { createGoogleGenerativeAI } from '@ai-sdk/google'
+
+// Safely initialize provider instances with fallback keys during build time
+const openai = createOpenAI({
+  apiKey: process.env.OPENAI_API_KEY || 'build_time_dummy_openai_key'
+})
+
+const anthropic = createAnthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY || 'build_time_dummy_anthropic_key'
+})
+
+const google = createGoogleGenerativeAI({
+  apiKey: process.env.GEMINI_API_KEY || 'build_time_dummy_gemini_key'
+})
 
 /**
  * Get AI model from string identifier with automatic provider detection
