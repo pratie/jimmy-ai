@@ -34,12 +34,12 @@ export const MinMenu = ({
   const [showDropdown, setShowDropdown] = useState(false)
 
   return (
-    <div className="p-3 flex flex-col items-center h-full text-white">
+    <div className="p-3 flex flex-col items-center h-full text-sidebar-foreground">
       <button
         onClick={onShrink}
-        className="animate-fade-in opacity-0 delay-300 fill-mode-forwards cursor-pointer w-10 h-10 flex items-center justify-center rounded-lg bg-white/5 hover:bg-white/15 transition-all"
+        className="animate-fade-in opacity-0 delay-300 fill-mode-forwards cursor-pointer w-10 h-10 flex items-center justify-center rounded-lg bg-sidebar-muted/50 hover:bg-sidebar-muted transition-all"
       >
-        <Menu className="w-5 h-5 text-white" />
+        <Menu className="w-5 h-5 text-sidebar-foreground" />
       </button>
       <div className="animate-fade-in opacity-0 delay-300 fill-mode-forwards flex flex-col justify-between h-full pt-10">
         <div className="flex flex-col">
@@ -69,24 +69,24 @@ export const MinMenu = ({
             <div className="relative">
               <button
                 onClick={() => setShowDropdown(!showDropdown)}
-                className="flex items-center justify-center w-10 h-10 rounded-full bg-white/15 hover:bg-white/25 transition"
+                className="flex items-center justify-center w-10 h-10 rounded-full bg-sidebar-muted hover:bg-sidebar-muted/80 transition"
               >
-                <User className="w-5 h-5 text-white" />
+                <User className="w-5 h-5 text-sidebar-foreground" />
               </button>
               {showDropdown && (
-                <div className="absolute bottom-full left-full ml-2 mb-0 bg-[#09090b]/95 backdrop-blur border border-white/[0.08] rounded-base shadow-shadow overflow-hidden w-48">
-                  <div className="px-4 py-3 border-b border-white/[0.08]">
-                    <p className="text-sm font-medium text-white truncate">{user.fullname}</p>
-                    <p className="text-xs text-white/60 truncate">{user.email}</p>
+                <div className="absolute bottom-full left-full ml-2 mb-0 bg-sidebar/95 backdrop-blur border border-sidebar-border rounded-lg shadow-large overflow-hidden w-48">
+                  <div className="px-4 py-3 border-b border-sidebar-border">
+                    <p className="text-sm font-medium text-sidebar-foreground truncate">{user.fullname}</p>
+                    <p className="text-xs text-sidebar-foreground/60 truncate">{user.email}</p>
                   </div>
                   <button
                     onClick={() => {
                       setShowDropdown(false)
                       onSignOut()
                     }}
-                    className="flex items-center gap-2 px-4 py-2.5 w-full hover:bg-white/10 transition-colors text-left text-white/95"
+                    className="flex items-center gap-2 px-4 py-2.5 w-full hover:bg-sidebar-muted transition-colors text-left text-sidebar-foreground/95"
                   >
-                    <LogOut className="w-4 h-4 text-white/70" />
+                    <LogOut className="w-4 h-4 text-sidebar-foreground/70" />
                     <span className="text-sm">Sign out</span>
                   </button>
                 </div>

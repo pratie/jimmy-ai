@@ -1,23 +1,14 @@
 "use client"
 
-import { useTheme } from 'next-themes'
-import { Moon, Sun } from 'lucide-react'
 import Image from 'next/image'
 import * as React from 'react'
 import Link from 'next/link'
 
 function NavBar() {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false)
-  const [mounted, setMounted] = React.useState(false)
-
-  React.useEffect(() => {
-    setMounted(true)
-  }, [])
-
-  const { setTheme, theme } = useTheme()
 
   return (
-    <nav className="fixed top-0 w-full bg-white/80 dark:bg-slate-950/50 backdrop-blur-xl z-50 border-b border-slate-200/50 dark:border-white/5 transition-all duration-300">
+    <nav className="fixed top-0 w-full bg-background/80 backdrop-blur-xl z-50 border-b border-border transition-all duration-300">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo - Clean and minimal */}
@@ -30,7 +21,7 @@ function NavBar() {
                 className="object-contain rounded-lg"
               />
             </div>
-            <span className="font-bold text-lg tracking-tight text-slate-900 dark:text-white">
+            <span className="font-bold text-lg tracking-tight text-foreground">
               ChatDock AI
             </span>
           </Link>
@@ -39,40 +30,29 @@ function NavBar() {
           <div className="hidden md:flex items-center gap-1">
             <a
               href="#features"
-              className="px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors rounded-full hover:bg-slate-100 dark:hover:bg-white/5"
+              className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors rounded-full hover:bg-accent"
             >
               Features
             </a>
             <a
               href="#pricing"
-              className="px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors rounded-full hover:bg-slate-100 dark:hover:bg-white/5"
+              className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors rounded-full hover:bg-accent"
             >
               Pricing
             </a>
             <Link
               href="/blogs"
-              className="px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors rounded-full hover:bg-slate-100 dark:hover:bg-white/5"
+              className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors rounded-full hover:bg-accent"
             >
               Blog
             </Link>
           </div>
 
-          {/* Desktop CTA & Theme Toggle */}
+          {/* Desktop CTA */}
           <div className="hidden md:flex items-center gap-3">
-            <button
-              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-              className="p-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors rounded-full hover:bg-slate-100 dark:hover:bg-white/5"
-              aria-label="Toggle theme"
-            >
-              {mounted && (theme === 'dark' ? (
-                <Sun className="w-5 h-5" />
-              ) : (
-                <Moon className="w-5 h-5" />
-              ))}
-            </button>
             <Link
               href="/auth/sign-in"
-              className="px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
+              className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
             >
               Sign in
             </Link>
@@ -80,7 +60,7 @@ function NavBar() {
               href="https://cal.com/prathap-reddy-caxwn4/15min"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center px-5 py-2 text-sm font-medium text-white bg-slate-900 dark:bg-white dark:text-slate-900 rounded-full hover:bg-slate-800 dark:hover:bg-slate-200 transition-all duration-200 shadow-[0_0_10px_rgba(0,0,0,0.1)] dark:shadow-[0_0_15px_rgba(255,255,255,0.1)]"
+              className="inline-flex items-center justify-center px-5 py-2 text-sm font-medium text-primary-foreground bg-primary rounded-full hover:bg-primary/90 transition-all duration-200 shadow-glow"
             >
               Book Demo
             </a>
@@ -89,17 +69,7 @@ function NavBar() {
           {/* Mobile Menu Button */}
           <div className="flex items-center gap-4 md:hidden">
             <button
-              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-              className="p-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
-            >
-              {mounted && (theme === 'dark' ? (
-                <Sun className="w-5 h-5" />
-              ) : (
-                <Moon className="w-5 h-5" />
-              ))}
-            </button>
-            <button
-              className="p-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+              className="p-2 text-muted-foreground hover:text-foreground"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
               {isMenuOpen ? (
@@ -118,33 +88,33 @@ function NavBar() {
 
       {/* Mobile Menu Dropdown */}
       {isMenuOpen && (
-        <div className="md:hidden border-t border-slate-200/50 dark:border-white/5 bg-white/95 dark:bg-slate-950/95 backdrop-blur-xl">
+        <div className="md:hidden border-t border-border bg-background/95 backdrop-blur-xl">
           <div className="px-6 py-4 space-y-4">
             <a
               href="#features"
-              className="block text-base font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+              className="block text-base font-medium text-muted-foreground hover:text-foreground"
               onClick={() => setIsMenuOpen(false)}
             >
               Features
             </a>
             <a
               href="#pricing"
-              className="block text-base font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+              className="block text-base font-medium text-muted-foreground hover:text-foreground"
               onClick={() => setIsMenuOpen(false)}
             >
               Pricing
             </a>
             <Link
               href="/blogs"
-              className="block text-base font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+              className="block text-base font-medium text-muted-foreground hover:text-foreground"
               onClick={() => setIsMenuOpen(false)}
             >
               Blog
             </Link>
-            <div className="pt-4 border-t border-slate-200/50 dark:border-white/5 flex flex-col gap-3">
+            <div className="pt-4 border-t border-border flex flex-col gap-3">
               <Link
                 href="/auth/sign-in"
-                className="block text-center text-base font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                className="block text-center text-base font-medium text-muted-foreground hover:text-foreground"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Sign in
@@ -153,7 +123,7 @@ function NavBar() {
                 href="https://cal.com/prathap-reddy-caxwn4/15min"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="block text-center px-5 py-3 text-base font-medium text-white bg-slate-900 dark:bg-white dark:text-slate-900 rounded-full hover:bg-slate-800 dark:hover:bg-slate-200 transition-all"
+                className="block text-center px-5 py-3 text-base font-medium text-primary-foreground bg-primary rounded-full hover:bg-primary/90 transition-all"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Book Demo

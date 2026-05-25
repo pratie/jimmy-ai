@@ -20,7 +20,7 @@ const BreadCrumb = (props: Props) => {
   return (
     <div className="flex flex-col">
       <div className="flex gap-5 items-center">
-        <h2 className="text-3xl font-bold capitalize text-white">
+        <h2 className="text-3xl font-bold capitalize text-foreground">
           {page}
         </h2>
         {page === 'conversation' && chatRoom && (
@@ -37,7 +37,7 @@ const BreadCrumb = (props: Props) => {
         )}
       </div>
       {page !== 'conversation' && (
-        <p className="text-white/60 text-sm mt-2 max-w-2xl">
+        <p className="text-muted-foreground text-sm mt-2 max-w-2xl">
           {page == 'settings'
             ? 'Manage your account settings, preferences and integrations'
             : page == 'dashboard'

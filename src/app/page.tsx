@@ -1,9 +1,6 @@
 import type { Metadata } from 'next'
 import NavBar from '@/components/navbar'
 import { Button } from '@/components/ui/button'
-import Image from 'next/image'
-import DashboardImg from '../../public/images/Dashboard.png'
-import { AspectRatio } from '@/components/ui/aspect-ratio'
 import Link from 'next/link'
 import PricingSection from '@/components/landing/pricing-section'
 import Script from 'next/script'
@@ -23,13 +20,13 @@ export const metadata: Metadata = {
 
 export default async function Home() {
   return (
-    <main className="min-h-screen bg-[#050507] text-[#F5F5F7] selection:bg-[#0071E3] selection:text-white relative overflow-x-hidden font-sans antialiased">
+    <main className="dark min-h-screen bg-background text-foreground selection:bg-primary selection:text-primary-foreground relative overflow-x-hidden font-sans antialiased">
       {/* Faint Premium Grid Layer */}
       <div className="absolute inset-0 z-0 pointer-events-none bg-grid-white/[0.005] bg-[size:60px_60px]" />
 
       {/* Restrained Premium Ambient Background Glow */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-[600px] pointer-events-none -z-10 overflow-hidden">
-        <div className="absolute top-[-25%] left-[25%] w-[50%] h-[50%] rounded-full bg-[#0071E3]/5 blur-[120px]" />
+        <div className="absolute top-[-25%] left-[25%] w-[50%] h-[50%] rounded-full bg-primary/5 blur-[120px]" />
       </div>
 
       <NavBar />
@@ -40,27 +37,27 @@ export default async function Home() {
 
           {/* Glowing Minimalist Badge */}
           <div className="flex justify-center mb-8">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/[0.02] border border-white/[0.05] text-[11px] font-medium tracking-widest uppercase text-[#86868B]">
-              <span className="h-1.5 w-1.5 rounded-full bg-[#0071E3] animate-pulse" />
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/[0.03] border border-white/[0.06] text-[11px] font-medium tracking-widest uppercase text-muted-foreground">
+              <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
               Agency Reseller Platform
             </div>
           </div>
 
-          {/* Main Headline - Brushed Titanium Aesthetic */}
-          <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-[5.5rem] font-bold tracking-tight text-white mb-6 leading-[1.03]">
+          {/* Main Headline */}
+          <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-[5.5rem] font-bold tracking-tight text-foreground mb-6 leading-[1.03]">
             The White-Label Transactional<br />
-            <span className="bg-gradient-to-b from-white via-[#E2E8F0] to-[#94A3B8] bg-clip-text text-transparent">AI Chatbot Platform.</span>
+            <span className="bg-gradient-to-b from-foreground via-foreground/70 to-muted-foreground bg-clip-text text-transparent">AI Chatbot Platform.</span>
           </h1>
 
           {/* Subheadline */}
-          <p className="text-lg md:text-xl text-[#86868B] max-w-3xl mx-auto mb-16 leading-relaxed font-normal">
+          <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto mb-16 leading-relaxed font-normal">
             Build, brand, and resell custom RAG chatbots that natively book meetings and close sales. Give your clients a fully white-labeled customer portal under your own custom domain. No code required.
           </p>
 
           {/* Spotlight Scraper Sandbox */}
           <div className="max-w-2xl mx-auto relative group">
             {/* Elegant deep blue focus shadow */}
-            <div className="absolute -inset-1.5 bg-[#0071E3]/5 rounded-[2.2rem] blur-[15px] opacity-30 group-hover:opacity-50 transition duration-500"></div>
+            <div className="absolute -inset-1.5 bg-primary/5 rounded-[2.2rem] blur-[15px] opacity-30 group-hover:opacity-50 transition duration-500"></div>
             <div className="relative">
               <InteractivePreviewChat />
             </div>
@@ -69,16 +66,16 @@ export default async function Home() {
       </section>
 
       {/* Niche Targets / Proof */}
-      <section className="py-16 border-b border-white/[0.03] relative">
+      <section className="py-16 border-b border-border relative">
         <div className="container mx-auto px-6 sm:px-8 lg:px-12">
           <div className="text-center mb-8">
-            <p className="text-xs font-semibold text-[#86868B] uppercase tracking-widest">
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">
               Optimized for high-ticket local business verticals
             </p>
           </div>
-          <div className="flex flex-wrap justify-center items-center gap-8 md:gap-16 text-[#86868B]/70 text-sm font-semibold tracking-wider uppercase">
+          <div className="flex flex-wrap justify-center items-center gap-8 md:gap-16 text-muted-foreground/70 text-sm font-semibold tracking-wider uppercase">
             {['Dental Services', 'Medical Clinics', 'Legal Consultancies', 'Home Contractors', 'E-Commerce Stores'].map((niche) => (
-              <div key={niche} className="hover:text-white transition-colors duration-300 cursor-default">
+              <div key={niche} className="hover:text-foreground transition-colors duration-300 cursor-default">
                 {niche}
               </div>
             ))}
@@ -87,7 +84,7 @@ export default async function Home() {
       </section>
 
       {/* Stats Section */}
-      <section className="py-20 border-b border-white/[0.03] relative">
+      <section className="py-20 border-b border-border relative">
         <div className="container mx-auto px-6 sm:px-8 lg:px-12">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12 max-w-5xl mx-auto">
             {[
@@ -97,41 +94,12 @@ export default async function Home() {
               { label: 'Client Set-Up Time', value: '< 5m' },
             ].map((stat, i) => (
               <div key={i} className="text-center group cursor-default">
-                <div className="text-5xl md:text-6xl font-semibold mb-3 text-white tracking-tight">
+                <div className="text-5xl md:text-6xl font-semibold mb-3 text-foreground tracking-tight">
                   {stat.value}
                 </div>
-                <div className="text-[#86868B] text-[11px] font-bold uppercase tracking-wider">{stat.label}</div>
+                <div className="text-muted-foreground text-[11px] font-bold uppercase tracking-wider">{stat.label}</div>
               </div>
             ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Dashboard Preview Section */}
-      <section className="py-28 relative">
-        <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.02] border border-white/[0.05] text-[11px] font-medium tracking-widest uppercase text-[#86868B] mb-4">
-              Command Center
-            </div>
-            <h2 className="text-3xl sm:text-4xl lg:text-[3.5rem] font-bold text-white mb-4 tracking-tight leading-tight">
-              A complete portal for you & your clients
-            </h2>
-            <p className="text-[#86868B] text-lg max-w-2xl mx-auto leading-relaxed">
-              Manage client domains, track chats, train RAG embeddings, and customize widget branding inside your white-labeled agency core.
-            </p>
-          </div>
-          <div className="max-w-5xl mx-auto rounded-2xl border border-white/[0.04] bg-[#0F1015]/40 p-2 shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden backdrop-blur-2xl relative group">
-            <AspectRatio ratio={16 / 9} className="overflow-hidden rounded-xl">
-              <Image
-                src={DashboardImg}
-                alt="ChatDock white label dashboard"
-                fill
-                className="object-contain transition-transform duration-700 group-hover:scale-[1.01]"
-                priority={false}
-                sizes="(min-width: 1280px) 1024px, (min-width: 768px) 80vw, 100vw"
-              />
-            </AspectRatio>
           </div>
         </div>
       </section>
@@ -140,16 +108,16 @@ export default async function Home() {
       <HowItWorks />
 
       {/* Dynamic Data Sourcing */}
-      <section className="py-28 relative border-t border-white/[0.03]">
+      <section className="py-28 relative border-t border-border">
         <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
           <div className="text-center mb-20">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.02] border border-white/[0.05] text-[11px] font-medium tracking-widest uppercase text-[#86868B] mb-4">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.03] border border-white/[0.06] text-[11px] font-medium tracking-widest uppercase text-muted-foreground mb-4">
               Knowledge Base
             </div>
-            <h2 className="text-3xl sm:text-4xl lg:text-[3.5rem] font-bold text-white mb-4 tracking-tight">
+            <h2 className="text-3xl sm:text-4xl lg:text-[3.5rem] font-bold text-foreground mb-4 tracking-tight">
               Dynamic scraping, instant embeddings
             </h2>
-            <p className="text-lg text-[#86868B] max-w-2xl mx-auto leading-relaxed">
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
               Train client bots in seconds using our multi-channel RAG engine.
             </p>
           </div>
@@ -160,12 +128,12 @@ export default async function Home() {
               { icon: '❓', title: 'Active FAQs', desc: 'Input custom question/answer guardrails for highly predictable, on-brand responses.' },
               { icon: '🛡️', title: 'Advanced Guardrails', desc: 'Tweak brand tone, control temperature limits, or toggle strict FAQ mode.' }
             ].map((item, i) => (
-              <div key={i} className="bg-[#0F1015]/40 border border-white/[0.04] p-6 rounded-2xl hover:bg-[#16161D]/60 hover:border-white/[0.08] transition-all duration-300 backdrop-blur-2xl group">
-                <div className="w-12 h-12 bg-white/[0.02] border border-white/[0.04] rounded-xl flex items-center justify-center mb-4 text-2xl group-hover:bg-[#0071E3]/10 group-hover:border-[#0071E3]/20 transition-all duration-300">
+              <div key={i} className="bg-card/40 border border-border p-6 rounded-2xl hover:bg-card/60 hover:border-border/80 transition-all duration-300 backdrop-blur-2xl group">
+                <div className="w-12 h-12 bg-white/[0.03] border border-border rounded-xl flex items-center justify-center mb-4 text-2xl group-hover:bg-primary/10 group-hover:border-primary/20 transition-all duration-300">
                   {item.icon}
                 </div>
-                <h3 className="font-bold text-white mb-2 text-lg">{item.title}</h3>
-                <p className="text-sm text-[#86868B] leading-relaxed">{item.desc}</p>
+                <h3 className="font-bold text-foreground mb-2 text-lg">{item.title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
               </div>
             ))}
           </div>
@@ -173,17 +141,17 @@ export default async function Home() {
       </section>
 
       {/* Features Grid - Reseller and B2B Agency Focused */}
-      <section id="features" className="py-32 border-t border-b border-white/[0.03] relative">
+      <section id="features" className="py-32 border-t border-b border-border relative">
         <div className="container mx-auto px-6 sm:px-8 lg:px-12 relative z-10">
 
           <div className="text-center mb-24">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.02] border border-white/[0.05] text-[11px] font-medium tracking-widest uppercase text-[#86868B] mb-4">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.03] border border-white/[0.06] text-[11px] font-medium tracking-widest uppercase text-muted-foreground mb-4">
               Reseller Platform
             </div>
-            <h2 className="text-3xl sm:text-4xl lg:text-[3.5rem] font-bold text-white mb-6 tracking-tight leading-tight">
+            <h2 className="text-3xl sm:text-4xl lg:text-[3.5rem] font-bold text-foreground mb-6 tracking-tight leading-tight">
               Engineered for high-margin SaaS revenue
             </h2>
-            <p className="text-[#86868B] text-xl max-w-3xl mx-auto leading-relaxed">
+            <p className="text-muted-foreground text-xl max-w-3xl mx-auto leading-relaxed">
               Everything you need to deliver, brand, and scale client chatbots under your own company label.
             </p>
           </div>
@@ -199,12 +167,12 @@ export default async function Home() {
               { title: 'Conversational Statistics', desc: 'Review daily chats, track qualified leads, and prove concrete ROI to your clients.', icon: BarChart3 },
               { title: 'Sub-Second Streaming', desc: 'Powered by PgVector and Gemini 2.5 Flash Lite for ultra-fast, natural streaming replies.', icon: Zap }
             ].map((feature, i) => (
-              <div key={i} className="group relative p-6 bg-[#0F1015]/40 border border-white/[0.04] rounded-2xl hover:border-white/[0.08] hover:bg-[#16161D]/60 transition-all duration-300">
-                <div className="w-10 h-10 rounded-xl bg-white/[0.02] border border-white/[0.04] flex items-center justify-center mb-5 text-[#0071E3] group-hover:bg-[#0071E3]/10 group-hover:border-[#0071E3]/20 transition-all duration-300">
+              <div key={i} className="group relative p-6 bg-card/40 border border-border rounded-2xl hover:border-border/80 hover:bg-card/60 transition-all duration-300">
+                <div className="w-10 h-10 rounded-xl bg-white/[0.03] border border-border flex items-center justify-center mb-5 text-primary group-hover:bg-primary/10 group-hover:border-primary/20 transition-all duration-300">
                   <feature.icon className="w-5 h-5" strokeWidth={1.5} />
                 </div>
-                <h3 className="text-lg font-bold text-white mb-2">{feature.title}</h3>
-                <p className="text-sm text-[#86868B] leading-relaxed">
+                <h3 className="text-lg font-bold text-foreground mb-2">{feature.title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">
                   {feature.desc}
                 </p>
               </div>
@@ -217,13 +185,13 @@ export default async function Home() {
       <section className="py-28 relative">
         <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
           <div className="text-center mb-20">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.02] border border-white/[0.05] text-[11px] font-medium tracking-widest uppercase text-[#86868B] mb-4">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.03] border border-white/[0.06] text-[11px] font-medium tracking-widest uppercase text-muted-foreground mb-4">
               Our Edge
             </div>
-            <h2 className="text-3xl sm:text-4xl lg:text-[3.5rem] font-bold text-white mb-4 tracking-tight">
+            <h2 className="text-3xl sm:text-4xl lg:text-[3.5rem] font-bold text-foreground mb-4 tracking-tight">
               Why agencies choose ChatDock
             </h2>
-            <p className="text-lg text-[#86868B] max-w-2xl mx-auto leading-relaxed">
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
               Purpose-built to deliver conversions, low operational costs, and high gross margins.
             </p>
           </div>
@@ -234,9 +202,9 @@ export default async function Home() {
               { title: 'Dynamic Style Sync', desc: 'Sync widget and dashboard designs with your agency colors in one click.' },
               { title: 'Zero Operations Overhead', desc: 'Our scraper and PgVector embedding engines handle the engineering so you can focus on sales.' }
             ].map((item, i) => (
-              <div key={i} className="bg-[#0F1015]/40 border border-white/[0.04] p-6 rounded-2xl backdrop-blur-2xl">
-                <h3 className="font-bold text-white mb-2 text-base">{item.title}</h3>
-                <p className="text-sm text-[#86868B] leading-relaxed">{item.desc}</p>
+              <div key={i} className="bg-card/40 border border-border p-6 rounded-2xl backdrop-blur-2xl hover:bg-card/60 hover:border-border/80 transition-all duration-300">
+                <h3 className="font-bold text-foreground mb-2 text-base">{item.title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
               </div>
             ))}
           </div>
@@ -247,25 +215,25 @@ export default async function Home() {
       <PricingSection />
 
       {/* Final CTA */}
-      <section className="py-32 relative overflow-hidden border-t border-white/[0.03]">
+      <section className="py-32 relative overflow-hidden border-t border-border">
         <div className="container mx-auto px-6 sm:px-8 lg:px-12 relative z-10">
-          <div className="max-w-4xl mx-auto text-center border border-white/[0.04] rounded-3xl p-12 md:p-20 bg-[#0F1015]/40 backdrop-blur-2xl relative overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
-            <div className="absolute top-[-30%] left-1/2 -translate-x-1/2 w-[350px] h-[350px] bg-[#0071E3]/5 blur-[80px] rounded-full pointer-events-none" />
+          <div className="max-w-4xl mx-auto text-center border border-border rounded-3xl p-12 md:p-20 bg-card/40 backdrop-blur-2xl relative overflow-hidden shadow-large">
+            <div className="absolute top-[-30%] left-1/2 -translate-x-1/2 w-[350px] h-[350px] bg-primary/5 blur-[80px] rounded-full pointer-events-none" />
 
-            <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold text-white mb-8 tracking-tight leading-tight">
+            <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold text-foreground mb-8 tracking-tight leading-tight">
               Launch Your White-Label<br />Agency Business Today
             </h2>
-            <p className="text-[#86868B] text-lg md:text-xl mb-10 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-muted-foreground text-lg md:text-xl mb-10 max-w-2xl mx-auto leading-relaxed">
               Start reselling custom transactional AI chatbots to your local clients and unlock high-margin recurring MRR.
             </p>
             <Link href="/auth/sign-up">
               <Button
-                className="h-14 px-12 bg-white text-slate-950 hover:bg-slate-200 text-lg font-bold rounded-full shadow-[0_0_30px_rgba(255,255,255,0.08)] transition-all duration-300"
+                className="h-14 px-12 bg-foreground text-background hover:bg-foreground/90 text-lg font-bold rounded-full shadow-[0_0_30px_rgba(255,255,255,0.06)] transition-all duration-300"
               >
                 Create Reseller Account <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
             </Link>
-            <p className="text-[#86868B] text-xs mt-8 font-medium">
+            <p className="text-muted-foreground text-xs mt-8 font-medium">
               ✓ No credit card required • ✓ Fully brandable under your domain • ✓ 100 free monthly credits included
             </p>
           </div>
@@ -273,13 +241,13 @@ export default async function Home() {
       </section>
 
       {/* Learn more (Blog Articles) */}
-      <section className="py-24 border-t border-white/[0.03] relative">
+      <section className="py-24 border-t border-border relative">
         <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
           <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-3 tracking-tight">
+            <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-3 tracking-tight">
               Agency Masterclass
             </h2>
-            <p className="text-base text-[#86868B]">
+            <p className="text-base text-muted-foreground">
               Deep dives on reseller setups, transactional RAG workflows, and conversion metrics.
             </p>
           </div>
@@ -290,16 +258,16 @@ export default async function Home() {
               { href: '/blogs/customer-support-ai', title: 'Building Bulletproof RAG', desc: 'Ensure accurate, hallucination-free answers using our PgVector crawl engines.' }
             ].map((blog, i) => (
               <Link key={i} href={blog.href} className="group">
-                <div className="bg-[#0F1015]/40 border border-white/[0.04] h-full p-8 rounded-2xl hover:border-white/[0.08] hover:bg-[#16161D]/60 transition-all duration-300">
-                  <h3 className="font-bold text-white mb-3 text-lg group-hover:text-[#0071E3] transition-colors">
+                <div className="bg-card/40 border border-border h-full p-8 rounded-2xl hover:border-border/80 hover:bg-card/60 transition-all duration-300">
+                  <h3 className="font-bold text-foreground mb-3 text-lg group-hover:text-primary transition-colors">
                     {[...Array(5)].map((_, starIndex) => (
-                      <svg key={starIndex} className="w-3.5 h-3.5 inline-block mr-0.5 text-[#0071E3]" fill="currentColor" viewBox="0 0 20 20">
+                      <svg key={starIndex} className="w-3.5 h-3.5 inline-block mr-0.5 text-primary" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.538 1.118l-2.8-2.034a1 1 0 00-1.176 0l-2.8 2.034c-.783.57-1.838-.197-1.538-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.381-1.81.588-1.81h3.462a1 1 0 00.95-.69l1.07-3.292z" />
                       </svg>
                     ))}
                     <span className="ml-1">{blog.title}</span>
                   </h3>
-                  <p className="text-sm text-[#86868B] leading-relaxed">
+                  <p className="text-sm text-muted-foreground leading-relaxed">
                     {blog.desc}
                   </p>
                 </div>

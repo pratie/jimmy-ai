@@ -14,8 +14,8 @@ export const ProgressBar = ({ label, end, credits }: ProgressBarProps) => {
   return (
     <div className="flex flex-col w-full gap-2">
       <div className="flex justify-between items-center">
-        <h3 className="font-heading text-sm text-text dark:text-darkText">{label}</h3>
-        <span className="text-xs font-base text-text/70 dark:text-darkText/70">
+        <h3 className="font-medium text-sm text-foreground">{label}</h3>
+        <span className="text-xs text-muted-foreground">
           {credits} / {end}
         </span>
       </div>

@@ -22,85 +22,8 @@ const config = {
         container: '1400px',
       },
       colors: {
-        // Refined SMB-friendly palette
-        main: '#1da1f2',              // Primary brand blue
-        mainAccent: '#0f8ad8',
-        overlay: 'rgba(15,23,42,0.8)',
-
-        // Light mode surfaces
-        bg: '#f4f6fb',
-        text: '#0f172a',
-
-        // Dark mode surfaces
-        darkBg: '#050914',
-        darkText: '#e2e8f0',
-        darkBorder: '#1e293b',
-        secondaryBlack: '#0f172a',
-
-        // Brand Palette (Landing page)
-        'brand-primary': '#0f172a',
-        'brand-secondary': '#e0e7ff',
-        'brand-accent': '#1da1f2',
-        'brand-info': '#6366f1',
-        'brand-success': '#22c55e',
-        'brand-warning': '#f97316',
-        'brand-error': '#ef4444',
-        'brand-yellow': '#fbbf24',
-        'brand-base-100': '#f8fafc',
-        'brand-base-200': '#eef2ff',
-        'brand-base-300': '#e2e8f0',
-
-        // Legacy "sauce-*" tokens mapped to calm hues
-        'sauce-mint': '#e0e7ff',
-        'sauce-cyan': '#dbeafe',
-        'sauce-purple': '#6366f1',
-        'sauce-purple-dark': '#4f46e5',
-        'sauce-purple-light': '#818cf8',
-        'sauce-black': '#0f172a',
-        'sauce-gray': '#1f2937',
-        'sauce-grid': '#e2e8f0',
-
-        // Accent colors from logos
-        'accent-red': '#ef4444',
-        'accent-yellow': '#fbbf24',
-        'accent-green': '#10b981',
-
-        // Pastel Palette - retained for compatibility
-        'pastel-lavender': '#ede9fe',
-        'pastel-cream': '#fff4e6',
-        'pastel-blush': '#ffe4e6',
-        'pastel-pink': '#fed7e2',
-        'pastel-mint': '#dcfce7',
-        'pastel-sky': '#dbeafe',
-        'pastel-periwinkle': '#e0e7ff',
-
-        // Text shades
-        'text-primary': '#0f172a',
-        'text-secondary': '#475569',
-        'text-muted': '#94a3b8',
-
-        // Interactive states
-        'interactive-pink': '#f8bbd0',
-        'interactive-blue': '#bfdbfe',
-        'interactive-mint': '#bbf7d0',
-
-        // Legacy aliases
-        cream: '#f8fafc',
-        'notebook-yellow': '#fefce8',
-        'sketch-red': '#ef4444',
-        'line-blue': '#e2e8f0',
-        gravel: '#0f172a',
-        iridium: '#0f172a',
-        orange: '#f97316',
-        peach: '#ffe4e6',
-        platinum: '#e2e8f0',
-        ghost: '#e2e8f0',
-        grandis: '#fcd34d',
-        porcelain: '#e0e7ff',
-        ironside: '#1f2937',
-
-        // Shadcn theme colors (aligned with new system)
-        border: '#e2e8f0',
+        /* ── Shadcn CSS-variable tokens (single source of truth) ── */
+        border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
         ring: 'hsl(var(--ring))',
         background: 'hsl(var(--background))',
@@ -133,23 +56,30 @@ const config = {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))',
         },
+
+        /* ── Sidebar tokens (always dark) ── */
+        sidebar: {
+          DEFAULT: 'hsl(var(--sidebar-bg))',
+          foreground: 'hsl(var(--sidebar-foreground))',
+          muted: 'hsl(var(--sidebar-muted))',
+          border: 'hsl(var(--sidebar-border))',
+        },
+
+        /* ── Semantic status colors ── */
+        success: '#22c55e',
+        warning: '#f97316',
+        info: '#6366f1',
       },
       borderRadius: {
-        base: '12px',
         lg: 'var(--radius)',
         md: 'calc(var(--radius) - 2px)',
         sm: 'calc(var(--radius) - 4px)',
       },
       boxShadow: {
-        light: '0 15px 35px rgba(15,23,42,0.12)',
-        dark: '0 25px 50px rgba(2,6,23,0.5)',
-        shadow: '0 20px 45px rgba(15,23,42,0.12)',
-      },
-      translate: {
-        boxShadowX: '0px',
-        boxShadowY: '-2px',
-        reverseBoxShadowX: '0px',
-        reverseBoxShadowY: '2px',
+        soft: '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
+        medium: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
+        large: '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)',
+        glow: '0 0 20px rgba(0, 113, 227, 0.15)',
       },
       fontWeight: {
         base: '500',

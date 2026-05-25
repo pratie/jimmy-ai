@@ -73,7 +73,7 @@ export const TrainingSourcesSelector = ({ domainId }: Props) => {
       <DialogTrigger asChild>
         <Button
           variant="outline"
-          className="w-full bg-white hover:bg-gray-50 text-gray-700 border-gray-200 shadow-sm transition-all duration-200"
+          className="w-full bg-background hover:bg-accent text-foreground border-border shadow-sm transition-all duration-200"
           onClick={() => {
             if (!urls.length) {
               handleDiscover()
@@ -85,30 +85,30 @@ export const TrainingSourcesSelector = ({ domainId }: Props) => {
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="flex flex-col max-w-3xl max-h-[85vh] p-0 gap-0 overflow-hidden bg-white border-none shadow-2xl">
+      <DialogContent className="flex flex-col max-w-3xl max-h-[85vh] p-0 gap-0 overflow-hidden bg-background border border-border shadow-large rounded-2xl">
         {/* Header */}
-        <div className="p-6 pb-4 border-b border-gray-100 bg-white z-20">
+        <div className="p-6 pb-4 border-b border-border bg-background z-20">
           <DialogHeader>
-            <DialogTitle className="text-xl font-semibold text-gray-900">Select Website Pages</DialogTitle>
-            <DialogDescription className="text-gray-500 mt-1.5">
+            <DialogTitle className="text-xl font-semibold text-foreground">Select Website Pages</DialogTitle>
+            <DialogDescription className="text-muted-foreground mt-1.5">
               Choose which pages to scrape and train your chatbot on.
             </DialogDescription>
           </DialogHeader>
           <div className="flex items-center justify-between mt-4">
-            <Badge variant="secondary" className="bg-blue-50 text-blue-700 hover:bg-blue-100 border-blue-100 px-3 py-1">
+            <Badge variant="secondary" className="bg-primary/10 text-primary hover:bg-primary/20 border-primary/20 px-3 py-1">
               {plan} Plan: {remaining === Infinity ? 'Unlimited' : `${remaining} remaining`} of {limit === Infinity ? 'unlimited' : limit} sources
             </Badge>
             {!discovering && urls.length > 0 && (
               <div className="flex items-center gap-3">
-                <span className="text-sm text-gray-500">
-                  <span className="font-semibold text-gray-900">{selectedUrls.length}</span> selected
+                <span className="text-sm text-muted-foreground">
+                  <span className="font-semibold text-foreground">{selectedUrls.length}</span> selected
                 </span>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={handleSelectAll}
                   disabled={!canSelectMore || urls.length === 0}
-                  className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 h-8"
+                  className="text-primary hover:text-primary/95 hover:bg-primary/10 h-8"
                 >
                   Select All
                 </Button>
@@ -118,24 +118,24 @@ export const TrainingSourcesSelector = ({ domainId }: Props) => {
         </div>
 
         {/* Content Area */}
-        <div className="flex-1 overflow-hidden relative bg-gray-50/50">
+        <div className="flex-1 overflow-hidden relative bg-muted/20">
           {discovering ? (
             <div className="flex flex-col items-center justify-center h-[400px] gap-4">
-              <div className="p-4 rounded-full bg-blue-50">
-                <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+              <div className="p-4 rounded-full bg-primary/10">
+                <Loader2 className="w-8 h-8 animate-spin text-primary" />
               </div>
-              <p className="text-sm font-medium text-gray-600">Discovering URLs from your website...</p>
+              <p className="text-sm font-medium text-muted-foreground">Discovering URLs from your website...</p>
             </div>
           ) : urls.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-[400px] gap-4">
-              <div className="p-4 rounded-full bg-gray-100">
-                <Link2 className="w-8 h-8 text-gray-400" />
+              <div className="p-4 rounded-full bg-muted">
+                <Link2 className="w-8 h-8 text-muted-foreground" />
               </div>
               <div className="text-center space-y-1">
-                <p className="text-sm font-medium text-gray-900">No URLs found yet</p>
-                <p className="text-xs text-gray-500">Click below to start discovering pages</p>
+                <p className="text-sm font-medium text-foreground">No URLs found yet</p>
+                <p className="text-xs text-muted-foreground">Click below to start discovering pages</p>
               </div>
-              <Button onClick={handleDiscover} disabled={discovering} className="bg-blue-600 hover:bg-blue-700 text-white shadow-md">
+              <Button onClick={handleDiscover} disabled={discovering} className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-glow font-semibold">
                 Discover URLs
               </Button>
             </div>
@@ -153,8 +153,8 @@ export const TrainingSourcesSelector = ({ domainId }: Props) => {
                       className={`
                         group flex items-start gap-4 p-4 rounded-xl border transition-all duration-200 cursor-pointer
                         ${isSelected
-                          ? 'bg-blue-50/50 border-blue-200 shadow-sm'
-                          : 'bg-white border-gray-100 hover:border-gray-200 hover:shadow-md'
+                          ? 'bg-primary/5 border-primary/30 shadow-sm'
+                          : 'bg-card border-border hover:border-border/80 hover:shadow-soft'
                         }
                         ${!canSelect ? 'opacity-50 cursor-not-allowed' : ''}
                       `}
@@ -162,22 +162,22 @@ export const TrainingSourcesSelector = ({ domainId }: Props) => {
                       <div className={`
                         mt-1 flex-shrink-0 rounded-full border w-5 h-5 flex items-center justify-center transition-colors
                         ${isSelected
-                          ? 'bg-blue-600 border-blue-600'
-                          : 'bg-white border-gray-300 group-hover:border-gray-400'
+                          ? 'bg-primary border-primary'
+                          : 'bg-background border-input group-hover:border-primary/40'
                         }
                       `}>
-                        {isSelected && <CheckCircle2 className="w-3.5 h-3.5 text-white" />}
+                        {isSelected && <CheckCircle2 className="w-3.5 h-3.5 text-primary-foreground" />}
                       </div>
 
                       <div className="flex-1 min-w-0 space-y-1">
-                        <h4 className={`text-sm font-semibold truncate ${isSelected ? 'text-blue-900' : 'text-gray-900'}`}>
+                        <h4 className={`text-sm font-semibold truncate ${isSelected ? 'text-primary' : 'text-foreground'}`}>
                           {urlData.title || 'Untitled Page'}
                         </h4>
-                        <p className="text-xs text-gray-500 truncate font-mono bg-gray-100/50 px-1.5 py-0.5 rounded w-fit max-w-full">
+                        <p className="text-xs text-muted-foreground truncate font-mono bg-muted/40 px-1.5 py-0.5 rounded w-fit max-w-full">
                           {urlData.url}
                         </p>
                         {urlData.description && (
-                          <p className="text-xs text-gray-500 line-clamp-2 leading-relaxed pt-1">
+                          <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed pt-1">
                             {urlData.description}
                           </p>
                         )}
@@ -191,25 +191,25 @@ export const TrainingSourcesSelector = ({ domainId }: Props) => {
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t border-gray-100 bg-white flex items-center justify-between gap-4 z-20">
+        <div className="p-4 border-t border-border bg-background flex items-center justify-between gap-4 z-20">
           <Button
             variant="ghost"
             onClick={() => setSelectedUrls([])}
             disabled={selectedUrls.length === 0}
-            className="text-gray-500 hover:text-gray-700 hover:bg-gray-100"
+            className="text-muted-foreground hover:text-foreground hover:bg-accent"
           >
             Clear Selection
           </Button>
           <div className="flex items-center gap-3">
             {!canSelectMore && (
-              <span className="text-xs font-medium text-amber-600 bg-amber-50 px-2 py-1 rounded-md">
+              <span className="text-xs font-medium text-warning bg-warning/10 px-2 py-1 rounded-md">
                 Limit reached
               </span>
             )}
             <Button
               onClick={handleScrape}
               disabled={selectedUrls.length === 0 || scraping}
-              className="bg-blue-600 hover:bg-blue-700 text-white shadow-md min-w-[140px]"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-glow min-w-[140px]"
             >
               {scraping ? (
                 <>

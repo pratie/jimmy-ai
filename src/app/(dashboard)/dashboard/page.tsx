@@ -71,10 +71,10 @@ const Page = async (props: Props) => {
         </div>
         <div className="w-full py-10">
           <div className="mx-auto max-w-5xl px-4">
-            <div className="relative bg-card rounded-base border border-white/[0.04] shadow-[0_20px_45px_rgba(0,0,0,0.5)] p-6">
+            <div className="relative bg-card rounded-lg border border-border shadow-sm p-6">
               <div className="mb-6">
-                <h2 className="font-heading text-xl text-white">Plan Usage</h2>
-                <p className="text-sm text-white/60 mt-1">
+                <h2 className="font-semibold text-xl text-foreground">Plan Usage</h2>
+                <p className="text-sm text-muted-foreground mt-1">
                   A detailed overview of your metrics, usage, customers and more
                 </p>
               </div>

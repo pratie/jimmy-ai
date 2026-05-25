@@ -245,22 +245,22 @@ const KnowledgeBaseViewerV2 = ({
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Plan Limits Display - Reimagined for High-Ticket */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 bg-gradient-to-br from-sauce-purple to-sauce-purple-dark rounded-2xl text-white shadow-shadow relative overflow-hidden group">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 bg-gradient-to-br from-primary to-primary/80 rounded-2xl text-primary-foreground shadow-glow relative overflow-hidden group">
             <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
               <Brain className="w-24 h-24" />
             </div>
 
             <div className="relative z-10 space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-bold uppercase tracking-widest text-white/70">Agent Knowledge Base</span>
-                <Badge className="bg-white/20 hover:bg-white/30 text-white border-0 text-[10px]">Active</Badge>
+                <span className="text-[10px] font-bold uppercase tracking-widest text-primary-foreground/75">Agent Knowledge Base</span>
+                <Badge className="bg-primary-foreground/20 hover:bg-primary-foreground/30 text-primary-foreground border-0 text-[10px]">Active</Badge>
               </div>
               <div className="flex items-center justify-between text-sm">
                 <span className="font-medium">Training Sources</span>
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger>
-                      <HelpCircle className="w-3.5 h-3.5 text-white/50" />
+                      <HelpCircle className="w-3.5 h-3.5 text-primary-foreground/60" />
                     </TooltipTrigger>
                     <TooltipContent>
                       <p className="max-w-xs text-xs">
@@ -274,13 +274,13 @@ const KnowledgeBaseViewerV2 = ({
                 <span className="text-3xl font-bold font-heading">
                   {trainingSourcesUsed}
                 </span>
-                <span className="text-white/50 text-sm">
+                <span className="text-primary-foreground/60 text-sm">
                   / {trainingSourcesLimit === Infinity ? '∞' : trainingSourcesLimit}
                 </span>
               </div>
-              <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
+              <div className="h-1.5 bg-primary-foreground/15 rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-white transition-all duration-1000 ease-out"
+                  className="h-full bg-primary-foreground transition-all duration-1000 ease-out"
                   style={{ width: `${sourcesPercent}%` }}
                 />
               </div>
@@ -288,15 +288,15 @@ const KnowledgeBaseViewerV2 = ({
 
             <div className="relative z-10 space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-bold uppercase tracking-widest text-white/70">Memory Capacity</span>
-                <Eye className="w-3.5 h-3.5 text-white/30" />
+                <span className="text-[10px] font-bold uppercase tracking-widest text-primary-foreground/75">Memory Capacity</span>
+                <Eye className="w-3.5 h-3.5 text-primary-foreground/40" />
               </div>
               <div className="flex items-center justify-between text-sm">
                 <span className="font-medium">Digital Brain Size</span>
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger>
-                      <HelpCircle className="w-3.5 h-3.5 text-white/50" />
+                      <HelpCircle className="w-3.5 h-3.5 text-primary-foreground/60" />
                     </TooltipTrigger>
                     <TooltipContent>
                       <p className="max-w-xs text-xs">
@@ -310,13 +310,13 @@ const KnowledgeBaseViewerV2 = ({
                 <span className="text-3xl font-bold font-heading">
                   {kbSizeMB.toFixed(2)}
                 </span>
-                <span className="text-white/50 text-sm">
+                <span className="text-primary-foreground/60 text-sm">
                   / {kbSizeLimit} MB
                 </span>
               </div>
-              <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
+              <div className="h-1.5 bg-primary-foreground/15 rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-white transition-all duration-1000 ease-out"
+                  className="h-full bg-primary-foreground transition-all duration-1000 ease-out"
                   style={{ width: `${kbPercent}%` }}
                 />
               </div>
@@ -325,17 +325,17 @@ const KnowledgeBaseViewerV2 = ({
 
           {/* Tab-based Training Methods */}
           <Tabs defaultValue="websites" className="w-full">
-            <TabsList className="inline-flex w-auto self-start gap-1 rounded-xl bg-sauce-grid/50 p-1 border border-sauce-grid/20 h-auto">
-              <TabsTrigger value="websites" className="rounded-lg px-4 py-2 text-xs font-bold transition-all data-[state=active]:bg-white data-[state=active]:text-sauce-purple data-[state=active]:shadow-sm flex items-center gap-2">
+            <TabsList className="inline-flex w-auto self-start gap-1 rounded-xl bg-muted/50 p-1 border border-border h-auto">
+              <TabsTrigger value="websites" className="rounded-lg px-4 py-2 text-xs font-bold transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm flex items-center gap-2">
                 <Globe className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">Websites</span>
                 <span className="sm:hidden">Web</span>
               </TabsTrigger>
-              <TabsTrigger value="text" className="rounded-lg px-4 py-2 text-xs font-bold transition-all data-[state=active]:bg-white data-[state=active]:text-sauce-purple data-[state=active]:shadow-sm flex items-center gap-2">
+              <TabsTrigger value="text" className="rounded-lg px-4 py-2 text-xs font-bold transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm flex items-center gap-2">
                 <FileText className="w-3.5 h-3.5" />
                 Text
               </TabsTrigger>
-              <TabsTrigger value="file" className="rounded-lg px-4 py-2 text-xs font-bold transition-all data-[state=active]:bg-white data-[state=active]:text-sauce-purple data-[state=active]:shadow-sm flex items-center gap-2">
+              <TabsTrigger value="file" className="rounded-lg px-4 py-2 text-xs font-bold transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm flex items-center gap-2">
                 <FileUp className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">File Upload</span>
                 <span className="sm:hidden">File</span>
@@ -351,17 +351,17 @@ const KnowledgeBaseViewerV2 = ({
                 </Badge>
               </div>
 
-              <div className="space-y-4 p-6 rounded-lg border bg-white/90 backdrop-blur-sm">
+              <div className="space-y-4 p-6 rounded-lg border bg-card backdrop-blur-sm">
                 {/* Default Domain Display */}
-                <div className="space-y-2 pb-4 border-b border-gray-100">
+                <div className="space-y-2 pb-4 border-b border-border">
                   <Label className="text-sm font-semibold">Primary Website</Label>
-                  <div className="flex items-center gap-3 p-3 bg-blue-50/50 border border-blue-100 rounded-lg">
-                    <div className="p-2 bg-white rounded-full border border-blue-100 shadow-sm">
-                      <Globe className="w-4 h-4 text-blue-600" />
+                  <div className="flex items-center gap-3 p-3 bg-primary/5 border border-primary/20 rounded-lg">
+                    <div className="p-2 bg-background rounded-full border border-border shadow-sm">
+                      <Globe className="w-4 h-4 text-primary" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 truncate">{domainName}</p>
-                      <p className="text-xs text-gray-500">Default source for crawling</p>
+                      <p className="text-sm font-medium text-foreground truncate">{domainName}</p>
+                      <p className="text-xs text-muted-foreground">Default source for crawling</p>
                     </div>
                   </div>
                 </div>
@@ -377,7 +377,7 @@ const KnowledgeBaseViewerV2 = ({
                     <span className="w-full border-t" />
                   </div>
                   <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-white px-2 text-muted-foreground">Or</span>
+                    <span className="bg-background px-2 text-muted-foreground">Or</span>
                   </div>
                 </div>
 
@@ -405,7 +405,7 @@ const KnowledgeBaseViewerV2 = ({
             <TabsContent value="text" className="space-y-4 mt-4">
               <p className="text-sm text-muted-foreground">Paste or type text directly</p>
 
-              <div className="space-y-4 p-6 rounded-lg border bg-white/90 backdrop-blur-sm">
+              <div className="space-y-4 p-6 rounded-lg border bg-card backdrop-blur-sm">
                 <Textarea
                   placeholder="Paste your content here... (minimum 50 characters)"
                   value={uploadText}
@@ -437,7 +437,7 @@ const KnowledgeBaseViewerV2 = ({
                 <Badge variant="outline" className="text-xs">50MB max</Badge>
               </div>
 
-              <div className="space-y-4 p-6 rounded-lg border bg-white/90 backdrop-blur-sm">
+              <div className="space-y-4 p-6 rounded-lg border bg-card backdrop-blur-sm">
                 <div className="space-y-2">
                   <Label className="text-sm font-semibold">Select File</Label>
                   <input
@@ -613,19 +613,19 @@ const KnowledgeBaseViewerV2 = ({
 
       <CardContent className="space-y-4">
         {/* Usage Stats (Glassmorphism look) */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 rounded-xl border border-sauce-grid/20 bg-sauce-grid/10">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 rounded-xl border border-border bg-muted/25">
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-sauce-gray/60">Sources Used</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Sources Used</span>
               <div className="flex items-center gap-1.5">
-                <span className="text-xs font-bold text-sauce-black">{trainingSourcesUsed}</span>
-                <span className="text-[10px] font-medium text-sauce-gray/40">/ {trainingSourcesLimit === Infinity ? '∞' : trainingSourcesLimit}</span>
+                <span className="text-xs font-bold text-foreground">{trainingSourcesUsed}</span>
+                <span className="text-[10px] font-medium text-muted-foreground/50">/ {trainingSourcesLimit === Infinity ? '∞' : trainingSourcesLimit}</span>
               </div>
             </div>
             {trainingSourcesLimit !== Infinity && (
-              <div className="h-1 bg-sauce-grid rounded-full overflow-hidden">
+              <div className="h-1 bg-muted rounded-full overflow-hidden">
                 <div
-                  className={cn("h-full transition-all duration-500", sourcesPercent > 80 ? 'bg-accent-red' : 'bg-sauce-purple')}
+                  className={cn("h-full transition-all duration-500", sourcesPercent > 80 ? 'bg-destructive' : 'bg-primary')}
                   style={{ width: `${sourcesPercent}%` }}
                 />
               </div>
@@ -633,15 +633,15 @@ const KnowledgeBaseViewerV2 = ({
           </div>
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-sauce-gray/60">Total Storage</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Total Storage</span>
               <div className="flex items-center gap-1.5">
-                <span className="text-xs font-bold text-sauce-black">{kbSizeMB.toFixed(2)}</span>
-                <span className="text-[10px] font-medium text-sauce-gray/40">/ {kbSizeLimit} MB</span>
+                <span className="text-xs font-bold text-foreground">{kbSizeMB.toFixed(2)}</span>
+                <span className="text-[10px] font-medium text-muted-foreground/50">/ {kbSizeLimit} MB</span>
               </div>
             </div>
-            <div className="h-1 bg-sauce-grid rounded-full overflow-hidden">
+            <div className="h-1 bg-muted rounded-full overflow-hidden">
               <div
-                className={cn("h-full transition-all duration-500", kbPercent > 80 ? 'bg-accent-red' : 'bg-sauce-purple')}
+                className={cn("h-full transition-all duration-500", kbPercent > 80 ? 'bg-destructive' : 'bg-primary')}
                 style={{ width: `${kbPercent}%` }}
               />
             </div>
@@ -650,17 +650,17 @@ const KnowledgeBaseViewerV2 = ({
 
         {/* Tab-based Training Methods */}
         <Tabs defaultValue="websites" className="w-full">
-          <TabsList className="inline-flex w-auto self-start gap-1 rounded-xl bg-sauce-grid/50 p-1 border border-sauce-grid/20 h-auto">
-            <TabsTrigger value="websites" className="rounded-lg px-4 py-2 text-xs font-bold transition-all data-[state=active]:bg-white data-[state=active]:text-sauce-purple data-[state=active]:shadow-sm flex items-center gap-2">
+          <TabsList className="inline-flex w-auto self-start gap-1 rounded-xl bg-muted/50 p-1 border border-border h-auto">
+            <TabsTrigger value="websites" className="rounded-lg px-4 py-2 text-xs font-bold transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm flex items-center gap-2">
               <Globe className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Websites</span>
               <span className="sm:hidden">Web</span>
             </TabsTrigger>
-            <TabsTrigger value="text" className="rounded-lg px-4 py-2 text-xs font-bold transition-all data-[state=active]:bg-white data-[state=active]:text-sauce-purple data-[state=active]:shadow-sm flex items-center gap-2">
+            <TabsTrigger value="text" className="rounded-lg px-4 py-2 text-xs font-bold transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm flex items-center gap-2">
               <FileText className="w-3.5 h-3.5" />
               Text
             </TabsTrigger>
-            <TabsTrigger value="file" className="rounded-lg px-4 py-2 text-xs font-bold transition-all data-[state=active]:bg-white data-[state=active]:text-sauce-purple data-[state=active]:shadow-sm flex items-center gap-2">
+            <TabsTrigger value="file" className="rounded-lg px-4 py-2 text-xs font-bold transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm flex items-center gap-2">
               <FileUp className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">File Upload</span>
               <span className="sm:hidden">File</span>
@@ -676,7 +676,7 @@ const KnowledgeBaseViewerV2 = ({
               </Badge>
             </div>
 
-            <div className="space-y-4 p-6 rounded-lg border bg-white/90 backdrop-blur-sm">
+            <div className="space-y-4 p-6 rounded-lg border bg-card backdrop-blur-sm">
               <div className="space-y-2">
                 <Label className="text-sm font-semibold">Collect Multiple Links</Label>
                 <p className="text-xs text-muted-foreground mb-2">Discover and select multiple pages from your website</p>
@@ -688,7 +688,7 @@ const KnowledgeBaseViewerV2 = ({
                   <span className="w-full border-t" />
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-white px-2 text-muted-foreground">Or</span>
+                  <span className="bg-background px-2 text-muted-foreground">Or</span>
                 </div>
               </div>
 
@@ -716,7 +716,7 @@ const KnowledgeBaseViewerV2 = ({
           <TabsContent value="text" className="space-y-4 mt-4">
             <p className="text-sm text-muted-foreground">Paste or type additional text</p>
 
-            <div className="space-y-4 p-6 rounded-lg border bg-white/90 backdrop-blur-sm">
+            <div className="space-y-4 p-6 rounded-lg border bg-card backdrop-blur-sm">
               <Textarea
                 placeholder="Paste your content here... (minimum 50 characters)"
                 value={uploadText}
@@ -748,7 +748,7 @@ const KnowledgeBaseViewerV2 = ({
               <Badge variant="outline" className="text-xs">50MB max</Badge>
             </div>
 
-            <div className="space-y-4 p-6 rounded-lg border bg-white/90 backdrop-blur-sm">
+            <div className="space-y-4 p-6 rounded-lg border bg-card backdrop-blur-sm">
               <div className="space-y-2">
                 <Label className="text-sm font-semibold">Select File</Label>
                 <input
