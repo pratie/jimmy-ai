@@ -24,7 +24,7 @@ const ConversationPage = async (props: Props) => {
         "-ml-[60px] md:-ml-20 lg:-ml-24 pl-0"
       }
     >
-      <div className="w-full md:w-80 md:min-w-[320px] border-r border-brand-base-300 overflow-y-auto">
+      <div className="w-full md:w-80 md:min-w-[320px] border-r border-border overflow-y-auto">
         <ConversationMenu domains={domains?.domains} />
       </div>
 
