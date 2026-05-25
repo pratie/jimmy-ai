@@ -3,14 +3,18 @@
 import Image from 'next/image'
 import * as React from 'react'
 import Link from 'next/link'
+import { cn } from '@/lib/utils'
 
 function NavBar() {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false)
 
   return (
-    <nav className="fixed top-0 w-full bg-background/80 backdrop-blur-xl z-50 border-b border-border transition-all duration-300">
-      <div className="max-w-7xl mx-auto px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+    <nav className={cn(
+      "fixed top-4 left-1/2 -translate-x-1/2 w-[90%] max-w-5xl bg-background/85 backdrop-blur-xl z-50 border border-border px-6 py-1.5 shadow-soft transition-all duration-300",
+      isMenuOpen ? "rounded-3xl" : "rounded-full"
+    )}>
+      <div className="w-full">
+        <div className="flex justify-between items-center h-12">
           {/* Logo - Clean and minimal */}
           <Link href="/" className="flex items-center gap-3 group">
             <div className="relative w-8 h-8 transition-transform group-hover:scale-105">

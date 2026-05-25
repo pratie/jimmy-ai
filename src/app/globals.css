@@ -58,11 +58,11 @@ body::before {
 
     --radius: 0.75rem;
 
-    /* Sidebar (always dark) */
-    --sidebar-bg: 0 0% 3%;          /* #080808 */
-    --sidebar-foreground: 0 0% 98%; /* #FAFAFA */
-    --sidebar-muted: 0 0% 15%;     /* #262626 */
-    --sidebar-border: 0 0% 15%;    /* #262626 */
+    /* Sidebar (clean light style) */
+    --sidebar-bg: 240 5% 98%;          /* #FAFAFA */
+    --sidebar-foreground: 240 10% 4%;   /* #0A0A0A */
+    --sidebar-muted: 240 5% 95%;        /* #F4F4F5 */
+    --sidebar-border: 240 6% 90%;       /* #E4E4E7 */
   }
 
   .dark {
@@ -95,10 +95,10 @@ body::before {
     --input: 240 4% 16%;
     --ring: 211 100% 50%;
 
-    --sidebar-bg: 0 0% 3%;
-    --sidebar-foreground: 0 0% 98%;
-    --sidebar-muted: 0 0% 15%;
-    --sidebar-border: 0 0% 15%;
+    --sidebar-bg: 240 5% 98%;
+    --sidebar-foreground: 240 10% 4%;
+    --sidebar-muted: 240 5% 95%;
+    --sidebar-border: 240 6% 90%;
   }
 }
 

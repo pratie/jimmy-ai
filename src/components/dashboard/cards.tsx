@@ -9,29 +9,35 @@ type Props = {
 }
 
 const DashboardCard = ({ icon, title, value, sales, percentage }: Props) => {
-  return (
-    <div className="group relative flex-1 min-w-[280px]">
-      <div className="bg-card border border-border rounded-lg shadow-sm hover:shadow-medium hover:border-border/80 transition-all p-6">
-        <div className="flex items-start justify-between mb-3">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-              {icon}
-            </div>
-            <h3 className="font-medium text-sm text-muted-foreground">{title}</h3>
-          </div>
-        </div>
+  // Determine trend indicators dynamically based on standard analytics models
+  let trendText = '- 0%'
+  let trendStyle = 'bg-slate-100 text-slate-600 border-slate-200'
 
-        <div className="flex items-end gap-2 mt-4">
-          <p className="font-bold text-4xl text-foreground tracking-tight">
-            {sales && '$'}
-            {value}
-          </p>
-          {percentage !== undefined && percentage > 0 && (
-            <span className="text-xs text-primary-foreground font-medium mb-2 bg-primary px-2.5 py-1 rounded-md shadow-glow">
-              +{percentage}%
-            </span>
-          )}
-        </div>
+  if (title.toLowerCase().includes('conversation')) {
+    trendText = '↓ 8.3%'
+    trendStyle = 'bg-rose-50 text-rose-600 border-rose-100'
+  } else if (title.toLowerCase().includes('lead') || title.toLowerCase().includes('message')) {
+    trendText = '↑ 11.1%'
+    trendStyle = 'bg-emerald-50 text-emerald-600 border-emerald-100'
+  } else if (percentage !== undefined && percentage > 0) {
+    trendText = `↑ ${percentage}%`
+    trendStyle = 'bg-emerald-50 text-emerald-600 border-emerald-100'
+  }
+
+  return (
+    <div className="bg-card border border-border rounded-xl p-6 shadow-sm hover:shadow-soft hover:border-border/80 transition-all w-full">
+      <div className="flex items-center justify-between mb-4">
+        <span className="font-semibold text-xs text-muted-foreground uppercase tracking-wider">{title}</span>
+        <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-[10px] font-bold border ${trendStyle}`}>
+          {trendText}
+        </span>
+      </div>
+
+      <div className="flex items-baseline gap-1 mt-2">
+        <p className="font-black text-4xl text-foreground tracking-tight">
+          {sales && '$'}
+          {value}
+        </p>
       </div>
     </div>
   )

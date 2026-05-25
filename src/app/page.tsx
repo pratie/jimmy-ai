@@ -20,9 +20,9 @@ export const metadata: Metadata = {
 
 export default async function Home() {
   return (
-    <main className="dark min-h-screen bg-background text-foreground selection:bg-primary selection:text-primary-foreground relative overflow-x-hidden font-sans antialiased">
+    <main className="min-h-screen bg-background text-foreground selection:bg-primary selection:text-primary-foreground relative overflow-x-hidden font-sans antialiased">
       {/* Faint Premium Grid Layer */}
-      <div className="absolute inset-0 z-0 pointer-events-none bg-grid-white/[0.005] bg-[size:60px_60px]" />
+      <div className="absolute inset-0 z-0 pointer-events-none bg-grid-black/[0.02] bg-[size:32px_32px]" />
 
       {/* Restrained Premium Ambient Background Glow */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-[600px] pointer-events-none -z-10 overflow-hidden">
@@ -32,27 +32,47 @@ export default async function Home() {
       <NavBar />
 
       {/* Hero Section */}
-      <section className="relative pt-36 pb-20 md:pt-52 md:pb-32 overflow-hidden">
+      <section className="relative pt-36 pb-20 md:pt-52 md:pb-28 overflow-hidden">
         <div className="relative z-10 max-w-5xl mx-auto px-6 sm:px-8 lg:px-12 text-center">
 
           {/* Glowing Minimalist Badge */}
           <div className="flex justify-center mb-8">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/[0.03] border border-white/[0.06] text-[11px] font-medium tracking-widest uppercase text-muted-foreground">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/5 border border-primary/10 text-[11px] font-semibold tracking-widest uppercase text-primary">
               <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
               Agency Reseller Platform
             </div>
           </div>
 
           {/* Main Headline */}
-          <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-[5.5rem] font-bold tracking-tight text-foreground mb-6 leading-[1.03]">
+          <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-[5.2rem] font-black tracking-tight text-foreground mb-6 leading-[1.05]">
             The White-Label Transactional<br />
-            <span className="bg-gradient-to-b from-foreground via-foreground/70 to-muted-foreground bg-clip-text text-transparent">AI Chatbot Platform.</span>
+            <span className="text-primary">AI Chatbot Reseller Platform.</span>
           </h1>
 
           {/* Subheadline */}
-          <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto mb-16 leading-relaxed font-normal">
+          <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto mb-10 leading-relaxed font-normal">
             Build, brand, and resell custom RAG chatbots that natively book meetings and close sales. Give your clients a fully white-labeled customer portal under your own custom domain. No code required.
           </p>
+
+          {/* Works With Integration Bar */}
+          <div className="flex justify-center mb-16">
+            <div className="inline-flex flex-wrap items-center justify-center gap-4 px-6 py-3 rounded-full bg-background border border-border/80 shadow-soft text-xs max-w-3xl z-20">
+              <span className="font-bold text-muted-foreground uppercase tracking-wider mr-2 text-[10px]">Works With</span>
+              {[
+                { name: 'ChatGPT', icon: '🤖' },
+                { name: 'Claude', icon: '🧠' },
+                { name: 'Gemini', icon: '✦' },
+                { name: 'Lovable', icon: '❤️' },
+                { name: 'Perplexity', icon: '🔍' },
+                { name: 'Your Site', icon: '🌐' }
+              ].map((item) => (
+                <span key={item.name} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted/50 border border-border text-[11px] font-medium text-foreground hover:bg-muted transition-colors cursor-default">
+                  <span>{item.icon}</span>
+                  <span>{item.name}</span>
+                </span>
+              ))}
+            </div>
+          </div>
 
           {/* Spotlight Scraper Sandbox */}
           <div className="max-w-2xl mx-auto relative group">
