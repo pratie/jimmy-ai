@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import { ClerkProvider } from '@clerk/nextjs'
-import { Inter } from 'next/font/google'
+import { Inter, Plus_Jakarta_Sans } from 'next/font/google'
 import Script from 'next/script'
 import './globals.css'
 import { Toaster } from '@/components/ui/toaster'
@@ -13,6 +13,15 @@ const inter = Inter({
   weight: ['400', '500', '600', '700', '800', '900'],
   variable: '--font-inter',
 })
+
+const jakarta = Plus_Jakarta_Sans({
+  subsets: ['latin'],
+  display: 'swap',
+  preload: true,
+  weight: ['400', '500', '600', '700', '800'],
+  variable: '--font-jakarta',
+})
+
 
 const APP_URL = (process.env.NEXT_PUBLIC_APP_URL || 'https://chatdock.io').replace(/\/$/, '')
 
@@ -71,7 +80,7 @@ export default function RootLayout({
   return (
     <ClerkProvider publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || 'pk_test_YnVpbGRfdGltZV9kdW1teV9jbGVya19rZXlfOTguY2xlcmsuYWNjb3VudHMuZGV2JA'}>
       <html lang="en" suppressHydrationWarning>
-        <body className={`${inter.variable} font-sans min-h-screen antialiased`}>
+        <body className={`${inter.variable} ${jakarta.variable} font-sans min-h-screen antialiased`}>
           {/* DataFast Analytics - Must be in body for Next.js Script component */}
           <Script
             defer

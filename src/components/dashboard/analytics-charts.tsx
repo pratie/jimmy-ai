@@ -4,7 +4,7 @@ import React from 'react'
 
 export function AnalyticsCharts() {
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full mt-6">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full mt-6 font-heading">
       
       {/* Card 1: Conversations */}
       <div className="bg-card border border-border rounded-xl p-6 shadow-sm hover:shadow-soft transition-all">
@@ -52,11 +52,11 @@ export function AnalyticsCharts() {
             <line x1="50" y1="180" x2="480" y2="180" stroke="#e2e8f0" strokeWidth="1" />
 
             {/* Y Axis Labels */}
-            <text x="15" y="24" className="fill-muted-foreground/80 font-sans" fontSize="9" fontWeight="500">4.00</text>
-            <text x="15" y="64" className="fill-muted-foreground/80 font-sans" fontSize="9" fontWeight="500">3.00</text>
-            <text x="15" y="104" className="fill-muted-foreground/80 font-sans" fontSize="9" fontWeight="500">2.00</text>
-            <text x="15" y="144" className="fill-muted-foreground/80 font-sans" fontSize="9" fontWeight="500">1.00</text>
-            <text x="15" y="184" className="fill-muted-foreground/80 font-sans" fontSize="9" fontWeight="500">0.00</text>
+            <text x="15" y="24" className="fill-muted-foreground/80 font-heading" fontSize="9" fontWeight="500">4.00</text>
+            <text x="15" y="64" className="fill-muted-foreground/80 font-heading" fontSize="9" fontWeight="500">3.00</text>
+            <text x="15" y="104" className="fill-muted-foreground/80 font-heading" fontSize="9" fontWeight="500">2.00</text>
+            <text x="15" y="144" className="fill-muted-foreground/80 font-heading" fontSize="9" fontWeight="500">1.00</text>
+            <text x="15" y="184" className="fill-muted-foreground/80 font-heading" fontSize="9" fontWeight="500">0.00</text>
 
             {/* X Axis Labels & tick coordinates */}
             {/* Tick 1: Sep 11 (X=70) */}
@@ -155,12 +155,12 @@ export function AnalyticsCharts() {
             <line x1="50" y1="180" x2="480" y2="180" stroke="#e2e8f0" strokeWidth="1" />
 
             {/* Y Axis Labels */}
-            <text x="12" y="24" className="fill-muted-foreground/80 font-sans" fontSize="9" fontWeight="500">10.00</text>
-            <text x="17" y="56" className="fill-muted-foreground/80 font-sans" fontSize="9" fontWeight="500">8.00</text>
-            <text x="17" y="88" className="fill-muted-foreground/80 font-sans" fontSize="9" fontWeight="500">6.00</text>
-            <text x="17" y="120" className="fill-muted-foreground/80 font-sans" fontSize="9" fontWeight="500">4.00</text>
-            <text x="17" y="152" className="fill-muted-foreground/80 font-sans" fontSize="9" fontWeight="500">2.00</text>
-            <text x="17" y="184" className="fill-muted-foreground/80 font-sans" fontSize="9" fontWeight="500">0.00</text>
+            <text x="12" y="24" className="fill-muted-foreground/80 font-heading" fontSize="9" fontWeight="500">10.00</text>
+            <text x="17" y="56" className="fill-muted-foreground/80 font-heading" fontSize="9" fontWeight="500">8.00</text>
+            <text x="17" y="88" className="fill-muted-foreground/80 font-heading" fontSize="9" fontWeight="500">6.00</text>
+            <text x="17" y="120" className="fill-muted-foreground/80 font-heading" fontSize="9" fontWeight="500">4.00</text>
+            <text x="17" y="152" className="fill-muted-foreground/80 font-heading" fontSize="9" fontWeight="500">2.00</text>
+            <text x="17" y="184" className="fill-muted-foreground/80 font-heading" fontSize="9" fontWeight="500">0.00</text>
 
             {/* X Axis Labels */}
             <text x="58" y="196" className="fill-muted-foreground font-medium" fontSize="9">Sep 11</text>

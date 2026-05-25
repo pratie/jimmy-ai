@@ -25,7 +25,7 @@ const DashboardCard = ({ icon, title, value, sales, percentage }: Props) => {
   }
 
   return (
-    <div className="bg-card border border-border rounded-xl p-6 shadow-sm hover:shadow-soft hover:border-border/80 transition-all w-full">
+    <div className="bg-card border border-border rounded-xl p-6 shadow-sm hover:shadow-soft hover:border-border/80 transition-all w-full font-heading">
       <div className="flex items-center justify-between mb-4">
         <span className="font-semibold text-xs text-muted-foreground uppercase tracking-wider">{title}</span>
         <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-[10px] font-bold border ${trendStyle}`}>
@@ -34,7 +34,7 @@ const DashboardCard = ({ icon, title, value, sales, percentage }: Props) => {
       </div>
 
       <div className="flex items-baseline gap-1 mt-2">
-        <p className="font-black text-4xl text-foreground tracking-tight">
+        <p className="font-extrabold text-4xl text-foreground tracking-tight">
           {sales && '$'}
           {value}
         </p>

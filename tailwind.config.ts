@@ -87,7 +87,7 @@ const config = {
       },
       fontFamily: {
         sans: ['var(--font-inter)', 'Inter', 'system-ui', 'sans-serif'],
-        heading: ['var(--font-inter)', 'Inter', 'system-ui', 'sans-serif'],
+        heading: ['var(--font-jakarta)', 'Plus Jakarta Sans', 'var(--font-inter)', 'Inter', 'system-ui', 'sans-serif'],
       },
       keyframes: {
         'accordion-down': {
