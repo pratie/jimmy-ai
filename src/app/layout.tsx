@@ -5,6 +5,7 @@ import Script from 'next/script'
 import './globals.css'
 import { Toaster } from '@/components/ui/toaster'
 import { ThemeProvider } from '@/context/them-provider'
+import { AgentProvider } from '@/context/agent-context'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -126,8 +127,10 @@ export default function RootLayout({
             defaultTheme="light"
             disableTransitionOnChange
           >
-            {children}
-            <Toaster />
+            <AgentProvider>
+              {children}
+              <Toaster />
+            </AgentProvider>
           </ThemeProvider>
         </body>
       </html>

@@ -72,6 +72,16 @@ const SettingsForm = ({ id, name, chatBot, plan, trainingSourcesUsed, knowledgeB
   const [activeTab, setActiveTab] = useState<TabKey>('knowledge')
 
   useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search)
+      const tabParam = params.get('tab') as TabKey
+      if (tabParam && ['knowledge', 'behavior', 'appearance', 'domain'].includes(tabParam)) {
+        setActiveTab(tabParam)
+      }
+    }
+  }, [])
+
+  useEffect(() => {
     let mounted = true
       ; (async () => {
         try {

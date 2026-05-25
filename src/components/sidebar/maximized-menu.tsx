@@ -1,9 +1,19 @@
-import { SIDE_BAR_MENU, SIDE_BAR_MENU_SECONDARY } from '@/constants/menu'
-import { LogOut, Menu, User } from 'lucide-react'
-import Image from 'next/image'
 import React, { useState } from 'react'
-import DomainMenu from './domain-menu'
+import { LogOut, Menu, User, ArrowLeft, Plus } from 'lucide-react'
+import Image from 'next/image'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import MenuItem from './menu-item'
+import { useAgent } from '@/context/agent-context'
+
+// Import custom icons
+import DashboardIcon from '@/icons/dashboard-icon'
+import ChatIcon from '@/icons/chat-icon'
+import HelpDeskIcon from '@/icons/help-desk-icon'
+import StarIcon from '@/icons/star-icon'
+import EmailIcon from '@/icons/email-icon'
+import CalIcon from '@/icons/cal-icon'
+import SettingsIcon from '@/icons/settings-icon'
 
 type Props = {
   onExpand(): void
@@ -24,82 +34,168 @@ type Props = {
 }
 
 const MaxMenu = ({ current, domains, onExpand, onSignOut, user }: Props) => {
+  const router = useRouter()
   const [showDropdown, setShowDropdown] = useState(false)
+  const { activeAgent, clearAgent } = useAgent()
+
+  const handleBackToAgents = () => {
+    clearAgent()
+    router.push('/dashboard')
+  }
+
+  // Scoped menu items for the active agent context
+  const agentMenuItems = [
+    {
+      label: 'Analytics',
+      icon: <DashboardIcon />,
+      path: 'dashboard'
+    },
+    {
+      label: 'Conversations',
+      icon: <ChatIcon />,
+      path: 'conversation'
+    },
+    {
+      label: 'Knowledge Base',
+      icon: <HelpDeskIcon />,
+      path: activeAgent ? `settings/${activeAgent.name.split('.')[0]}?tab=knowledge` : 'dashboard'
+    },
+    {
+      label: 'Topics',
+      icon: <StarIcon />,
+      path: activeAgent ? `settings/${activeAgent.name.split('.')[0]}?tab=behavior` : 'dashboard'
+    },
+    {
+      label: 'Leads',
+      icon: <EmailIcon />,
+      path: 'email-marketing'
+    },
+    {
+      label: 'Campaigns',
+      icon: <CalIcon />,
+      path: 'appointment'
+    },
+    {
+      label: 'Agent Settings',
+      icon: <SettingsIcon />,
+      path: activeAgent ? `settings/${activeAgent.name.split('.')[0]}?tab=domain` : 'dashboard'
+    }
+  ]
 
   return (
-    <div className="py-4 px-5 flex flex-col h-full text-sidebar-foreground">
-      <div className="flex justify-between items-center">
+    <div className="py-4 px-5 flex flex-col h-full text-sidebar-foreground font-heading">
+      {/* Sidebar Header Section */}
+      <div className="flex justify-between items-center mb-6">
         <div className="flex items-center gap-3 animate-fade-in opacity-0 delay-300 fill-mode-forwards">
-          <div className="relative w-8 h-8">
+          <div className="relative w-7 h-7">
             <Image
-              src="/images/logo.png"
+              src="/images/logo.svg"
               alt="Logo"
               fill
-              className="object-contain rounded-lg"
+              className="object-contain"
             />
           </div>
-          <span className="text-lg font-bold tracking-tight">ChatDock AI</span>
+          <span className="text-base font-extrabold tracking-tight">ChatDock AI</span>
         </div>
         <Menu
-          className="cursor-pointer animate-fade-in opacity-0 delay-300 fill-mode-forwards text-sidebar-foreground/70 hover:text-sidebar-foreground"
+          className="cursor-pointer animate-fade-in opacity-0 delay-300 fill-mode-forwards text-sidebar-foreground/70 hover:text-sidebar-foreground w-5 h-5"
           onClick={onExpand}
         />
       </div>
-      <div className="animate-fade-in opacity-0 delay-300 fill-mode-forwards flex flex-col justify-between h-full pt-10">
+
+      <div className="animate-fade-in opacity-0 delay-300 fill-mode-forwards flex flex-col justify-between h-full pt-4">
+        {/* Navigation Actions */}
         <div className="flex flex-col">
-          <p className="text-xs text-sidebar-foreground/60 mb-3 font-semibold tracking-[0.08em]">MENU</p>
-          {SIDE_BAR_MENU.map((menu, key) => (
-            <MenuItem
-              size="max"
-              {...menu}
-              key={key}
-              current={current}
-            />
-          ))}
-          <DomainMenu domains={domains} />
+          {activeAgent ? (
+            <>
+              {/* Back to Agents Link */}
+              <button
+                onClick={handleBackToAgents}
+                className="flex items-center gap-2 px-2.5 py-2.5 w-full text-xs font-bold text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-muted rounded-xl transition-all border border-transparent text-left mb-4 border-b border-sidebar-border/30 pb-3"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" />
+                Back to Agents
+              </button>
+
+              {/* Scoped Agent Context Menu */}
+              <p className="text-[10px] text-sidebar-foreground/50 mb-2 font-bold tracking-[0.08em] uppercase">Agent Console</p>
+              <div className="flex flex-col gap-0.5">
+                {agentMenuItems.map((menu, key) => (
+                  <MenuItem
+                    size="max"
+                    {...menu}
+                    key={key}
+                    current={current}
+                  />
+                ))}
+              </div>
+              
+              {/* Add Custom Menu Mock */}
+              <button className="flex items-center gap-2 px-2 py-2 rounded-lg my-1 transition-all border border-transparent text-sidebar-foreground/50 hover:text-sidebar-foreground/80 hover:bg-sidebar-muted text-sm font-semibold mt-2">
+                <Plus className="w-4 h-4" />
+                Add Custom Menu
+              </button>
+            </>
+          ) : (
+            <>
+              {/* Global Catalog Sidebar Menu */}
+              <p className="text-[10px] text-sidebar-foreground/50 mb-2 font-bold tracking-[0.08em] uppercase">Catalog</p>
+              <MenuItem
+                size="max"
+                label="Agents"
+                icon={<DashboardIcon />}
+                path="dashboard"
+                current={current}
+              />
+            </>
+          )}
         </div>
+
+        {/* Bottom Panel Wrapper */}
         <div className="flex flex-col gap-3">
-          {SIDE_BAR_MENU_SECONDARY.map((menu, key) => (
-            <MenuItem
-              size="max"
-              {...menu}
-              key={`secondary-${key}`}
-              current={current}
-            />
-          ))}
+          {activeAgent && (
+            <button
+              onClick={handleBackToAgents}
+              className="flex items-center gap-2 px-2 py-2.5 rounded-lg w-full text-xs font-bold text-sidebar-foreground/60 hover:text-rose-600 hover:bg-rose-50 transition-all border border-transparent text-left"
+            >
+              <LogOut className="w-3.5 h-3.5 rotate-180" />
+              Exit Preview
+            </button>
+          )}
+          
           {user && (
-            <div className="relative">
+            <div className="relative border-t border-sidebar-border/40 pt-3">
               <button
                 onClick={() => setShowDropdown(!showDropdown)}
-                className="flex items-center gap-2 px-2 py-2 w-full rounded-lg transition-all border border-transparent text-sidebar-foreground/80 hover:text-sidebar-foreground hover:bg-sidebar-muted"
+                className="flex items-center gap-2 px-2 py-1.5 w-full rounded-lg transition-all border border-transparent text-sidebar-foreground/80 hover:text-sidebar-foreground hover:bg-sidebar-muted"
               >
-                <div className="flex items-center justify-center w-10 h-10 rounded-full bg-sidebar-muted/70 text-sidebar-foreground">
-                  <User className="w-5 h-5" />
+                <div className="flex items-center justify-center w-8 h-8 rounded-full bg-sidebar-muted/70 text-sidebar-foreground text-xs font-bold border border-sidebar-border">
+                  {user.fullname.charAt(0).toUpperCase()}
                 </div>
                 <div className="flex flex-col overflow-hidden flex-1 text-left">
-                  <p className="text-sm font-semibold text-sidebar-foreground truncate">
+                  <p className="text-xs font-bold text-sidebar-foreground truncate leading-none">
                     {user.fullname}
                   </p>
-                  <p className="text-xs text-sidebar-foreground/60 truncate">
+                  <p className="text-[10px] text-sidebar-foreground/60 truncate mt-1">
                     {user.email}
                   </p>
                 </div>
               </button>
               {showDropdown && (
                 <div className="absolute bottom-full left-0 right-0 mb-2 bg-sidebar/95 backdrop-blur border border-sidebar-border rounded-lg shadow-large overflow-hidden">
-                  <div className="px-4 py-3 border-b border-sidebar-border">
-                    <p className="text-sm font-semibold text-sidebar-foreground">{user.fullname}</p>
-                    <p className="text-xs text-sidebar-foreground/60">{user.email}</p>
+                  <div className="px-4 py-3 border-b border-sidebar-border bg-sidebar-muted/20">
+                    <p className="text-xs font-bold text-sidebar-foreground">{user.fullname}</p>
+                    <p className="text-[10px] text-sidebar-foreground/60 mt-0.5">{user.email}</p>
                   </div>
                   <button
                     onClick={() => {
                       setShowDropdown(false)
                       onSignOut()
                     }}
-                    className="flex items-center gap-2 px-4 py-2.5 w-full hover:bg-sidebar-muted transition-all text-left font-normal text-sidebar-foreground/95"
+                    className="flex items-center gap-2 px-4 py-2.5 w-full hover:bg-sidebar-muted transition-all text-left font-semibold text-sidebar-foreground/90"
                   >
-                    <LogOut className="w-4 h-4 text-sidebar-foreground/70" />
-                    <span className="text-sm">Sign out</span>
+                    <LogOut className="w-3.5 h-3.5 text-sidebar-foreground/60" />
+                    <span className="text-xs">Sign out</span>
                   </button>
                 </div>
               )}
