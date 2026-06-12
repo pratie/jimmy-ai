@@ -192,16 +192,16 @@ Ask me anything about your website, services, pricing, or details, and I will an
   }
 
   return (
-    <div className="w-full max-w-2xl mx-auto rounded-3xl border border-slate-200/80 dark:border-white/10 bg-white/70 dark:bg-slate-900/80 shadow-2xl backdrop-blur-xl overflow-hidden transition-all duration-300">
+    <div className="w-full max-w-2xl mx-auto rounded-b-2xl border border-t-0 border-slate-200/80 dark:border-white/10 bg-white/70 dark:bg-slate-900/80 shadow-2xl backdrop-blur-xl overflow-hidden transition-all duration-300">
       
       {/* Dynamic Header */}
-      <div className="bg-slate-900 dark:bg-black p-4 flex items-center justify-between border-b border-slate-800">
+      <div className="bg-slate-900 dark:bg-black/40 backdrop-blur-md p-4 flex items-center justify-between border-b border-slate-800 dark:border-white/5">
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-full bg-slate-800 flex items-center justify-center ring-2 ring-slate-700 overflow-hidden">
+          <div className="h-10 w-10 rounded-full bg-slate-800 flex items-center justify-center ring-1 ring-white/10 overflow-hidden shadow-glow-primary">
             {step === 'scraping' ? (
               <Loader2 className="w-5 h-5 text-white animate-spin" />
             ) : (
-              <Globe className="w-5 h-5 text-slate-300" />
+              <Globe className="w-5 h-5 text-primary" />
             )}
           </div>
           <div>

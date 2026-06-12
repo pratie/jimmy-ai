@@ -1,35 +1,40 @@
 'use client'
 
 import React from 'react'
+import { FadeIn } from '@/components/ui/fade-in'
+import { SpotlightCard } from '@/components/ui/spotlight-card'
 
 export default function HowItWorks() {
   return (
     <section className="py-24 md:py-32 relative overflow-hidden bg-transparent">
 
       {/* Decorative background glows */}
-      <div className="absolute top-1/3 left-1/4 -translate-x-1/2 w-[350px] h-[350px] rounded-full bg-primary/5 blur-3xl opacity-60 pointer-events-none" />
-      <div className="absolute bottom-1/3 right-1/4 translate-x-1/2 w-[350px] h-[350px] rounded-full bg-primary/5 blur-3xl opacity-60 pointer-events-none" />
+      <div className="absolute top-1/3 left-1/4 -translate-x-1/2 w-[500px] h-[500px] rounded-full bg-primary/10 blur-[120px] pointer-events-none animate-pulse" />
+      <div className="absolute bottom-1/3 right-1/4 translate-x-1/2 w-[500px] h-[500px] rounded-full bg-blue-500/10 blur-[120px] pointer-events-none animate-pulse" style={{ animationDelay: '2s' }} />
 
       <div className="container mx-auto px-6 sm:px-8 lg:px-12 relative z-10">
 
         {/* Section Header */}
-        <div className="text-center mb-20">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/[0.03] border border-white/[0.06] text-[11px] font-medium tracking-widest uppercase text-muted-foreground mb-6">
-            ✨ Product Flow
+        <FadeIn direction="up">
+          <div className="text-center mb-20">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/[0.03] border border-white/[0.06] text-[11px] font-bold tracking-widest uppercase text-primary mb-6 shadow-[inset_0_0_20px_rgba(255,255,255,0.02)]">
+              ✨ Product Flow
+            </div>
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-black tracking-tighter text-foreground mb-6">
+              Launch your AI Agent in <span className="text-gradient-primary">under 5 minutes</span>
+            </h2>
+            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+              A simple, self-serve flow built to turn anonymous website traffic into qualified meetings and paying customers.
+            </p>
           </div>
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-foreground mb-6">
-            Launch your AI Agent in under 5 minutes
-          </h2>
-          <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-            A simple, self-serve flow built to turn anonymous website traffic into qualified meetings and paying customers.
-          </p>
-        </div>
+        </FadeIn>
 
         {/* 4-Column Modern Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-7xl mx-auto">
 
           {/* Card 1: Train AI */}
-          <div className="group relative overflow-hidden bg-card/40 backdrop-blur-xl border border-border rounded-3xl p-6 hover:shadow-large hover:border-border/80 transition-all duration-500 flex flex-col justify-between h-[380px]">
+          <FadeIn delay={0.1} direction="up" className="h-full">
+            <SpotlightCard className="p-6 flex flex-col justify-between h-full min-h-[380px] group">
             <div>
               {/* Dynamic SVG 1: Crawler/Data flow */}
               <div className="h-28 w-full bg-background/40 rounded-2xl border border-border/50 flex items-center justify-center overflow-hidden mb-6 relative group-hover:bg-background/60 transition-colors duration-300">
@@ -78,10 +83,12 @@ export default function HowItWorks() {
             <div className="text-xs font-semibold text-muted-foreground/60 tracking-wider uppercase mt-4">
               Step 01 / Scraper
             </div>
-          </div>
+          </SpotlightCard>
+          </FadeIn>
 
           {/* Card 2: Customize */}
-          <div className="group relative overflow-hidden bg-card/40 backdrop-blur-xl border border-border rounded-3xl p-6 hover:shadow-large hover:border-border/80 transition-all duration-500 flex flex-col justify-between h-[380px]">
+          <FadeIn delay={0.2} direction="up" className="h-full">
+            <SpotlightCard className="p-6 flex flex-col justify-between h-full min-h-[380px] group">
             <div>
               {/* Dynamic SVG 2: Customization dials */}
               <div className="h-28 w-full bg-background/40 rounded-2xl border border-border/50 flex items-center justify-center overflow-hidden mb-6 relative group-hover:bg-background/60 transition-colors duration-300">
@@ -121,10 +128,12 @@ export default function HowItWorks() {
             <div className="text-xs font-semibold text-muted-foreground/60 tracking-wider uppercase mt-4">
               Step 02 / Guardrails
             </div>
-          </div>
+          </SpotlightCard>
+          </FadeIn>
 
           {/* Card 3: Embed */}
-          <div className="group relative overflow-hidden bg-card/40 backdrop-blur-xl border border-border rounded-3xl p-6 hover:shadow-large hover:border-border/80 transition-all duration-500 flex flex-col justify-between h-[380px]">
+          <FadeIn delay={0.3} direction="up" className="h-full">
+            <SpotlightCard className="p-6 flex flex-col justify-between h-full min-h-[380px] group">
             <div>
               {/* Dynamic SVG 3: Script embedding */}
               <div className="h-28 w-full bg-background/40 rounded-2xl border border-border/50 flex items-center justify-center overflow-hidden mb-6 relative group-hover:bg-background/60 transition-colors duration-300">
@@ -160,10 +169,12 @@ export default function HowItWorks() {
             <div className="text-xs font-semibold text-muted-foreground/60 tracking-wider uppercase mt-4">
               Step 03 / Embed
             </div>
-          </div>
+          </SpotlightCard>
+          </FadeIn>
 
           {/* Card 4: Convert */}
-          <div className="group relative overflow-hidden bg-card/40 backdrop-blur-xl border border-border rounded-3xl p-6 hover:shadow-large hover:border-border/80 transition-all duration-500 flex flex-col justify-between h-[380px]">
+          <FadeIn delay={0.4} direction="up" className="h-full">
+            <SpotlightCard className="p-6 flex flex-col justify-between h-full min-h-[380px] group">
             <div>
               {/* Dynamic SVG 4: Conversion & Chat bubbles */}
               <div className="h-28 w-full bg-background/40 rounded-2xl border border-border/50 flex items-center justify-center overflow-hidden mb-6 relative group-hover:bg-background/60 transition-colors duration-300">
@@ -195,7 +206,8 @@ export default function HowItWorks() {
             <div className="text-xs font-semibold text-muted-foreground/60 tracking-wider uppercase mt-4">
               Step 04 / Conversion
             </div>
-          </div>
+          </SpotlightCard>
+          </FadeIn>
 
         </div>
 

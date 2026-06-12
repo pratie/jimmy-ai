@@ -67,13 +67,13 @@ body::before {
 
   .dark {
     /* ── Dark Mode ── */
-    --background: 0 0% 4%;          /* #0A0A0A */
+    --background: 0 0% 0%;          /* #000000 - True black for premium feel */
     --foreground: 0 0% 98%;         /* #FAFAFA */
 
-    --card: 0 0% 7%;               /* #121212 */
-    --card-foreground: 0 0% 98%;   /* #FAFAFA */
+    --card: 240 4% 4%;              /* #0A0A0A */
+    --card-foreground: 0 0% 98%;    /* #FAFAFA */
 
-    --popover: 0 0% 7%;            /* #121212 */
+    --popover: 240 4% 4%;           /* #0A0A0A */
     --popover-foreground: 0 0% 98%;
 
     --primary: 211 100% 50%;        /* #0A84FF — Apple dark mode blue */
@@ -95,10 +95,10 @@ body::before {
     --input: 240 4% 16%;
     --ring: 211 100% 50%;
 
-    --sidebar-bg: 240 5% 98%;
-    --sidebar-foreground: 240 10% 4%;
-    --sidebar-muted: 240 5% 95%;
-    --sidebar-border: 240 6% 90%;
+    --sidebar-bg: 0 0% 4%;
+    --sidebar-foreground: 0 0% 98%;
+    --sidebar-muted: 240 4% 10%;
+    --sidebar-border: 240 4% 16%;
   }
 }
 
@@ -106,6 +106,10 @@ body::before {
   /* Subtle grid background for dark hero sections */
   .bg-grid-white\/\[0\.02\] {
     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' width='32' height='32' fill='none' stroke='rgb(255 255 255 / 0.02)'%3e%3cpath d='M0 .5H31.5V32'/%3e%3c/svg%3e");
+  }
+
+  .bg-grid-white\/\[0\.05\] {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' width='32' height='32' fill='none' stroke='rgb(255 255 255 / 0.05)'%3e%3cpath d='M0 .5H31.5V32'/%3e%3c/svg%3e");
   }
 
   .bg-grid-black\/\[0\.02\] {
@@ -119,6 +123,10 @@ body::before {
 
   .text-gradient-premium {
     @apply bg-clip-text text-transparent bg-gradient-to-b from-foreground to-muted-foreground;
+  }
+
+  .text-gradient-primary {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-400;
   }
 }
 
