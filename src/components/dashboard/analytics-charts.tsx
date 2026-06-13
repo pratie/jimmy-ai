@@ -7,13 +7,13 @@ export function AnalyticsCharts() {
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full mt-6 font-heading">
       
       {/* Card 1: Conversations */}
-      <div className="bg-card border border-border rounded-xl p-6 shadow-sm hover:shadow-soft transition-all">
+      <div className="bg-card/60 backdrop-blur-xl border border-border/60 rounded-2xl p-6 shadow-sm hover:shadow-glow-primary hover:border-primary/20 transition-all duration-300">
         <div className="flex items-start justify-between mb-4">
           <div>
             <h3 className="font-bold text-base text-foreground">Conversations</h3>
             <p className="text-xs text-muted-foreground mt-0.5">The number of conversations/users your assistant has had</p>
           </div>
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-rose-50 text-rose-600 border border-rose-100">
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/10 text-rose-400 border border-rose-500/20">
             ↓ 8.3%
           </span>
         </div>
@@ -32,7 +32,7 @@ export function AnalyticsCharts() {
 
         {/* SVG Chart */}
         <div className="w-full h-[220px] relative">
-          <svg className="w-full h-full" viewBox="0 0 500 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <svg className="w-full h-full text-border" viewBox="0 0 500 200" fill="none" xmlns="http://www.w3.org/2000/svg">
             <defs>
               <linearGradient id="orange-grad" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stopColor="#f59e0b" stopOpacity="0.25" />
@@ -44,12 +44,12 @@ export function AnalyticsCharts() {
               </linearGradient>
             </defs>
 
-            {/* Dotted Grid Lines */}
-            <line x1="50" y1="20" x2="480" y2="20" stroke="#f1f5f9" strokeWidth="1" strokeDasharray="3 3" />
-            <line x1="50" y1="60" x2="480" y2="60" stroke="#f1f5f9" strokeWidth="1" strokeDasharray="3 3" />
-            <line x1="50" y1="100" x2="480" y2="100" stroke="#f1f5f9" strokeWidth="1" strokeDasharray="3 3" />
-            <line x1="50" y1="140" x2="480" y2="140" stroke="#f1f5f9" strokeWidth="1" strokeDasharray="3 3" />
-            <line x1="50" y1="180" x2="480" y2="180" stroke="#e2e8f0" strokeWidth="1" />
+            {/* Dotted Grid Lines - theme aware */}
+            <line x1="50" y1="20" x2="480" y2="20" stroke="currentColor" strokeWidth="1" strokeDasharray="3 3" strokeOpacity="0.5" />
+            <line x1="50" y1="60" x2="480" y2="60" stroke="currentColor" strokeWidth="1" strokeDasharray="3 3" strokeOpacity="0.5" />
+            <line x1="50" y1="100" x2="480" y2="100" stroke="currentColor" strokeWidth="1" strokeDasharray="3 3" strokeOpacity="0.5" />
+            <line x1="50" y1="140" x2="480" y2="140" stroke="currentColor" strokeWidth="1" strokeDasharray="3 3" strokeOpacity="0.5" />
+            <line x1="50" y1="180" x2="480" y2="180" stroke="currentColor" strokeWidth="1" strokeOpacity="0.7" />
 
             {/* Y Axis Labels */}
             <text x="15" y="24" className="fill-muted-foreground/80 font-heading" fontSize="9" fontWeight="500">4.00</text>
@@ -101,21 +101,21 @@ export function AnalyticsCharts() {
             />
 
             {/* Plot Circles Markers */}
-            <circle cx="206" cy="140" r="4.5" fill="#f59e0b" stroke="#ffffff" strokeWidth="1.5" className="shadow-sm" />
-            <circle cx="342" cy="60" r="4.5" fill="#f59e0b" stroke="#ffffff" strokeWidth="1.5" className="shadow-sm" />
-            <circle cx="410" cy="60" r="4.5" fill="#6ee7b7" stroke="#ffffff" strokeWidth="1.5" className="shadow-sm" />
+            <circle cx="206" cy="140" r="4.5" fill="#f59e0b" className="stroke-card" strokeWidth="1.5" />
+            <circle cx="342" cy="60" r="4.5" fill="#f59e0b" className="stroke-card" strokeWidth="1.5" />
+            <circle cx="410" cy="60" r="4.5" fill="#6ee7b7" className="stroke-card" strokeWidth="1.5" />
           </svg>
         </div>
       </div>
 
       {/* Card 2: Incoming Messages */}
-      <div className="bg-card border border-border rounded-xl p-6 shadow-sm hover:shadow-soft transition-all">
+      <div className="bg-card/60 backdrop-blur-xl border border-border/60 rounded-2xl p-6 shadow-sm hover:shadow-glow-primary hover:border-primary/20 transition-all duration-300">
         <div className="flex items-start justify-between mb-4">
           <div>
             <h3 className="font-bold text-base text-foreground">Incoming Messages</h3>
             <p className="text-xs text-muted-foreground mt-0.5">The number of text messages sent by users to your assistant</p>
           </div>
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-600 border border-emerald-100">
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
             ↑ 11.1%
           </span>
         </div>
@@ -134,7 +134,7 @@ export function AnalyticsCharts() {
 
         {/* SVG Chart */}
         <div className="w-full h-[220px] relative">
-          <svg className="w-full h-full" viewBox="0 0 500 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <svg className="w-full h-full text-border" viewBox="0 0 500 200" fill="none" xmlns="http://www.w3.org/2000/svg">
             <defs>
               <linearGradient id="blue-grad" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stopColor="#0ea5e9" stopOpacity="0.25" />
@@ -146,13 +146,13 @@ export function AnalyticsCharts() {
               </linearGradient>
             </defs>
 
-            {/* Dotted Grid Lines */}
-            <line x1="50" y1="20" x2="480" y2="20" stroke="#f1f5f9" strokeWidth="1" strokeDasharray="3 3" />
-            <line x1="50" y1="52" x2="480" y2="52" stroke="#f1f5f9" strokeWidth="1" strokeDasharray="3 3" />
-            <line x1="50" y1="84" x2="480" y2="84" stroke="#f1f5f9" strokeWidth="1" strokeDasharray="3 3" />
-            <line x1="50" y1="116" x2="480" y2="116" stroke="#f1f5f9" strokeWidth="1" strokeDasharray="3 3" />
-            <line x1="50" y1="148" x2="480" y2="148" stroke="#f1f5f9" strokeWidth="1" strokeDasharray="3 3" />
-            <line x1="50" y1="180" x2="480" y2="180" stroke="#e2e8f0" strokeWidth="1" />
+            {/* Dotted Grid Lines - theme aware */}
+            <line x1="50" y1="20" x2="480" y2="20" stroke="currentColor" strokeWidth="1" strokeDasharray="3 3" strokeOpacity="0.5" />
+            <line x1="50" y1="52" x2="480" y2="52" stroke="currentColor" strokeWidth="1" strokeDasharray="3 3" strokeOpacity="0.5" />
+            <line x1="50" y1="84" x2="480" y2="84" stroke="currentColor" strokeWidth="1" strokeDasharray="3 3" strokeOpacity="0.5" />
+            <line x1="50" y1="116" x2="480" y2="116" stroke="currentColor" strokeWidth="1" strokeDasharray="3 3" strokeOpacity="0.5" />
+            <line x1="50" y1="148" x2="480" y2="148" stroke="currentColor" strokeWidth="1" strokeDasharray="3 3" strokeOpacity="0.5" />
+            <line x1="50" y1="180" x2="480" y2="180" stroke="currentColor" strokeWidth="1" strokeOpacity="0.7" />
 
             {/* Y Axis Labels */}
             <text x="12" y="24" className="fill-muted-foreground/80 font-heading" fontSize="9" fontWeight="500">10.00</text>
@@ -199,9 +199,9 @@ export function AnalyticsCharts() {
             />
 
             {/* Plot Circles Markers */}
-            <circle cx="206" cy="52" r="4.5" fill="#0ea5e9" stroke="#ffffff" strokeWidth="1.5" className="shadow-sm" />
-            <circle cx="274" cy="84" r="4.5" fill="#0ea5e9" stroke="#ffffff" strokeWidth="1.5" className="shadow-sm" />
-            <circle cx="410" cy="40" r="4.5" fill="#f59e0b" stroke="#ffffff" strokeWidth="1.5" className="shadow-sm" />
+            <circle cx="206" cy="52" r="4.5" fill="#0ea5e9" className="stroke-card" strokeWidth="1.5" />
+            <circle cx="274" cy="84" r="4.5" fill="#0ea5e9" className="stroke-card" strokeWidth="1.5" />
+            <circle cx="410" cy="40" r="4.5" fill="#f59e0b" className="stroke-card" strokeWidth="1.5" />
           </svg>
         </div>
       </div>

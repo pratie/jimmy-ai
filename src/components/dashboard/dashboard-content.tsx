@@ -67,7 +67,7 @@ export default function DashboardContent({
       <div className="mx-auto max-w-5xl px-4 py-8 font-heading animate-fade-in">
         {/* Catalog Header */}
         <div className="flex flex-col gap-1.5 mb-8">
-          <h1 className="text-3xl font-extrabold tracking-tight text-foreground">Agents</h1>
+          <h1 className="text-3xl font-black tracking-tighter text-foreground">Agents</h1>
           <p className="text-xs text-muted-foreground">Select or deploy a dedicated AI assistant trained on website pages</p>
         </div>
 
@@ -79,8 +79,11 @@ export default function DashboardContent({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search agents..."
-            className="h-11 w-full pl-11 pr-4 rounded-xl border border-input bg-background text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-primary shadow-xs font-semibold"
+            className="h-11 w-full pl-11 pr-12 rounded-2xl border border-input bg-card/60 backdrop-blur-xl text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/40 shadow-xs font-semibold"
           />
+          <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-muted/60 border border-border/60 text-[10px] font-semibold text-muted-foreground pointer-events-none">
+            ⌘K
+          </div>
         </div>
 
         {/* Catalog Grid */}
@@ -97,15 +100,25 @@ export default function DashboardContent({
             // Dynamic date placeholder
             const dateStr = "Last Edited May 25, 2026"
 
+            // Generate a gradient based on domain name
+            const gradients = [
+              'from-blue-500 to-cyan-400',
+              'from-violet-500 to-purple-400',
+              'from-emerald-500 to-teal-400',
+              'from-orange-500 to-amber-400',
+              'from-rose-500 to-pink-400',
+            ]
+            const gradientIndex = domain.name.charCodeAt(0) % gradients.length
+
             return (
               <div
                 key={domain.id}
                 onClick={() => selectAgent({ id: domain.id, name: domain.name, icon: domain.icon })}
-                className="flex flex-col items-stretch p-5 bg-card border border-border rounded-2xl shadow-xs hover:shadow-medium hover:border-primary/20 transition-all cursor-pointer group h-[200px]"
+                className="flex flex-col items-stretch p-5 bg-card border border-border rounded-2xl shadow-xs hover:scale-[1.02] hover:shadow-glow-primary hover:border-primary/30 transition-all duration-300 cursor-pointer group h-[200px]"
               >
                 {/* Large visual initials badge */}
-                <div className="w-16 h-16 rounded-xl bg-zinc-50 border border-zinc-200/80 flex items-center justify-center text-zinc-500 font-extrabold text-lg group-hover:bg-primary/5 group-hover:border-primary/20 transition-colors shadow-xs">
-                  <span className="group-hover:text-primary transition-colors">{initials}</span>
+                <div className={`w-16 h-16 rounded-xl bg-gradient-to-br ${gradients[gradientIndex]} text-white flex items-center justify-center font-extrabold text-lg shadow-xs`}>
+                  <span>{initials}</span>
                 </div>
 
                 <div className="mt-5 flex-1 flex flex-col justify-end">
@@ -123,10 +136,10 @@ export default function DashboardContent({
           {/* "+ Add Agent" dotted card */}
           <button
             onClick={() => setShowAddAgent(true)}
-            className="flex flex-col items-center justify-center p-5 border-2 border-dashed border-zinc-200 hover:border-primary/40 bg-zinc-50/50 hover:bg-primary/5 rounded-2xl gap-3 transition-all group h-[200px]"
+            className="flex flex-col items-center justify-center p-5 bg-card/40 border border-dashed border-border hover:border-primary/40 hover:bg-primary/5 backdrop-blur-xl rounded-2xl gap-3 transition-all duration-300 group h-[200px]"
           >
             <div className="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center group-hover:scale-110 transition-transform shadow-xs">
-              <Plus className="w-5 h-5" />
+              <Plus className="w-5 h-5 group-hover:rotate-90 transition-transform duration-300" />
             </div>
             <span className="text-xs font-extrabold text-foreground tracking-tight">Create AI Agent</span>
             <span className="text-[9px] text-muted-foreground max-w-[180px] text-center">Deploy RAG chatbot trained on website pages</span>
@@ -149,17 +162,17 @@ export default function DashboardContent({
   return (
     <div className="mx-auto max-w-5xl px-4 pb-12 font-heading animate-fade-in">
       {/* Scoped Header Row */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 pt-4">
+      <div className="bg-gradient-to-r from-primary/5 to-transparent rounded-2xl p-6 -mx-2 flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
           <div className="flex items-center gap-2">
-            <Bot className="w-5 h-5 text-primary" />
-            <span className="text-xs font-bold text-primary uppercase tracking-wider">Active Workspace Console</span>
+            <Bot className="w-5 h-5 text-primary shadow-glow-primary" />
+            <span className="text-xs font-bold text-primary/80 uppercase tracking-wider">Active Workspace Console</span>
           </div>
           <h1 className="text-3xl font-extrabold tracking-tight text-foreground mt-1 capitalize">
             {activeAgent.name.replace(/\.[a-z]{2,}$/, '').replace(/-/g, ' ')}
           </h1>
           <div className="flex items-center gap-3 mt-3">
-            <button className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border bg-background hover:bg-muted text-xs font-semibold text-foreground shadow-sm transition-colors">
+            <button className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-border/60 bg-card/60 backdrop-blur-sm hover:border-primary/30 text-xs font-semibold text-foreground shadow-sm transition-colors">
               Last 7 days
               <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />
             </button>
@@ -199,7 +212,7 @@ export default function DashboardContent({
       <AnalyticsCharts />
 
       {/* Scoped Usage Plan Overview */}
-      <div className="relative bg-card rounded-xl border border-border shadow-xs p-6 mt-8">
+      <div className="relative bg-card rounded-xl border border-border shadow-xs backdrop-blur-xl p-6 mt-8">
         <div className="mb-6">
           <h2 className="font-extrabold text-xl text-foreground">Usage Summary</h2>
           <p className="text-xs text-muted-foreground mt-1">

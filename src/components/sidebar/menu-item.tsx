@@ -18,10 +18,10 @@ const MenuItem = ({ size, path, icon, label, current, onSignOut }: Props) => {
         <Link
           onClick={onSignOut}
           className={cn(
-            'flex items-center gap-2 px-2 py-2 rounded-lg my-1 transition-all border font-normal text-sidebar-foreground',
+            'flex items-center gap-2.5 px-2.5 py-2 rounded-xl transition-all border font-normal text-sidebar-foreground/80 hover:text-sidebar-foreground text-sm',
             current === path
-              ? 'bg-sidebar-muted font-semibold border-sidebar-border'
-              : 'border-transparent hover:bg-sidebar-muted'
+              ? 'bg-sidebar-muted/70 font-semibold border-sidebar-border/50 text-sidebar-foreground'
+              : 'border-transparent hover:bg-sidebar-muted/50'
           )}
           href={path ? `/${path}` : '#'}
         >
@@ -33,14 +33,17 @@ const MenuItem = ({ size, path, icon, label, current, onSignOut }: Props) => {
         <Link
           onClick={onSignOut}
           className={cn(
-            'rounded-lg p-2 my-1 transition-all border text-sidebar-foreground',
+            'rounded-xl p-2 transition-all border text-sidebar-foreground/70 hover:text-sidebar-foreground flex flex-col items-center gap-1 relative',
             current === path
-              ? 'bg-sidebar-muted border-sidebar-border'
-              : 'border-transparent hover:bg-sidebar-muted'
+              ? 'bg-sidebar-muted/70 border-sidebar-border/50 text-sidebar-foreground'
+              : 'border-transparent hover:bg-sidebar-muted/60'
           )}
           href={path ? `/${path}` : '#'}
         >
           {icon}
+          {current === path && (
+            <span className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary" />
+          )}
         </Link>
       )
     default:

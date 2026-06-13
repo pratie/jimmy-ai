@@ -23,6 +23,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import HelpDesk from './help-desk'
 import AppearanceSettings from './appearance'
 import { getPlanLimits } from '@/lib/plans'
+import { SpotlightCard } from '@/components/ui/spotlight-card'
 
 const WelcomeMessage = dynamic(
   () => import('./greetings-message').then((props) => props.default),
@@ -117,27 +118,49 @@ const SettingsForm = ({ id, name, chatBot, plan, trainingSourcesUsed, knowledgeB
   return (
     <form className="flex flex-col gap-8 pb-10" onSubmit={onUpdateSettings}>
       {/* Premium Setup Checklist */}
-      <div className="flex flex-col gap-5 rounded-2xl border border-white/[0.04] bg-card p-6 shadow-[0_20px_45px_rgba(0,0,0,0.5)] transition-all duration-300">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="space-y-1">
-            <h2 className="font-bold text-xl text-white tracking-tight flex items-center gap-2">
-              Agent Setup Progress
-              <span className="text-sm font-medium px-2 py-0.5 bg-[#0071E3]/15 text-[#0071E3] rounded-full">
+      <div className="flex flex-col gap-6 rounded-3xl border border-white/[0.06] bg-card/40 backdrop-blur-xl p-8 shadow-[0_30px_60px_rgba(0,0,0,0.4)] transition-all duration-500 hover:border-white/[0.1]">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="flex items-center gap-5">
+            {/* Circular Progress Ring */}
+            <div className="relative flex items-center justify-center w-16 h-16 bg-white/[0.02] border border-white/[0.06] rounded-full shadow-inner">
+              <svg className="w-16 h-16 transform -rotate-90">
+                <circle
+                  cx="32"
+                  cy="32"
+                  r="26"
+                  className="text-white/[0.04]"
+                  strokeWidth="3.5"
+                  stroke="currentColor"
+                  fill="transparent"
+                />
+                <circle
+                  cx="32"
+                  cy="32"
+                  r="26"
+                  className="text-primary transition-all duration-1000 ease-out"
+                  strokeWidth="3.5"
+                  strokeDasharray={2 * Math.PI * 26}
+                  strokeDashoffset={2 * Math.PI * 26 - (progressPercent / 100) * (2 * Math.PI * 26)}
+                  strokeLinecap="round"
+                  stroke="currentColor"
+                  fill="transparent"
+                />
+              </svg>
+              <span className="absolute text-xs font-black text-white tracking-tighter">
                 {progressPercent}%
               </span>
-            </h2>
-            <p className="text-xs text-white/60 font-medium">Complete these steps to launch your autonomous AI agent</p>
+            </div>
+            <div className="space-y-1">
+              <h2 className="font-black text-xl text-white tracking-tight flex items-center gap-2">
+                Agent Setup Progress
+              </h2>
+              <p className="text-xs text-white/50 font-medium">Complete these steps to launch your autonomous AI agent</p>
+            </div>
           </div>
           <div className="flex items-center gap-3">
-            <div className="hidden md:block w-32 h-1.5 bg-white/5 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-[#0071E3] transition-all duration-500 ease-out"
-                style={{ width: `${progressPercent}%` }}
-              />
-            </div>
-            <Button asChild variant="outline" size="sm" className="rounded-xl border-white/[0.08] bg-white/5 text-white hover:bg-white/10 hover:text-white transition-colors">
+            <Button asChild variant="outline" size="sm" className="rounded-xl border-white/[0.08] bg-white/5 text-white hover:bg-white/10 hover:text-white transition-all duration-300">
               <a href={`/preview/${id}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
-                Live Preview <ArrowRight className="w-3 h-3" />
+                Live Preview <ArrowRight className="w-3.5 h-3.5" />
               </a>
             </Button>
           </div>
@@ -145,38 +168,40 @@ const SettingsForm = ({ id, name, chatBot, plan, trainingSourcesUsed, knowledgeB
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           {checklistItems.map((item) => (
-            <button
-              type="button"
+            <SpotlightCard
               key={item.key}
-              onClick={() => setActiveTab(item.key)}
+              spotlightColor={item.completed ? 'rgba(34, 197, 94, 0.08)' : 'rgba(0, 113, 227, 0.12)'}
               className={cn(
-                "group flex flex-col gap-3 rounded-xl border p-4 text-left transition-all duration-300",
+                "group cursor-pointer transition-all duration-300 border",
                 item.completed
-                  ? "border-accent-green/30 bg-accent-green/10 hover:bg-accent-green/15"
-                  : "border-white/[0.04] bg-[#0b0d12] hover:border-white/[0.12] hover:shadow-lg",
-                activeTab === item.key && !item.completed && "ring-2 ring-[#0071E3]/20 border-[#0071E3]/40"
+                  ? "border-emerald-500/20 bg-emerald-500/5 hover:border-emerald-500/40 hover:bg-emerald-500/10"
+                  : "border-white/[0.04] bg-[#0b0d12]/60 hover:border-white/[0.12] hover:bg-[#0b0d12]/80",
+                activeTab === item.key && !item.completed && "ring-2 ring-primary/30 border-primary/40"
               )}
+              onClick={() => setActiveTab(item.key)}
             >
-              <div className="flex items-center justify-between w-full">
-                <div className={cn(
-                  "p-2 rounded-lg transition-colors",
-                  item.completed ? "bg-accent-green/20 text-accent-green" : "bg-white/5 text-white/50 group-hover:bg-[#0071E3]/10 group-hover:text-[#0071E3]"
-                )}>
-                  {item.completed ? (
-                    <CheckCircle2 className="w-4 h-4" />
-                  ) : (
-                    <CircleDashed className="w-4 h-4" />
+              <div className="flex flex-col gap-3 p-5 text-left">
+                <div className="flex items-center justify-between w-full">
+                  <div className={cn(
+                    "p-2 rounded-xl transition-all duration-300",
+                    item.completed ? "bg-emerald-500/20 text-emerald-400" : "bg-white/5 text-white/50 group-hover:bg-primary/10 group-hover:text-primary"
+                  )}>
+                    {item.completed ? (
+                      <CheckCircle2 className="w-4 h-4 animate-in zoom-in duration-300" />
+                    ) : (
+                      <CircleDashed className="w-4 h-4 group-hover:rotate-45 transition-transform duration-300" />
+                    )}
+                  </div>
+                  {item.completed && (
+                    <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest bg-emerald-500/10 px-2.5 py-0.5 rounded-full">Completed</span>
                   )}
                 </div>
-                {item.completed && (
-                  <span className="text-[10px] font-bold text-accent-green uppercase tracking-wider">Completed</span>
-                )}
+                <div className="space-y-0.5">
+                  <h3 className="font-bold text-sm text-white tracking-tight group-hover:text-white transition-colors">{item.label}</h3>
+                  <p className="text-[11px] text-white/50 font-medium leading-tight group-hover:text-white/60 transition-colors">{item.description}</p>
+                </div>
               </div>
-              <div className="space-y-0.5">
-                <h3 className="font-bold text-sm text-white">{item.label}</h3>
-                <p className="text-[11px] text-white/60 font-medium leading-tight">{item.description}</p>
-              </div>
-            </button>
+            </SpotlightCard>
           ))}
         </div>
       </div>
@@ -186,36 +211,36 @@ const SettingsForm = ({ id, name, chatBot, plan, trainingSourcesUsed, knowledgeB
         onValueChange={(value) => setActiveTab(value as TabKey)}
         className="flex flex-col gap-6"
       >
-        <TabsList className="inline-flex w-auto self-start gap-1 rounded-xl bg-white/5 p-1 border border-white/[0.04]">
+        <TabsList className="inline-flex w-auto self-start gap-1.5 rounded-2xl bg-[#0b0d12]/80 backdrop-blur-xl p-1.5 border border-white/[0.06]">
           <TabsTrigger
             value="knowledge"
-            className="rounded-lg px-4 py-2 text-xs font-bold transition-all data-[state=active]:bg-[#0071E3] data-[state=active]:text-white text-white/60 hover:text-white"
+            className="rounded-xl px-5 py-2.5 text-xs font-bold transition-all duration-300 data-[state=active]:bg-[#0071E3] data-[state=active]:text-white data-[state=active]:shadow-[0_4px_20px_rgba(0,113,227,0.4)] text-white/50 hover:text-white/80"
           >
             Knowledge Base
           </TabsTrigger>
           <TabsTrigger
             value="behavior"
-            className="rounded-lg px-4 py-2 text-xs font-bold transition-all data-[state=active]:bg-[#0071E3] data-[state=active]:text-white text-white/60 hover:text-white"
+            className="rounded-xl px-5 py-2.5 text-xs font-bold transition-all duration-300 data-[state=active]:bg-[#0071E3] data-[state=active]:text-white data-[state=active]:shadow-[0_4px_20px_rgba(0,113,227,0.4)] text-white/50 hover:text-white/80"
           >
             AI Behavior
           </TabsTrigger>
           <TabsTrigger
             value="appearance"
-            className="rounded-lg px-4 py-2 text-xs font-bold transition-all data-[state=active]:bg-[#0071E3] data-[state=active]:text-white text-white/60 hover:text-white"
+            className="rounded-xl px-5 py-2.5 text-xs font-bold transition-all duration-300 data-[state=active]:bg-[#0071E3] data-[state=active]:text-white data-[state=active]:shadow-[0_4px_20px_rgba(0,113,227,0.4)] text-white/50 hover:text-white/80"
           >
             Appearance
           </TabsTrigger>
           <TabsTrigger
             value="domain"
-            className="rounded-lg px-4 py-2 text-xs font-bold transition-all data-[state=active]:bg-[#0071E3] data-[state=active]:text-white text-white/60 hover:text-white"
+            className="rounded-xl px-5 py-2.5 text-xs font-bold transition-all duration-300 data-[state=active]:bg-[#0071E3] data-[state=active]:text-white data-[state=active]:shadow-[0_4px_20px_rgba(0,113,227,0.4)] text-white/50 hover:text-white/80"
           >
             Domain & Embed
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="knowledge" className="mt-0">
-          <div className="flex flex-col gap-4 rounded-2xl border border-white/[0.04] bg-card p-6 shadow-[0_20px_45px_rgba(0,0,0,0.5)]">
-            <h2 className="font-bold text-xl text-white tracking-tight">Knowledge Base</h2>
+          <div className="flex flex-col gap-6 rounded-3xl border border-white/[0.06] bg-card/40 backdrop-blur-xl p-8 shadow-[0_30px_60px_rgba(0,0,0,0.4)]">
+            <h2 className="font-black text-xl text-white tracking-tight">Knowledge Base</h2>
             <KnowledgeBaseViewer
               domainId={id}
               domainName={name}
@@ -232,14 +257,14 @@ const SettingsForm = ({ id, name, chatBot, plan, trainingSourcesUsed, knowledgeB
         </TabsContent>
 
         <TabsContent value="behavior" className="mt-0 space-y-6">
-          <div className="flex flex-col gap-6 rounded-2xl border border-white/[0.04] bg-card p-6 shadow-[0_20px_45px_rgba(0,0,0,0.5)]">
-            <div className="flex items-center justify-between border-b border-white/[0.04] pb-4">
+          <div className="flex flex-col gap-6 rounded-3xl border border-white/[0.06] bg-card/40 backdrop-blur-xl p-8 shadow-[0_30px_60px_rgba(0,0,0,0.4)]">
+            <div className="flex items-center justify-between border-b border-white/[0.06] pb-5">
               <div className="space-y-1">
-                <h2 className="font-bold text-xl text-white tracking-tight">AI Behavior</h2>
-                <p className="text-xs text-white/60 font-medium">Configure how your agent interacts with customers</p>
+                <h2 className="font-black text-xl text-white tracking-tight">AI Behavior</h2>
+                <p className="text-xs text-white/50 font-medium">Configure how your agent interacts with customers</p>
               </div>
-              <Button asChild variant="ghost" size="sm" className="text-xs font-bold text-[#0071E3] hover:bg-[#0071E3]/10">
-                <a href={`/settings/${name}/advanced`}>Advanced Settings <ArrowRight className="ml-2 w-3 h-3" /></a>
+              <Button asChild variant="ghost" size="sm" className="text-xs font-bold text-primary hover:bg-primary/10">
+                <a href={`/settings/${name}/advanced`}>Advanced Settings <ArrowRight className="ml-2 w-3.5 h-3.5" /></a>
               </Button>
             </div>
             <div className="grid gap-8 md:grid-cols-2">
@@ -259,20 +284,20 @@ const SettingsForm = ({ id, name, chatBot, plan, trainingSourcesUsed, knowledgeB
             </div>
           </div>
 
-          <div className="flex flex-col gap-4 rounded-2xl border border-white/[0.04] bg-card p-6 shadow-[0_20px_45px_rgba(0,0,0,0.5)]">
-            <h2 className="font-bold text-xl text-white tracking-tight">Help Desk (FAQs)</h2>
+          <div className="flex flex-col gap-6 rounded-3xl border border-white/[0.06] bg-card/40 backdrop-blur-xl p-8 shadow-[0_30px_60px_rgba(0,0,0,0.4)]">
+            <h2 className="font-black text-xl text-white tracking-tight border-b border-white/[0.06] pb-4">Help Desk (FAQs)</h2>
             <HelpDesk id={id} />
           </div>
         </TabsContent>
 
         <TabsContent value="appearance" className="mt-0">
-          <div className="flex flex-col gap-6 rounded-2xl border border-white/[0.04] bg-card p-6 shadow-[0_20px_45px_rgba(0,0,0,0.5)]">
-            <div className="flex items-center justify-between border-b border-white/[0.04] pb-4">
+          <div className="flex flex-col gap-6 rounded-3xl border border-white/[0.06] bg-card/40 backdrop-blur-xl p-8 shadow-[0_30px_60px_rgba(0,0,0,0.4)]">
+            <div className="flex items-center justify-between border-b border-white/[0.06] pb-5">
               <div className="space-y-1">
-                <h2 className="font-bold text-xl text-white tracking-tight">Appearance</h2>
-                <p className="text-xs text-white/60 font-medium">Customize your agent&apos;s visual identity</p>
+                <h2 className="font-black text-xl text-white tracking-tight">Appearance</h2>
+                <p className="text-xs text-white/50 font-medium">Customize your agent&apos;s visual identity</p>
               </div>
-              <div className="flex gap-1.5 bg-[#0071E3]/10 rounded-full px-3 py-1 text-[10px] items-center font-bold text-[#0071E3] uppercase tracking-wider">
+              <div className="flex gap-1.5 bg-primary/10 border border-primary/20 rounded-full px-3 py-1.5 text-[10px] items-center font-black text-primary uppercase tracking-widest">
                 <PremiumBadge />
                 Enterprise
               </div>
@@ -290,12 +315,12 @@ const SettingsForm = ({ id, name, chatBot, plan, trainingSourcesUsed, knowledgeB
         </TabsContent>
 
         <TabsContent value="domain" className="mt-0 space-y-6">
-          <div className="flex flex-col gap-6 rounded-2xl border border-white/[0.04] bg-card p-6 shadow-[0_20px_45px_rgba(0,0,0,0.5)]">
-            <h2 className="font-bold text-xl text-white tracking-tight border-b border-white/[0.04] pb-4">Domain Settings</h2>
+          <div className="flex flex-col gap-6 rounded-3xl border border-white/[0.06] bg-card/40 backdrop-blur-xl p-8 shadow-[0_30px_60px_rgba(0,0,0,0.4)]">
+            <h2 className="font-black text-xl text-white tracking-tight border-b border-white/[0.06] pb-5">Domain Settings</h2>
             <DomainUpdate name={name} register={register} errors={errors} />
           </div>
-          <div className="flex flex-col gap-6 rounded-2xl border border-white/[0.04] bg-card p-6 shadow-[0_20px_45px_rgba(0,0,0,0.5)]">
-            <h2 className="font-bold text-xl text-white tracking-tight border-b border-white/[0.04] pb-4">Embed & Launch</h2>
+          <div className="flex flex-col gap-6 rounded-3xl border border-white/[0.06] bg-card/40 backdrop-blur-xl p-8 shadow-[0_30px_60px_rgba(0,0,0,0.4)]">
+            <h2 className="font-black text-xl text-white tracking-tight border-b border-white/[0.06] pb-5">Embed & Launch</h2>
             <CodeSnippet id={id} />
           </div>
         </TabsContent>

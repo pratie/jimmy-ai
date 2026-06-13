@@ -26,7 +26,7 @@ const SideBar = ({ domains, user }: Props) => {
   return (
     <div
       className={cn(
-        'bg-sidebar text-sidebar-foreground h-full w-[60px] fill-mode-forwards fixed md:relative z-40 md:z-auto border-r border-sidebar-border shadow-large',
+        'bg-sidebar/95 backdrop-blur-xl text-sidebar-foreground h-full w-[60px] fill-mode-forwards fixed md:relative z-40 md:z-auto border-r border-sidebar-border shadow-[4px_0_24px_rgba(0,0,0,0.15)] transition-all duration-300 ease-out',
         expand == undefined && '',
         expand == true
           ? 'animate-open-sidebar'
