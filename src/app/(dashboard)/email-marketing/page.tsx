@@ -22,11 +22,11 @@ const Page = async (props: Props) => {
   return (
     <>
       <InfoBar></InfoBar>
-      <EmailMarketing
-        campaign={campaigns?.campaign!}
-        subscription={customers?.subscription!}
-        domains={customers?.domains!}
-      />
+      <div className="min-h-0 flex-1 overflow-y-auto">
+        <div className="mx-auto w-full max-w-[1280px] px-5 py-7 md:px-8">
+          <EmailMarketing campaign={campaigns?.campaign!} subscription={customers?.subscription!} domains={customers?.domains!} />
+        </div>
+      </div>
     </>
   )
 }

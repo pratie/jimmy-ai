@@ -28,8 +28,8 @@ body::before {
 @layer base {
   :root {
     /* ── Light Mode (default) ── */
-    --background: 0 0% 98%;         /* #FAFAFA */
-    --foreground: 0 0% 4%;          /* #0A0A0A */
+    --background: 228 26% 97%;
+    --foreground: 224 47% 10%;
 
     --card: 0 0% 100%;              /* #FFFFFF */
     --card-foreground: 0 0% 4%;     /* #0A0A0A */
@@ -37,14 +37,14 @@ body::before {
     --popover: 0 0% 100%;           /* #FFFFFF */
     --popover-foreground: 0 0% 4%;  /* #0A0A0A */
 
-    --primary: 211 100% 45%;        /* #0071E3 — Apple system blue */
+    --primary: 240 70% 62%;
     --primary-foreground: 0 0% 100%; /* #FFFFFF */
 
     --secondary: 240 5% 96%;        /* #F4F4F5 */
     --secondary-foreground: 0 0% 9%; /* #171717 */
 
-    --muted: 240 5% 96%;            /* #F4F4F5 */
-    --muted-foreground: 240 4% 46%; /* #71717A */
+    --muted: 228 23% 95%;
+    --muted-foreground: 222 12% 45%;
 
     --accent: 240 5% 96%;           /* #F4F4F5 */
     --accent-foreground: 0 0% 9%;   /* #171717 */
@@ -52,9 +52,9 @@ body::before {
     --destructive: 0 84% 60%;       /* #EF4444 */
     --destructive-foreground: 0 0% 98%;
 
-    --border: 240 6% 90%;           /* #E4E4E7 */
-    --input: 240 6% 90%;            /* #E4E4E7 */
-    --ring: 211 100% 45%;           /* matches primary */
+    --border: 224 20% 89%;
+    --input: 224 20% 89%;
+    --ring: 240 70% 62%;
 
     --radius: 0.75rem;
 

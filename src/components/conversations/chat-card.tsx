@@ -1,7 +1,7 @@
 'use client'
 import { useChatTime } from '@/hooks/conversation/use-conversation'
 import React from 'react'
-import { Card, CardContent, CardDescription } from '../ui/card'
+import { CardDescription } from '../ui/card'
 import { Avatar, AvatarFallback } from '../ui/avatar'
 import { User } from 'lucide-react'
 import { UrgentIcon } from '@/icons/urgent-icon'
@@ -26,40 +26,40 @@ const ChatCard = ({
   const { messageSentAt, urgent } = useChatTime(createdAt, id)
 
   return (
-    <Card
+    <button
       onClick={onChat}
-      className="rounded-none border-r-0 hover:bg-muted cursor-pointer transition duration-150 ease-in-out"
+      className="w-full border-b border-slate-100 px-4 py-3.5 text-left transition hover:bg-indigo-50/50"
     >
-      <CardContent className="py-4 flex gap-3">
+      <div className="flex gap-3">
         <div>
           <Avatar>
-            <AvatarFallback className="bg-muted">
-              <User />
+            <AvatarFallback className="bg-slate-100 text-slate-500">
+              <User className="h-4 w-4" />
             </AvatarFallback>
           </Avatar>
         </div>
-        <div className="flex justify-between w-full">
-          <div>
-            <div className="flex gap-5 items-center">
-              <CardDescription className="font-bold leading-none text-foreground">
+        <div className="flex min-w-0 flex-1 justify-between gap-3">
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <CardDescription className="truncate font-black leading-none text-slate-900">
                 {title}
               </CardDescription>
               {urgent && !seen && <UrgentIcon />}
             </div>
-            <CardDescription>
+            <CardDescription className="mt-1.5 truncate text-[11px] text-slate-400">
               {description
                 ? description.substring(0, 20) + '...'
                 : 'This chatroom is empty'}
             </CardDescription>
           </div>
-          <div className="w-[100px] flex justify-end">
-            <CardDescription className="text-xs">
+          <div className="shrink-0">
+            <CardDescription className="text-[10px] font-semibold text-slate-400">
               {createdAt ? messageSentAt : ''}
             </CardDescription>
           </div>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </button>
   )
 }
 

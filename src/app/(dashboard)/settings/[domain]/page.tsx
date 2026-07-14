@@ -18,8 +18,8 @@ const DomainSettingsPage = async (
   return (
     <>
       <InfoBar />
-      <div className="w-full flex-1 h-0 overflow-x-hidden">
-        <div className="mx-auto max-w-5xl px-4">
+      <div className="w-full flex-1 h-0 overflow-y-auto overflow-x-hidden">
+        <div className="mx-auto max-w-6xl px-5 py-7 md:px-8">
           <SettingsForm
             plan={domain.subscription?.plan!}
             chatBot={activeDomain.chatBot}

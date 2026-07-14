@@ -56,16 +56,12 @@ const EmailMarketing = ({ campaign, domains, subscription }: Props) => {
   } = useEmailMarketing()
 
   return (
-    <div className="w-full flex-1 h-0 grid grid-cols-1 lg:grid-cols-2 gap-10">
-      <CustomerTable
-        domains={domains}
-        onId={onSetAnswersId}
-        onSelect={onSelectedEmails}
-        select={isSelected}
-        id={isId}
-      />
-      <div>
-        <div className="flex gap-3 justify-end">
+    <div className="grid w-full grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(380px,0.9fr)]">
+      <div className="overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-4 shadow-[0_8px_30px_rgba(15,23,42,0.04)]">
+        <CustomerTable domains={domains} onId={onSetAnswersId} onSelect={onSelectedEmails} select={isSelected} id={isId} />
+      </div>
+      <div className="min-w-0">
+        <div className="mb-4 flex flex-wrap gap-2 xl:justify-end">
           <Button
             disabled={isSelected.length == 0}
             onClick={onAddCustomersToCampaign}
@@ -76,7 +72,7 @@ const EmailMarketing = ({ campaign, domains, subscription }: Props) => {
             title="Create a new campaign"
             description="Add your customers and create a marketing campaign"
             trigger={
-              <Card className="flex gap-2 items-center px-3 cursor-pointer text-sm">
+              <Card className="flex cursor-pointer items-center gap-2 rounded-xl border-slate-200 px-3 text-xs font-bold shadow-sm">
                 <Loader loading={false}>
                   <Plus /> Create Campaign
                 </Loader>
@@ -104,26 +100,26 @@ const EmailMarketing = ({ campaign, domains, subscription }: Props) => {
               </Button>
             </form>
           </Modal>
-          <Card className="p-2">
+          <Card className="rounded-xl border-slate-200 p-2.5 shadow-sm">
             <CardDescription className="font-bold">
               {subscription?.plan || 'FREE'} Plan
             </CardDescription>
           </Card>
         </div>
-        <div className="flex flex-col items-end mt-5 gap-3">
+        <div className="flex flex-col gap-3">
           {campaign &&
             campaign.map((camp, i) => (
               <Card
                 key={camp.id}
                 className={cn(
-                  'p-5 min-w-[600px] cursor-pointer',
-                  campaignId == camp.id ? 'bg-gray-50' : ''
+                  'w-full cursor-pointer rounded-2xl border-slate-200 p-5 shadow-sm transition hover:border-[#5b5ce2]/25',
+                  campaignId == camp.id ? 'bg-indigo-50/50 ring-2 ring-[#5b5ce2]/15' : 'bg-white'
                 )}
                 onClick={() => onSelectCampaign(camp.id)}
               >
                 <Loader loading={processing}>
                   <CardContent className="p-0 flex flex-col items-center gap-3">
-                    <div className="flex w-full justify-between items-center">
+                    <div className="flex w-full flex-col justify-between gap-3 sm:flex-row sm:items-center">
                       <div className="flex gap-2 items-center">
                         <CalIcon />
                         <CardDescription>

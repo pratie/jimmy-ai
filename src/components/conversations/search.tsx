@@ -31,10 +31,10 @@ const ConversationSearch = ({ register, setValue, onAutoSelect, domains }: Props
 
   if (activeAgent) {
     return (
-      <div className="flex flex-col px-5 py-3.5 bg-muted/20 border-b border-border font-heading">
-        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Active Workspace</span>
-        <span className="text-sm font-extrabold text-foreground mt-1 flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+      <div className="mx-4 my-3 flex flex-col rounded-xl bg-slate-50 px-3 py-3 font-heading">
+        <span className="text-[9px] font-black uppercase tracking-[0.16em] text-slate-400">Active workspace</span>
+        <span className="mt-1 flex items-center gap-2 truncate text-xs font-extrabold text-slate-800">
+          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
           {activeAgent.name}
         </span>
       </div>
@@ -42,11 +42,11 @@ const ConversationSearch = ({ register, setValue, onAutoSelect, domains }: Props
   }
 
   return (
-    <div className="flex flex-col py-3 px-5 font-heading">
-      <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-2">Select Domain</span>
+    <div className="flex flex-col px-4 py-3 font-heading">
+      <span className="mb-2 text-[9px] font-black uppercase tracking-[0.16em] text-slate-400">Filter workspace</span>
       <select
         {...register('domain')}
-        className="px-3 py-3 text-xs font-semibold border border-input rounded-xl bg-background focus:outline-none focus:ring-1 focus:ring-primary shadow-sm"
+        className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-xs font-semibold text-slate-700 shadow-sm outline-none focus:border-[#5b5ce2]/40 focus:bg-white focus:ring-4 focus:ring-[#5b5ce2]/8"
       >
         <option
           disabled

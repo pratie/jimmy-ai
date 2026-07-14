@@ -14,15 +14,15 @@ type DataTableProps = {
 
 export const DataTable = ({ headers, children }: DataTableProps) => {
   return (
-    <Table className="rounded-t-xl overflow-hidden">
+    <Table className="overflow-hidden">
       <TableHeader>
-        <TableRow className="">
+        <TableRow className="border-slate-100 bg-slate-50/70 hover:bg-slate-50/70">
           {headers.map((header, key) => (
             <TableHead
               key={key}
               className={cn(
                 key == headers.length - 1 && 'text-right',
-                'text-black'
+                'h-11 text-[10px] font-black uppercase tracking-[0.12em] text-slate-400'
               )}
             >
               {header}

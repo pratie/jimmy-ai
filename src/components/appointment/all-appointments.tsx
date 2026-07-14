@@ -3,7 +3,6 @@ import React from 'react'
 import { DataTable } from '../table'
 import { TableCell, TableRow } from '../ui/table'
 import { getMonthName } from '@/lib/utils'
-import { CardDescription } from '../ui/card'
 
 type Props = {
   bookings:
@@ -26,10 +25,10 @@ type Props = {
 const AllAppointments = ({ bookings }: Props) => {
   return (
     <DataTable headers={APPOINTMENT_TABLE_HEADER}>
-      {bookings ? (
+      {bookings?.length ? (
         bookings.map((booking) => (
-          <TableRow key={booking.id}>
-            <TableCell>{booking.email}</TableCell>
+          <TableRow key={booking.id} className="border-slate-100 hover:bg-slate-50/80">
+            <TableCell className="font-bold text-slate-800">{booking.email}</TableCell>
             <TableCell>
               <div>
                 {getMonthName(booking.date.getMonth())} {booking.date.getDate()}{' '}
@@ -47,13 +46,13 @@ const AllAppointments = ({ bookings }: Props) => {
                 {booking.createdAt.getHours() > 12 ? 'PM' : 'AM'}
               </div>
             </TableCell>
-            <TableCell className="text-right">
+            <TableCell className="text-right font-semibold text-slate-600">
               {booking.Customer?.Domain?.name}
             </TableCell>
           </TableRow>
         ))
       ) : (
-        <CardDescription>No Appointments</CardDescription>
+        <TableRow><TableCell colSpan={4} className="h-40 text-center text-xs font-semibold text-slate-400">No bookings captured yet.</TableCell></TableRow>
       )}
     </DataTable>
   )

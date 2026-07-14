@@ -132,6 +132,8 @@ export const onGetAllAccountDomains = async () => {
             name: true,
             icon: true,
             id: true,
+            createdAt: true,
+            updatedAt: true,
             chatBot: {
               select: {
                 id: true,
@@ -141,10 +143,15 @@ export const onGetAllAccountDomains = async () => {
                 textColor: true,
                 theme: true,
                 helpdesk: true,
+                knowledgeBaseStatus: true,
+                hasEmbeddings: true,
+                mode: true,
               },
             },
             customer: {
               select: {
+                id: true,
+                email: true,
                 chatRoom: {
                   select: {
                     id: true,

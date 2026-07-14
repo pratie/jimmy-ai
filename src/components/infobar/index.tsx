@@ -1,14 +1,10 @@
 import React from 'react'
 import BreadCrumb from './bread-crumb'
 
-type Props = {}
-
-const InfoBar = (props: Props) => {
-  return (
-    <div className="flex w-full justify-between items-center py-3 mb-2 px-4 md:px-8 border-b border-border/50 bg-background/80 backdrop-blur-sm sticky top-0 z-30">
-      <BreadCrumb />
-    </div>
-  )
-}
+const InfoBar = () => (
+  <header className="sticky top-0 z-30 flex min-h-[76px] w-full items-center border-b border-slate-200/80 bg-[#f5f6fa]/90 px-5 backdrop-blur-xl md:px-8">
+    <BreadCrumb />
+  </header>
+)
 
 export default InfoBar
