@@ -60,7 +60,7 @@ const SideBar = ({ domains, user }: Props) => {
       <div className="flex h-20 items-center border-b border-white/10 px-4 md:px-5">
         <Link href="/dashboard" onClick={clearAgent} className="flex items-center gap-3 overflow-hidden">
           <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-2xl bg-white p-2 shadow-[0_8px_30px_rgba(91,92,226,0.35)]">
-            <Image src="/images/logo.svg" alt="ChatDock" fill className="object-contain p-2" />
+            <Image src="/images/chatdock-mark.png" alt="ChatDock" fill sizes="40px" className="object-contain p-1" />
           </div>
           <div className="hidden min-w-0 md:block">
             <p className="truncate text-sm font-black tracking-tight">ChatDock</p>

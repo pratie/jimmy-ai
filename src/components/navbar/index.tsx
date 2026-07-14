@@ -15,7 +15,7 @@ export default function NavBar() {
       <div className="mx-auto max-w-7xl overflow-hidden rounded-2xl border border-white/10 bg-[#101726]/90 shadow-[0_15px_50px_rgba(0,0,0,.22)] backdrop-blur-xl">
         <div className="flex h-16 items-center justify-between px-4 sm:px-6">
           <Link href="/" className="flex items-center gap-2.5" onClick={close}>
-            <span className="relative h-8 w-8 overflow-hidden rounded-lg bg-white"><Image src="/images/logo.png" alt="ChatDock" fill className="object-contain" /></span>
+            <span className="relative h-8 w-8 overflow-hidden rounded-lg bg-white"><Image src="/images/chatdock-mark.png" alt="ChatDock" fill sizes="32px" className="object-contain" /></span>
             <span className="text-base font-semibold tracking-tight text-white">ChatDock</span>
           </Link>
 

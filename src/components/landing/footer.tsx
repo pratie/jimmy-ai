@@ -7,7 +7,7 @@ export function Footer() {
       <div className="mx-auto max-w-7xl">
         <div className="grid gap-12 border-b border-white/10 pb-12 md:grid-cols-[1.5fr_1fr_1fr_1fr]">
           <div>
-            <Link href="/" className="flex items-center gap-2.5"><span className="relative h-8 w-8 overflow-hidden rounded-lg bg-white"><Image src="/images/logo.png" alt="ChatDock" fill className="object-contain" /></span><span className="font-semibold">ChatDock</span></Link>
+            <Link href="/" className="flex items-center gap-2.5"><span className="relative h-8 w-8 overflow-hidden rounded-lg bg-white"><Image src="/images/chatdock-mark.png" alt="ChatDock" fill sizes="32px" className="object-contain" /></span><span className="font-semibold">ChatDock</span></Link>
             <p className="mt-5 max-w-xs text-sm leading-6 text-white/40">The AI delivery workspace for agencies that want to launch faster and show clients what is working.</p>
           </div>
           <div><p className="text-xs font-bold uppercase tracking-[0.16em] text-white/30">Platform</p><div className="mt-5 space-y-3 text-sm text-white/55"><a className="block hover:text-white" href="#workflow">How it works</a><a className="block hover:text-white" href="#features">Features</a><a className="block hover:text-white" href="#pricing">Pricing</a></div></div>
