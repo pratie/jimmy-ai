@@ -9,17 +9,17 @@ import React from 'react'
 
 const SignInPage = () => {
   return (
-    <div className="flex-1 py-36 md:px-16 w-full">
-      <div className="flex flex-col h-full gap-3">
+    <div className="w-full">
+      <div className="flex flex-col gap-3">
         <SignInFormProvider>
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-4">
             <LoginForm />
             <div className="w-full flex flex-col gap-3 items-center">
               <Button
                 type="submit"
-                className="w-full"
+                className="h-11 w-full rounded-xl bg-[#111827] text-sm font-semibold hover:bg-[#252d3d]"
               >
-                Submit
+                  Sign in
               </Button>
               <div className="w-full relative">
                 <div className="absolute inset-0 flex items-center">
@@ -32,11 +32,11 @@ const SignInPage = () => {
                 </div>
               </div>
               <GoogleAuthButton />
-              <p>
+              <p className="text-sm text-slate-500">
                 Don&apos;t have an account?{' '}
                 <Link
                   href="/auth/sign-up"
-                  className="font-bold"
+                  className="font-semibold text-indigo-600 hover:text-indigo-700"
                 >
                   Create one
                 </Link>

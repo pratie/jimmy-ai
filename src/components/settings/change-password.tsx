@@ -12,8 +12,8 @@ const ChangePassword = (props: Props) => {
   const { register, errors, onChangePassword, loading } = useChangePassword()
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-5 gap-10">
-      <div className="lg:col-span-1">
+    <section className="grid gap-7 rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_6px_24px_rgba(15,23,42,.035)] lg:grid-cols-[220px_minmax(0,1fr)] md:p-7">
+      <div>
         <Section
           label="Change Password"
           message="Reset your password"
@@ -21,15 +21,15 @@ const ChangePassword = (props: Props) => {
       </div>
       <form
         onSubmit={onChangePassword}
-        className="lg:col-span-4"
+        className="max-w-lg"
       >
-        <div className="lg:w-[500px] flex flex-col gap-3">
+        <div className="flex flex-col gap-3">
           <FormGenerator
             register={register}
             errors={errors}
             name="password"
             placeholder="New Password"
-            type="text"
+            type="password"
             inputType="input"
           />
           <FormGenerator
@@ -37,7 +37,7 @@ const ChangePassword = (props: Props) => {
             errors={errors}
             name="confirmPassword"
             placeholder="Confirm Password"
-            type="text"
+            type="password"
             inputType="input"
           />
           <Button className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold shadow-glow">
@@ -45,7 +45,7 @@ const ChangePassword = (props: Props) => {
           </Button>
         </div>
       </form>
-    </div>
+    </section>
   )
 }
 

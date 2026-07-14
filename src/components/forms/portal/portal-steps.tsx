@@ -77,7 +77,6 @@ const PortalSteps = ({
         date={date}
         bookings={bookings}
         currentSlot={slot}
-        register={register}
         onBack={onBack}
         onBooking={onBooking}
         onSlot={onSlot}
@@ -102,12 +101,10 @@ const PortalSteps = ({
   }
 
   return (
-    <div className="flex flex-col items-center gap-3">
-      <h2 className="font-bold text-brand-primary/80 text-4xl">Thank You</h2>
-      <p className="text-center text-brand-primary/70">
-        Thank you for taking the time to fill in this form. We look forward to
-        <br /> speaking to you soon.
-      </p>
+    <div className="mx-auto flex max-w-lg flex-col items-center py-12 text-center">
+      <span className="grid h-12 w-12 place-items-center rounded-full bg-emerald-100 text-emerald-600">✓</span>
+      <h2 className="mt-5 text-2xl font-semibold tracking-[-0.03em] text-slate-950">You’re all set</h2>
+      <p className="mt-3 text-sm leading-6 text-slate-500">Your information has been received. A confirmation and the next steps will arrive by email.</p>
     </div>
   )
 }

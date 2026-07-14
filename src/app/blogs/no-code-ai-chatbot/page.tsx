@@ -2,22 +2,22 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: 'No‑Code AI Chatbot: Launch in Minutes — BookmyLead AI',
+  title: 'No‑Code AI Chatbot: Launch in Minutes — ChatDock',
   description:
     'Build a no‑code AI chatbot without engineering. Train on your site and docs, customize tone, embed a single line of code, and start capturing leads.',
   keywords: ['no-code ai chatbot', 'no code chatbot', 'website chatbot', 'ai website assistant'],
   alternates: { canonical: '/blogs/no-code-ai-chatbot' },
   openGraph: {
-    title: 'No‑Code AI Chatbot: Launch in Minutes — BookmyLead AI',
+    title: 'No‑Code AI Chatbot: Launch in Minutes — ChatDock',
     description:
-      'Create a no‑code AI chatbot that understands your content. Customize, embed, and measure performance with BookmyLead AI.',
+      'Create a no‑code AI chatbot that understands your content. Customize, embed, and measure performance with ChatDock.',
     type: 'article',
     images: [{ url: '/images/social_graph_img.png', width: 1200, height: 630, alt: 'No-Code AI Chatbot' }],
     url: '/blogs/no-code-ai-chatbot',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'No‑Code AI Chatbot: Launch in Minutes — BookmyLead AI',
+    title: 'No‑Code AI Chatbot: Launch in Minutes — ChatDock',
     description: 'No engineering required. Train, customize, and embed instantly.',
     images: ['/images/social_graph_img.png'],
   },
@@ -48,7 +48,7 @@ export default function BlogArticle() {
           </section>
 
           <section>
-            <h2>Setup with BookmyLead AI</h2>
+            <h2>Setup with ChatDock</h2>
             <ol>
               <li>Connect your site and upload PDFs/FAQs.</li>
               <li>Pick a mode: Sales, Support, Qualifier, or Strict FAQ.</li>
@@ -91,7 +91,7 @@ export default function BlogArticle() {
             description:
               'Build a no‑code AI chatbot without engineering. Train on your site and docs, customize tone, embed a single line of code, and start capturing leads.',
             mainEntityOfPage: { '@type': 'WebPage', '@id': '/blogs/no-code-ai-chatbot' },
-            author: { '@type': 'Organization', name: 'BookmyLead AI' },
+            author: { '@type': 'Organization', name: 'ChatDock' },
           }),
         }}
       />

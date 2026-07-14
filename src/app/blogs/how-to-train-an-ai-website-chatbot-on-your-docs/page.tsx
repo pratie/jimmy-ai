@@ -4,7 +4,7 @@ import Link from 'next/link'
 export const metadata: Metadata = {
   title: 'How to Train an AI Website Chatbot on Your Docs (Step-by-Step)',
   description:
-    'Step-by-step guide to train an AI website chatbot on your documentation: connect sources, crawl pages, upload PDFs, structure a knowledge base, test prompts, and deploy with BookmyLead AI.',
+    'Step-by-step guide to train an AI website chatbot on your documentation: connect sources, crawl pages, upload PDFs, structure a knowledge base, test prompts, and deploy with ChatDock.',
   keywords: [
     'train ai chatbot website',
     'knowledge base',
@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'How to Train an AI Website Chatbot on Your Docs (Step-by-Step)',
     description:
-      'A practical setup guide: connect sources, crawl your site, upload PDFs, organize knowledge, test prompts, and deploy with BookmyLead AI.',
+      'A practical setup guide: connect sources, crawl your site, upload PDFs, organize knowledge, test prompts, and deploy with ChatDock.',
     type: 'article',
     url: '/blogs/how-to-train-an-ai-website-chatbot-on-your-docs',
     images: [
@@ -33,7 +33,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'How to Train an AI Website Chatbot on Your Docs (Step-by-Step)',
     description:
-      'A practical setup guide for training an AI website chatbot on your documentation with BookmyLead AI.',
+      'A practical setup guide for training an AI website chatbot on your documentation with ChatDock.',
     images: ['/images/social_graph_img.png'],
   },
 }
@@ -49,7 +49,7 @@ export default function BlogArticle() {
               How to Train an AI Website Chatbot on Your Docs (Step-by-Step)
             </h1>
             <p className="mt-3 text-lg text-brand-primary/75">
-              A practical setup guide: connect sources, crawl your site, upload PDFs, organize a knowledge base, test prompts, and deploy—using BookmyLead AI.
+              A practical setup guide: connect sources, crawl your site, upload PDFs, organize a knowledge base, test prompts, and deploy—using ChatDock.
             </p>
           </header>
 
@@ -66,7 +66,7 @@ export default function BlogArticle() {
             <ul>
               <li>Website or docs with up‑to‑date content</li>
               <li>PDFs/FAQs or knowledge base articles (optional)</li>
-              <li>A BookmyLead AI account</li>
+              <li>A ChatDock account</li>
             </ul>
           </section>
 
@@ -82,7 +82,7 @@ export default function BlogArticle() {
           <section>
             <h2>Step 2 — Connect your website and docs</h2>
             <p>
-              In BookmyLead AI, add your root domain and key doc sections. Choose a crawl depth that
+              In ChatDock, add your root domain and key doc sections. Choose a crawl depth that
               includes product, pricing, and integration pages. Avoid crawling changelogs or noisy
               content. You can add exclusions to keep the knowledge base tight.
             </p>
@@ -163,7 +163,7 @@ export default function BlogArticle() {
 
           <section className="mt-10 text-sm text-muted-foreground">
             <p>
-              You may also like: <Link href="/blogs/ai-website-chatbot">AI Website Chatbot for Lead Generation: The 2025 Playbook</Link>.
+              You may also like: <Link href="/blogs/ai-website-chatbot">AI Website Chatbot for Lead Generation: The 2026 Playbook</Link>.
             </p>
           </section>
         </div>
@@ -178,14 +178,14 @@ export default function BlogArticle() {
             '@type': 'Article',
             headline: 'How to Train an AI Website Chatbot on Your Docs (Step-by-Step)',
             description:
-              'Step-by-step guide to train an AI website chatbot on your documentation: connect sources, crawl pages, upload PDFs, structure a knowledge base, test prompts, and deploy with BookmyLead AI.',
+              'Step-by-step guide to train an AI website chatbot on your documentation: connect sources, crawl pages, upload PDFs, structure a knowledge base, test prompts, and deploy with ChatDock.',
             mainEntityOfPage: {
               '@type': 'WebPage',
               '@id': '/blogs/how-to-train-an-ai-website-chatbot-on-your-docs',
             },
             author: {
               '@type': 'Organization',
-              name: 'BookmyLead AI',
+              name: 'ChatDock',
             },
           }),
         }}

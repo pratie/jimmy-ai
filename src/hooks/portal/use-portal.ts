@@ -60,10 +60,16 @@ export const usePortal = (
 
         setLoading(false)
       }
-    } catch (error) {}
+    } catch (error) {
+      toast({ title: 'Could not complete booking', description: 'Please try another time or refresh the page.', variant: 'destructive' })
+      setLoading(false)
+    }
   })
 
-  const onSelectedTimeSlot = (slot: string) => setSelectedSlot(slot)
+  const onSelectedTimeSlot = (slot: string) => {
+    setSelectedSlot(slot)
+    setValue('slot', slot, { shouldValidate: true })
+  }
 
   return {
     step,

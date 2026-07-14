@@ -1,5 +1,5 @@
 'use client'
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
@@ -50,6 +50,15 @@ const AdvancedAISettings = ({
   const [support, setSupport] = useState<string>(modePrompts?.SUPPORT || defaultBlocks.SUPPORT)
   const [qualifier, setQualifier] = useState<string>(modePrompts?.QUALIFIER || defaultBlocks.QUALIFIER)
   const [faq, setFaq] = useState<string>(modePrompts?.FAQ_STRICT || defaultBlocks.FAQ_STRICT)
+  const [activePrompt, setActivePrompt] = useState<'sales' | 'support' | 'qualifier' | 'faq'>('sales')
+
+  const promptOptions = [
+    { key: 'sales' as const, label: 'Sales', value: sales, update: setSales },
+    { key: 'support' as const, label: 'Support', value: support, update: setSupport },
+    { key: 'qualifier' as const, label: 'Qualifier', value: qualifier, update: setQualifier },
+    { key: 'faq' as const, label: 'FAQ only', value: faq, update: setFaq },
+  ]
+  const selectedPrompt = promptOptions.find((option) => option.key === activePrompt)!
 
   const onSaveModel = async () => {
     setSavingModel(true)
@@ -74,64 +83,64 @@ const AdvancedAISettings = ({
   }
 
   return (
-    <div className="flex flex-col gap-6 text-white">
+    <div className="flex flex-col gap-5 text-slate-950">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold tracking-tight text-white">Advanced AI Settings</h1>
-        <a href={`/settings/${domainName}`} className="text-sm text-white/60 hover:text-white underline transition-colors">Back to Settings</a>
+        <div><h1 className="text-2xl font-semibold tracking-[-0.03em] text-slate-950">Advanced AI</h1><p className="mt-1 text-sm text-slate-500">Model selection and mode-specific instruction overrides.</p></div>
+        <a href={`/settings/${domainName}`} className="text-xs font-semibold text-indigo-600 transition hover:text-indigo-700">Back to agent</a>
       </div>
 
       {/* Model Provider Config */}
-      <Card className="bg-card border-white/[0.04] shadow-[0_20px_45px_rgba(0,0,0,0.5)]">
-        <CardHeader className="border-b border-white/[0.04] pb-4">
-          <CardTitle className="text-white">Model & Temperature</CardTitle>
-          <CardDescription className="text-white/60">Choose your AI model provider and set response creativity</CardDescription>
+      <Card className="rounded-2xl border-slate-200 bg-white shadow-[0_6px_24px_rgba(15,23,42,.035)]">
+        <CardHeader className="border-b border-slate-100 pb-4">
+          <CardTitle className="text-base font-semibold text-slate-900">Model and response range</CardTitle>
+          <CardDescription className="text-sm text-slate-500">Choose the model and balance consistency with variation.</CardDescription>
         </CardHeader>
         <CardContent className="pt-6">
           <Loader loading={savingModel}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label htmlFor="llm-model" className="text-white/80 font-medium">Model</Label>
+                <Label htmlFor="llm-model" className="text-xs font-semibold text-slate-700">Model</Label>
                 <div className="relative">
                   <select
                     id="llm-model"
                     value={model}
                     onChange={(e) => setModel(e.target.value)}
-                    className="w-full px-3 py-2.5 pl-10 border border-white/[0.08] rounded-xl bg-white/5 text-white focus:outline-none focus:ring-2 focus:ring-[#0071E3]/40 appearance-none"
+                    className="w-full appearance-none rounded-xl border border-slate-300 bg-white py-2.5 pl-10 pr-3 text-sm text-slate-800 outline-none focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100"
                   >
-                    <optgroup label="OpenAI" className="bg-[#09090b]">
+                    <optgroup label="OpenAI">
                       {OPENAI_MODELS.map((m) => (
-                        <option key={m.id} value={m.id} className="bg-[#09090b] text-white">
+                        <option key={m.id} value={m.id}>
                           {m.name} ({m.contextWindow.toLocaleString()} tokens)
                         </option>
                       ))}
                     </optgroup>
-                    <optgroup label="Anthropic Claude" className="bg-[#09090b]">
+                    <optgroup label="Anthropic Claude">
                       {ANTHROPIC_MODELS.map((m) => (
-                        <option key={m.id} value={m.id} className="bg-[#09090b] text-white">
+                        <option key={m.id} value={m.id}>
                           {m.name} ({m.contextWindow.toLocaleString()} tokens)
                         </option>
                       ))}
                     </optgroup>
-                    <optgroup label="Google Gemini" className="bg-[#09090b]">
+                    <optgroup label="Google Gemini">
                       {GOOGLE_MODELS.map((m) => (
-                        <option key={m.id} value={m.id} className="bg-[#09090b] text-white">
+                        <option key={m.id} value={m.id}>
                           {m.name} ({m.contextWindow.toLocaleString()} tokens)
                         </option>
                       ))}
                     </optgroup>
                   </select>
                   <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
-                    {model.startsWith('gpt-') && <OpenAIIcon size={18} className="text-white" />}
-                    {model.startsWith('claude-') && <AnthropicIcon size={18} className="text-white" />}
-                    {model.startsWith('gemini-') && <GoogleIcon size={18} className="text-white" />}
+                    {model.startsWith('gpt-') && <OpenAIIcon size={18} className="text-slate-700" />}
+                    {model.startsWith('claude-') && <AnthropicIcon size={18} className="text-slate-700" />}
+                    {model.startsWith('gemini-') && <GoogleIcon size={18} className="text-slate-700" />}
                   </div>
                 </div>
-                <p className="text-xs text-white/40">
-                  Multi-provider support: OpenAI, Anthropic Claude & Google Gemini
+                <p className="text-xs text-slate-400">
+                  Available providers depend on your workspace configuration.
                 </p>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="temperature" className="text-white/80 font-medium">Temperature</Label>
+                <Label htmlFor="temperature" className="text-xs font-semibold text-slate-700">Response variation</Label>
                 <div className="py-2">
                   <input
                     id="temperature"
@@ -141,7 +150,7 @@ const AdvancedAISettings = ({
                     step={0.1}
                     value={temperature}
                     onChange={(e) => setTemperature(parseFloat(e.target.value))}
-                    className="w-full accent-[#0071E3] bg-white/10 h-1.5 rounded-full appearance-none cursor-pointer"
+                    className="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-slate-200 accent-indigo-600"
                   />
                 </div>
                 <div className="flex items-center gap-2">
@@ -152,43 +161,30 @@ const AdvancedAISettings = ({
                     step={0.1}
                     value={temperature}
                     onChange={(e) => setTemperature(Number(e.target.value))}
-                    className="w-24 bg-white/5 border-white/[0.08] text-white rounded-xl"
+                    className="w-24 rounded-xl border-slate-300 bg-white text-slate-800"
                   />
-                  <span className="text-xs text-white/40">0 = precise, 1 = creative</span>
+                  <span className="text-xs text-slate-400">0 is precise · 1 allows more variation</span>
                 </div>
               </div>
             </div>
-            <Button className="mt-6 bg-[#0071E3] hover:bg-[#0071E3]/90 text-white font-semibold rounded-xl shadow-[0_4px_12px_rgba(0,113,227,0.3)]" onClick={onSaveModel} disabled={savingModel}>Save Model</Button>
+            <Button className="mt-6 rounded-xl bg-[#111827] text-sm font-semibold text-white hover:bg-[#252d3d]" onClick={onSaveModel} disabled={savingModel}>Save model settings</Button>
           </Loader>
         </CardContent>
       </Card>
 
       {/* Per-mode prompt overrides */}
-      <Card className="bg-card border-white/[0.04] shadow-[0_20px_45px_rgba(0,0,0,0.5)]">
-        <CardHeader className="border-b border-white/[0.04] pb-4">
-          <CardTitle className="text-white">Mode Prompts</CardTitle>
-          <CardDescription className="text-white/60">Customize the instruction block for each bot mode</CardDescription>
+      <Card className="rounded-2xl border-slate-200 bg-white shadow-[0_6px_24px_rgba(15,23,42,.035)]">
+        <CardHeader className="border-b border-slate-100 pb-4">
+          <CardTitle className="text-base font-semibold text-slate-900">Mode instructions</CardTitle>
+          <CardDescription className="text-sm text-slate-500">Override the instruction block used for each agent mode.</CardDescription>
         </CardHeader>
         <CardContent className="pt-6">
           <Loader loading={savingPrompts}>
-            <div className="space-y-6">
-              <div className="space-y-2">
-                <Label className="text-white/80 font-medium">Sales Agent</Label>
-                <Textarea value={sales} onChange={(e) => setSales(e.target.value)} rows={8} className="bg-white/5 border-white/[0.08] text-white rounded-xl placeholder:text-white/30" />
-              </div>
-              <div className="space-y-2">
-                <Label className="text-white/80 font-medium">Support Agent</Label>
-                <Textarea value={support} onChange={(e) => setSupport(e.target.value)} rows={8} className="bg-white/5 border-white/[0.08] text-white rounded-xl placeholder:text-white/30" />
-              </div>
-              <div className="space-y-2">
-                <Label className="text-white/80 font-medium">Lead Qualifier</Label>
-                <Textarea value={qualifier} onChange={(e) => setQualifier(e.target.value)} rows={8} className="bg-white/5 border-white/[0.08] text-white rounded-xl placeholder:text-white/30" />
-              </div>
-              <div className="space-y-2">
-                <Label className="text-white/80 font-medium">FAQ Only</Label>
-                <Textarea value={faq} onChange={(e) => setFaq(e.target.value)} rows={8} className="bg-white/5 border-white/[0.08] text-white rounded-xl placeholder:text-white/30" />
-              </div>
-              <Button onClick={onSavePrompts} disabled={savingPrompts} className="w-full bg-[#0071E3] hover:bg-[#0071E3]/90 text-white font-semibold rounded-xl shadow-[0_4px_12px_rgba(0,113,227,0.3)]">Save Mode Prompts</Button>
+            <div>
+              <div className="mb-4 flex flex-wrap gap-2">{promptOptions.map((option) => <button key={option.key} type="button" onClick={() => setActivePrompt(option.key)} className={`rounded-lg px-3 py-2 text-xs font-semibold transition ${activePrompt === option.key ? 'bg-slate-900 text-white' : 'border border-slate-200 bg-white text-slate-500 hover:bg-slate-50'}`}>{option.label}</button>)}</div>
+              <Label className="text-xs font-semibold text-slate-700">{selectedPrompt.label} instructions</Label>
+              <Textarea value={selectedPrompt.value} onChange={(event) => selectedPrompt.update(event.target.value)} rows={12} className="mt-2 rounded-xl border-slate-300 bg-white font-mono text-xs leading-6 text-slate-700 focus:border-indigo-400 focus:ring-indigo-100" />
+              <div className="mt-4 flex items-center justify-between gap-4"><p className="text-xs text-slate-400">Changes affect future conversations using this mode.</p><Button onClick={onSavePrompts} disabled={savingPrompts} className="shrink-0 rounded-xl bg-[#111827] text-sm font-semibold text-white hover:bg-[#252d3d]">Save instructions</Button></div>
             </div>
           </Loader>
         </CardContent>
@@ -198,4 +194,3 @@ const AdvancedAISettings = ({
 }
 
 export default AdvancedAISettings
-

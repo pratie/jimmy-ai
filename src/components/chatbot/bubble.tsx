@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { cn, extractUUIDFromString, getMonthName } from '@/lib/utils'
+import { cn, extractUUIDFromString } from '@/lib/utils'
 import { getKieImageUrl } from '@/lib/kie-api'
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'
 import { User } from 'lucide-react'
@@ -22,7 +22,6 @@ type Props = {
 }
 
 const Bubble = ({ message, createdAt, botIcon, theme }: Props) => {
-  let d = new Date()
   const image = extractUUIDFromString(message.content)
   const [imageError, setImageError] = useState(false)
   const [botAvatarError, setBotAvatarError] = useState(false)
@@ -58,7 +57,7 @@ const Bubble = ({ message, createdAt, botIcon, theme }: Props) => {
       )}
       <div
         className={cn(
-          'flex flex-col gap-1 min-w-[100px] max-w-[320px] px-4 py-2.5 rounded-2xl shadow-sm',
+          'flex min-w-[72px] max-w-[300px] flex-col gap-1 rounded-2xl px-3.5 py-2.5 shadow-sm',
           message.role == 'assistant' ? 'rounded-bl-none bg-slate-100 text-slate-900' : 'rounded-br-none bg-slate-900 text-white'
         )}
         style={{
@@ -72,32 +71,6 @@ const Bubble = ({ message, createdAt, botIcon, theme }: Props) => {
               : theme?.userText || '#ffffff',
         }}
       >
-        {createdAt ? (
-          <div
-            className={cn(
-              'flex gap-2 text-[10px] opacity-70 mb-0.5',
-              message.role == 'assistant' ? 'text-slate-500' : 'text-slate-300'
-            )}
-          >
-            <p>
-              {createdAt.getDate()} {getMonthName(createdAt.getMonth())}
-            </p>
-            <p>
-              {createdAt.getHours()}:{createdAt.getMinutes()}
-              {createdAt.getHours() > 12 ? 'PM' : 'AM'}
-            </p>
-          </div>
-        ) : (
-          <p
-            className={cn(
-              'text-[10px] opacity-70 mb-0.5',
-              message.role == 'assistant' ? 'text-slate-500' : 'text-slate-300'
-            )}
-          >
-            {`${d.getHours()}:${d.getMinutes()} ${d.getHours() > 12 ? 'pm' : 'am'
-              }`}
-          </p>
-        )}
         {image && !imageError ? (
           <div className="relative aspect-square rounded-lg overflow-hidden my-1">
             <Image
@@ -115,11 +88,7 @@ const Bubble = ({ message, createdAt, botIcon, theme }: Props) => {
           </div>
         ) : (
           <div className="text-[14px] leading-relaxed break-words whitespace-pre-wrap">
-            <span
-              dangerouslySetInnerHTML={{
-                __html: message.content.replace('(complete)', ' ')
-              }}
-            />
+            <span>{message.content.replace('(complete)', ' ')}</span>
             {message.link && (
               <a
                 className={cn('underline font-semibold pl-1 inline-block hover:opacity-80 transition-opacity')}

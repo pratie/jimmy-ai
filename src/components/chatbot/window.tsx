@@ -32,6 +32,7 @@ type Props = {
   onClose?: () => void
   showBranding?: boolean
   agencyName?: string
+  onSuggestion?: (suggestion: string) => void
   realtimeMode:
   | {
     chatroom: string
@@ -77,6 +78,7 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
       onClose,
       showBranding,
       agencyName,
+      onSuggestion,
     },
     ref
   ) => {
@@ -119,7 +121,7 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
       return () => el.removeEventListener('scroll', onScroll)
     }, [ref])
 
-    console.log(errors)
+    const showFaqs = Boolean(help || helpdesk?.length)
     return (
       <div
         className={cn(
@@ -134,9 +136,9 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
         }}
       >
         {/* Fixed Header */}
-        <div className="flex justify-between items-center px-6 py-5 border-b border-slate-100 shrink-0" style={{ backgroundColor: t.headerBg, color: t.headerText }}>
-          <div className="flex gap-4 items-center">
-            <Avatar className="w-12 h-12 ring-4 ring-slate-50">
+        <div className="flex shrink-0 items-center justify-between border-b border-black/5 px-4 py-3.5" style={{ backgroundColor: t.headerBg, color: t.headerText }}>
+          <div className="flex items-center gap-3">
+            <Avatar className="h-10 w-10 border border-black/5">
               {botIcon && !avatarError ? (
                 <AvatarImage
                   src={getKieImageUrl(botIcon)}
@@ -150,12 +152,12 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
               )}
             </Avatar>
             <div className="flex flex-col">
-              <h3 className="text-base font-bold leading-tight mb-0.5">
+              <h3 className="text-sm font-semibold leading-tight">
                 {domainName || 'Assistant'}
               </h3>
-              <p className="text-[12px] text-slate-500 flex items-center gap-1.5 font-semibold">
-                <span className="inline-block w-2 h-2 rounded-full bg-green-500 shadow-[0_0_6px_rgba(34,197,94,0.4)]" aria-hidden="true" />
-                Online
+              <p className="mt-1 flex items-center gap-1.5 text-[10px] opacity-60">
+                <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" aria-hidden="true" />
+                AI assistant · Online
               </p>
               {realtimeMode?.mode && (
                 <RealTimeMode
@@ -171,7 +173,7 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
                 type="button"
                 aria-label="Close chat"
                 onClick={onClose}
-                className="h-7 w-7 inline-flex items-center justify-center rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-current opacity-50 transition hover:bg-black/5 hover:opacity-80"
                 title="Close"
               >
                 <X className="w-4 h-4" />
@@ -181,7 +183,7 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
         </div>
         {/* Tabs and content area - proper flex layout */}
         <Tabs defaultValue="chat" className="flex-1 flex flex-col min-h-0">
-          <div className="px-4 pt-2 pb-0 bg-white border-b border-slate-50">
+          {showFaqs && <div className="border-b border-slate-100 bg-white px-4 pt-1">
             <TabsList className="w-full justify-start gap-6 bg-transparent p-0 h-auto">
               <TabsTrigger
                 value="chat"
@@ -198,13 +200,13 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
                 FAQs
               </TabsTrigger>
             </TabsList>
-          </div>
+          </div>}
 
           <TabsContent value="chat" className="flex-1 flex flex-col min-h-0 m-0">
             {/* Messages area - takes all available space */}
             <div
               style={{ color: textColor || t.text, backgroundColor: t.surface }}
-              className="flex-1 overflow-y-auto px-4 py-4 scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent"
+              className="flex-1 overflow-y-auto px-4 py-5 scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent"
               ref={ref}
             >
               <div className="flex flex-col gap-4">
@@ -222,6 +224,16 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
                   />
                 ))}
                 {onResponding && <Responding botIcon={botIcon} />}
+                {chats.length <= 1 && onSuggestion && (
+                  <div className="ml-8 mt-1">
+                    <p className="mb-2 text-[10px] font-medium uppercase tracking-[0.12em] text-slate-400">Popular questions</p>
+                    <div className="flex flex-wrap gap-2">
+                      {['What do you offer?', 'How does pricing work?', 'Can I book a call?'].map((suggestion) => (
+                        <button key={suggestion} type="button" onClick={() => onSuggestion(suggestion)} className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[11px] font-medium text-slate-600 shadow-sm transition hover:border-slate-300 hover:bg-slate-50">{suggestion}</button>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -231,13 +243,13 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
                 e.preventDefault()
                 onChat()
               }}
-              className="flex px-4 py-4 items-end gap-2 bg-white border-t border-slate-100 shrink-0"
+              className="flex shrink-0 items-end gap-2 border-t border-slate-100 bg-white px-3.5 py-3"
             >
               <div className="flex-1 relative">
                 <Input
                   {...register('content')}
-                  placeholder={`Type a message...`}
-                  className="w-full min-h-[44px] rounded-xl px-4 py-2.5 pr-10 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-300 text-sm transition-all shadow-sm"
+                  placeholder="Ask a question…"
+                  className="min-h-[42px] w-full rounded-xl px-3.5 py-2.5 pr-10 text-sm shadow-none transition-all focus:border-slate-300 focus:outline-none focus:ring-4 focus:ring-slate-900/5"
                   style={{ backgroundColor: t.inputBg, border: `1px solid ${t.inputBorder}`, color: t.text }}
                 />
                 <Label htmlFor="bot-image" className="absolute right-2 top-1/2 -translate-y-1/2 cursor-pointer p-1.5 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors">
@@ -252,7 +264,8 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
               </div>
               <button
                 type="submit"
-                className="shrink-0 h-[44px] w-[44px] rounded-xl bg-slate-900 hover:bg-slate-800 disabled:bg-slate-200 disabled:cursor-not-allowed text-white flex items-center justify-center transition-all shadow-sm hover:shadow-md"
+                className="flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-xl text-white shadow-sm transition-all hover:opacity-90 disabled:cursor-not-allowed disabled:bg-slate-200"
+                style={{ backgroundColor: canSend ? t.primary : undefined }}
                 disabled={!canSend}
                 aria-label="Send"
               >

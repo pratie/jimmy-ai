@@ -2,13 +2,13 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: 'Chatbot Trained on Your Data: Accurate, On‑Brand Answers — BookmyLead AI',
+  title: 'Chatbot Trained on Your Data: Accurate, On‑Brand Answers — ChatDock',
   description:
-    'Deploy a chatbot trained on your data using RAG. Connect your site and docs, control guardrails, and deliver accurate, sourced answers with BookmyLead AI.',
+    'Deploy a chatbot trained on your data using RAG. Connect your site and docs, control guardrails, and deliver accurate, sourced answers with ChatDock.',
   keywords: ['chatbot trained on your data', 'rag chatbot', 'vector search chatbot', 'ai knowledge base'],
   alternates: { canonical: '/blogs/chatbot-trained-on-your-data' },
   openGraph: {
-    title: 'Chatbot Trained on Your Data: Accurate, On‑Brand Answers — BookmyLead AI',
+    title: 'Chatbot Trained on Your Data: Accurate, On‑Brand Answers — ChatDock',
     description:
       'Use retrieval‑augmented generation to ground responses in your content. Learn setup and best practices.',
     type: 'article',
@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Chatbot Trained on Your Data: Accurate, On‑Brand Answers — BookmyLead AI',
+    title: 'Chatbot Trained on Your Data: Accurate, On‑Brand Answers — ChatDock',
     description: 'Ground answers in your docs with RAG. Setup and best practices.',
     images: ['/images/social_graph_img.png'],
   },
@@ -48,7 +48,7 @@ export default function BlogArticle() {
           </section>
 
           <section>
-            <h2>How BookmyLead AI implements RAG</h2>
+            <h2>How ChatDock implements RAG</h2>
             <ol>
               <li>Ingest: crawl website, upload PDFs, add FAQs.</li>
               <li>Chunk & embed: generate vector embeddings per chunk.</li>
@@ -85,9 +85,9 @@ export default function BlogArticle() {
             '@type': 'Article',
             headline: 'Chatbot Trained on Your Data: Accurate, On‑Brand Answers',
             description:
-              'Deploy a chatbot trained on your data using RAG. Connect your site and docs, control guardrails, and deliver accurate, sourced answers with BookmyLead AI.',
+              'Deploy a chatbot trained on your data using RAG. Connect your site and docs, control guardrails, and deliver accurate, sourced answers with ChatDock.',
             mainEntityOfPage: { '@type': 'WebPage', '@id': '/blogs/chatbot-trained-on-your-data' },
-            author: { '@type': 'Organization', name: 'BookmyLead AI' },
+            author: { '@type': 'Organization', name: 'ChatDock' },
           }),
         }}
       />

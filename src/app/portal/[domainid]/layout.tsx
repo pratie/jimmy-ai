@@ -42,13 +42,13 @@ const DomainPortalLayout = async ({ children, params }: Props) => {
 
   return (
     <div 
-      className="flex flex-col md:h-screen w-full"
+      className="flex min-h-screen w-full flex-col bg-[#f4f5f7] text-slate-950"
       style={{
-        '--primary': agencyColor,
+        '--portal-accent': agencyColor,
       } as React.CSSProperties}
     >
       <PortalBanner logo={agencyLogo} name={agencyName} />
-      <div className="container flex justify-center flex-1 h-0 mt-12 w-full px-4">
+      <div className="mx-auto flex w-full max-w-6xl flex-1 items-center justify-center px-4 py-8 sm:px-6 sm:py-12">
         {children}
       </div>
     </div>

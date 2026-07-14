@@ -74,7 +74,7 @@ const GoogleAuthButton = () => {
   return (
     <Button
       variant="outline"
-      className="w-full"
+      className="h-11 w-full rounded-xl border-slate-300 bg-white text-sm font-semibold text-slate-700 shadow-none hover:bg-slate-50"
       type="button"
       onClick={signInWithGoogle}
       disabled={!isLoaded || loading}

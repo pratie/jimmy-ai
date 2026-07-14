@@ -21,7 +21,7 @@ const Page = async ({
   return (
     <>
       <InfoBar />
-      <div className="chat-window mx-auto flex h-0 w-full max-w-6xl flex-1 flex-col gap-8 overflow-y-auto px-5 py-7 md:px-8">
+      <div className="chat-window mx-auto flex h-0 w-full max-w-[1280px] flex-1 flex-col gap-4 overflow-y-auto px-5 py-5 md:px-8 md:py-6">
         {sp.payment === 'success' && (
           <PaymentSuccess
             plan={sp.plan as PlanType}

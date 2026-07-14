@@ -73,15 +73,15 @@ const WhiteLabelBranding = () => {
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-5 gap-10 border-t border-border pt-10">
-      <div className="lg:col-span-1">
+    <section className="grid gap-7 rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_6px_24px_rgba(15,23,42,.035)] lg:grid-cols-[220px_minmax(0,1fr)] md:p-7">
+      <div>
         <Section
           label="Agency Branding"
           message="White-label the transactional portals and widgets under your own name and style guidelines."
         />
       </div>
-      <form onSubmit={handleSubmit} className="lg:col-span-4 space-y-6">
-        <div className="lg:w-[500px] flex flex-col gap-5">
+      <form onSubmit={handleSubmit} className="max-w-2xl">
+        <div className="flex flex-col gap-5">
           {/* Agency Name */}
           <div className="flex flex-col gap-2">
             <Label htmlFor="agency-name" className="text-sm font-semibold text-foreground/80">
@@ -189,7 +189,7 @@ const WhiteLabelBranding = () => {
           </Button>
         </div>
       </form>
-    </div>
+    </section>
   )
 }
 

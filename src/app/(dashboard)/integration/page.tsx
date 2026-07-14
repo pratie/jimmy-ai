@@ -15,7 +15,7 @@ const IntegrationsPage = async () => {
       <InfoBar />
       <div className="min-h-0 flex-1 overflow-y-auto">
         <div className="mx-auto w-full max-w-[1280px] px-5 py-7 md:px-8">
-          <div className="mb-6 max-w-2xl"><h2 className="text-2xl font-black tracking-tight text-slate-950">Connect the rest of the client stack.</h2><p className="mt-2 text-sm font-medium leading-6 text-slate-400">Turn a helpful conversation into a payment, booking, handoff, or CRM update.</p></div>
+          <div className="mb-5 max-w-2xl"><h2 className="text-lg font-semibold text-slate-950">Payment connection</h2><p className="mt-1 text-sm leading-6 text-slate-500">Let qualified visitors continue from a conversation to a secure client checkout.</p></div>
           <IntegrationsList connections={connections} />
         </div>
       </div>

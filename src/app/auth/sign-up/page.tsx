@@ -9,10 +9,11 @@ type Props = {}
 
 const SignUp = (props: Props) => {
   return (
-    <div className="flex-1 py-36 md:px-16 w-full">
-      <div className="flex flex-col h-full gap-3">
+    <div className="w-full">
+      <div className="flex flex-col gap-5">
+        <div><p className="text-xs font-semibold uppercase tracking-[0.16em] text-indigo-600">Start free</p><h1 className="mt-3 text-3xl font-semibold tracking-[-0.035em] text-slate-950">Create your agency workspace</h1><p className="mt-2 text-sm leading-6 text-slate-500">Build and test your first client agent with 100 included credits.</p></div>
         <SignUpFormProvider>
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-4">
             <RegistrationFormStep />
             <ButtonHandler />
           </div>

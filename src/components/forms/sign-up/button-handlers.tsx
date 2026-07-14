@@ -30,10 +30,10 @@ const ButtonHandler = (props: Props) => {
 
   if (currentStep === 2) {
     return (
-      <div className="w-full flex flex-col gap-3 items-center">
+      <div className="flex w-full flex-col items-center gap-3">
         <Button
           type="submit"
-          className="w-full"
+          className="h-11 w-full rounded-xl bg-[#111827] text-sm font-semibold hover:bg-[#252d3d]"
           disabled={loading}
         >
           {loading ? (
@@ -44,11 +44,11 @@ const ButtonHandler = (props: Props) => {
             'Create an account'
           )}
         </Button>
-        <p>
+        <p className="text-sm text-slate-500">
           Already have an account?{' '}
           <Link
             href="/auth/sign-in"
-            className="font-bold"
+            className="font-semibold text-indigo-600"
           >
             Sign In
           </Link>
@@ -58,7 +58,7 @@ const ButtonHandler = (props: Props) => {
   }
 
   return (
-    <div className="w-full flex flex-col gap-3 items-center">
+    <div className="flex w-full flex-col items-center gap-3">
       <GoogleAuthButton />
       <div className="w-full relative">
         <div className="absolute inset-0 flex items-center">
@@ -73,7 +73,7 @@ const ButtonHandler = (props: Props) => {
       {!showAccountForm && (
         <Button
           type="button"
-          className="w-full border border-border bg-white text-brand-primary hover:bg-white/80"
+          className="h-11 w-full rounded-xl border-slate-300 bg-white text-sm font-semibold text-slate-700 hover:bg-slate-50"
           variant="outline"
           onClick={() => setShowAccountForm(true)}
         >
@@ -84,7 +84,7 @@ const ButtonHandler = (props: Props) => {
         <Button
           variant="outline"
           type="button"
-          className="w-full border border-border bg-white text-brand-primary hover:bg-white/80"
+          className="h-11 w-full rounded-xl border-slate-300 bg-[#111827] text-sm font-semibold text-white hover:bg-[#252d3d]"
           disabled={!canProceed || loading}
           onClick={() => {
             if (!canProceed || loading) return
@@ -104,11 +104,11 @@ const ButtonHandler = (props: Props) => {
           )}
         </Button>
       )}
-      <p>
+      <p className="text-sm text-slate-500">
         Already have an account?{' '}
         <Link
           href="/auth/sign-in"
-          className="font-bold"
+          className="font-semibold text-indigo-600"
         >
           Sign In
         </Link>

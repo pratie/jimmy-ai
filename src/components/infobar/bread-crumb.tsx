@@ -1,6 +1,7 @@
 'use client'
 
-import { Bell, Search } from 'lucide-react'
+import { ExternalLink } from 'lucide-react'
+import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import React from 'react'
 
@@ -25,20 +26,10 @@ const BreadCrumb = () => {
   return (
     <div className="flex w-full items-center justify-between gap-5">
       <div className="min-w-0">
-        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#5b5ce2]">{details.eyebrow}</p>
-        <h1 className="mt-1 truncate text-xl font-black capitalize tracking-tight text-slate-950 md:text-2xl">{details.title}</h1>
+        <p className="text-[9px] font-semibold uppercase tracking-[0.18em] text-[#6667db]">{details.eyebrow}</p>
+        <h1 className="mt-1 truncate text-xl font-semibold capitalize tracking-[-0.025em] text-slate-950 md:text-[22px]">{details.title}</h1>
       </div>
-      <div className="flex items-center gap-2">
-        <button className="hidden h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-500 shadow-sm transition hover:border-slate-300 hover:text-slate-900 sm:flex">
-          <Search className="h-4 w-4" />
-          Search
-          <kbd className="ml-2 rounded-md bg-slate-100 px-1.5 py-0.5 text-[9px] font-bold text-slate-400">⌘ K</kbd>
-        </button>
-        <button className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 shadow-sm transition hover:text-slate-900" aria-label="Notifications">
-          <Bell className="h-4 w-4" />
-          <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-[#ff6b5f] ring-2 ring-white" />
-        </button>
-      </div>
+      <Link href="/" target="_blank" className="hidden h-9 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-xs font-medium text-slate-500 shadow-sm transition hover:border-slate-300 hover:text-slate-900 sm:flex">View website <ExternalLink className="h-3.5 w-3.5" /></Link>
     </div>
   )
 }

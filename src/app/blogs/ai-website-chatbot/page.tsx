@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: 'AI Website Chatbot for Lead Generation: The 2025 Playbook',
+  title: 'AI Website Chatbot for Lead Generation: The 2026 Playbook',
   description:
     'A practical guide to using an AI website chatbot to capture, qualify, and convert leads. Setup steps, prompts, KPIs, examples, and best practices.',
   keywords: [
@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     canonical: '/blogs/ai-website-chatbot',
   },
   openGraph: {
-    title: 'AI Website Chatbot for Lead Generation: The 2025 Playbook',
+    title: 'AI Website Chatbot for Lead Generation: The 2026 Playbook',
     description:
       'A practical guide to using an AI website chatbot to capture, qualify, and convert leads. Setup steps, prompts, KPIs, examples, and best practices.',
     type: 'article',
@@ -32,7 +32,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'AI Website Chatbot for Lead Generation: The 2025 Playbook',
+    title: 'AI Website Chatbot for Lead Generation: The 2026 Playbook',
     description:
       'A practical guide to using an AI website chatbot to capture, qualify, and convert leads.',
     images: ['/images/social_graph_img.png'],
@@ -47,7 +47,7 @@ export default function BlogArticle() {
           <header className="not-prose mb-8">
             <p className="text-sm text-muted-foreground">Guide • 12 min read</p>
             <h1 className="mt-2 text-3xl sm:text-4xl font-bold tracking-tight text-brand-primary">
-              AI Website Chatbot for Lead Generation: The 2025 Playbook
+              AI Website Chatbot for Lead Generation: The 2026 Playbook
             </h1>
             <p className="mt-3 text-lg text-brand-primary/75">
               Everything you need to launch a high‑converting website chatbot: strategy, prompts, setup, and metrics—built on ChatDock AI.
@@ -178,7 +178,7 @@ export default function BlogArticle() {
           <section className="mt-14 text-sm text-muted-foreground">
             <p>
               This guide is for informational purposes and focuses on on‑site lead capture strategies
-              using AI chatbots in 2025. Tailor benchmarks to your traffic and sales cycle.
+              using AI chatbots in 2026. Tailor benchmarks to your traffic and sales cycle.
             </p>
           </section>
         </div>
@@ -191,7 +191,7 @@ export default function BlogArticle() {
           __html: JSON.stringify({
             '@context': 'https://schema.org',
             '@type': 'Article',
-            headline: 'AI Website Chatbot for Lead Generation: The 2025 Playbook',
+            headline: 'AI Website Chatbot for Lead Generation: The 2026 Playbook',
             description:
               'A practical guide to using an AI website chatbot to capture, qualify, and convert leads. Setup steps, prompts, KPIs, examples, and best practices.',
             mainEntityOfPage: {

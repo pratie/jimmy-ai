@@ -1,20 +1,21 @@
 'use client'
 
 import { useChatWindow } from '@/hooks/conversation/use-conversation'
-import { ArrowUp, Bot, Paperclip, Radio, Sparkles } from 'lucide-react'
+import { ArrowLeft, ArrowUp, Bot, Paperclip, Radio, Sparkles } from 'lucide-react'
 import React from 'react'
 import Bubble from '../chatbot/bubble'
 import { Loader } from '../loader'
 
-const Messenger = () => {
+const Messenger = ({ onBack }: { onBack?: () => void }) => {
   const { messageWindowRef, chats, loading, chatRoom, onHandleSentMessage, register } = useChatWindow()
 
   return (
     <div className="relative flex min-h-0 flex-1 flex-col bg-[#fafbfe]">
       <div className="flex h-[72px] shrink-0 items-center justify-between border-b border-slate-200 bg-white px-5">
         <div className="flex items-center gap-3">
+          {onBack && <button type="button" onClick={onBack} aria-label="Back to conversations" className="grid h-9 w-9 place-items-center rounded-xl border border-slate-200 text-slate-500"><ArrowLeft className="h-4 w-4" /></button>}
           <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#0b1020] text-white"><Bot className="h-[18px] w-[18px]" /></div>
-          <div><p className="text-xs font-black text-slate-900">Conversation workspace</p><p className="mt-1 flex items-center gap-1.5 text-[10px] font-semibold text-slate-400"><Radio className="h-3 w-3 text-emerald-500" /> AI replies active</p></div>
+          <div><p className="text-xs font-semibold text-slate-900">Conversation workspace</p><p className="mt-1 flex items-center gap-1.5 text-[10px] font-medium text-slate-400"><Radio className="h-3 w-3 text-emerald-500" /> AI replies active</p></div>
         </div>
         <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[9px] font-black uppercase tracking-wider text-emerald-700">Online</span>
       </div>

@@ -2,22 +2,22 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: '24/7 AI Support: Always‑On Helpdesk for Your Website — BookmyLead AI',
+  title: '24/7 AI Support: Always‑On Helpdesk for Your Website — ChatDock',
   description:
-    'Offer 24/7 AI support on your website. Learn setup, routing, SLAs, and KPIs to deliver instant answers and seamless handoffs with BookmyLead AI.',
+    'Offer 24/7 AI support on your website. Learn setup, routing, SLAs, and KPIs to deliver instant answers and seamless handoffs with ChatDock.',
   keywords: ['24/7 ai support', 'always-on support', 'website support ai', 'ai helpdesk'],
   alternates: { canonical: '/blogs/24-7-ai-support' },
   openGraph: {
-    title: '24/7 AI Support: Always‑On Helpdesk for Your Website — BookmyLead AI',
+    title: '24/7 AI Support: Always‑On Helpdesk for Your Website — ChatDock',
     description:
-      'Deliver instant answers day and night. Configure guardrails, live handoff, and reporting with BookmyLead AI.',
+      'Deliver instant answers day and night. Configure guardrails, live handoff, and reporting with ChatDock.',
     type: 'article',
     images: [{ url: '/images/social_graph_img.png', width: 1200, height: 630, alt: '24/7 AI Support' }],
     url: '/blogs/24-7-ai-support',
   },
   twitter: {
     card: 'summary_large_image',
-    title: '24/7 AI Support: Always‑On Helpdesk for Your Website — BookmyLead AI',
+    title: '24/7 AI Support: Always‑On Helpdesk for Your Website — ChatDock',
     description: 'Instant responses, better SLAs, and smart routing using AI.',
     images: ['/images/social_graph_img.png'],
   },
@@ -77,9 +77,9 @@ export default function BlogArticle() {
             '@type': 'Article',
             headline: '24/7 AI Support: Always‑On Helpdesk for Your Website',
             description:
-              'Offer 24/7 AI support on your website. Learn setup, routing, SLAs, and KPIs to deliver instant answers and seamless handoffs with BookmyLead AI.',
+              'Offer 24/7 AI support on your website. Learn setup, routing, SLAs, and KPIs to deliver instant answers and seamless handoffs with ChatDock.',
             mainEntityOfPage: { '@type': 'WebPage', '@id': '/blogs/24-7-ai-support' },
-            author: { '@type': 'Organization', name: 'BookmyLead AI' },
+            author: { '@type': 'Organization', name: 'ChatDock' },
           }),
         }}
       />

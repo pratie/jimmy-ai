@@ -44,6 +44,7 @@ export const useChatBot = (options?: UseChatBotOptions) => {
     register,
     handleSubmit,
     reset,
+    setValue,
     watch,
     formState: { errors },
   } = useForm<ChatBotMessageProps>({
@@ -148,7 +149,12 @@ export const useChatBot = (options?: UseChatBotOptions) => {
     const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 
     const handleMessage = (e: MessageEvent) => {
-      console.log(e.data)
+      if (e.data && typeof e.data === 'object' && e.data.type === 'chatdock:command') {
+        if (e.data.command === 'open') setBotOpened(true)
+        if (e.data.command === 'close') setBotOpened(false)
+        if (e.data.command === 'toggle') setBotOpened((open) => !open)
+        return
+      }
       const botid = e.data
       if (!handled && typeof botid === 'string') {
         // Validate UUID format
@@ -411,6 +417,7 @@ export const useChatBot = (options?: UseChatBotOptions) => {
     onStartChatting,
     onChats,
     register,
+    setValue,
     watch,
     onAiTyping,
     messageWindowRef,

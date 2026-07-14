@@ -23,7 +23,7 @@ const ConversationMenu = ({ domains }: Props) => {
   return (
     <div className="h-full bg-white">
       <div className="border-b border-slate-100 px-5 pb-4 pt-5">
-        <p className="text-sm font-black text-slate-950">Customer conversations</p>
+        <p className="text-sm font-semibold text-slate-950">Customer conversations</p>
         <p className="mt-1 text-[11px] font-medium text-slate-400">Review, qualify, or take over live.</p>
       </div>
       <ConversationSearch

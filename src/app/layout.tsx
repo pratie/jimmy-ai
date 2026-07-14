@@ -28,10 +28,10 @@ const APP_URL = (process.env.NEXT_PUBLIC_APP_URL || 'https://chatdock.io').repla
 
 export const metadata: Metadata = {
   metadataBase: new URL(APP_URL),
-  title: 'ChatDock AI - AI Agent Trained on Your Company Data',
-  description: 'Deploy an AI agent trained on your company data to capture leads 24/7, answer questions instantly, and close deals while you sleep. Turn visitors into customers automatically.',
-  keywords: ['AI chatbot', 'AI agent', 'lead generation', 'customer support automation', 'conversational AI', 'business automation', 'ChatDock AI'],
-  authors: [{ name: 'ChatDock AI' }],
+  title: 'ChatDock — AI Delivery OS for Agencies',
+  description: 'Launch, manage, test, and prove the value of white-label AI agents for every client from one agency workspace.',
+  keywords: ['AI agency platform', 'white-label AI agent', 'website chatbot', 'lead qualification', 'client chatbot management', 'ChatDock'],
+  authors: [{ name: 'ChatDock' }],
   icons: {
     icon: [
       { url: '/icon.svg', type: 'image/svg+xml' },
@@ -41,23 +41,23 @@ export const metadata: Metadata = {
     shortcut: '/images/logo.svg',
   },
   openGraph: {
-    title: 'ChatDock AI - AI Agent Trained on Your Company Data',
-    description: 'Deploy an AI agent trained on your company data to capture leads 24/7, answer questions instantly, and close deals while you sleep.',
+    title: 'ChatDock — AI Delivery OS for Agencies',
+    description: 'Launch and manage white-label client AI agents from one connected workspace.',
     type: 'website',
     images: [
       {
         url: `${APP_URL}/images/social_graph_img.png`,
         width: 1200,
         height: 630,
-        alt: 'ChatDock · Website AI Assistant',
+        alt: 'ChatDock agency workspace',
       },
     ],
     url: APP_URL,
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'ChatDock AI - AI Agent Trained on Your Company Data',
-    description: 'Deploy an AI agent trained on your company data to capture leads 24/7, answer questions instantly, and close deals while you sleep.',
+    title: 'ChatDock — AI Delivery OS for Agencies',
+    description: 'Launch and manage white-label client AI agents from one connected workspace.',
     images: [`${APP_URL}/images/social_graph_img.png`],
   },
   robots: {
@@ -98,7 +98,7 @@ export default function RootLayout({
             {JSON.stringify({
               '@context': 'https://schema.org',
               '@type': 'Organization',
-              name: 'ChatDock AI',
+              name: 'ChatDock',
               url: APP_URL,
               logo: `${APP_URL}/images/logo.svg`,
             })}
@@ -109,7 +109,7 @@ export default function RootLayout({
             {JSON.stringify({
               '@context': 'https://schema.org',
               '@type': 'SoftwareApplication',
-              name: 'ChatDock AI',
+              name: 'ChatDock',
               applicationCategory: 'BusinessApplication',
               operatingSystem: 'Web',
               url: APP_URL,

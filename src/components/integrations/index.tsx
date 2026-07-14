@@ -13,9 +13,9 @@ type Props = {
 
 const IntegrationsList = ({ connections }: Props) => {
   return (
-    <div className="grid grid-cols-1 content-start gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="grid max-w-xl grid-cols-1 content-start gap-4">
       {INTEGRATION_LIST_ITEMS.map((item) => (
-        <div key={item.id} className="group rounded-3xl border border-slate-200/80 bg-white p-5 shadow-[0_8px_30px_rgba(15,23,42,0.04)] transition hover:-translate-y-0.5 hover:border-[#5b5ce2]/25 hover:shadow-lg">
+        <div key={item.id} className="group rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_6px_24px_rgba(15,23,42,.035)] transition hover:border-slate-300">
           <div className="flex flex-col gap-4">
             <div className="flex w-full items-start justify-between gap-5">
               <div className="">
@@ -28,7 +28,7 @@ const IntegrationsList = ({ connections }: Props) => {
                     className="object-contain p-2"
                   />
                 </div>
-                <h2 className="mt-4 text-sm font-black capitalize text-slate-900">{item.name}</h2>
+                <h2 className="mt-4 text-sm font-semibold capitalize text-slate-900">{item.name}</h2>
               </div>
               <IntegrationTrigger
                 connections={connections}

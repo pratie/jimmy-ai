@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { ArrowLeft, Link2Off } from 'lucide-react'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
@@ -8,21 +9,14 @@ export const metadata: Metadata = {
 }
 
 export default async function PortalIndex({ params }: { params: Promise<{ domainid: string }> }) {
-  const { domainid } = await params
+  await params
   return (
-    <main className="min-h-[60vh] flex items-center justify-center px-6">
-      <div className="max-w-lg text-center space-y-4">
-        <h1 className="text-2xl font-bold">Portal</h1>
-        <p className="text-muted-foreground">
-          This portal base URL is used by your assistant to share appointment and payment links.
-          If you were expecting a specific action, please check your message for the full link.
-        </p>
-        <div className="text-sm text-muted-foreground">
-          <code className="px-2 py-1 rounded bg-muted">{`/portal/${domainid}`}</code>
-        </div>
-        <div className="pt-2">
-          <Link href="/" className="underline underline-offset-4">Go back to homepage</Link>
-        </div>
+    <main className="flex min-h-[420px] w-full items-center justify-center">
+      <div className="max-w-md rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-[0_14px_40px_rgba(15,23,42,.06)]">
+        <span className="mx-auto grid h-11 w-11 place-items-center rounded-xl bg-slate-100 text-slate-500"><Link2Off className="h-5 w-5" /></span>
+        <h1 className="mt-5 text-xl font-semibold text-slate-950">This link is incomplete</h1>
+        <p className="mt-3 text-sm leading-6 text-slate-500">Return to the conversation and use the full booking or payment link shared by the assistant.</p>
+        <Link href="/" className="mt-6 inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-600"><ArrowLeft className="h-3.5 w-3.5" /> Return to homepage</Link>
       </div>
     </main>
   )

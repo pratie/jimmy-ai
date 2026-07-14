@@ -1,10 +1,7 @@
 import AiChatBot from '@/components/chatbot'
 import React from 'react'
 import './chatbot.css'
-import { Cuprum } from 'next/font/google'
 import type { Metadata } from 'next'
-
-const cuprum = Cuprum({ subsets: ['latin'], weight: ['400', '700'] })
 
 type Props = {}
 
@@ -16,11 +13,7 @@ export const metadata: Metadata = {
 }
 
 const ChatBot = (props: Props) => {
-  return (
-    <div className={cuprum.className}>
-      <AiChatBot />
-    </div>
-  )
+  return <AiChatBot />
 }
 
 export default ChatBot

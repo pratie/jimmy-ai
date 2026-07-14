@@ -3,7 +3,6 @@ import React, { useCallback, useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { useSignUp } from '@clerk/nextjs'
 import { useToast } from '@/components/ui/use-toast'
-import Image from 'next/image'
 import { ArrowLeft } from 'lucide-react'
 import { useAuthContextHook } from '@/context/use-auth-context'
 
@@ -43,27 +42,20 @@ const OTPForm = ({ onOTP, setOTP }: Props) => {
 
   return (
     <>
-      <div className="flex items-center gap-4 mb-4">
+      <div className="mb-2 flex items-center gap-3">
         <Button
           type="button"
           variant="ghost"
           size="icon"
           onClick={() => setCurrentStep(1)}
-          className="flex-shrink-0"
+          className="h-9 w-9 shrink-0 rounded-lg border border-slate-200"
         >
           <ArrowLeft className="h-4 w-4" />
         </Button>
-        <Image
-          src="/images/logo.svg"
-          alt="Logo"
-          width={60}
-          height={60}
-          className="flex-shrink-0"
-        />
-        <h2 className="text-gravel md:text-4xl font-bold">Enter OTP</h2>
+        <h2 className="text-xl font-semibold text-slate-900">Check your email</h2>
       </div>
-      <p className="text-iridium md:text-sm">
-        Enter the one time password that was sent to your email.
+      <p className="text-sm text-slate-500">
+        Enter the six-digit verification code we sent you.
       </p>
       <div className="w-full justify-center flex py-5">
         <OTPInput

@@ -160,7 +160,7 @@ export default function Home() {
           <div className="mx-auto mb-7 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.06] px-4 py-2 text-xs font-semibold text-white/70 backdrop-blur">
             <Sparkles className="h-3.5 w-3.5 text-[#ffb36b]" /> The AI delivery OS for agencies
           </div>
-          <h1 className="mx-auto max-w-5xl text-balance text-5xl font-semibold leading-[0.98] tracking-[-0.055em] text-white sm:text-6xl md:text-7xl lg:text-[88px]">
+          <h1 className="mx-auto max-w-5xl text-balance text-[42px] font-semibold leading-[1.02] tracking-[-0.05em] text-white sm:text-6xl sm:leading-[0.98] md:text-7xl lg:text-[88px]">
             Turn client websites into <span className="text-[#aaaaff]">AI sales teams.</span>
           </h1>
           <p className="mx-auto mt-7 max-w-2xl text-balance text-lg leading-8 text-white/60 md:text-xl">
@@ -222,6 +222,27 @@ export default function Home() {
                 <p className="mt-3 leading-7 text-slate-500">{feature.copy}</p>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="border-y border-[#e3e5eb] bg-[#f7f8fa] px-5 py-24 sm:px-8 lg:py-28">
+        <div className="mx-auto max-w-7xl">
+          <div className="grid gap-12 lg:grid-cols-[0.8fr_1.2fr] lg:items-start">
+            <div className="lg:sticky lg:top-28">
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#6667db]">Built to save delivery time</p>
+              <h2 className="mt-5 text-4xl font-semibold tracking-[-0.04em] sm:text-5xl">The repeated work becomes one workflow.</h2>
+              <p className="mt-5 max-w-lg text-lg leading-8 text-slate-500">Spend less time stitching systems together and more time improving the client result.</p>
+            </div>
+            <div className="overflow-hidden rounded-[24px] border border-[#dfe2e9] bg-white">
+              <div className="grid grid-cols-[0.8fr_1fr_1fr] border-b border-slate-200 bg-slate-50 px-5 py-3 text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400 sm:px-7"><span>Workflow</span><span>Without ChatDock</span><span>With ChatDock</span></div>
+              {[
+                ['Agent launch', 'Crawler, prompt tool, widget, handoff', 'One guided client setup'],
+                ['Quality review', 'Scattered test chats and screenshots', 'Structured private launch review'],
+                ['Daily operations', 'Separate inboxes and spreadsheets', 'One agency command center'],
+                ['Client reporting', 'Manually assemble activity updates', 'Conversations, leads, and bookings together'],
+              ].map(([area, before, after]) => <div key={area} className="grid grid-cols-1 gap-3 border-b border-slate-100 px-5 py-5 last:border-0 sm:grid-cols-[0.8fr_1fr_1fr] sm:gap-5 sm:px-7"><p className="text-sm font-semibold text-slate-800">{area}</p><p className="text-xs leading-5 text-slate-400">{before}</p><p className="flex items-start gap-2 text-xs font-medium leading-5 text-slate-700"><Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-600" />{after}</p></div>)}
+            </div>
           </div>
         </div>
       </section>

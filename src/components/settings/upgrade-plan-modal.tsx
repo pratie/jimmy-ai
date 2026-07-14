@@ -52,12 +52,10 @@ export default function UpgradePlanModal({ currentPlan }: Props) {
       open={open}
       onOpenChange={setOpen}
       trigger={
-        <Card className="border-dashed bg-cream border-brand-base-300 w-full cursor-pointer h-[270px] flex justify-center items-center">
-          <CardContent className="flex gap-2 items-center">
-            <div className="rounded-full border-2 p-1 border-brand-base-300">
-              <Plus className="text-brand-primary/60" />
-            </div>
-            <CardDescription className="font-semibold">Upgrade Plan</CardDescription>
+        <Card className="w-full cursor-pointer rounded-xl border-slate-200 bg-[#111827] text-white shadow-sm transition hover:bg-[#252d3d]">
+          <CardContent className="flex items-center justify-between p-4">
+            <div className="text-left"><p className="text-sm font-semibold">Explore paid plans</p><CardDescription className="mt-1 text-xs text-white/50">Add more clients and message capacity</CardDescription></div>
+            <div className="grid h-8 w-8 place-items-center rounded-lg bg-white/10"><Plus className="h-4 w-4 text-white" /></div>
           </CardContent>
         </Card>
       }
@@ -66,4 +64,3 @@ export default function UpgradePlanModal({ currentPlan }: Props) {
     </Modal>
   )
 }
-

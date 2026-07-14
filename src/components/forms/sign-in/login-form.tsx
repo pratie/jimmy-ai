@@ -26,8 +26,9 @@ const LoginForm = (props: Props) => {
   }, [emailFromQuery])
   return (
     <>
-      <h1 className="text-gravel md:text-4xl font-bold">Login</h1>
-      <p className="text-iridium md:text-sm">Enter your email and password</p>
+      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-indigo-600">Welcome back</p>
+      <h1 className="text-3xl font-semibold tracking-[-0.035em] text-slate-950">Sign in to your workspace</h1>
+      <p className="mb-3 text-sm leading-6 text-slate-500">Manage client agents, conversations, and launches.</p>
       {USER_LOGIN_FORM.map((field) => (
         <FormGenerator
           key={field.id}

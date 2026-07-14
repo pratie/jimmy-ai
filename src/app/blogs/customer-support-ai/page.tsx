@@ -2,13 +2,13 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: 'Customer Support AI: Reduce Tickets, Delight Customers — BookmyLead AI',
+  title: 'Customer Support AI: Reduce Tickets, Delight Customers — ChatDock',
   description:
     'Use Customer Support AI to automate FAQs, offer instant answers, and hand off complex chats to humans. Benchmarks, setup, and best practices.',
   keywords: ['customer support ai', 'ai support', 'support automation', 'knowledge base chatbot'],
   alternates: { canonical: '/blogs/customer-support-ai' },
   openGraph: {
-    title: 'Customer Support AI: Reduce Tickets, Delight Customers — BookmyLead AI',
+    title: 'Customer Support AI: Reduce Tickets, Delight Customers — ChatDock',
     description:
       'Automate first‑line support with an AI assistant trained on your docs. Learn setup, guardrails, and KPIs.',
     type: 'article',
@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Customer Support AI: Reduce Tickets, Delight Customers — BookmyLead AI',
+    title: 'Customer Support AI: Reduce Tickets, Delight Customers — ChatDock',
     description: 'Automate FAQs and boost CSAT with AI trained on your docs.',
     images: ['/images/social_graph_img.png'],
   },
@@ -49,7 +49,7 @@ export default function BlogArticle() {
           </section>
 
           <section>
-            <h2>Setup with BookmyLead AI</h2>
+            <h2>Setup with ChatDock</h2>
             <ol>
               <li>Connect docs, FAQs, release notes, and tutorials.</li>
               <li>Enable Strict FAQ or Support mode for guardrails.</li>
@@ -93,7 +93,7 @@ export default function BlogArticle() {
             description:
               'Use Customer Support AI to automate FAQs, offer instant answers, and hand off complex chats to humans. Benchmarks, setup, and best practices.',
             mainEntityOfPage: { '@type': 'WebPage', '@id': '/blogs/customer-support-ai' },
-            author: { '@type': 'Organization', name: 'BookmyLead AI' },
+            author: { '@type': 'Organization', name: 'ChatDock' },
           }),
         }}
       />

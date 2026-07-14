@@ -2,9 +2,9 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: 'AI Chatbot for Website: Complete Guide (2025) — BookmyLead AI',
+  title: 'AI Chatbot for Website: Complete Guide (2026) — ChatDock',
   description:
-    'Learn how to add an AI chatbot to your website: benefits, setup steps, lead capture, support automation, KPIs, and best practices using BookmyLead AI.',
+    'Learn how to add an AI chatbot to your website: benefits, setup steps, lead capture, support automation, KPIs, and best practices using ChatDock.',
   keywords: [
     'ai chatbot for website',
     'website chatbot',
@@ -14,16 +14,16 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: '/blogs/ai-chatbot-for-website' },
   openGraph: {
-    title: 'AI Chatbot for Website: Complete Guide (2025) — BookmyLead AI',
+    title: 'AI Chatbot for Website: Complete Guide (2026) — ChatDock',
     description:
-      'Add an AI chatbot to your website in minutes. Improve conversions, qualify leads, and automate support with BookmyLead AI.',
+      'Add an AI chatbot to your website in minutes. Improve conversions, qualify leads, and automate support with ChatDock.',
     type: 'article',
     images: [{ url: '/images/social_graph_img.png', width: 1200, height: 630, alt: 'AI Chatbot for Website' }],
     url: '/blogs/ai-chatbot-for-website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'AI Chatbot for Website: Complete Guide (2025) — BookmyLead AI',
+    title: 'AI Chatbot for Website: Complete Guide (2026) — ChatDock',
     description: 'Benefits, setup, KPIs, and best practices to deploy an AI website chatbot.',
     images: ['/images/social_graph_img.png'],
   },
@@ -37,7 +37,7 @@ export default function BlogArticle() {
           <header className="not-prose mb-8">
             <p className="text-sm text-muted-foreground">Guide • 10 min read</p>
             <h1 className="mt-2 text-3xl sm:text-4xl font-bold tracking-tight text-brand-primary">
-              AI Chatbot for Website: Complete Guide (2025)
+              AI Chatbot for Website: Complete Guide (2026)
             </h1>
             <p className="mt-3 text-lg text-brand-primary/75">
               Everything you need to launch an AI chatbot on your website: conversion wins, setup steps, implementation options, KPIs, and best practices.
@@ -55,7 +55,7 @@ export default function BlogArticle() {
           </section>
 
           <section>
-            <h2>How it works with BookmyLead AI</h2>
+            <h2>How it works with ChatDock</h2>
             <ol>
               <li><strong>Train on your data:</strong> crawl your site, upload docs/FAQs.</li>
               <li><strong>Choose a mode:</strong> Sales, Support, Qualifier, or Strict FAQ.</li>
@@ -116,11 +116,11 @@ export default function BlogArticle() {
           __html: JSON.stringify({
             '@context': 'https://schema.org',
             '@type': 'Article',
-            headline: 'AI Chatbot for Website: Complete Guide (2025)',
+            headline: 'AI Chatbot for Website: Complete Guide (2026)',
             description:
-              'Learn how to add an AI chatbot to your website: benefits, setup steps, lead capture, support automation, KPIs, and best practices using BookmyLead AI.',
+              'Learn how to add an AI chatbot to your website: benefits, setup steps, lead capture, support automation, KPIs, and best practices using ChatDock.',
             mainEntityOfPage: { '@type': 'WebPage', '@id': '/blogs/ai-chatbot-for-website' },
-            author: { '@type': 'Organization', name: 'BookmyLead AI' },
+            author: { '@type': 'Organization', name: 'ChatDock' },
           }),
         }}
       />

@@ -2,11 +2,8 @@
 import { useChatBot } from '@/hooks/chatbot/use-chatbot'
 import React, { useState, useEffect } from 'react'
 import { BotWindow } from './window'
-import { cn } from '@/lib/utils'
 import { getKieImageUrl } from '@/lib/kie-api'
 import Image from 'next/image'
-import { X } from 'lucide-react'
-import { BotIcon } from '@/icons/bot-icon'
 import { Loader } from '@/components/loader'
 
 type Props = {}
@@ -18,6 +15,7 @@ const AiChatBot = (props: Props) => {
     botOpened,
     onChats,
     register,
+    setValue,
     watch,
     onStartChatting,
     onAiTyping,
@@ -53,6 +51,7 @@ const AiChatBot = (props: Props) => {
               themeConfig={currentBot?.chatBot?.theme as any}
               chats={onChats}
               register={register}
+              onSuggestion={(suggestion) => setValue('content', suggestion, { shouldValidate: true })}
               watch={watch}
               onChat={onStartChatting}
               onResponding={onAiTyping}
@@ -68,8 +67,10 @@ const AiChatBot = (props: Props) => {
 
       {/* Always show the bubble promptly, even while loading */}
       {!botOpened && (
-        <div
-          className="rounded-full overflow-hidden relative cursor-pointer w-16 h-16 flex items-center justify-center bg-white border border-gray-300 shadow-sm hover:shadow-md transition-shadow pointer-events-auto"
+        <button
+          type="button"
+          aria-label={`Open chat with ${currentBot?.name || 'assistant'}`}
+          className="group relative flex h-16 w-16 cursor-pointer items-center justify-center overflow-hidden rounded-full border border-slate-200 bg-white shadow-[0_10px_30px_rgba(15,23,42,.18)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_14px_36px_rgba(15,23,42,.24)] focus:outline-none focus:ring-4 focus:ring-indigo-200 pointer-events-auto"
           onClick={onOpenChatBot}
         >
           {((currentBot?.chatBot?.icon || currentBot?.icon) && !iconError) ? (
@@ -82,9 +83,10 @@ const AiChatBot = (props: Props) => {
               onLoad={() => setIconError(false)}
             />
           ) : (
-            <BotIcon />
+            <Image src="/images/chatdock-mark.png" alt="" fill sizes="64px" className="object-contain p-2" />
           )}
-        </div>
+          <span className="absolute bottom-0.5 right-0.5 h-3.5 w-3.5 rounded-full border-2 border-white bg-emerald-500" aria-hidden="true" />
+        </button>
       )}
     </div>
   )

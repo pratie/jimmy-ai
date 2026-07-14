@@ -14,10 +14,8 @@ import {
   MessageSquareText,
   Plus,
   Search,
-  Sparkles,
   Target,
   UsersRound,
-  X,
   Zap,
 } from 'lucide-react'
 import Link from 'next/link'
@@ -78,17 +76,17 @@ function MetricCard({ label, value, detail, icon: Icon, accent }: {
   accent: string
 }) {
   return (
-    <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-[0_8px_30px_rgba(15,23,42,0.04)]">
+    <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-[0_6px_20px_rgba(15,23,42,0.035)]">
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-xs font-bold text-slate-500">{label}</p>
-          <p className="mt-3 text-3xl font-black tracking-[-0.04em] text-slate-950">{value}</p>
+          <p className="text-xs font-semibold text-slate-500">{label}</p>
+          <p className="mt-2 text-2xl font-bold tracking-[-0.035em] text-slate-950">{value}</p>
         </div>
-        <div className={cn('flex h-10 w-10 items-center justify-center rounded-xl', accent)}>
-          <Icon className="h-[18px] w-[18px]" />
+        <div className={cn('flex h-9 w-9 items-center justify-center rounded-xl', accent)}>
+          <Icon className="h-4 w-4" />
         </div>
       </div>
-      <p className="mt-3 text-[11px] font-medium text-slate-400">{detail}</p>
+      <p className="mt-2.5 text-[11px] font-medium text-slate-400">{detail}</p>
     </div>
   )
 }
@@ -118,46 +116,46 @@ export default function DashboardContent({ conversations, leads, appointments, p
 
   if (showCreate) {
     return (
-      <div className="mx-auto w-full max-w-6xl px-5 py-7 md:px-8">
-        <button onClick={() => setShowCreate(false)} className="mb-5 inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-600 shadow-sm hover:text-slate-950">
-          <X className="h-3.5 w-3.5" /> Close setup
-        </button>
-        <AddDomainCTA />
+      <div className="mx-auto w-full max-w-[1280px] px-5 py-5 md:px-8 md:py-6">
+        <AddDomainCTA onClose={() => setShowCreate(false)} />
       </div>
     )
   }
 
   return (
-    <div className="mx-auto w-full max-w-[1280px] px-5 py-7 md:px-8 md:py-9">
-      <section className="relative overflow-hidden rounded-[28px] bg-[#0b1020] px-6 py-7 text-white shadow-[0_25px_70px_rgba(15,23,42,0.16)] md:px-8 md:py-8">
-        <div className="absolute -right-16 -top-24 h-72 w-72 rounded-full bg-[#5b5ce2]/35 blur-3xl" />
-        <div className="absolute -bottom-28 left-1/3 h-56 w-56 rounded-full bg-cyan-400/10 blur-3xl" />
-        <div className="relative flex flex-col justify-between gap-7 lg:flex-row lg:items-end">
-          <div className="max-w-2xl">
-            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.06] px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.16em] text-white/65">
-              <Sparkles className="h-3.5 w-3.5 text-[#9b9cff]" /> Agency pulse
+    <div className="mx-auto w-full max-w-[1280px] px-5 py-5 md:px-8 md:py-6">
+      <section className="flex flex-col gap-4 rounded-2xl border border-slate-200/80 bg-white px-4 py-4 shadow-[0_6px_24px_rgba(15,23,42,0.035)] sm:flex-row sm:items-center sm:justify-between sm:px-5">
+        <div className="flex min-w-0 items-center gap-3.5">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#111827] text-white">
+            <Bot className="h-[18px] w-[18px]" />
+          </div>
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <h2 className="truncate text-sm font-semibold text-slate-950">
+                {domains.length === 0 ? 'Create your first client workspace' : `${liveAgents} of ${domains.length} agents live`}
+              </h2>
+              {domains.length > 0 && <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />}
             </div>
-            <h2 className="text-3xl font-black leading-tight tracking-[-0.04em] text-white md:text-4xl">
-              Your agents should prove revenue, not just answer questions.
-            </h2>
-            <p className="mt-3 max-w-xl text-sm font-medium leading-6 text-white/55">
-              Monitor every client workspace, resolve conversations, and move qualified visitors toward a booked meeting.
+            <p className="mt-1 truncate text-xs text-slate-500">
+              {domains.length === 0
+                ? 'Connect a website, train the agent, and preview it before launch.'
+                : `${conversations.toLocaleString()} conversations · ${totalKnownLeads || leads} qualified leads · ${appointments} bookings`}
             </p>
           </div>
-          <button onClick={() => setShowCreate(true)} className="inline-flex h-12 shrink-0 items-center justify-center gap-2 rounded-2xl bg-white px-5 text-sm font-black text-[#0b1020] shadow-xl transition hover:-translate-y-0.5 hover:bg-[#f1f1ff]">
-            <Plus className="h-4 w-4" /> Deploy client agent
-          </button>
         </div>
+        <button onClick={() => setShowCreate(true)} className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-xl bg-[#111827] px-4 text-xs font-semibold text-white shadow-sm transition hover:bg-[#252d3d]">
+          <Plus className="h-3.5 w-3.5" /> New client agent
+        </button>
       </section>
 
-      <section className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <section className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <MetricCard label="Client agents" value={domains.length} detail={`${liveAgents} live and customer-facing`} icon={Bot} accent="bg-indigo-50 text-[#5b5ce2]" />
         <MetricCard label="Conversations" value={conversations} detail="Across every client workspace" icon={MessageSquareText} accent="bg-sky-50 text-sky-600" />
         <MetricCard label="Qualified leads" value={totalKnownLeads || leads} detail="Visitors with captured contact data" icon={UsersRound} accent="bg-emerald-50 text-emerald-600" />
         <MetricCard label="Lead → booking" value={`${conversionRate}%`} detail={`${appointments} confirmed booking${appointments === 1 ? '' : 's'}`} icon={Target} accent="bg-orange-50 text-orange-600" />
       </section>
 
-      <div className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
+      <div className="mt-4 grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
         <section className="overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-[0_8px_30px_rgba(15,23,42,0.04)]">
           <div className="flex flex-col gap-4 border-b border-slate-100 px-5 py-5 sm:flex-row sm:items-center sm:justify-between md:px-6">
             <div>
