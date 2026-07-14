@@ -1,238 +1,267 @@
 import type { Metadata } from 'next'
+import Link from 'next/link'
+import Script from 'next/script'
+import {
+  ArrowRight,
+  BarChart3,
+  Bot,
+  CalendarCheck2,
+  Check,
+  ChevronRight,
+  CircleCheck,
+  Globe2,
+  Inbox,
+  MessageSquareText,
+  Palette,
+  ShieldCheck,
+  Sparkles,
+  Target,
+  UsersRound,
+  Zap,
+} from 'lucide-react'
+
+import { Footer } from '@/components/landing/footer'
+import PricingSection from '@/components/landing/pricing-section'
 import NavBar from '@/components/navbar'
 import { Button } from '@/components/ui/button'
-import Link from 'next/link'
-import PricingSection from '@/components/landing/pricing-section'
-import Script from 'next/script'
-import HowItWorks from '@/components/landing/how-it-works'
-import { Check, ChevronRight, Shield, Zap, Clock, Users, BarChart3, Globe, MessageSquare, ArrowRight, Sparkles, DollarSign, Calendar } from 'lucide-react'
-import { Footer } from '@/components/landing/footer'
-import InteractivePreviewChat from '@/components/landing/interactive-preview-chat'
 
 export const metadata: Metadata = {
-  title: 'ChatDock AI - White-Label Transactional Chatbot Reseller Platform for AI Agencies',
+  title: 'ChatDock — The AI Delivery OS for Agencies',
   description:
-    'Build, brand, and resell custom RAG chatbots that natively book meetings and close sales. Give your clients a fully white-labeled dashboard under your own domain.',
-  alternates: {
-    canonical: '/',
-  },
+    'Launch, manage, and prove the value of white-label AI agents for every client from one agency workspace.',
+  alternates: { canonical: '/' },
 }
 
-import { FadeIn } from '@/components/ui/fade-in'
-import { SpotlightCard } from '@/components/ui/spotlight-card'
+const workflow = [
+  {
+    number: '01',
+    title: 'Bring the client',
+    description: 'Add their website and brand. ChatDock turns their real content into a grounded knowledge base.',
+    icon: Globe2,
+  },
+  {
+    number: '02',
+    title: 'Shape the agent',
+    description: 'Choose the goal, voice, questions, guardrails, and look—without rebuilding the same setup every time.',
+    icon: Bot,
+  },
+  {
+    number: '03',
+    title: 'Launch and prove ROI',
+    description: 'Embed once, then manage conversations, leads, bookings, and client reporting from one place.',
+    icon: BarChart3,
+  },
+]
 
-export default async function Home() {
+const capabilities = [
+  { icon: Palette, title: 'Your brand, everywhere', copy: 'Custom colors, identity, domains, and client-facing experiences.' },
+  { icon: Inbox, title: 'One agency inbox', copy: 'Watch every agent, take over hot conversations, and never lose the thread.' },
+  { icon: Target, title: 'Lead qualification', copy: 'Capture contact details and ask the questions that matter to each client.' },
+  { icon: CalendarCheck2, title: 'Bookings built in', copy: 'Move qualified visitors from conversation to calendar without friction.' },
+  { icon: ShieldCheck, title: 'Grounded responses', copy: 'Train on approved client sources and control how every agent behaves.' },
+  { icon: UsersRound, title: 'Client workspaces', copy: 'Keep delivery organized as your roster grows from one client to many.' },
+]
+
+function ProductPreview() {
   return (
-    <main className="min-h-screen bg-background text-foreground selection:bg-primary selection:text-primary-foreground relative overflow-x-hidden font-sans antialiased">
-      {/* 100x Premium Ambient Background Elements */}
-      <div className="absolute inset-0 z-0 pointer-events-none bg-grid-white/[0.02] dark:bg-grid-white/[0.05] bg-[size:40px_40px] opacity-100" />
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[140%] max-w-7xl h-[800px] pointer-events-none -z-10 overflow-hidden">
-        <div className="absolute top-[-20%] left-[20%] w-[60%] h-[60%] rounded-full bg-primary/20 blur-[150px] animate-gradient" />
-        <div className="absolute top-[10%] right-[10%] w-[40%] h-[40%] rounded-full bg-blue-600/10 blur-[120px] animate-gradient" style={{ animationDelay: '2s' }} />
-      </div>
-
-      <NavBar />
-
-      {/* Hero Section */}
-      <section className="relative pt-40 pb-24 md:pt-60 md:pb-32 overflow-hidden flex flex-col items-center justify-center">
-        <div className="relative z-10 max-w-6xl mx-auto px-6 sm:px-8 lg:px-12 text-center">
-          
-          <FadeIn delay={0.1} direction="up">
-            <div className="flex justify-center mb-10">
-              <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-card/40 backdrop-blur-xl border border-border shadow-soft hover:shadow-glow-primary transition-all duration-500 text-xs font-bold tracking-widest uppercase text-primary cursor-default group">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
-                </span>
-                ChatDock Reseller Platform
-                <span className="text-muted-foreground ml-1 group-hover:text-foreground transition-colors duration-300">v2.0</span>
+    <div className="relative mx-auto mt-16 max-w-6xl lg:mt-20">
+      <div className="absolute -inset-8 rounded-[3rem] bg-gradient-to-r from-[#ff8a65]/20 via-[#7979f6]/20 to-[#54d6b5]/20 blur-3xl" />
+      <div className="relative overflow-hidden rounded-[26px] border border-white/15 bg-[#f8f9fc] p-2 shadow-[0_50px_120px_rgba(0,0,0,0.45)] sm:p-3">
+        <div className="flex min-h-[520px] overflow-hidden rounded-[19px] bg-white text-left text-[#111827]">
+          <aside className="hidden w-56 shrink-0 bg-[#111827] p-5 text-white md:block">
+            <div className="mb-10 flex items-center gap-2.5 font-semibold">
+              <span className="grid h-8 w-8 place-items-center rounded-lg bg-[#6c6df2]"><MessageSquareText className="h-4 w-4" /></span>
+              ChatDock
+            </div>
+            <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.18em] text-white/35">Agency</p>
+            {['Overview', 'Inbox', 'Leads', 'Bookings'].map((item, index) => (
+              <div key={item} className={`mb-1 rounded-lg px-3 py-2.5 text-sm ${index === 0 ? 'bg-white/10 text-white' : 'text-white/55'}`}>{item}</div>
+            ))}
+            <p className="mb-3 mt-8 text-[10px] font-bold uppercase tracking-[0.18em] text-white/35">Client workspaces</p>
+            {['Northstar Dental', 'Aster & Co.', 'Luma Fitness'].map((item, index) => (
+              <div key={item} className="flex items-center gap-2.5 py-2 text-xs text-white/65">
+                <span className={`h-2 w-2 rounded-full ${index < 2 ? 'bg-emerald-400' : 'bg-amber-300'}`} />{item}
               </div>
+            ))}
+          </aside>
+
+          <div className="min-w-0 flex-1 bg-[#f4f5f8] p-4 sm:p-7">
+            <div className="mb-8 flex items-center justify-between">
+              <div>
+                <p className="text-xs font-semibold text-[#6c6df2]">AGENCY OVERVIEW</p>
+                <h3 className="mt-1 text-xl font-bold sm:text-2xl">Good morning, Prathap</h3>
+              </div>
+              <div className="hidden rounded-xl bg-[#111827] px-4 py-2.5 text-xs font-semibold text-white sm:block">+ New client agent</div>
             </div>
-          </FadeIn>
 
-          <FadeIn delay={0.2} direction="up">
-            <h1 className="text-5xl sm:text-7xl md:text-[6.5rem] font-black tracking-tighter text-foreground mb-8 leading-[1.05] relative z-10">
-              The Ultimate AI Chatbot<br />
-              <span className="text-gradient-primary">Reseller Platform.</span>
-            </h1>
-          </FadeIn>
-
-          <FadeIn delay={0.3} direction="up">
-            <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto mb-14 leading-relaxed font-medium">
-              Build, brand, and resell highly custom RAG chatbots that natively book meetings and close sales. 
-              <br className="hidden md:block"/> No code required. 100% white-label.
-            </p>
-          </FadeIn>
-
-          <FadeIn delay={0.4} direction="up">
-            <div className="flex justify-center gap-6 mb-20 flex-col sm:flex-row">
-              <Link href="/auth/sign-up">
-                <Button className="h-16 px-10 bg-foreground text-background hover:bg-foreground/90 text-lg font-bold rounded-full shadow-[0_0_40px_rgba(255,255,255,0.1)] hover:shadow-[0_0_60px_rgba(255,255,255,0.2)] transition-all duration-300 hover:scale-[1.02]">
-                  Start Reselling Free <ArrowRight className="w-5 h-5 ml-3" />
-                </Button>
-              </Link>
-              <Link href="#features">
-                <Button variant="outline" className="h-16 px-10 bg-card/30 backdrop-blur-xl border-border hover:bg-card/60 text-lg font-bold rounded-full transition-all duration-300">
-                  View Features
-                </Button>
-              </Link>
+            <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+              {[
+                ['Live agents', '08', '+2 this month'],
+                ['Conversations', '1,248', 'Across all clients'],
+                ['Qualified leads', '184', '14.7% conversion'],
+                ['Bookings', '62', 'This month'],
+              ].map(([label, value, note]) => (
+                <div key={label} className="rounded-2xl border border-[#e6e8ef] bg-white p-4 shadow-sm">
+                  <p className="text-[11px] font-medium text-slate-500">{label}</p>
+                  <p className="mt-2 text-2xl font-bold tracking-tight">{value}</p>
+                  <p className="mt-2 text-[10px] text-slate-400">{note}</p>
+                </div>
+              ))}
             </div>
-          </FadeIn>
 
-          {/* Works With Integration Bar */}
-          <FadeIn delay={0.5} direction="up">
-            <div className="flex justify-center mb-24">
-              <div className="inline-flex flex-wrap items-center justify-center gap-5 px-8 py-4 rounded-[2rem] bg-card/20 backdrop-blur-3xl border border-white/5 shadow-large text-xs max-w-4xl z-20">
-                <span className="font-bold text-muted-foreground uppercase tracking-wider mr-4 text-[11px]">Powered By</span>
+            <div className="mt-4 grid gap-4 lg:grid-cols-[1.45fr_0.8fr]">
+              <div className="rounded-2xl border border-[#e6e8ef] bg-white p-5 shadow-sm">
+                <div className="mb-5 flex items-center justify-between">
+                  <div><p className="font-semibold">Client portfolio</p><p className="text-xs text-slate-400">Every agent, one clear view</p></div>
+                  <span className="text-xs font-semibold text-[#6c6df2]">View all</span>
+                </div>
                 {[
-                  { name: 'ChatGPT 4o', icon: '⚡' },
-                  { name: 'Claude 3.5', icon: '🧠' },
-                  { name: 'Gemini Flash', icon: '✦' },
-                  { name: 'PgVector', icon: '💾' }
-                ].map((item) => (
-                  <span key={item.name} className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-xs font-semibold text-foreground hover:bg-white/10 hover:border-white/20 transition-colors cursor-default shadow-sm">
-                    <span>{item.icon}</span>
-                    <span>{item.name}</span>
-                  </span>
+                  ['Northstar Dental', 'Live', '426 chats', '58 leads'],
+                  ['Aster & Co.', 'Live', '312 chats', '41 leads'],
+                  ['Luma Fitness', 'Training', '—', '—'],
+                ].map(([name, status, chats, leads]) => (
+                  <div key={name} className="grid grid-cols-[1fr_auto] items-center gap-3 border-t border-slate-100 py-3.5 sm:grid-cols-[1fr_70px_80px_70px]">
+                    <div className="flex items-center gap-3"><span className="grid h-8 w-8 place-items-center rounded-lg bg-indigo-50 text-xs font-bold text-indigo-600">{name[0]}</span><span className="truncate text-xs font-semibold sm:text-sm">{name}</span></div>
+                    <span className={`hidden text-[11px] font-semibold sm:block ${status === 'Live' ? 'text-emerald-600' : 'text-amber-600'}`}>{status}</span>
+                    <span className="hidden text-[11px] text-slate-400 sm:block">{chats}</span>
+                    <span className="text-[11px] text-slate-400">{leads}</span>
+                  </div>
                 ))}
               </div>
-            </div>
-          </FadeIn>
 
-          {/* Spotlight Scraper Sandbox */}
-          <FadeIn delay={0.6} direction="up">
-            <div className="max-w-3xl mx-auto relative group perspective-1000">
-              <div className="absolute -inset-4 bg-primary/20 rounded-[2.5rem] blur-[30px] opacity-40 group-hover:opacity-70 group-hover:blur-[40px] transition duration-700"></div>
-              <div className="relative transform-gpu group-hover:rotate-x-[1deg] group-hover:scale-[1.01] transition-all duration-700 ease-out">
-                <div className="rounded-t-2xl bg-[#1c1c1e] border border-b-0 border-white/10 p-3 flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-[#ff5f56]"></div>
-                  <div className="w-3 h-3 rounded-full bg-[#ffbd2e]"></div>
-                  <div className="w-3 h-3 rounded-full bg-[#27c93f]"></div>
-                  <div className="ml-auto flex bg-[#2c2c2e] px-3 py-1 rounded-md border border-white/5 text-[10px] text-gray-400 font-mono items-center gap-2">
-                    <Shield className="w-3 h-3" /> https://your-agency.com/chat
-                  </div>
+              <div className="rounded-2xl bg-[#171d2b] p-5 text-white shadow-sm">
+                <div className="mb-8 flex items-center justify-between"><span className="text-xs text-white/50">Agent activity</span><Zap className="h-4 w-4 text-[#ffb36b]" /></div>
+                <p className="text-4xl font-bold">14.7%</p>
+                <p className="mt-2 text-xs text-white/45">visitor-to-lead conversion</p>
+                <div className="mt-8 flex h-24 items-end gap-2">
+                  {[34, 48, 40, 67, 56, 82, 72, 95, 78, 100].map((height, index) => <span key={index} className="flex-1 rounded-t bg-[#7778f4]" style={{ height: `${height}%`, opacity: 0.45 + index * 0.05 }} />)}
                 </div>
-                <InteractivePreviewChat />
+                <div className="mt-5 flex items-center gap-2 text-[11px] text-emerald-300"><CircleCheck className="h-3.5 w-3.5" /> All live agents healthy</div>
               </div>
             </div>
-          </FadeIn>
-        </div>
-      </section>
-
-      {/* Stats Section */}
-      <section className="py-24 border-y border-border relative bg-card/20 backdrop-blur-lg">
-        <div className="container mx-auto px-6 sm:px-8 lg:px-12">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-12 md:gap-16 max-w-6xl mx-auto">
-            {[
-              { label: 'Avg Booking Increase', value: '+67%' },
-              { label: 'Auto-Resolved Tickets', value: '80%' },
-              { label: 'SaaS Gross Margin', value: '98%' },
-              { label: 'Client Set-Up Time', value: '< 5m' },
-            ].map((stat, i) => (
-              <FadeIn key={i} delay={0.1 * i} direction="up">
-                <div className="text-center group cursor-default">
-                  <div className="text-5xl md:text-7xl font-black mb-4 text-foreground tracking-tighter bg-clip-text text-transparent bg-gradient-to-br from-foreground to-muted-foreground group-hover:from-primary group-hover:to-blue-500 transition-all duration-500">
-                    {stat.value}
-                  </div>
-                  <div className="text-muted-foreground text-[11px] font-black uppercase tracking-widest">{stat.label}</div>
-                </div>
-              </FadeIn>
-            ))}
           </div>
         </div>
-      </section>
-
-      {/* How It Works */}
-      <HowItWorks />
-
-      {/* Features Grid - Reseller and B2B Agency Focused */}
-      <section id="features" className="py-32 relative">
-        <div className="container mx-auto px-6 sm:px-8 lg:px-12 relative z-10">
-          <FadeIn delay={0.2}>
-            <div className="text-center mb-24">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-xs font-bold tracking-widest uppercase text-primary mb-6 shadow-[inset_0_0_20px_rgba(255,255,255,0.02)]">
-                The Reseller Engine
-              </div>
-              <h2 className="text-4xl sm:text-5xl lg:text-[4rem] font-black text-foreground mb-8 tracking-tighter leading-[1.1]">
-                Engineered for <span className="text-gradient-primary">high-margin SaaS.</span>
-              </h2>
-              <p className="text-muted-foreground text-xl max-w-3xl mx-auto leading-relaxed">
-                Everything you need to deliver, brand, and scale client chatbots under your own company label. No hidden fees.
-              </p>
-            </div>
-          </FadeIn>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 max-w-[1400px] mx-auto">
-            {[
-              { title: '100% White-Label Branding', desc: 'Custom logos, tailored color schemes, and custom domains map directly to your brand.', icon: Globe },
-              { title: 'Conversational Commerce', desc: 'Natively showcase products and take checkouts directly inside the chatbot window.', icon: DollarSign },
-              { title: 'Appointment Booking', desc: 'Integrated slot scheduling allows leads to book meetings without email back-and-forths.', icon: Calendar },
-              { title: 'Embed Attribution Toggle', desc: 'Remove all branding footers or white-label them as "Powered by [Your Agency]".', icon: Shield },
-              { title: 'Real-Time Human Handoff', desc: 'Let your clients take control of hot chats in real-time when leads require human answers.', icon: Sparkles },
-              { title: 'Multi-Tenant Client Portals', desc: 'Invite clients to their own branded dashboard to check booking logs and conversations.', icon: Users },
-              { title: 'Conversational Statistics', desc: 'Review daily chats, track qualified leads, and prove concrete ROI to your clients.', icon: BarChart3 },
-              { title: 'Sub-Second Streaming', desc: 'Powered by PgVector and Gemini 2.5 Flash Lite for ultra-fast, natural streaming replies.', icon: Zap }
-            ].map((feature, i) => (
-              <FadeIn key={i} delay={0.1 * (i % 4)} direction="up">
-                <SpotlightCard className="h-full p-8 group">
-                  <div className="w-12 h-12 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center mb-6 text-primary shadow-[0_0_15px_rgba(0,113,227,0.2)] group-hover:scale-110 group-hover:shadow-[0_0_30px_rgba(0,113,227,0.4)] transition-all duration-500">
-                    <feature.icon className="w-6 h-6" strokeWidth={2} />
-                  </div>
-                  <h3 className="text-xl font-bold text-foreground mb-3 tracking-tight group-hover:text-primary transition-colors">{feature.title}</h3>
-                  <p className="text-base text-muted-foreground leading-relaxed font-medium">
-                    {feature.desc}
-                  </p>
-                </SpotlightCard>
-              </FadeIn>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Pricing Section */}
-      <div className="relative z-10">
-        <PricingSection />
       </div>
+    </div>
+  )
+}
 
-      {/* Final CTA */}
-      <section className="py-32 relative overflow-hidden">
-        <div className="container mx-auto px-6 sm:px-8 lg:px-12 relative z-10">
-          <FadeIn direction="up">
-            <SpotlightCard spotlightColor="rgba(0, 113, 227, 0.15)" className="max-w-5xl mx-auto text-center border-border/50 p-16 md:p-24 shadow-2xl relative overflow-hidden">
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary/10 blur-[100px] rounded-full pointer-events-none" />
+export default function Home() {
+  return (
+    <main className="min-h-screen overflow-x-hidden bg-[#f4f5f7] text-[#111827] selection:bg-[#6c6df2] selection:text-white">
+      <NavBar />
 
-              <h2 className="text-5xl sm:text-6xl md:text-7xl font-black text-foreground mb-8 tracking-tighter leading-tight relative z-10">
-                Launch Your White-Label<br />Agency Today.
-              </h2>
-              <p className="text-muted-foreground text-xl md:text-2xl mb-12 max-w-3xl mx-auto leading-relaxed relative z-10">
-                Start reselling custom transactional AI chatbots to your local clients and unlock high-margin recurring MRR.
-              </p>
-              <div className="relative z-10">
-                <Link href="/auth/sign-up">
-                  <Button className="h-16 px-12 bg-primary text-primary-foreground hover:bg-primary/90 text-lg font-bold rounded-full shadow-glow-primary transition-all duration-300 hover:scale-105">
-                    Create Reseller Account <ArrowRight className="w-6 h-6 ml-3" />
-                  </Button>
-                </Link>
-                <p className="text-muted-foreground text-sm mt-8 font-bold tracking-wide uppercase">
-                  No credit card required • 100 free monthly credits
-                </p>
+      <section className="relative overflow-hidden bg-[#0d1321] px-5 pb-24 pt-36 text-white sm:px-8 md:pt-44 lg:pb-32">
+        <div className="absolute inset-0 opacity-30 [background-image:linear-gradient(rgba(255,255,255,.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.05)_1px,transparent_1px)] [background-size:72px_72px] [mask-image:linear-gradient(to_bottom,black,transparent_78%)]" />
+        <div className="absolute left-[-10%] top-24 h-72 w-72 rounded-full bg-[#6c6df2]/25 blur-[100px]" />
+        <div className="absolute right-[-5%] top-40 h-72 w-72 rounded-full bg-[#ff8a65]/20 blur-[100px]" />
+
+        <div className="relative mx-auto max-w-7xl text-center">
+          <div className="mx-auto mb-7 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.06] px-4 py-2 text-xs font-semibold text-white/70 backdrop-blur">
+            <Sparkles className="h-3.5 w-3.5 text-[#ffb36b]" /> The AI delivery OS for agencies
+          </div>
+          <h1 className="mx-auto max-w-5xl text-balance text-5xl font-semibold leading-[0.98] tracking-[-0.055em] text-white sm:text-6xl md:text-7xl lg:text-[88px]">
+            Turn client websites into <span className="text-[#aaaaff]">AI sales teams.</span>
+          </h1>
+          <p className="mx-auto mt-7 max-w-2xl text-balance text-lg leading-8 text-white/60 md:text-xl">
+            Launch, manage, and prove the value of white-label AI agents for every client—from one calm, connected workspace.
+          </p>
+          <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <Link href="/auth/sign-up"><Button className="h-13 rounded-xl bg-[#7677f4] px-7 text-sm font-semibold text-white hover:bg-[#6869e8]">Build your first agent <ArrowRight className="ml-2 h-4 w-4" /></Button></Link>
+            <a href="https://cal.com/prathap-reddy-caxwn4/15min" target="_blank" rel="noopener noreferrer" className="inline-flex h-13 items-center rounded-xl border border-white/15 bg-white/[0.06] px-7 text-sm font-semibold text-white transition hover:bg-white/10">See it with your agency</a>
+          </div>
+          <div className="mt-7 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-white/45">
+            {['No code required', 'White-label ready', 'Start with 100 free credits'].map(item => <span key={item} className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-emerald-300" />{item}</span>)}
+          </div>
+          <ProductPreview />
+        </div>
+      </section>
+
+      <section className="border-b border-[#dfe2e9] bg-white px-5 py-7">
+        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-center gap-3 text-xs font-semibold text-slate-500 sm:gap-5 md:text-sm">
+          {['Client website', 'Trained AI agent', 'Qualified lead', 'Booked meeting'].map((item, index) => (
+            <div key={item} className="flex items-center gap-3"><span>{item}</span>{index < 3 && <ChevronRight className="h-4 w-4 text-[#8d8ef6]" />}</div>
+          ))}
+        </div>
+      </section>
+
+      <section id="workflow" className="px-5 py-24 sm:px-8 lg:py-32">
+        <div className="mx-auto max-w-7xl">
+          <div className="grid gap-12 lg:grid-cols-[0.8fr_1.2fr] lg:items-end">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#6667db]">Built for repeatable delivery</p>
+              <h2 className="mt-5 max-w-xl text-4xl font-semibold leading-tight tracking-[-0.04em] sm:text-5xl">Stop rebuilding your AI service for every client.</h2>
+            </div>
+            <p className="max-w-2xl text-lg leading-8 text-slate-500">ChatDock gives your agency one repeatable path from signed client to live, measurable AI agent—without stitching together training tools, chat widgets, inboxes, and calendars.</p>
+          </div>
+
+          <div className="mt-16 grid gap-4 lg:grid-cols-3">
+            {workflow.map((step) => (
+              <article key={step.number} className="group rounded-[26px] border border-[#dfe2e9] bg-white p-7 transition duration-300 hover:-translate-y-1 hover:shadow-[0_25px_60px_rgba(17,24,39,0.09)] sm:p-9">
+                <div className="flex items-start justify-between"><span className="text-xs font-bold tracking-[0.2em] text-slate-300">{step.number}</span><span className="grid h-11 w-11 place-items-center rounded-2xl bg-[#f0f0ff] text-[#6667db]"><step.icon className="h-5 w-5" /></span></div>
+                <h3 className="mt-16 text-2xl font-semibold tracking-tight">{step.title}</h3>
+                <p className="mt-3 leading-7 text-slate-500">{step.description}</p>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section id="features" className="bg-white px-5 py-24 sm:px-8 lg:py-32">
+        <div className="mx-auto max-w-7xl">
+          <div className="mx-auto max-w-3xl text-center">
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#6667db]">One system, not six subscriptions</p>
+            <h2 className="mt-5 text-4xl font-semibold tracking-[-0.04em] sm:text-5xl">Everything between the first hello and the booked call.</h2>
+            <p className="mt-5 text-lg leading-8 text-slate-500">Give clients a better experience while giving your team fewer tools to babysit.</p>
+          </div>
+          <div className="mt-16 grid gap-px overflow-hidden rounded-[28px] border border-[#e3e5eb] bg-[#e3e5eb] md:grid-cols-2 lg:grid-cols-3">
+            {capabilities.map((feature) => (
+              <div key={feature.title} className="bg-white p-8 sm:p-10">
+                <feature.icon className="h-6 w-6 text-[#696ae4]" />
+                <h3 className="mt-8 text-xl font-semibold">{feature.title}</h3>
+                <p className="mt-3 leading-7 text-slate-500">{feature.copy}</p>
               </div>
-            </SpotlightCard>
-          </FadeIn>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="px-5 py-24 sm:px-8 lg:py-32">
+        <div className="mx-auto grid max-w-7xl overflow-hidden rounded-[32px] bg-[#151b29] text-white lg:grid-cols-2">
+          <div className="p-8 sm:p-12 lg:p-16">
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#aaaaff]">Made to keep clients</p>
+            <h2 className="mt-5 text-4xl font-semibold tracking-[-0.04em] sm:text-5xl">Don’t sell “a chatbot.” Sell a result they can see.</h2>
+            <p className="mt-6 max-w-xl text-lg leading-8 text-white/55">Every conversation, lead, and booking lives in the same operational view, so your next client check-in starts with evidence—not screenshots and guesswork.</p>
+            <Link href="/auth/sign-up" className="mt-9 inline-flex items-center gap-2 text-sm font-semibold text-white">Explore the workspace <ArrowRight className="h-4 w-4" /></Link>
+          </div>
+          <div className="relative min-h-[420px] bg-[#1d2434] p-7 sm:p-10">
+            <div className="absolute inset-0 opacity-25 [background-image:radial-gradient(circle_at_center,rgba(137,138,255,.5)_0,transparent_55%)]" />
+            <div className="relative rounded-3xl border border-white/10 bg-white/[0.06] p-5 backdrop-blur">
+              <div className="mb-8 flex items-center justify-between"><div><p className="text-sm font-semibold">Northstar Dental</p><p className="mt-1 text-xs text-white/35">Monthly client summary</p></div><span className="rounded-full bg-emerald-400/10 px-3 py-1 text-[11px] font-semibold text-emerald-300">Agent live</span></div>
+              <div className="grid grid-cols-3 gap-2">
+                {[['426','Chats'],['58','Leads'],['21','Bookings']].map(([value,label]) => <div key={label} className="rounded-2xl bg-black/15 p-4"><p className="text-2xl font-semibold">{value}</p><p className="mt-1 text-[10px] text-white/40">{label}</p></div>)}
+              </div>
+              <div className="mt-5 rounded-2xl bg-black/15 p-5">
+                <div className="flex items-center justify-between text-xs"><span className="text-white/45">Conversion journey</span><span className="text-emerald-300">+18.4%</span></div>
+                <div className="mt-5 space-y-3">{[['Visitors','100%'],['Conversations','41%'],['Qualified','14%'],['Booked','5%']].map(([label,width]) => <div key={label} className="grid grid-cols-[80px_1fr_34px] items-center gap-3 text-[10px] text-white/40"><span>{label}</span><span className="h-1.5 rounded-full bg-white/10"><span className="block h-full rounded-full bg-[#8586f7]" style={{width}} /></span><span>{width}</span></div>)}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <PricingSection />
+
+      <section className="px-5 pb-24 pt-8 sm:px-8 lg:pb-32">
+        <div className="mx-auto max-w-7xl rounded-[32px] bg-[#7677f4] px-7 py-16 text-center text-white sm:px-12 lg:py-24">
+          <h2 className="mx-auto max-w-3xl text-4xl font-semibold tracking-[-0.04em] sm:text-6xl">Your next client agent can be live this week.</h2>
+          <p className="mx-auto mt-5 max-w-xl text-lg text-white/70">Start building now, or bring your use case and we’ll walk through it together.</p>
+          <div className="mt-9 flex flex-col justify-center gap-3 sm:flex-row"><Link href="/auth/sign-up"><Button className="h-13 rounded-xl bg-white px-7 text-sm font-semibold text-[#5556cf] hover:bg-white/90">Start building free <ArrowRight className="ml-2 h-4 w-4" /></Button></Link><a href="https://cal.com/prathap-reddy-caxwn4/15min" target="_blank" rel="noopener noreferrer" className="inline-flex h-13 items-center justify-center rounded-xl border border-white/25 px-7 text-sm font-semibold text-white hover:bg-white/10">Book a demo</a></div>
         </div>
       </section>
 
       <Footer />
-
-      {/* Chatbot Embed - Landing page only */}
-      <Script
-        id="46316941-5e6b-4222-adc4-48fc5221012c"
-        src="https://www.chatdock.io/embed.min.js"
-        strategy="afterInteractive"
-        data-app-origin="https://www.chatdock.io"
-        data-margin="24"
-        data-size="md"
-      />
+      <Script id="46316941-5e6b-4222-adc4-48fc5221012c" src="https://www.chatdock.io/embed.min.js" strategy="afterInteractive" data-app-origin="https://www.chatdock.io" data-margin="24" data-size="md" />
     </main>
   )
 }

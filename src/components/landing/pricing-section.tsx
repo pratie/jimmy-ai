@@ -1,82 +1,40 @@
+import { ArrowRight, Check } from 'lucide-react'
+import Link from 'next/link'
 
-'use client'
-
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card'
-import { Check } from 'lucide-react'
-import { Button } from '../ui/button'
+const included = [
+  'Done-for-you agent setup',
+  'Custom knowledge-base training',
+  'Lead capture and appointment booking',
+  'Weekly performance tuning',
+  'Unlimited conversations',
+  'Ongoing monitoring and support',
+]
 
 export default function PricingSection() {
   return (
-    <section
-      id="pricing"
-      className="py-24 relative"
-    >
-      <div className="container mx-auto px-6 sm:px-8 lg:px-12 relative z-10">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-6 tracking-tight">
-            Simple, Transparent Pricing
-          </h2>
-          <p className="text-muted-foreground text-lg max-w-2xl mx-auto mb-8">
-            No complex tiers. One package to get your fully managed AI agent running 24/7.
-          </p>
+    <section id="pricing" className="bg-white px-5 py-24 sm:px-8 lg:py-32">
+      <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
+        <div>
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#6667db]">Simple starting point</p>
+          <h2 className="mt-5 max-w-xl text-4xl font-semibold tracking-[-0.04em] sm:text-5xl">Launch with support, not another learning curve.</h2>
+          <p className="mt-6 max-w-xl text-lg leading-8 text-slate-500">We’ll help train, launch, and tune your first agent so you can focus on the client relationship and the result.</p>
+          <Link href="/auth/sign-up" className="mt-8 inline-flex items-center gap-2 text-sm font-semibold text-[#5f60d8]">Or explore the platform free <ArrowRight className="h-4 w-4" /></Link>
         </div>
 
-        <div className="max-w-lg mx-auto">
-          <Card className="w-full flex flex-col justify-between rounded-2xl overflow-hidden transition-all duration-300 border border-border bg-card/40 backdrop-blur-2xl shadow-large relative">
-            <div className="absolute top-0 right-0 bg-primary text-primary-foreground px-4 py-1.5 text-xs font-bold rounded-bl-xl shadow-glow">
-              Most Popular
+        <div className="overflow-hidden rounded-[28px] border border-[#dfe2e9] bg-[#f6f7fa] shadow-[0_30px_80px_rgba(17,24,39,.08)]">
+          <div className="grid md:grid-cols-[0.8fr_1.2fr]">
+            <div className="bg-[#171d2b] p-8 text-white sm:p-10">
+              <span className="rounded-full bg-[#8586f7]/15 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-[#b6b7ff]">Concierge</span>
+              <div className="mt-9 flex items-end gap-2"><span className="text-5xl font-semibold tracking-tight">$97</span><span className="pb-1 text-sm text-white/45">/ month</span></div>
+              <p className="mt-3 text-sm text-white/45">$500 one-time setup</p>
+              <a href="https://cal.com/prathap-reddy-caxwn4/15min" target="_blank" rel="noopener noreferrer" className="mt-10 inline-flex h-12 w-full items-center justify-center rounded-xl bg-[#7778f4] text-sm font-semibold text-white transition hover:bg-[#696ae6]">Book your launch call</a>
+              <p className="mt-4 text-center text-[11px] text-white/35">Talk through your use case before committing</p>
             </div>
-
-            <CardHeader className="pb-4 text-center pt-10">
-              <CardTitle className="text-2xl font-bold text-foreground mb-2">Concierge Package</CardTitle>
-              <CardDescription className="text-muted-foreground text-sm">
-                Everything you need to automate sales & support
-              </CardDescription>
-            </CardHeader>
-
-            <CardContent className="pb-6 text-center">
-              <div className="mb-6">
-                <div className="flex items-baseline justify-center gap-1 mb-2">
-                  <span className="text-5xl font-bold text-foreground tracking-tight">$97</span>
-                  <span className="text-muted-foreground text-sm">/mo</span>
-                </div>
-                <p className="text-muted-foreground text-sm">
-                  + $500 one-time setup fee
-                </p>
-              </div>
-            </CardContent>
-
-            <CardFooter className="flex flex-col items-start gap-6 pt-6 border-t border-border bg-card/20">
-              <div className="space-y-4 w-full px-4">
-                {[
-                  'Full "Done-For-You" Setup',
-                  'Custom Knowledge Base Training',
-                  'Weekly Performance Tuning',
-                  '24/7 Monitoring & Support',
-                  'Monthly Strategy Call',
-                  'Unlimited Conversations'
-                ].map((feature) => (
-                  <div key={feature} className="flex items-center gap-3">
-                    <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                      <Check className="w-3 h-3 text-primary" />
-                    </div>
-                    <p className="text-foreground/90 text-sm font-medium">{feature}</p>
-                  </div>
-                ))}
-              </div>
-
-              <div className="w-full px-4 pb-4">
-                <a href="https://cal.com/prathap-reddy-caxwn4/15min" target="_blank" rel="noopener noreferrer" className="block w-full">
-                  <Button className="w-full h-12 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-xl shadow-glow transition-all">
-                    Get Started Now
-                  </Button>
-                </a>
-                <p className="text-center text-xs text-muted-foreground mt-4">
-                  100% Satisfaction Guarantee
-                </p>
-              </div>
-            </CardFooter>
-          </Card>
+            <div className="p-8 sm:p-10">
+              <p className="text-sm font-semibold text-slate-900">Everything needed to go live</p>
+              <div className="mt-7 space-y-4">{included.map(item => <div key={item} className="flex items-start gap-3 text-sm text-slate-600"><span className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full bg-emerald-50 text-emerald-600"><Check className="h-3 w-3" /></span>{item}</div>)}</div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
