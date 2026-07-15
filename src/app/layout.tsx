@@ -28,9 +28,9 @@ const APP_URL = (process.env.NEXT_PUBLIC_APP_URL || 'https://chatdock.io').repla
 
 export const metadata: Metadata = {
   metadataBase: new URL(APP_URL),
-  title: 'ChatDock — AI Delivery OS for Agencies',
-  description: 'Launch, manage, test, and prove the value of white-label AI agents for every client from one agency workspace.',
-  keywords: ['AI agency platform', 'white-label AI agent', 'website chatbot', 'lead qualification', 'client chatbot management', 'ChatDock'],
+  title: 'ChatDock — Client AI Chatbots for Agencies',
+  description: 'Launch client-branded AI chatbots that answer questions, qualify leads, and book appointments—then manage every client from one agency workspace.',
+  keywords: ['AI chatbot for agencies', 'client chatbot platform', 'website chatbot', 'lead qualification', 'appointment booking chatbot', 'ChatDock'],
   authors: [{ name: 'ChatDock' }],
   icons: {
     icon: [
@@ -41,8 +41,8 @@ export const metadata: Metadata = {
     shortcut: '/images/logo.svg',
   },
   openGraph: {
-    title: 'ChatDock — AI Delivery OS for Agencies',
-    description: 'Launch and manage white-label client AI agents from one connected workspace.',
+    title: 'ChatDock — Client AI Chatbots for Agencies',
+    description: 'Launch client-branded chatbots that qualify leads and book appointments from one agency workspace.',
     type: 'website',
     images: [
       {
@@ -56,8 +56,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'ChatDock — AI Delivery OS for Agencies',
-    description: 'Launch and manage white-label client AI agents from one connected workspace.',
+    title: 'ChatDock — Client AI Chatbots for Agencies',
+    description: 'Launch client-branded chatbots that qualify leads and book appointments from one agency workspace.',
     images: [`${APP_URL}/images/social_graph_img.png`],
   },
   robots: {

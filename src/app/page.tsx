@@ -26,40 +26,40 @@ import NavBar from '@/components/navbar'
 import { Button } from '@/components/ui/button'
 
 export const metadata: Metadata = {
-  title: 'ChatDock — The AI Delivery OS for Agencies',
+  title: 'ChatDock — Client AI Chatbots for Agencies',
   description:
-    'Launch, manage, and prove the value of white-label AI agents for every client from one agency workspace.',
+    'Launch client-branded AI chatbots that answer questions, qualify leads, and book appointments—then manage every client from one agency workspace.',
   alternates: { canonical: '/' },
 }
 
 const workflow = [
   {
     number: '01',
-    title: 'Bring the client',
-    description: 'Add their website and brand. ChatDock turns their real content into a grounded knowledge base.',
+    title: 'Add the client website',
+    description: 'ChatDock turns approved website content into a grounded knowledge base, ready for you to review.',
     icon: Globe2,
   },
   {
     number: '02',
-    title: 'Shape the agent',
-    description: 'Choose the goal, voice, questions, guardrails, and look—without rebuilding the same setup every time.',
+    title: 'Make it client-ready',
+    description: 'Set the voice, qualification questions, booking goal, guardrails, and brand without rebuilding the stack.',
     icon: Bot,
   },
   {
     number: '03',
-    title: 'Launch and prove ROI',
-    description: 'Embed once, then manage conversations, leads, bookings, and client reporting from one place.',
+    title: 'Launch and show the result',
+    description: 'Install one embed, then track conversations, qualified leads, and bookings in the same workspace.',
     icon: BarChart3,
   },
 ]
 
 const capabilities = [
-  { icon: Palette, title: 'Your brand, everywhere', copy: 'Custom colors, identity, domains, and client-facing experiences.' },
-  { icon: Inbox, title: 'One agency inbox', copy: 'Watch every agent, take over hot conversations, and never lose the thread.' },
-  { icon: Target, title: 'Lead qualification', copy: 'Capture contact details and ask the questions that matter to each client.' },
-  { icon: CalendarCheck2, title: 'Bookings built in', copy: 'Move qualified visitors from conversation to calendar without friction.' },
-  { icon: ShieldCheck, title: 'Grounded responses', copy: 'Train on approved client sources and control how every agent behaves.' },
-  { icon: UsersRound, title: 'Client workspaces', copy: 'Keep delivery organized as your roster grows from one client to many.' },
+  { icon: Palette, title: 'Client-branded experience', copy: 'Match each client’s colors, identity, welcome message, and website experience.' },
+  { icon: Inbox, title: 'One agency inbox', copy: 'Review conversations across clients and step in when a valuable lead needs attention.' },
+  { icon: Target, title: 'Qualification that fits', copy: 'Capture contact details and ask the questions that matter for each client’s service.' },
+  { icon: CalendarCheck2, title: 'A path to the calendar', copy: 'Move the right visitors from a helpful conversation to a booked appointment.' },
+  { icon: ShieldCheck, title: 'Answers grounded in the client', copy: 'Train on approved sources, test before launch, and control how every agent behaves.' },
+  { icon: UsersRound, title: 'A workspace per client', copy: 'Keep knowledge, branding, conversations, leads, and bookings organized as you grow.' },
 ]
 
 function ProductPreview() {
@@ -158,20 +158,20 @@ export default function Home() {
 
         <div className="relative mx-auto max-w-7xl text-center">
           <div className="mx-auto mb-7 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.06] px-4 py-2 text-xs font-semibold text-white/70 backdrop-blur">
-            <Sparkles className="h-3.5 w-3.5 text-[#ffb36b]" /> The AI delivery OS for agencies
+            <Sparkles className="h-3.5 w-3.5 text-[#ffb36b]" /> For AI automation, lead-gen &amp; web agencies
           </div>
           <h1 className="mx-auto max-w-5xl text-balance text-[42px] font-semibold leading-[1.02] tracking-[-0.05em] text-white sm:text-6xl sm:leading-[0.98] md:text-7xl lg:text-[88px]">
-            Turn client websites into <span className="text-[#aaaaff]">AI sales teams.</span>
+            Launch client chatbots that <span className="text-[#aaaaff]">qualify and book.</span>
           </h1>
           <p className="mx-auto mt-7 max-w-2xl text-balance text-lg leading-8 text-white/60 md:text-xl">
-            Launch, manage, and prove the value of white-label AI agents for every client—from one calm, connected workspace.
+            Train on each client’s website, match their brand, qualify visitors, book appointments, and manage every account from one workspace.
           </p>
           <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <Link href="/auth/sign-up"><Button className="h-13 rounded-xl bg-[#7677f4] px-7 text-sm font-semibold text-white hover:bg-[#6869e8]">Build your first agent <ArrowRight className="ml-2 h-4 w-4" /></Button></Link>
-            <a href="https://cal.com/prathap-reddy-caxwn4/15min" target="_blank" rel="noopener noreferrer" className="inline-flex h-13 items-center rounded-xl border border-white/15 bg-white/[0.06] px-7 text-sm font-semibold text-white transition hover:bg-white/10">See it with your agency</a>
+            <Link href="/auth/sign-up"><Button className="h-13 rounded-xl bg-[#7677f4] px-7 text-sm font-semibold text-white hover:bg-[#6869e8]">Launch a client agent <ArrowRight className="ml-2 h-4 w-4" /></Button></Link>
+            <a href="https://cal.com/prathap-reddy-caxwn4/15min" target="_blank" rel="noopener noreferrer" className="inline-flex h-13 items-center rounded-xl border border-white/15 bg-white/[0.06] px-7 text-sm font-semibold text-white transition hover:bg-white/10">Talk through a client use case</a>
           </div>
           <div className="mt-7 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-white/45">
-            {['No code required', 'White-label ready', 'Start with 100 free credits'].map(item => <span key={item} className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-emerald-300" />{item}</span>)}
+            {['No code required', 'Client-brand ready', '100 free messages to test'].map(item => <span key={item} className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-emerald-300" />{item}</span>)}
           </div>
           <ProductPreview />
         </div>
@@ -179,7 +179,7 @@ export default function Home() {
 
       <section className="border-b border-[#dfe2e9] bg-white px-5 py-7">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-center gap-3 text-xs font-semibold text-slate-500 sm:gap-5 md:text-sm">
-          {['Client website', 'Trained AI agent', 'Qualified lead', 'Booked meeting'].map((item, index) => (
+          {['Client website', 'Grounded chatbot', 'Qualified visitor', 'Booked appointment'].map((item, index) => (
             <div key={item} className="flex items-center gap-3"><span>{item}</span>{index < 3 && <ChevronRight className="h-4 w-4 text-[#8d8ef6]" />}</div>
           ))}
         </div>
@@ -189,10 +189,10 @@ export default function Home() {
         <div className="mx-auto max-w-7xl">
           <div className="grid gap-12 lg:grid-cols-[0.8fr_1.2fr] lg:items-end">
             <div>
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#6667db]">Built for repeatable delivery</p>
-              <h2 className="mt-5 max-w-xl text-4xl font-semibold leading-tight tracking-[-0.04em] sm:text-5xl">Stop rebuilding your AI service for every client.</h2>
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#6667db]">Your client signed. Now deliver.</p>
+              <h2 className="mt-5 max-w-xl text-4xl font-semibold leading-tight tracking-[-0.04em] sm:text-5xl">Stop stitching together a chatbot stack for every client.</h2>
             </div>
-            <p className="max-w-2xl text-lg leading-8 text-slate-500">ChatDock gives your agency one repeatable path from signed client to live, measurable AI agent—without stitching together training tools, chat widgets, inboxes, and calendars.</p>
+            <p className="max-w-2xl text-lg leading-8 text-slate-500">ChatDock gives small agencies one repeatable path from a signed local-business client to a live, measurable website agent—without juggling separate training, widget, inbox, lead, and booking tools.</p>
           </div>
 
           <div className="mt-16 grid gap-4 lg:grid-cols-3">
@@ -210,9 +210,9 @@ export default function Home() {
       <section id="features" className="bg-white px-5 py-24 sm:px-8 lg:py-32">
         <div className="mx-auto max-w-7xl">
           <div className="mx-auto max-w-3xl text-center">
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#6667db]">One system, not six subscriptions</p>
-            <h2 className="mt-5 text-4xl font-semibold tracking-[-0.04em] sm:text-5xl">Everything between the first hello and the booked call.</h2>
-            <p className="mt-5 text-lg leading-8 text-slate-500">Give clients a better experience while giving your team fewer tools to babysit.</p>
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#6667db]">Built for the service you actually sell</p>
+            <h2 className="mt-5 text-4xl font-semibold tracking-[-0.04em] sm:text-5xl">From website question to qualified appointment.</h2>
+            <p className="mt-5 text-lg leading-8 text-slate-500">Give appointment-driven clients a faster response while giving your agency fewer tools to babysit.</p>
           </div>
           <div className="mt-16 grid gap-px overflow-hidden rounded-[28px] border border-[#e3e5eb] bg-[#e3e5eb] md:grid-cols-2 lg:grid-cols-3">
             {capabilities.map((feature) => (
@@ -230,9 +230,9 @@ export default function Home() {
         <div className="mx-auto max-w-7xl">
           <div className="grid gap-12 lg:grid-cols-[0.8fr_1.2fr] lg:items-start">
             <div className="lg:sticky lg:top-28">
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#6667db]">Built to save delivery time</p>
-              <h2 className="mt-5 text-4xl font-semibold tracking-[-0.04em] sm:text-5xl">The repeated work becomes one workflow.</h2>
-              <p className="mt-5 max-w-lg text-lg leading-8 text-slate-500">Spend less time stitching systems together and more time improving the client result.</p>
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#6667db]">Productize the delivery work</p>
+              <h2 className="mt-5 text-4xl font-semibold tracking-[-0.04em] sm:text-5xl">The next client should not mean another custom build.</h2>
+              <p className="mt-5 max-w-lg text-lg leading-8 text-slate-500">Use the same launch workflow for dental, home-service, wellness, and other appointment-led clients—then tune what makes each business different.</p>
             </div>
             <div className="overflow-hidden rounded-[24px] border border-[#dfe2e9] bg-white">
               <div className="grid grid-cols-[0.8fr_1fr_1fr] border-b border-slate-200 bg-slate-50 px-5 py-3 text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400 sm:px-7"><span>Workflow</span><span>Without ChatDock</span><span>With ChatDock</span></div>
@@ -250,9 +250,9 @@ export default function Home() {
       <section className="px-5 py-24 sm:px-8 lg:py-32">
         <div className="mx-auto grid max-w-7xl overflow-hidden rounded-[32px] bg-[#151b29] text-white lg:grid-cols-2">
           <div className="p-8 sm:p-12 lg:p-16">
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#aaaaff]">Made to keep clients</p>
-            <h2 className="mt-5 text-4xl font-semibold tracking-[-0.04em] sm:text-5xl">Don’t sell “a chatbot.” Sell a result they can see.</h2>
-            <p className="mt-6 max-w-xl text-lg leading-8 text-white/55">Every conversation, lead, and booking lives in the same operational view, so your next client check-in starts with evidence—not screenshots and guesswork.</p>
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#aaaaff]">Protect the client retainer</p>
+            <h2 className="mt-5 text-4xl font-semibold tracking-[-0.04em] sm:text-5xl">Don’t report “the bot is live.” Show what it produced.</h2>
+            <p className="mt-6 max-w-xl text-lg leading-8 text-white/55">Keep conversations, captured leads, and bookings in one operational view, so your next client check-in starts with evidence instead of activity screenshots.</p>
             <Link href="/auth/sign-up" className="mt-9 inline-flex items-center gap-2 text-sm font-semibold text-white">Explore the workspace <ArrowRight className="h-4 w-4" /></Link>
           </div>
           <div className="relative min-h-[420px] bg-[#1d2434] p-7 sm:p-10">
@@ -275,9 +275,9 @@ export default function Home() {
 
       <section className="px-5 pb-24 pt-8 sm:px-8 lg:pb-32">
         <div className="mx-auto max-w-7xl rounded-[32px] bg-[#7677f4] px-7 py-16 text-center text-white sm:px-12 lg:py-24">
-          <h2 className="mx-auto max-w-3xl text-4xl font-semibold tracking-[-0.04em] sm:text-6xl">Your next client agent can be live this week.</h2>
-          <p className="mx-auto mt-5 max-w-xl text-lg text-white/70">Start building now, or bring your use case and we’ll walk through it together.</p>
-          <div className="mt-9 flex flex-col justify-center gap-3 sm:flex-row"><Link href="/auth/sign-up"><Button className="h-13 rounded-xl bg-white px-7 text-sm font-semibold text-[#5556cf] hover:bg-white/90">Start building free <ArrowRight className="ml-2 h-4 w-4" /></Button></Link><a href="https://cal.com/prathap-reddy-caxwn4/15min" target="_blank" rel="noopener noreferrer" className="inline-flex h-13 items-center justify-center rounded-xl border border-white/25 px-7 text-sm font-semibold text-white hover:bg-white/10">Book a demo</a></div>
+          <h2 className="mx-auto max-w-3xl text-4xl font-semibold tracking-[-0.04em] sm:text-6xl">Have a client website ready?</h2>
+          <p className="mx-auto mt-5 max-w-xl text-lg text-white/70">Turn it into a working qualification and booking demo before your next client call.</p>
+          <div className="mt-9 flex flex-col justify-center gap-3 sm:flex-row"><Link href="/auth/sign-up"><Button className="h-13 rounded-xl bg-white px-7 text-sm font-semibold text-[#5556cf] hover:bg-white/90">Build the first demo free <ArrowRight className="ml-2 h-4 w-4" /></Button></Link><a href="https://cal.com/prathap-reddy-caxwn4/15min" target="_blank" rel="noopener noreferrer" className="inline-flex h-13 items-center justify-center rounded-xl border border-white/25 px-7 text-sm font-semibold text-white hover:bg-white/10">Book an agency walkthrough</a></div>
         </div>
       </section>
 
