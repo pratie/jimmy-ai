@@ -14,13 +14,13 @@ interface ChatMessage {
 
 type SandboxStep = 'idle' | 'scraping' | 'chatting' | 'cta'
 
-const SUGGESTIONS = ['acme.com', 'stripe.com', 'notion.so']
+const SUGGESTIONS = ['your-client.com', 'acmedental.com', 'brightplumbing.co']
 
 const CRAWL_STAGES = [
   { label: 'Connecting', icon: '🔗' },
-  { label: 'Discovering', icon: '🔍' },
-  { label: 'Parsing', icon: '📄' },
-  { label: 'Embedding', icon: '🧠' },
+  { label: 'Reading', icon: '🔍' },
+  { label: 'Organizing', icon: '📄' },
+  { label: 'Learning', icon: '🧠' },
   { label: 'Ready', icon: '✓' },
 ]
 
@@ -78,13 +78,13 @@ export default function InteractivePreviewChat() {
   // Trigger real-time crawler progress steps
   const runCrawlerProgress = () => {
     const statuses = [
-      { prg: 15, msg: '🔗 Connecting to Firecrawl API...', stage: 0 },
-      { prg: 30, msg: '🔍 Discovering site pages & assets...', stage: 1 },
-      { prg: 50, msg: '📄 Converting HTML into clean Markdown...', stage: 2 },
-      { prg: 70, msg: '📄 Structuring 12,400 words from 8 pages...', stage: 2 },
-      { prg: 85, msg: '🧠 Generating embedding vectors...', stage: 3 },
-      { prg: 95, msg: '🧠 Storing 24 chunks in pgvector...', stage: 3 },
-      { prg: 100, msg: '✓ RAG sandbox agent is live!', stage: 4 }
+      { prg: 15, msg: '🔗 Connecting to the website...', stage: 0 },
+      { prg: 30, msg: '🔍 Reading pages, services & pricing...', stage: 1 },
+      { prg: 50, msg: '📄 Organizing everything it found...', stage: 2 },
+      { prg: 70, msg: '📄 Structuring content from every page...', stage: 2 },
+      { prg: 85, msg: '🧠 Teaching the assistant to answer from it...', stage: 3 },
+      { prg: 95, msg: '🧠 Saving what it learned...', stage: 3 },
+      { prg: 100, msg: '✓ Your assistant is ready — say hello!', stage: 4 }
     ]
 
     let idx = 0
@@ -223,7 +223,7 @@ export default function InteractivePreviewChat() {
   }
 
   return (
-    <div className="w-full max-w-2xl mx-auto rounded-b-2xl border border-t-0 border-white/[0.08] bg-[#0a0a0a] shadow-2xl overflow-hidden transition-all duration-500">
+    <div className="w-full max-w-2xl mx-auto rounded-3xl border border-white/[0.08] bg-[#0b0d16] shadow-[0_40px_100px_-20px_rgba(23,29,59,0.5)] overflow-hidden transition-all duration-500">
       
       {/* Dynamic Header */}
       <div className="bg-[#111113] p-4 flex items-center justify-between border-b border-white/[0.06]">
@@ -239,16 +239,16 @@ export default function InteractivePreviewChat() {
           </div>
           <div>
             <h4 className="text-white font-bold text-sm tracking-tight">
-              {step === 'idle' && 'AI Agent Sandbox'}
-              {step === 'scraping' && 'Training Agent...'}
-              {(step === 'chatting' || step === 'cta') && `${siteData?.title || 'Your Agent'}`}
+              {step === 'idle' && 'Live demo — try it yourself'}
+              {step === 'scraping' && 'Building your assistant...'}
+              {(step === 'chatting' || step === 'cta') && `${siteData?.title || 'Your Assistant'}`}
             </h4>
             <p className="text-[10px] text-white/40 flex items-center gap-1.5 mt-0.5 font-medium">
               <span className={`h-1.5 w-1.5 rounded-full ${step === 'scraping' ? 'bg-amber-400 animate-pulse' : 'bg-emerald-400'}`} />
               <span>
-                {step === 'idle' && 'Ready to deploy'}
-                {step === 'scraping' && 'Crawling pages...'}
-                {(step === 'chatting' || step === 'cta') && 'Live sandbox active'}
+                {step === 'idle' && 'No signup needed'}
+                {step === 'scraping' && 'Reading the website...'}
+                {(step === 'chatting' || step === 'cta') && 'Live — ask it anything'}
               </span>
             </p>
           </div>
@@ -279,14 +279,14 @@ export default function InteractivePreviewChat() {
             <div className="absolute bottom-0 right-1/4 w-24 h-24 bg-blue-500/10 rounded-full blur-[50px] pointer-events-none" />
             
             <div className="relative z-10">
-              <div className="w-14 h-14 bg-white/[0.04] border border-white/[0.08] rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-[0_0_30px_rgba(0,113,227,0.1)]">
-                <Zap className="w-6 h-6 text-primary" />
+              <div className="w-14 h-14 bg-white/[0.04] border border-white/[0.08] rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-[0_0_30px_rgba(118,119,244,0.15)]">
+                <Zap className="w-6 h-6 text-[#8b8cf8]" />
               </div>
               <h3 className="text-lg font-black text-white mb-1.5 tracking-tight">
-                Try It With Your Website
+                Paste any website. Meet its assistant.
               </h3>
-              <p className="text-xs text-white/40 mb-8 max-w-[320px] mx-auto leading-relaxed font-medium">
-                Paste any URL — we&apos;ll crawl it, build a knowledge base, and let you chat with an AI agent trained on your content.
+              <p className="text-xs text-white/40 mb-8 max-w-[340px] mx-auto leading-relaxed font-medium">
+                Type a website address — yours, a client&apos;s, anyone&apos;s. In about 30 seconds you&apos;ll be chatting with an assistant that learned it. This is exactly what your clients&apos; visitors get.
               </p>
 
               <form onSubmit={handleStartCrawl} className="flex gap-2 max-w-md mx-auto">
@@ -297,11 +297,11 @@ export default function InteractivePreviewChat() {
                     placeholder={SUGGESTIONS[activeSuggestion]}
                     value={urlInput}
                     onChange={(e) => setUrlInput(e.target.value)}
-                    className="w-full h-12 pl-11 pr-4 rounded-xl border border-white/[0.08] bg-white/[0.03] text-sm text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/40 transition-all font-medium"
+                    className="w-full h-12 pl-11 pr-4 rounded-xl border border-white/[0.08] bg-white/[0.03] text-sm text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-[#7677f4]/40 focus:border-[#7677f4]/50 transition-all font-medium"
                   />
                 </div>
-                <Button type="submit" className="h-12 px-6 rounded-xl bg-primary hover:bg-primary/90 text-white font-bold shadow-[0_0_20px_rgba(0,113,227,0.3)] hover:shadow-[0_0_30px_rgba(0,113,227,0.5)] flex items-center gap-2 transition-all active:scale-95">
-                  Train <ArrowRight className="w-4 h-4" />
+                <Button type="submit" className="h-12 px-6 rounded-xl bg-[#7677f4] hover:bg-[#696ae6] text-white font-bold shadow-[0_0_20px_rgba(118,119,244,0.35)] hover:shadow-[0_0_30px_rgba(118,119,244,0.5)] flex items-center gap-2 transition-all active:scale-95">
+                  Try it <ArrowRight className="w-4 h-4" />
                 </Button>
               </form>
 
@@ -313,7 +313,7 @@ export default function InteractivePreviewChat() {
               )}
 
               <p className="text-[10px] text-white/20 mt-5 font-medium">
-                Free sandbox • No signup required • Powered by Firecrawl + pgvector
+                Free demo • No signup required • Takes about 30 seconds
               </p>
             </div>
           </div>
@@ -328,7 +328,7 @@ export default function InteractivePreviewChat() {
                 <div key={i} className="flex items-center flex-1">
                   <div className={`flex items-center gap-1.5 px-2 py-1 rounded-lg text-[9px] font-bold uppercase tracking-wider transition-all duration-300 ${
                     i < activeStage ? 'text-emerald-400 bg-emerald-400/10' :
-                    i === activeStage ? 'text-primary bg-primary/10 shadow-[0_0_10px_rgba(0,113,227,0.2)]' :
+                    i === activeStage ? 'text-primary bg-primary/10 shadow-[0_0_10px_rgba(118,119,244,0.2)]' :
                     'text-white/20 bg-white/[0.02]'
                   }`}>
                     <span>{stage.icon}</span>
@@ -374,7 +374,7 @@ export default function InteractivePreviewChat() {
             <div className="mt-3">
               <div className="w-full bg-white/[0.04] rounded-full h-1 overflow-hidden">
                 <div 
-                  className="bg-gradient-to-r from-primary to-blue-400 h-1 rounded-full transition-all duration-500 ease-out shadow-[0_0_8px_rgba(0,113,227,0.4)]"
+                  className="bg-gradient-to-r from-primary to-blue-400 h-1 rounded-full transition-all duration-500 ease-out shadow-[0_0_8px_rgba(118,119,244,0.4)]"
                   style={{ width: `${crawlProgress}%` }}
                 />
               </div>
@@ -399,13 +399,13 @@ export default function InteractivePreviewChat() {
               {messages.map((msg, index) => (
                 <div key={index} className={`flex gap-3 ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-fade-in`}>
                   {msg.role === 'assistant' && (
-                    <div className="h-7 w-7 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0 ring-1 ring-primary/20 shadow-[0_0_12px_rgba(0,113,227,0.15)]">
+                    <div className="h-7 w-7 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0 ring-1 ring-primary/20 shadow-[0_0_12px_rgba(118,119,244,0.15)]">
                       <Bot className="w-3.5 h-3.5 text-primary" />
                     </div>
                   )}
                   <div className={`max-w-[82%] rounded-2xl px-4 py-3 text-[13px] leading-relaxed ${
                     msg.role === 'user'
-                      ? 'bg-primary text-white rounded-tr-md shadow-[0_2px_12px_rgba(0,113,227,0.3)]'
+                      ? 'bg-primary text-white rounded-tr-md shadow-[0_2px_12px_rgba(118,119,244,0.3)]'
                       : 'bg-white/[0.04] text-white/80 border border-white/[0.06] rounded-tl-md'
                   }`}>
                     {msg.content}
@@ -415,7 +415,7 @@ export default function InteractivePreviewChat() {
 
               {isTyping && displayedText && (
                 <div className="flex gap-3 justify-start animate-fade-in">
-                  <div className="h-7 w-7 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0 ring-1 ring-primary/20 shadow-[0_0_12px_rgba(0,113,227,0.15)]">
+                  <div className="h-7 w-7 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0 ring-1 ring-primary/20 shadow-[0_0_12px_rgba(118,119,244,0.15)]">
                     <Bot className="w-3.5 h-3.5 text-primary" />
                   </div>
                   <div className="max-w-[82%] rounded-2xl rounded-tl-md px-4 py-3 text-[13px] leading-relaxed bg-white/[0.04] text-white/80 border border-white/[0.06]">
@@ -457,13 +457,13 @@ export default function InteractivePreviewChat() {
                 <button 
                   type="submit" 
                   disabled={isTyping || !inputVal.trim()} 
-                  className="h-10 w-10 rounded-xl bg-primary hover:bg-primary/90 flex items-center justify-center active:scale-95 transition-all text-white disabled:opacity-30 disabled:scale-100 shadow-[0_0_12px_rgba(0,113,227,0.3)]"
+                  className="h-10 w-10 rounded-xl bg-primary hover:bg-primary/90 flex items-center justify-center active:scale-95 transition-all text-white disabled:opacity-30 disabled:scale-100 shadow-[0_0_12px_rgba(118,119,244,0.3)]"
                 >
                   <Send className="w-4 h-4" />
                 </button>
               </form>
               <p className="text-center text-[9px] text-white/15 mt-2 font-medium">
-                Powered by ChatDock AI • Gemini Flash + pgvector RAG
+                Live demo — the same assistant your clients&apos; websites get
               </p>
             </div>
           </div>
@@ -481,16 +481,16 @@ export default function InteractivePreviewChat() {
               </div>
               
               <h3 className="text-xl font-black text-white mb-1.5 tracking-tight">
-                Agent is Ready to Deploy
+                Now imagine this on a client&apos;s website
               </h3>
-              <p className="text-xs text-white/40 mb-8 max-w-[280px] mx-auto leading-relaxed font-medium">
-                Your AI answered queries using <strong className="text-white/60">{siteData?.title}</strong>&apos;s real content. Deploy it on your website today.
+              <p className="text-xs text-white/40 mb-8 max-w-[300px] mx-auto leading-relaxed font-medium">
+                Everything it just said came from <strong className="text-white/60">{siteData?.title}</strong>&apos;s real content. Launch the same assistant — branded, qualifying leads, booking appointments — in minutes.
               </p>
 
               <div className="flex flex-col sm:flex-row items-center justify-center gap-2.5 w-full max-w-xs mx-auto">
                 <a href="/auth/sign-up" className="w-full">
-                  <Button className="w-full h-11 bg-primary hover:bg-primary/90 text-white rounded-xl font-bold shadow-[0_0_20px_rgba(0,113,227,0.3)] transition-all active:scale-95 text-sm">
-                    Launch Your Agent <Sparkles className="w-3.5 h-3.5 ml-2" />
+                  <Button className="w-full h-11 bg-[#7677f4] hover:bg-[#696ae6] text-white rounded-xl font-bold shadow-[0_0_20px_rgba(118,119,244,0.35)] transition-all active:scale-95 text-sm">
+                    Start free <Sparkles className="w-3.5 h-3.5 ml-2" />
                   </Button>
                 </a>
                 <a href="https://cal.com/prathap-reddy-caxwn4/15min" target="_blank" rel="noopener noreferrer" className="w-full">

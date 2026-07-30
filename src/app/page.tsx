@@ -1,146 +1,140 @@
 import type { Metadata } from 'next'
+import type * as React from 'react'
 import Link from 'next/link'
 import Script from 'next/script'
 import {
+  ArrowDown,
   ArrowRight,
-  BarChart3,
-  Bot,
   CalendarCheck2,
   Check,
-  ChevronRight,
-  CircleCheck,
   Globe2,
   Inbox,
   MessageSquareText,
   Palette,
+  Rocket,
   ShieldCheck,
-  Sparkles,
   Target,
   UsersRound,
-  Zap,
 } from 'lucide-react'
 
+import Faq from '@/components/landing/faq'
 import { Footer } from '@/components/landing/footer'
+import HeroDemo from '@/components/landing/hero-demo'
+import InteractivePreviewChat from '@/components/landing/interactive-preview-chat'
 import PricingSection from '@/components/landing/pricing-section'
+import { Reveal } from '@/components/landing/reveal'
+import { StatCounter } from '@/components/landing/stat-counter'
 import NavBar from '@/components/navbar'
-import { Button } from '@/components/ui/button'
 
 export const metadata: Metadata = {
   title: 'ChatDock — Client AI Chatbots for Agencies',
   description:
-    'Launch client-branded AI chatbots that answer questions, qualify leads, and book appointments—then manage every client from one agency workspace.',
+    'Give every client website a 24/7 assistant that answers questions, captures leads, and books appointments. Launch client-branded chatbots and manage them all from one agency dashboard.',
   alternates: { canonical: '/' },
 }
 
-const workflow = [
+const VERTICALS = [
+  'Dental clinics',
+  'Med spas',
+  'Plumbers',
+  'HVAC companies',
+  'Law firms',
+  'Fitness studios',
+  'Salons',
+  'Roofers',
+  'Chiropractors',
+  'Real estate teams',
+  'Vet clinics',
+  'Home cleaners',
+]
+
+const STEPS = [
   {
-    number: '01',
-    title: 'Add the client website',
-    description: 'ChatDock turns approved website content into a grounded knowledge base, ready for you to review.',
+    number: '1',
+    time: '~2 minutes',
     icon: Globe2,
+    title: 'Paste the client’s website',
+    description:
+      'ChatDock reads the site and learns every service, price, and policy on it. Add PDFs or docs if you want it to know more.',
   },
   {
-    number: '02',
-    title: 'Make it client-ready',
-    description: 'Set the voice, qualification questions, booking goal, guardrails, and brand without rebuilding the stack.',
-    icon: Bot,
+    number: '2',
+    time: '~10 minutes',
+    icon: Palette,
+    title: 'Make it theirs',
+    description:
+      'Set the client’s logo, colors, and greeting. Choose the questions that qualify a good lead — and what a “booked appointment” means for that business.',
   },
   {
-    number: '03',
-    title: 'Launch and show the result',
-    description: 'Install one embed, then track conversations, qualified leads, and bookings in the same workspace.',
-    icon: BarChart3,
+    number: '3',
+    time: '~5 minutes',
+    icon: Rocket,
+    title: 'Put it live and watch',
+    description:
+      'Copy one line of code onto the site. From then on, every conversation, captured lead, and booking shows up in your dashboard.',
   },
 ]
 
-const capabilities = [
-  { icon: Palette, title: 'Client-branded experience', copy: 'Match each client’s colors, identity, welcome message, and website experience.' },
-  { icon: Inbox, title: 'One agency inbox', copy: 'Review conversations across clients and step in when a valuable lead needs attention.' },
-  { icon: Target, title: 'Qualification that fits', copy: 'Capture contact details and ask the questions that matter for each client’s service.' },
-  { icon: CalendarCheck2, title: 'A path to the calendar', copy: 'Move the right visitors from a helpful conversation to a booked appointment.' },
-  { icon: ShieldCheck, title: 'Answers grounded in the client', copy: 'Train on approved sources, test before launch, and control how every agent behaves.' },
-  { icon: UsersRound, title: 'A workspace per client', copy: 'Keep knowledge, branding, conversations, leads, and bookings organized as you grow.' },
+const FEATURES = [
+  {
+    icon: Palette,
+    title: 'Their brand, not ours',
+    copy: 'Logo, colors, and tone match each client’s website so the assistant feels like part of their team.',
+  },
+  {
+    icon: ShieldCheck,
+    title: 'Answers from approved content only',
+    copy: 'It learns from the client’s site and your documents — and says “let me take your details” instead of guessing when it doesn’t know.',
+  },
+  {
+    icon: Target,
+    title: 'Asks the questions that matter',
+    copy: 'Name, phone, and whatever qualifies a real lead for that business — collected naturally inside the conversation.',
+  },
+  {
+    icon: CalendarCheck2,
+    title: 'Turns chats into appointments',
+    copy: 'Serious visitors get guided from “how much does it cost?” to a booked time on the calendar.',
+  },
+  {
+    icon: Inbox,
+    title: 'Every conversation in one inbox',
+    copy: 'See chats across all clients in one place and step in personally when a valuable lead shows up.',
+  },
+  {
+    icon: UsersRound,
+    title: 'A separate workspace per client',
+    copy: 'Knowledge, branding, leads, and bookings never mix. Add the next client without rebuilding anything.',
+  },
 ]
 
-function ProductPreview() {
+const COMPARISON = [
+  ['Launching an agent', 'Crawler + prompt tool + widget, stitched by hand', 'One guided setup per client'],
+  ['Checking quality', 'Scattered test chats and screenshots', 'Private test chat before going live'],
+  ['Daily operations', 'A different inbox and login per client', 'One agency dashboard for everything'],
+  ['Client reporting', 'Screenshots pasted into a slide deck', 'Conversations, leads & bookings — ready to show'],
+]
+
+function VerticalsMarquee() {
+  const items = (ariaHidden: boolean) => (
+    <div aria-hidden={ariaHidden || undefined} className="flex shrink-0 animate-marquee items-center">
+      {VERTICALS.map((vertical) => (
+        <span
+          key={vertical}
+          className="mx-3 flex items-center gap-2 whitespace-nowrap rounded-full border border-black/[0.07] bg-white px-4 py-2 text-sm font-medium text-[#5a6072]"
+        >
+          <span className="h-1.5 w-1.5 rounded-full bg-[#7677f4]" />
+          {vertical}
+        </span>
+      ))}
+    </div>
+  )
+
   return (
-    <div className="relative mx-auto mt-16 max-w-6xl lg:mt-20">
-      <div className="absolute -inset-8 rounded-[3rem] bg-gradient-to-r from-[#ff8a65]/20 via-[#7979f6]/20 to-[#54d6b5]/20 blur-3xl" />
-      <div className="relative overflow-hidden rounded-[26px] border border-white/15 bg-[#f8f9fc] p-2 shadow-[0_50px_120px_rgba(0,0,0,0.45)] sm:p-3">
-        <div className="flex min-h-[520px] overflow-hidden rounded-[19px] bg-white text-left text-[#111827]">
-          <aside className="hidden w-56 shrink-0 bg-[#111827] p-5 text-white md:block">
-            <div className="mb-10 flex items-center gap-2.5 font-semibold">
-              <span className="grid h-8 w-8 place-items-center rounded-lg bg-[#6c6df2]"><MessageSquareText className="h-4 w-4" /></span>
-              ChatDock
-            </div>
-            <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.18em] text-white/35">Agency</p>
-            {['Overview', 'Inbox', 'Leads', 'Bookings'].map((item, index) => (
-              <div key={item} className={`mb-1 rounded-lg px-3 py-2.5 text-sm ${index === 0 ? 'bg-white/10 text-white' : 'text-white/55'}`}>{item}</div>
-            ))}
-            <p className="mb-3 mt-8 text-[10px] font-bold uppercase tracking-[0.18em] text-white/35">Client workspaces</p>
-            {['Northstar Dental', 'Aster & Co.', 'Luma Fitness'].map((item, index) => (
-              <div key={item} className="flex items-center gap-2.5 py-2 text-xs text-white/65">
-                <span className={`h-2 w-2 rounded-full ${index < 2 ? 'bg-emerald-400' : 'bg-amber-300'}`} />{item}
-              </div>
-            ))}
-          </aside>
-
-          <div className="min-w-0 flex-1 bg-[#f4f5f8] p-4 sm:p-7">
-            <div className="mb-8 flex items-center justify-between">
-              <div>
-                <p className="text-xs font-semibold text-[#6c6df2]">AGENCY OVERVIEW</p>
-                <h3 className="mt-1 text-xl font-bold sm:text-2xl">Good morning, Prathap</h3>
-              </div>
-              <div className="hidden rounded-xl bg-[#111827] px-4 py-2.5 text-xs font-semibold text-white sm:block">+ New client agent</div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-              {[
-                ['Live agents', '08', '+2 this month'],
-                ['Conversations', '1,248', 'Across all clients'],
-                ['Qualified leads', '184', '14.7% conversion'],
-                ['Bookings', '62', 'This month'],
-              ].map(([label, value, note]) => (
-                <div key={label} className="rounded-2xl border border-[#e6e8ef] bg-white p-4 shadow-sm">
-                  <p className="text-[11px] font-medium text-slate-500">{label}</p>
-                  <p className="mt-2 text-2xl font-bold tracking-tight">{value}</p>
-                  <p className="mt-2 text-[10px] text-slate-400">{note}</p>
-                </div>
-              ))}
-            </div>
-
-            <div className="mt-4 grid gap-4 lg:grid-cols-[1.45fr_0.8fr]">
-              <div className="rounded-2xl border border-[#e6e8ef] bg-white p-5 shadow-sm">
-                <div className="mb-5 flex items-center justify-between">
-                  <div><p className="font-semibold">Client portfolio</p><p className="text-xs text-slate-400">Every agent, one clear view</p></div>
-                  <span className="text-xs font-semibold text-[#6c6df2]">View all</span>
-                </div>
-                {[
-                  ['Northstar Dental', 'Live', '426 chats', '58 leads'],
-                  ['Aster & Co.', 'Live', '312 chats', '41 leads'],
-                  ['Luma Fitness', 'Training', '—', '—'],
-                ].map(([name, status, chats, leads]) => (
-                  <div key={name} className="grid grid-cols-[1fr_auto] items-center gap-3 border-t border-slate-100 py-3.5 sm:grid-cols-[1fr_70px_80px_70px]">
-                    <div className="flex items-center gap-3"><span className="grid h-8 w-8 place-items-center rounded-lg bg-indigo-50 text-xs font-bold text-indigo-600">{name[0]}</span><span className="truncate text-xs font-semibold sm:text-sm">{name}</span></div>
-                    <span className={`hidden text-[11px] font-semibold sm:block ${status === 'Live' ? 'text-emerald-600' : 'text-amber-600'}`}>{status}</span>
-                    <span className="hidden text-[11px] text-slate-400 sm:block">{chats}</span>
-                    <span className="text-[11px] text-slate-400">{leads}</span>
-                  </div>
-                ))}
-              </div>
-
-              <div className="rounded-2xl bg-[#171d2b] p-5 text-white shadow-sm">
-                <div className="mb-8 flex items-center justify-between"><span className="text-xs text-white/50">Agent activity</span><Zap className="h-4 w-4 text-[#ffb36b]" /></div>
-                <p className="text-4xl font-bold">14.7%</p>
-                <p className="mt-2 text-xs text-white/45">visitor-to-lead conversion</p>
-                <div className="mt-8 flex h-24 items-end gap-2">
-                  {[34, 48, 40, 67, 56, 82, 72, 95, 78, 100].map((height, index) => <span key={index} className="flex-1 rounded-t bg-[#7778f4]" style={{ height: `${height}%`, opacity: 0.45 + index * 0.05 }} />)}
-                </div>
-                <div className="mt-5 flex items-center gap-2 text-[11px] text-emerald-300"><CircleCheck className="h-3.5 w-3.5" /> All live agents healthy</div>
-              </div>
-            </div>
-          </div>
-        </div>
+    <div className="relative overflow-hidden py-2 [mask-image:linear-gradient(to_right,transparent,black_12%,black_88%,transparent)]">
+      <div className="flex w-max motion-reduce:animate-none">
+        {items(false)}
+        {items(true)}
       </div>
     </div>
   )
@@ -148,141 +142,377 @@ function ProductPreview() {
 
 export default function Home() {
   return (
-    <main className="min-h-screen overflow-x-hidden bg-[#f4f5f7] text-[#111827] selection:bg-[#6c6df2] selection:text-white">
+    <main className="min-h-screen overflow-x-hidden bg-[#fbfbfd] text-[#171d3b] selection:bg-[#7677f4] selection:text-white">
+      {/* If JS is unavailable, never leave scroll-revealed content hidden */}
+      <noscript>
+        <style>{`.reveal{opacity:1 !important;transform:none !important}`}</style>
+      </noscript>
       <NavBar />
 
-      <section className="relative overflow-hidden bg-[#0d1321] px-5 pb-24 pt-36 text-white sm:px-8 md:pt-44 lg:pb-32">
-        <div className="absolute inset-0 opacity-30 [background-image:linear-gradient(rgba(255,255,255,.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.05)_1px,transparent_1px)] [background-size:72px_72px] [mask-image:linear-gradient(to_bottom,black,transparent_78%)]" />
-        <div className="absolute left-[-10%] top-24 h-72 w-72 rounded-full bg-[#6c6df2]/25 blur-[100px]" />
-        <div className="absolute right-[-5%] top-40 h-72 w-72 rounded-full bg-[#ff8a65]/20 blur-[100px]" />
+      {/* ───────────────────────── Hero ───────────────────────── */}
+      <section className="relative overflow-hidden px-5 pb-24 pt-28 sm:px-8 md:pt-36 lg:pb-28">
+        {/* Backdrop */}
+        <div className="absolute inset-0 [background-image:linear-gradient(rgba(23,29,59,.035)_1px,transparent_1px),linear-gradient(90deg,rgba(23,29,59,.035)_1px,transparent_1px)] [background-size:56px_56px] [mask-image:radial-gradient(ellipse_70%_60%_at_50%_0%,black,transparent)]" />
+        <div className="absolute left-1/2 top-[-220px] h-[480px] w-[720px] -translate-x-1/2 rounded-full bg-[#7677f4]/15 blur-[120px]" />
 
-        <div className="relative mx-auto max-w-7xl text-center">
-          <div className="mx-auto mb-7 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.06] px-4 py-2 text-xs font-semibold text-white/70 backdrop-blur">
-            <Sparkles className="h-3.5 w-3.5 text-[#ffb36b]" /> For AI automation, lead-gen &amp; web agencies
-          </div>
-          <h1 className="mx-auto max-w-5xl text-balance text-[42px] font-semibold leading-[1.02] tracking-[-0.05em] text-white sm:text-6xl sm:leading-[0.98] md:text-7xl lg:text-[88px]">
-            Launch client chatbots that <span className="text-[#aaaaff]">qualify and book.</span>
-          </h1>
-          <p className="mx-auto mt-7 max-w-2xl text-balance text-lg leading-8 text-white/60 md:text-xl">
-            Train on each client’s website, match their brand, qualify visitors, book appointments, and manage every account from one workspace.
-          </p>
-          <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <Link href="/auth/sign-up"><Button className="h-13 rounded-xl bg-[#7677f4] px-7 text-sm font-semibold text-white hover:bg-[#6869e8]">Launch a client agent <ArrowRight className="ml-2 h-4 w-4" /></Button></Link>
-            <a href="https://cal.com/prathap-reddy-caxwn4/15min" target="_blank" rel="noopener noreferrer" className="inline-flex h-13 items-center rounded-xl border border-white/15 bg-white/[0.06] px-7 text-sm font-semibold text-white transition hover:bg-white/10">Talk through a client use case</a>
-          </div>
-          <div className="mt-7 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-white/45">
-            {['No code required', 'Client-brand ready', '100 free messages to test'].map(item => <span key={item} className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-emerald-300" />{item}</span>)}
-          </div>
-          <ProductPreview />
-        </div>
-      </section>
-
-      <section className="border-b border-[#dfe2e9] bg-white px-5 py-7">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-center gap-3 text-xs font-semibold text-slate-500 sm:gap-5 md:text-sm">
-          {['Client website', 'Grounded chatbot', 'Qualified visitor', 'Booked appointment'].map((item, index) => (
-            <div key={item} className="flex items-center gap-3"><span>{item}</span>{index < 3 && <ChevronRight className="h-4 w-4 text-[#8d8ef6]" />}</div>
-          ))}
-        </div>
-      </section>
-
-      <section id="workflow" className="px-5 py-24 sm:px-8 lg:py-32">
-        <div className="mx-auto max-w-7xl">
-          <div className="grid gap-12 lg:grid-cols-[0.8fr_1.2fr] lg:items-end">
-            <div>
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#6667db]">Your client signed. Now deliver.</p>
-              <h2 className="mt-5 max-w-xl text-4xl font-semibold leading-tight tracking-[-0.04em] sm:text-5xl">Stop stitching together a chatbot stack for every client.</h2>
-            </div>
-            <p className="max-w-2xl text-lg leading-8 text-slate-500">ChatDock gives small agencies one repeatable path from a signed local-business client to a live, measurable website agent—without juggling separate training, widget, inbox, lead, and booking tools.</p>
-          </div>
-
-          <div className="mt-16 grid gap-4 lg:grid-cols-3">
-            {workflow.map((step) => (
-              <article key={step.number} className="group rounded-[26px] border border-[#dfe2e9] bg-white p-7 transition duration-300 hover:-translate-y-1 hover:shadow-[0_25px_60px_rgba(17,24,39,0.09)] sm:p-9">
-                <div className="flex items-start justify-between"><span className="text-xs font-bold tracking-[0.2em] text-slate-300">{step.number}</span><span className="grid h-11 w-11 place-items-center rounded-2xl bg-[#f0f0ff] text-[#6667db]"><step.icon className="h-5 w-5" /></span></div>
-                <h3 className="mt-16 text-2xl font-semibold tracking-tight">{step.title}</h3>
-                <p className="mt-3 leading-7 text-slate-500">{step.description}</p>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section id="features" className="bg-white px-5 py-24 sm:px-8 lg:py-32">
-        <div className="mx-auto max-w-7xl">
-          <div className="mx-auto max-w-3xl text-center">
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#6667db]">Built for the service you actually sell</p>
-            <h2 className="mt-5 text-4xl font-semibold tracking-[-0.04em] sm:text-5xl">From website question to qualified appointment.</h2>
-            <p className="mt-5 text-lg leading-8 text-slate-500">Give appointment-driven clients a faster response while giving your agency fewer tools to babysit.</p>
-          </div>
-          <div className="mt-16 grid gap-px overflow-hidden rounded-[28px] border border-[#e3e5eb] bg-[#e3e5eb] md:grid-cols-2 lg:grid-cols-3">
-            {capabilities.map((feature) => (
-              <div key={feature.title} className="bg-white p-8 sm:p-10">
-                <feature.icon className="h-6 w-6 text-[#696ae4]" />
-                <h3 className="mt-8 text-xl font-semibold">{feature.title}</h3>
-                <p className="mt-3 leading-7 text-slate-500">{feature.copy}</p>
+        <div className="relative mx-auto grid max-w-6xl items-center gap-14 lg:grid-cols-[1.05fr_0.95fr] lg:gap-10">
+          <div className="text-center lg:text-left">
+            <Reveal>
+              <div className="inline-flex items-center gap-2 rounded-full border border-black/[0.08] bg-white px-4 py-2 text-xs font-semibold text-[#5a6072] shadow-[0_2px_10px_rgba(23,29,59,0.05)]">
+                <span className="relative flex h-2 w-2">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+                </span>
+                For agencies that manage client websites
               </div>
+            </Reveal>
+
+            <Reveal delay={80}>
+              <h1 className="mt-5 text-balance font-heading text-[38px] font-extrabold leading-[1.05] tracking-[-0.035em] sm:text-5xl lg:text-[58px]">
+                Give every client’s website a{' '}
+                <span className="relative whitespace-nowrap text-[#5f60d8]">
+                  receptionist
+                  <svg
+                    className="absolute -bottom-2 left-0 w-full text-[#7677f4]/40"
+                    viewBox="0 0 300 12"
+                    fill="none"
+                    preserveAspectRatio="none"
+                    aria-hidden="true"
+                  >
+                    <path d="M2 9C60 3 150 2 298 7" stroke="currentColor" strokeWidth="5" strokeLinecap="round" />
+                  </svg>
+                </span>{' '}
+                that never sleeps.
+              </h1>
+            </Reveal>
+
+            <Reveal delay={160}>
+              <p className="mx-auto mt-5 max-w-xl text-balance text-[17px] leading-8 text-[#5a6072] lg:mx-0">
+                ChatDock adds a friendly assistant to any website you manage. It answers visitors’ questions from the
+                client’s own content, saves their details, and books the appointment — while you run every client from
+                one dashboard.
+              </p>
+            </Reveal>
+
+            <Reveal delay={240}>
+              <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row lg:justify-start">
+                <Link
+                  href="/auth/sign-up"
+                  className="press inline-flex items-center gap-2 rounded-xl bg-[#7677f4] px-7 py-3.5 text-sm font-semibold text-white shadow-[0_12px_30px_-8px_rgba(118,119,244,0.6)] transition-colors hover:bg-[#696ae6]"
+                >
+                  Build your first assistant free <ArrowRight className="h-4 w-4" />
+                </Link>
+                <a
+                  href="#demo"
+                  className="press inline-flex items-center gap-2 rounded-xl border border-black/[0.1] bg-white px-7 py-3.5 text-sm font-semibold text-[#171d3b] transition-colors hover:bg-black/[0.03]"
+                >
+                  See it work, live <ArrowDown className="h-4 w-4" />
+                </a>
+              </div>
+            </Reveal>
+
+            <Reveal delay={320}>
+              <div className="mt-7 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-[13px] text-[#8a8fa5] lg:justify-start">
+                {['No coding needed', 'Live in an afternoon', '100 free messages to test'].map((item) => (
+                  <span key={item} className="flex items-center gap-1.5">
+                    <Check className="h-3.5 w-3.5 text-emerald-500" />
+                    {item}
+                  </span>
+                ))}
+              </div>
+            </Reveal>
+          </div>
+
+          <Reveal delay={200} className="relative">
+            <HeroDemo />
+          </Reveal>
+        </div>
+      </section>
+
+      {/* ─────────────────── Verticals marquee ─────────────────── */}
+      <section className="border-y border-black/[0.06] bg-[#f6f7fb] py-8">
+        <p className="mb-5 text-center text-xs font-bold uppercase tracking-[0.2em] text-[#8a8fa5]">
+          Works for the businesses your clients run
+        </p>
+        <VerticalsMarquee />
+      </section>
+
+      {/* ─────────────────── Live sandbox demo ─────────────────── */}
+      <section id="demo" className="scroll-mt-24 px-5 py-24 sm:px-8 lg:py-32">
+        <div className="mx-auto max-w-6xl">
+          <Reveal className="mx-auto max-w-2xl text-center">
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#6667db]">Don’t take our word for it</p>
+            <h2 className="mt-4 font-heading text-4xl font-bold tracking-[-0.03em] sm:text-5xl">
+              Paste a real website. Meet its assistant.
+            </h2>
+            <p className="mt-5 text-lg leading-8 text-[#5a6072]">
+              This is the fastest way to understand what you’d be selling. Try it with your own site — or a client’s —
+              and ask it anything a customer would.
+            </p>
+          </Reveal>
+          <Reveal delay={120} className="mt-12">
+            <InteractivePreviewChat />
+          </Reveal>
+        </div>
+      </section>
+
+      {/* ───────────────────── How it works ───────────────────── */}
+      <section id="how-it-works" className="scroll-mt-24 bg-white px-5 py-24 sm:px-8 lg:py-32">
+        <div className="mx-auto max-w-6xl">
+          <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-end">
+            <Reveal>
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#6667db]">How it works</p>
+              <h2 className="mt-4 max-w-xl font-heading text-4xl font-bold tracking-[-0.03em] sm:text-5xl">
+                From a client’s website to a working assistant in an afternoon.
+              </h2>
+            </Reveal>
+            <Reveal delay={100}>
+              <p className="max-w-xl text-lg leading-8 text-[#5a6072]">
+                No custom builds, no stack of disconnected tools. The same three steps for every client you sign —
+                dental practice, plumber, or law firm.
+              </p>
+            </Reveal>
+          </div>
+
+          <div className="relative mt-16 grid gap-5 lg:grid-cols-3">
+            {/* Connecting line (desktop) */}
+            <div className="absolute left-[16%] right-[16%] top-12 hidden border-t-2 border-dashed border-[#7677f4]/25 lg:block" />
+            {STEPS.map((step, index) => (
+              <Reveal key={step.number} delay={index * 120} className="relative">
+                <article className="group h-full rounded-[24px] border border-black/[0.07] bg-[#fbfbfd] p-7 transition-all duration-300 ease-out-strong hover:-translate-y-1 hover:shadow-[0_24px_60px_-20px_rgba(23,29,59,0.18)] sm:p-8">
+                  <div className="flex items-center justify-between">
+                    <span className="grid h-12 w-12 place-items-center rounded-2xl bg-[#7677f4] font-heading text-lg font-bold text-white shadow-[0_8px_20px_-6px_rgba(118,119,244,0.6)]">
+                      {step.number}
+                    </span>
+                    <span className="rounded-full bg-black/[0.04] px-3 py-1 text-[11px] font-semibold text-[#8a8fa5]">
+                      {step.time}
+                    </span>
+                  </div>
+                  <h3 className="mt-8 font-heading text-xl font-bold tracking-tight sm:text-2xl">{step.title}</h3>
+                  <p className="mt-3 leading-7 text-[#5a6072]">{step.description}</p>
+                </article>
+              </Reveal>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="border-y border-[#e3e5eb] bg-[#f7f8fa] px-5 py-24 sm:px-8 lg:py-28">
-        <div className="mx-auto max-w-7xl">
-          <div className="grid gap-12 lg:grid-cols-[0.8fr_1.2fr] lg:items-start">
-            <div className="lg:sticky lg:top-28">
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#6667db]">Productize the delivery work</p>
-              <h2 className="mt-5 text-4xl font-semibold tracking-[-0.04em] sm:text-5xl">The next client should not mean another custom build.</h2>
-              <p className="mt-5 max-w-lg text-lg leading-8 text-slate-500">Use the same launch workflow for dental, home-service, wellness, and other appointment-led clients—then tune what makes each business different.</p>
-            </div>
-            <div className="overflow-hidden rounded-[24px] border border-[#dfe2e9] bg-white">
-              <div className="grid grid-cols-[0.8fr_1fr_1fr] border-b border-slate-200 bg-slate-50 px-5 py-3 text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400 sm:px-7"><span>Workflow</span><span>Without ChatDock</span><span>With ChatDock</span></div>
-              {[
-                ['Agent launch', 'Crawler, prompt tool, widget, handoff', 'One guided client setup'],
-                ['Quality review', 'Scattered test chats and screenshots', 'Structured private launch review'],
-                ['Daily operations', 'Separate inboxes and spreadsheets', 'One agency command center'],
-                ['Client reporting', 'Manually assemble activity updates', 'Conversations, leads, and bookings together'],
-              ].map(([area, before, after]) => <div key={area} className="grid grid-cols-1 gap-3 border-b border-slate-100 px-5 py-5 last:border-0 sm:grid-cols-[0.8fr_1fr_1fr] sm:gap-5 sm:px-7"><p className="text-sm font-semibold text-slate-800">{area}</p><p className="text-xs leading-5 text-slate-400">{before}</p><p className="flex items-start gap-2 text-xs font-medium leading-5 text-slate-700"><Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-600" />{after}</p></div>)}
-            </div>
+      {/* ─────────────────────── Features ─────────────────────── */}
+      <section id="features" className="scroll-mt-24 px-5 py-24 sm:px-8 lg:py-32">
+        <div className="mx-auto max-w-6xl">
+          <Reveal className="mx-auto max-w-2xl text-center">
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#6667db]">What you get</p>
+            <h2 className="mt-4 font-heading text-4xl font-bold tracking-[-0.03em] sm:text-5xl">
+              Everything between “visitor had a question” and “client got a booking.”
+            </h2>
+          </Reveal>
+
+          <div className="mt-14 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+            {FEATURES.map((feature, index) => (
+              <Reveal key={feature.title} delay={(index % 3) * 100}>
+                <div className="group h-full rounded-[24px] border border-black/[0.07] bg-white p-7 transition-all duration-300 ease-out-strong hover:-translate-y-1 hover:border-[#7677f4]/30 hover:shadow-[0_24px_60px_-20px_rgba(23,29,59,0.15)] sm:p-8">
+                  <span className="grid h-11 w-11 place-items-center rounded-xl bg-[#eef0ff] text-[#5f60d8] transition-colors duration-300 group-hover:bg-[#7677f4] group-hover:text-white">
+                    <feature.icon className="h-5 w-5" />
+                  </span>
+                  <h3 className="mt-6 font-heading text-lg font-bold tracking-tight">{feature.title}</h3>
+                  <p className="mt-2.5 text-[15px] leading-7 text-[#5a6072]">{feature.copy}</p>
+                </div>
+              </Reveal>
+            ))}
           </div>
         </div>
       </section>
 
+      {/* ────────────────── Before / after table ────────────────── */}
+      <section className="bg-white px-5 py-24 sm:px-8 lg:py-28">
+        <div className="mx-auto grid max-w-6xl gap-12 lg:grid-cols-[0.85fr_1.15fr] lg:items-start">
+          <Reveal className="lg:sticky lg:top-28">
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#6667db]">Why agencies switch</p>
+            <h2 className="mt-4 font-heading text-4xl font-bold tracking-[-0.03em] sm:text-5xl">
+              The next client shouldn’t mean another custom build.
+            </h2>
+            <p className="mt-5 max-w-lg text-lg leading-8 text-[#5a6072]">
+              Most agencies duct-tape a crawler, a prompt tool, a chat widget, an inbox, and a spreadsheet — for every
+              single client. ChatDock replaces the pile with one repeatable workflow.
+            </p>
+          </Reveal>
+
+          <Reveal delay={120}>
+            <div className="overflow-hidden rounded-[24px] border border-black/[0.08] bg-[#fbfbfd]">
+              <div className="grid grid-cols-[0.8fr_1fr_1fr] border-b border-black/[0.06] bg-black/[0.02] px-5 py-3.5 text-[10px] font-bold uppercase tracking-[0.14em] text-[#8a8fa5] sm:px-7">
+                <span>Task</span>
+                <span>The duct-tape way</span>
+                <span className="text-[#5f60d8]">With ChatDock</span>
+              </div>
+              {COMPARISON.map(([area, before, after]) => (
+                <div
+                  key={area}
+                  className="grid grid-cols-1 gap-3 border-b border-black/[0.05] px-5 py-5 last:border-0 sm:grid-cols-[0.8fr_1fr_1fr] sm:gap-5 sm:px-7"
+                >
+                  <p className="text-sm font-semibold text-[#171d3b]">{area}</p>
+                  <p className="text-[13px] leading-6 text-[#9aa0b5] sm:line-through sm:decoration-[#d9dbe6]">{before}</p>
+                  <p className="flex items-start gap-2 text-[13px] font-medium leading-6 text-[#3c4257]">
+                    <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-500" />
+                    {after}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* ──────────────── Results / retention proof ──────────────── */}
       <section className="px-5 py-24 sm:px-8 lg:py-32">
-        <div className="mx-auto grid max-w-7xl overflow-hidden rounded-[32px] bg-[#151b29] text-white lg:grid-cols-2">
-          <div className="p-8 sm:p-12 lg:p-16">
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#aaaaff]">Protect the client retainer</p>
-            <h2 className="mt-5 text-4xl font-semibold tracking-[-0.04em] sm:text-5xl">Don’t report “the bot is live.” Show what it produced.</h2>
-            <p className="mt-6 max-w-xl text-lg leading-8 text-white/55">Keep conversations, captured leads, and bookings in one operational view, so your next client check-in starts with evidence instead of activity screenshots.</p>
-            <Link href="/auth/sign-up" className="mt-9 inline-flex items-center gap-2 text-sm font-semibold text-white">Explore the workspace <ArrowRight className="h-4 w-4" /></Link>
+        <div className="mx-auto grid max-w-6xl overflow-hidden rounded-[32px] bg-[#171d3b] text-white lg:grid-cols-2">
+          <div className="p-8 sm:p-12 lg:p-14">
+            <Reveal>
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#b6b7ff]">Keep the retainer</p>
+              <h2 className="mt-4 font-heading text-4xl font-bold tracking-[-0.03em] sm:text-5xl">
+                Don’t tell clients “the bot is live.” Show what it caught.
+              </h2>
+              <p className="mt-6 max-w-xl text-lg leading-8 text-white/60">
+                Every conversation, captured lead, and booked appointment is logged per client. Open the workspace in
+                your monthly review and walk through exactly what the assistant produced — that’s what renews retainers.
+              </p>
+              <Link
+                href="/auth/sign-up"
+                className="press mt-9 inline-flex items-center gap-2 text-sm font-semibold text-white"
+              >
+                Explore the dashboard <ArrowRight className="h-4 w-4" />
+              </Link>
+            </Reveal>
           </div>
-          <div className="relative min-h-[420px] bg-[#1d2434] p-7 sm:p-10">
-            <div className="absolute inset-0 opacity-25 [background-image:radial-gradient(circle_at_center,rgba(137,138,255,.5)_0,transparent_55%)]" />
-            <div className="relative rounded-3xl border border-white/10 bg-white/[0.06] p-5 backdrop-blur">
-              <div className="mb-8 flex items-center justify-between"><div><p className="text-sm font-semibold">Northstar Dental</p><p className="mt-1 text-xs text-white/35">Monthly client summary</p></div><span className="rounded-full bg-emerald-400/10 px-3 py-1 text-[11px] font-semibold text-emerald-300">Agent live</span></div>
-              <div className="grid grid-cols-3 gap-2">
-                {[['426','Chats'],['58','Leads'],['21','Bookings']].map(([value,label]) => <div key={label} className="rounded-2xl bg-black/15 p-4"><p className="text-2xl font-semibold">{value}</p><p className="mt-1 text-[10px] text-white/40">{label}</p></div>)}
+
+          <div className="relative min-h-[420px] bg-[#1e2547] p-7 sm:p-10">
+            <div className="absolute inset-0 opacity-30 [background-image:radial-gradient(circle_at_center,rgba(137,138,255,.45)_0,transparent_55%)]" />
+            <Reveal delay={150} className="relative">
+              <div className="rounded-3xl border border-white/10 bg-white/[0.06] p-5 backdrop-blur">
+                <div className="mb-7 flex items-center justify-between">
+                  <div>
+                    <p className="flex items-center gap-2 text-sm font-semibold">
+                      <MessageSquareText className="h-4 w-4 text-[#b6b7ff]" /> Northstar Dental
+                    </p>
+                    <p className="mt-1 text-xs text-white/40">Monthly client summary</p>
+                  </div>
+                  <span className="rounded-full bg-emerald-400/10 px-3 py-1 text-[11px] font-semibold text-emerald-300">
+                    Assistant live
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    [426, 'Conversations'],
+                    [58, 'Leads captured'],
+                    [21, 'Appointments'],
+                  ].map(([value, label]) => (
+                    <div key={label} className="rounded-2xl bg-black/20 p-4">
+                      <p className="font-heading text-2xl font-bold sm:text-3xl">
+                        <StatCounter value={value as number} />
+                      </p>
+                      <p className="mt-1 text-[10px] text-white/45">{label}</p>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="mt-4 rounded-2xl bg-black/20 p-5">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-white/45">From visitor to appointment</span>
+                  </div>
+                  <div className="mt-5 space-y-3">
+                    {[
+                      ['Visitors', '100%', 0],
+                      ['Started chatting', '41%', 120],
+                      ['Became leads', '14%', 240],
+                      ['Booked a time', '5%', 360],
+                    ].map(([label, width, delay]) => (
+                      <div
+                        key={label as string}
+                        className="grid grid-cols-[110px_1fr_36px] items-center gap-3 text-[11px] text-white/45"
+                      >
+                        <span>{label}</span>
+                        <span className="h-1.5 overflow-hidden rounded-full bg-white/10">
+                          <span
+                            className="grow-bar block h-full rounded-full bg-[#8586f7]"
+                            style={
+                              {
+                                '--bar-width': width,
+                                '--bar-delay': `${(delay as number) + 300}ms`,
+                              } as React.CSSProperties
+                            }
+                          />
+                        </span>
+                        <span className="tabular-nums">{width}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
-              <div className="mt-5 rounded-2xl bg-black/15 p-5">
-                <div className="flex items-center justify-between text-xs"><span className="text-white/45">Conversion journey</span><span className="text-emerald-300">+18.4%</span></div>
-                <div className="mt-5 space-y-3">{[['Visitors','100%'],['Conversations','41%'],['Qualified','14%'],['Booked','5%']].map(([label,width]) => <div key={label} className="grid grid-cols-[80px_1fr_34px] items-center gap-3 text-[10px] text-white/40"><span>{label}</span><span className="h-1.5 rounded-full bg-white/10"><span className="block h-full rounded-full bg-[#8586f7]" style={{width}} /></span><span>{width}</span></div>)}</div>
-              </div>
-            </div>
+            </Reveal>
           </div>
         </div>
       </section>
 
       <PricingSection />
 
-      <section className="px-5 pb-24 pt-8 sm:px-8 lg:pb-32">
-        <div className="mx-auto max-w-7xl rounded-[32px] bg-[#7677f4] px-7 py-16 text-center text-white sm:px-12 lg:py-24">
-          <h2 className="mx-auto max-w-3xl text-4xl font-semibold tracking-[-0.04em] sm:text-6xl">Have a client website ready?</h2>
-          <p className="mx-auto mt-5 max-w-xl text-lg text-white/70">Turn it into a working qualification and booking demo before your next client call.</p>
-          <div className="mt-9 flex flex-col justify-center gap-3 sm:flex-row"><Link href="/auth/sign-up"><Button className="h-13 rounded-xl bg-white px-7 text-sm font-semibold text-[#5556cf] hover:bg-white/90">Build the first demo free <ArrowRight className="ml-2 h-4 w-4" /></Button></Link><a href="https://cal.com/prathap-reddy-caxwn4/15min" target="_blank" rel="noopener noreferrer" className="inline-flex h-13 items-center justify-center rounded-xl border border-white/25 px-7 text-sm font-semibold text-white hover:bg-white/10">Book an agency walkthrough</a></div>
+      {/* ─────────────────────────── FAQ ─────────────────────────── */}
+      <section id="faq" className="scroll-mt-24 px-5 py-24 sm:px-8 lg:py-28">
+        <div className="mx-auto max-w-6xl">
+          <Reveal className="mx-auto max-w-2xl text-center">
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#6667db]">Questions, answered plainly</p>
+            <h2 className="mt-4 font-heading text-4xl font-bold tracking-[-0.03em] sm:text-5xl">
+              Everything clients will ask you — answered.
+            </h2>
+          </Reveal>
+          <Reveal delay={120} className="mt-12">
+            <Faq />
+          </Reveal>
         </div>
       </section>
 
+      {/* ───────────────────────── Final CTA ───────────────────────── */}
+      <section className="px-5 pb-24 sm:px-8 lg:pb-32">
+        <Reveal>
+          <div className="relative mx-auto max-w-6xl overflow-hidden rounded-[32px] bg-gradient-to-br from-[#7677f4] to-[#5556cf] px-7 py-16 text-center text-white sm:px-12 lg:py-24">
+            <div className="absolute inset-0 opacity-20 [background-image:linear-gradient(rgba(255,255,255,.12)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.12)_1px,transparent_1px)] [background-size:44px_44px] [mask-image:radial-gradient(ellipse_at_center,black,transparent_75%)]" />
+            <div className="relative">
+              <h2 className="mx-auto max-w-3xl font-heading text-4xl font-bold tracking-[-0.03em] sm:text-6xl">
+                Right now, someone is on a client’s website with a question.
+              </h2>
+              <p className="mx-auto mt-5 max-w-xl text-lg text-white/75">
+                Put an assistant there before your next client call — and walk in with a working demo instead of a
+                proposal.
+              </p>
+              <div className="mt-9 flex flex-col justify-center gap-3 sm:flex-row">
+                <Link
+                  href="/auth/sign-up"
+                  className="press inline-flex items-center justify-center gap-2 rounded-xl bg-white px-7 py-3.5 text-sm font-semibold text-[#5556cf] transition-colors hover:bg-white/90"
+                >
+                  Build the first demo free <ArrowRight className="h-4 w-4" />
+                </Link>
+                <a
+                  href="https://cal.com/prathap-reddy-caxwn4/15min"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="press inline-flex items-center justify-center rounded-xl border border-white/30 px-7 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-white/10"
+                >
+                  Book a 15-minute walkthrough
+                </a>
+              </div>
+            </div>
+          </div>
+        </Reveal>
+      </section>
+
       <Footer />
-      <Script id="46316941-5e6b-4222-adc4-48fc5221012c" src="https://www.chatdock.io/embed.min.js" strategy="afterInteractive" data-app-origin="https://www.chatdock.io" data-margin="24" data-size="md" />
+      <Script
+        id="46316941-5e6b-4222-adc4-48fc5221012c"
+        src="https://www.chatdock.io/embed.min.js"
+        strategy="afterInteractive"
+        data-app-origin="https://www.chatdock.io"
+        data-margin="24"
+        data-size="md"
+      />
     </main>
   )
 }
