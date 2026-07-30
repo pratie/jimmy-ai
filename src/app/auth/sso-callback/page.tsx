@@ -9,11 +9,9 @@ export default function SSOCallback() {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    console.log('[SSO Callback] OAuth callback page loaded')
 
     // Set a timeout to detect if authentication is taking too long
     const timeoutId = setTimeout(() => {
-      console.error('[SSO Callback] Authentication timeout after 30 seconds')
       setError('Authentication is taking longer than expected. Please try again.')
 
       // Redirect to sign-in after 3 more seconds

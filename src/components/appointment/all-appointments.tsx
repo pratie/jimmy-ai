@@ -42,8 +42,10 @@ const AllAppointments = ({ bookings }: Props) => {
                 {booking.createdAt.getDate()} {booking.createdAt.getFullYear()}
               </div>
               <div>
-                {booking.createdAt.getHours()} {booking.createdAt.getMinutes()}{' '}
-                {booking.createdAt.getHours() > 12 ? 'PM' : 'AM'}
+                {booking.createdAt.toLocaleTimeString('en-US', {
+                  hour: 'numeric',
+                  minute: '2-digit',
+                })}
               </div>
             </TableCell>
             <TableCell className="text-right font-semibold text-slate-600">

@@ -10,6 +10,10 @@ type Props = {}
 
 const AiChatBot = (props: Props) => {
   const [iconError, setIconError] = useState(false)
+  // The widget runs inside a tiny iframe, so the iframe's own innerWidth says
+  // nothing about the device. screen.width reflects the visitor's device and
+  // matches the parent embed's < 640px full-screen breakpoint.
+  const [responsive, setResponsive] = useState(false)
   const {
     onOpenChatBot,
     botOpened,
@@ -27,10 +31,20 @@ const AiChatBot = (props: Props) => {
     errors,
   } = useChatBot()
 
+  useEffect(() => {
+    const update = () => setResponsive(window.screen.width < 640)
+    update()
+    window.addEventListener('resize', update)
+    return () => window.removeEventListener('resize', update)
+  }, [])
+
   // Reset icon error when icon changes
   useEffect(() => {
     setIconError(false)
   }, [currentBot?.chatBot?.icon])
+
+  const themeConfig = (currentBot?.chatBot?.theme as any) || {}
+  const brandPrimary: string = themeConfig.primary || '#0f172a'
 
   return (
     <div className="fixed inset-0 flex flex-col justify-end items-end p-0 pointer-events-none bg-transparent">
@@ -58,7 +72,7 @@ const AiChatBot = (props: Props) => {
               botIcon={currentBot?.chatBot?.icon || currentBot?.icon || null}
               showBranding={Boolean(currentBot?.showBranding)}
               agencyName={currentBot?.agencyName}
-              responsive={typeof window !== 'undefined' && window.innerWidth < 640}
+              responsive={responsive}
               onClose={onOpenChatBot}
             />
           </Loader>
@@ -70,7 +84,11 @@ const AiChatBot = (props: Props) => {
         <button
           type="button"
           aria-label={`Open chat with ${currentBot?.name || 'assistant'}`}
-          className="group relative flex h-16 w-16 cursor-pointer items-center justify-center overflow-hidden rounded-full border border-slate-200 bg-white shadow-[0_10px_30px_rgba(15,23,42,.18)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_14px_36px_rgba(15,23,42,.24)] focus:outline-none focus:ring-4 focus:ring-indigo-200 pointer-events-auto"
+          className="group relative flex h-16 w-16 cursor-pointer items-center justify-center overflow-hidden rounded-full border bg-white shadow-[0_10px_30px_rgba(15,23,42,.18)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_14px_36px_rgba(15,23,42,.24)] focus:outline-none focus:ring-4 pointer-events-auto press"
+          style={{
+            borderColor: `${brandPrimary}33`,
+            ['--tw-ring-color' as any]: `${brandPrimary}2e`,
+          }}
           onClick={onOpenChatBot}
         >
           {((currentBot?.chatBot?.icon || currentBot?.icon) && !iconError) ? (

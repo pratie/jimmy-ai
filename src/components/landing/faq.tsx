@@ -35,9 +35,9 @@ const FAQS: { question: string; answer: string }[] = [
       'Real conversations, captured leads, and booked appointments — not “the bot is live.” Open the client’s workspace in a review call and walk through exactly what the assistant handled and what it produced. That’s what keeps retainers renewed.',
   },
   {
-    question: 'How much does it cost to try?',
+    question: 'How much does it cost?',
     answer:
-      'Nothing. Create a free account, build an agent on a real website, and test it with 100 free messages. When you’re ready to launch your first paying client, we’ll help you set it up.',
+      'Trying it costs nothing — the free plan includes a full workspace and 100 messages. Paid plans start at $19/month for one live client and $49/month for five client workspaces. All plans are monthly with no annual lock-in, and yearly billing saves about 40%.',
   },
 ]
 

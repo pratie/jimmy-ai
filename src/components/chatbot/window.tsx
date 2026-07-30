@@ -183,18 +183,18 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
         </div>
         {/* Tabs and content area - proper flex layout */}
         <Tabs defaultValue="chat" className="flex-1 flex flex-col min-h-0">
-          {showFaqs && <div className="border-b border-slate-100 bg-white px-4 pt-1">
+          {showFaqs && <div className="border-b border-black/5 px-4 pt-1" style={{ backgroundColor: t.surface, color: t.text }}>
             <TabsList className="w-full justify-start gap-6 bg-transparent p-0 h-auto">
               <TabsTrigger
                 value="chat"
-                className="flex items-center gap-1.5 rounded-none border-b-2 border-transparent px-0 py-2 text-sm font-medium text-slate-500 data-[state=active]:border-slate-900 data-[state=active]:text-slate-900 transition-colors"
+                className="flex items-center gap-1.5 rounded-none border-b-2 border-transparent px-0 py-2 text-sm font-medium text-current opacity-50 data-[state=active]:border-current data-[state=active]:opacity-100 transition-opacity"
               >
                 <MessageCircle className="w-4 h-4" />
                 Chat
               </TabsTrigger>
               <TabsTrigger
                 value="faqs"
-                className="flex items-center gap-1.5 rounded-none border-b-2 border-transparent px-0 py-2 text-sm font-medium text-slate-500 data-[state=active]:border-slate-900 data-[state=active]:text-slate-900 transition-colors"
+                className="flex items-center gap-1.5 rounded-none border-b-2 border-transparent px-0 py-2 text-sm font-medium text-current opacity-50 data-[state=active]:border-current data-[state=active]:opacity-100 transition-opacity"
               >
                 <HelpCircle className="w-4 h-4" />
                 FAQs
@@ -223,13 +223,13 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
                     }}
                   />
                 ))}
-                {onResponding && <Responding botIcon={botIcon} />}
+                {onResponding && <Responding botIcon={botIcon} theme={{ botBg: t.botBubbleBg, botText: t.botBubbleText }} />}
                 {chats.length <= 1 && onSuggestion && (
-                  <div className="ml-8 mt-1">
-                    <p className="mb-2 text-[10px] font-medium uppercase tracking-[0.12em] text-slate-400">Popular questions</p>
+                  <div className="ml-8 mt-1" style={{ color: t.text }}>
+                    <p className="mb-2 text-[10px] font-medium uppercase tracking-[0.12em] opacity-50">Popular questions</p>
                     <div className="flex flex-wrap gap-2">
                       {['What do you offer?', 'How does pricing work?', 'Can I book a call?'].map((suggestion) => (
-                        <button key={suggestion} type="button" onClick={() => onSuggestion(suggestion)} className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[11px] font-medium text-slate-600 shadow-sm transition hover:border-slate-300 hover:bg-slate-50">{suggestion}</button>
+                        <button key={suggestion} type="button" onClick={() => onSuggestion(suggestion)} className="rounded-full border px-3 py-1.5 text-[11px] font-medium opacity-70 shadow-sm transition hover:opacity-100" style={{ borderColor: `${t.text}26` }}>{suggestion}</button>
                       ))}
                     </div>
                   </div>
@@ -243,7 +243,8 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
                 e.preventDefault()
                 onChat()
               }}
-              className="flex shrink-0 items-end gap-2 border-t border-slate-100 bg-white px-3.5 py-3"
+              className="flex shrink-0 items-end gap-2 border-t border-black/5 px-3.5 py-3"
+              style={{ backgroundColor: t.surface }}
             >
               <div className="flex-1 relative">
                 <Input
@@ -274,15 +275,15 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
             </form>
           </TabsContent>
 
-          <TabsContent value="faqs" className="flex-1 overflow-y-auto m-0 p-4">
+          <TabsContent value="faqs" className="flex-1 overflow-y-auto m-0 p-4" style={{ backgroundColor: t.surface, color: t.text }}>
             <div className="space-y-4">
               <div>
-                <CardTitle className="text-base font-semibold text-slate-900">Frequently Asked Questions</CardTitle>
-                <CardDescription className="text-sm mt-1 text-slate-500">
+                <CardTitle className="text-base font-semibold text-current">Frequently Asked Questions</CardTitle>
+                <CardDescription className="text-sm mt-1 text-current opacity-60">
                   Find quick answers to common questions
                 </CardDescription>
               </div>
-              <Separator className="bg-slate-100" />
+              <Separator className="bg-black/5" />
               <div className="space-y-3">
                 {helpdesk && helpdesk.length > 0 ? (
                   helpdesk.map((desk) => (
@@ -293,8 +294,8 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
                     />
                   ))
                 ) : (
-                  <div className="text-center py-12 text-slate-400">
-                    <HelpCircle className="w-10 h-10 mx-auto mb-3 opacity-20" />
+                  <div className="text-center py-12 opacity-50">
+                    <HelpCircle className="w-10 h-10 mx-auto mb-3 opacity-40" />
                     <p className="text-sm font-medium">No FAQs available yet</p>
                   </div>
                 )}
@@ -305,18 +306,24 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
 
         {showBranding && (
           <div
-            className="shrink-0 border-t border-slate-50 px-2 py-2 text-center"
-            style={{ backgroundColor: t.surface }}
+            className="shrink-0 border-t border-black/5 px-2 py-2 text-center"
+            style={{ backgroundColor: t.surface, color: t.text }}
           >
-            <a
-              href={agencyName ? '#' : "https://chatdock.io/?utm_source=widget&utm_medium=free_badge&utm_campaign=virality"}
-              target={agencyName ? undefined : "_blank"}
-              rel={agencyName ? undefined : "noopener noreferrer"}
-              className="inline-flex items-center justify-center gap-1.5 text-[11px] font-bold text-slate-400 hover:text-slate-600 transition-colors uppercase tracking-wider"
-              aria-label={`Powered by ${agencyName || 'chatdock.io'} – Get your AI assistant`}
-            >
-              <span>Powered by {agencyName || 'chatdock.io'}</span>
-            </a>
+            {agencyName ? (
+              <span className="inline-flex items-center justify-center gap-1.5 text-[10px] font-medium opacity-50 tracking-wide">
+                Powered by {agencyName}
+              </span>
+            ) : (
+              <a
+                href="https://chatdock.io/?utm_source=widget&utm_medium=free_badge&utm_campaign=virality"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-1.5 text-[10px] font-medium opacity-50 hover:opacity-80 transition-opacity tracking-wide"
+                aria-label="Powered by chatdock.io – Get your AI assistant"
+              >
+                Powered by chatdock.io
+              </a>
+            )}
           </div>
         )}
 

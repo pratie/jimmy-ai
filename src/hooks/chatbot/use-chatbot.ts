@@ -183,13 +183,11 @@ export const useChatBot = (options?: UseChatBotOptions) => {
   }, [domainId])
 
   const onStartChatting = handleSubmit(async (values) => {
-    console.log('ALL VALUES', values)
     const anonymousId = getAnonymousId()
     // Always snap to bottom on user send
     { const el = messageWindowRef.current; if (el) setTimeout(() => el.scroll({ top: el.scrollHeight, behavior: 'smooth' }), 0) }
 
     if (values.image?.length) {
-      console.log('IMAGE FROM ', values.image[0])
       const uploadResult = await uploadFile(values.image[0])
 
       if (!uploadResult.success) {
@@ -209,7 +207,6 @@ export const useChatBot = (options?: UseChatBotOptions) => {
         { const el = messageWindowRef.current; if (el) setTimeout(() => el.scroll({ top: el.scrollHeight, behavior: 'smooth' }), 0) }
       }
 
-      console.log('🟡 RESPONSE FROM KIE', uploaded.downloadUrl)
       setOnAiTyping(true)
       const response = await onAiChatBotAssistant(
         currentBotId!,
@@ -449,7 +446,6 @@ export const useRealTime = (
     counterRef.current = 1
 
     const handler = (data: any) => {
-      console.log('✅', data)
       if (counterRef.current !== 1) {
         setChats((prev) => [
           ...prev,

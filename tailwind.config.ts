@@ -69,11 +69,23 @@ const config = {
         success: '#22c55e',
         warning: '#f97316',
         info: '#6366f1',
+
+        /* ── Brand tokens (used across settings/auth surfaces) ── */
+        brand: {
+          primary: '#171d3b',
+          accent: '#5b5ce2',
+          'base-100': '#f6f7fb',
+          'base-200': '#e9eaf2',
+          'base-300': '#d9dbe6',
+        },
+        main: '#5b5ce2',
+        bg: '#ffffff',
       },
       borderRadius: {
         lg: 'var(--radius)',
         md: 'calc(var(--radius) - 2px)',
         sm: 'calc(var(--radius) - 4px)',
+        base: '14px',
       },
       boxShadow: {
         soft: '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
@@ -83,6 +95,7 @@ const config = {
         'glow-lg': '0 0 40px rgba(0, 113, 227, 0.3)',
         'glow-primary': '0 0 40px hsl(var(--primary) / 0.2)',
         'glass-inset': 'inset 0 0 0 1px rgba(255, 255, 255, 0.05)',
+        shadow: '0 6px 24px rgba(15, 23, 42, 0.08)',
       },
       fontWeight: {
         base: '500',

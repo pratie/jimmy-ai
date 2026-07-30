@@ -1,6 +1,5 @@
 import { CheckCircle2Icon } from 'lucide-react'
 import React from 'react'
-import { Button } from '../ui/button'
 import { StripeConnect } from '../settings/stripe-connect'
 
 type IntegrationModalBodyProps = {
@@ -18,23 +17,21 @@ export const IntegrationModalBody = ({
     case 'stripe':
       return (
         <div className="flex flex-col gap-2">
-          <h2 className="font-bold">Stripe would like to access</h2>
+          <h2 className="font-bold">Dodo Payments will be able to</h2>
           {[
-            'Payment and bank information',
-            'Products and services you sell',
-            'Business and tax information',
-            'Create and update Products',
+            'Process payments from your client agents',
+            'Create checkout sessions for qualified visitors',
+            'Report payment activity back to your workspace',
           ].map((item, key) => (
             <div
               key={key}
-              className="flex gap-2 items-center pl-3"
+              className="flex gap-2 items-center pl-3 text-sm text-slate-600"
             >
-              <CheckCircle2Icon />
+              <CheckCircle2Icon className="h-4 w-4 shrink-0 text-emerald-600" />
               <p>{item}</p>
             </div>
           ))}
-          <div className="flex justify-between mt-10">
-            <Button variant="outline">Learn more</Button>
+          <div className="flex justify-end mt-8">
             <StripeConnect connected={connections[type]} />
           </div>
         </div>

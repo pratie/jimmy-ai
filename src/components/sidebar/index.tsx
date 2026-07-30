@@ -83,7 +83,7 @@ const SideBar = ({ domains, user }: Props) => {
                   'group flex h-11 items-center justify-center gap-3 rounded-xl text-sm font-bold transition md:justify-start md:px-3',
                   active
                     ? 'bg-white text-[#0b1020] shadow-lg shadow-black/20'
-                    : 'text-white/58 hover:bg-white/8 hover:text-white'
+                    : 'text-white/60 hover:bg-white/10 hover:text-white'
                 )}
               >
                 <Icon className="h-[18px] w-[18px] shrink-0" />
@@ -113,7 +113,7 @@ const SideBar = ({ domains, user }: Props) => {
                 title={domain.name}
                 className={cn(
                   'group flex h-11 w-full items-center justify-center gap-3 rounded-xl text-left transition md:justify-start md:px-2.5',
-                  selected ? 'bg-[#5b5ce2]/20 text-white' : 'text-white/55 hover:bg-white/8 hover:text-white'
+                  selected ? 'bg-[#5b5ce2]/20 text-white' : 'text-white/55 hover:bg-white/10 hover:text-white'
                 )}
               >
                 <span className={cn(
@@ -145,7 +145,7 @@ const SideBar = ({ domains, user }: Props) => {
             return (
               <Link key={item.href} href={item.href} className={cn(
                 'flex h-10 items-center justify-center gap-3 rounded-xl text-xs font-bold transition md:justify-start md:px-3',
-                active ? 'bg-white/12 text-white' : 'text-white/45 hover:bg-white/8 hover:text-white'
+                active ? 'bg-white/15 text-white' : 'text-white/45 hover:bg-white/10 hover:text-white'
               )}>
                 <Icon className="h-4 w-4" />
                 <span className="hidden md:block">{item.label}</span>

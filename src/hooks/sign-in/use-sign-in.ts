@@ -17,40 +17,27 @@ export const useSignInForm = () => {
   })
   const onHandleSubmit = methods.handleSubmit(
     async (values: UserLoginProps) => {
-      console.log('[Sign-In] 🚀 Starting sign-in process...')
-      console.log('[Sign-In] 📧 Email:', values.email)
-      console.log('[Sign-In] 🔒 Password length:', values.password?.length || 0)
-      console.log('[Sign-In] ✅ Clerk loaded:', isLoaded)
 
       if (!isLoaded) {
-        console.log('[Sign-In] ⚠️ Clerk not loaded yet, aborting...')
         return
       }
 
       try {
         setLoading(true)
-        console.log('[Sign-In] 🔄 Setting loading state to true')
 
-        console.log('[Sign-In] 📝 Attempting Clerk authentication...')
         const authenticated = await signIn.create({
           identifier: values.email,
           password: values.password,
         })
-        console.log('[Sign-In] ✅ Clerk authentication response received')
-        console.log('[Sign-In] 📊 Authentication status:', authenticated.status)
-        console.log('[Sign-In] 🎫 Session ID:', authenticated.createdSessionId)
 
         if (authenticated.status === 'complete') {
-          console.log('[Sign-In] ✅ Authentication complete, activating session...')
           await setActive({ session: authenticated.createdSessionId })
-          console.log('[Sign-In] ✅ Session activated successfully')
 
           toast({
             title: 'Success',
             description: 'Welcome back!',
           })
 
-          console.log('[Sign-In] 🚀 Redirecting to dashboard...')
           router.push('/dashboard')
         } else {
           console.error('[Sign-In] ⚠️ Authentication status not complete:', authenticated.status)

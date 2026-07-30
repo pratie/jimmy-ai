@@ -8,7 +8,7 @@ import Modal from '../mondal'
 import { Card, CardContent, CardDescription, CardTitle } from '../ui/card'
 import { Loader } from '../loader'
 import FormGenerator from '../forms/form-generator'
-import { cn, getMonthName } from '@/lib/utils'
+import { cn } from '@/lib/utils'
 import CalIcon from '@/icons/cal-icon'
 import PersonIcon from '@/icons/person-icon'
 import { EditEmail } from './edit-email'
@@ -116,8 +116,11 @@ const EmailMarketing = ({ campaign, domains, subscription }: Props) => {
                       <div className="flex gap-2 items-center">
                         <CalIcon />
                         <CardDescription>
-                          Created {getMonthName(camp.createdAt.getMonth())}{' '}
-                          {camp.createdAt.getDate()}th
+                          Created{' '}
+                          {camp.createdAt.toLocaleDateString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                          })}
                         </CardDescription>
                       </div>
                       <div className="flex gap-2">

@@ -2,7 +2,7 @@
 import { INTEGRATION_LIST_ITEMS } from '@/constants/integrations'
 import React from 'react'
 import { CardDescription } from '../ui/card'
-import Image from 'next/image'
+import { CreditCard } from 'lucide-react'
 import IntegrationTrigger from './IntegrationTrigger'
 
 type Props = {
@@ -19,16 +19,10 @@ const IntegrationsList = ({ connections }: Props) => {
           <div className="flex flex-col gap-4">
             <div className="flex w-full items-start justify-between gap-5">
               <div className="">
-                <div className="relative h-11 w-11 overflow-hidden rounded-2xl border border-slate-100 bg-slate-50 p-2">
-                  <Image
-                    sizes="100vw"
-                    src={`https://ucarecdn.com/${item.logo}/`}
-                    alt="Logo"
-                    fill
-                    className="object-contain p-2"
-                  />
+                <div className="grid h-11 w-11 place-items-center rounded-2xl border border-slate-100 bg-slate-50 text-[#5b5ce2]">
+                  <CreditCard className="h-5 w-5" />
                 </div>
-                <h2 className="mt-4 text-sm font-semibold capitalize text-slate-900">{item.name}</h2>
+                <h2 className="mt-4 text-sm font-semibold text-slate-900">{item.label}</h2>
               </div>
               <IntegrationTrigger
                 connections={connections}
