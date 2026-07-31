@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import {
   AlertCircle,
-  ArrowRight,
+  ArrowUp,
   Check,
   CheckCircle2,
   Globe,
@@ -28,11 +28,9 @@ const SUGGESTED_SITES = ['stripe.com', 'notion.so', 'airbnb.com']
 const SUGGESTED_QUESTIONS = ['What do you offer?', 'How much does it cost?', 'How do I get in touch?']
 
 const CRAWL_STAGES = [
-  'Connecting to the website',
   'Reading pages, services & pricing',
-  'Organizing what it found',
-  'Teaching the assistant',
-  'Ready — say hello',
+  'Organizing what I found',
+  'Learning how to answer',
 ]
 
 // Minimal markdown: **bold** and [label](url) → real elements, rest is text.
@@ -64,9 +62,42 @@ function renderSandboxContent(raw: string): React.ReactNode[] {
   return nodes
 }
 
+/** Faded skeleton bubbles — reads as earlier conversations, fills the frame
+ *  with the product's own shape instead of empty whitespace. */
+function GhostConversation() {
+  const rows: { side: 'left' | 'right'; widths: number[] }[] = [
+    { side: 'left', widths: [150, 190] },
+    { side: 'right', widths: [110] },
+    { side: 'left', widths: [200, 140, 90] },
+    { side: 'right', widths: [150, 80] },
+  ]
+  return (
+    <div aria-hidden="true" className="space-y-3 [mask-image:linear-gradient(to_bottom,transparent,black_80%)]">
+      {rows.map((row, index) => (
+        <div key={index} className={`flex ${row.side === 'right' ? 'justify-end' : 'justify-start'}`}>
+          <div
+            className={`space-y-2 rounded-2xl px-4 py-3 ${
+              row.side === 'right' ? 'rounded-br-md bg-[#7677f4]/10' : 'rounded-bl-md bg-[#f4f5fa]'
+            }`}
+          >
+            {row.widths.map((width, i) => (
+              <div
+                key={i}
+                className={`h-2 rounded-full ${row.side === 'right' ? 'bg-[#7677f4]/25' : 'bg-[#171d3b]/10'}`}
+                style={{ width }}
+              />
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
 export default function InteractivePreviewChat() {
   const [step, setStep] = useState<SandboxStep>('idle')
   const [urlInput, setUrlInput] = useState('')
+  const [crawlUrl, setCrawlUrl] = useState('')
   const [errorMessage, setErrorMessage] = useState('')
 
   // Crawl progress
@@ -95,16 +126,15 @@ export default function InteractivePreviewChat() {
 
   const runCrawlerProgress = () => {
     const ticks = [
-      { prg: 18, stage: 0 },
-      { prg: 34, stage: 1 },
-      { prg: 52, stage: 1 },
-      { prg: 68, stage: 2 },
-      { prg: 84, stage: 3 },
-      { prg: 94, stage: 3 },
-      { prg: 100, stage: 4 },
+      { prg: 22, stage: 0 },
+      { prg: 42, stage: 0 },
+      { prg: 58, stage: 1 },
+      { prg: 74, stage: 1 },
+      { prg: 88, stage: 2 },
+      { prg: 100, stage: 2 },
     ]
     let idx = 0
-    setCrawlProgress(0)
+    setCrawlProgress(8)
     setActiveStage(0)
     setErrorMessage('')
     const timer = setInterval(() => {
@@ -115,32 +145,33 @@ export default function InteractivePreviewChat() {
       } else {
         clearInterval(timer)
       }
-    }, 750)
+    }, 800)
     return () => clearInterval(timer)
   }
 
-  const handleStartCrawl = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!urlInput || urlInput.trim().length === 0) return
+  const startCrawl = async (rawUrl: string) => {
+    const target = rawUrl.trim()
+    if (!target || step === 'scraping') return
 
+    setCrawlUrl(target.replace(/^https?:\/\//, ''))
     setStep('scraping')
     const cleanupProgress = runCrawlerProgress()
 
     try {
-      const response = await onGeneratePreviewContext(urlInput)
-      await new Promise((r) => setTimeout(r, 1400))
+      const response = await onGeneratePreviewContext(target)
+      await new Promise((r) => setTimeout(r, 1600))
 
       if (response.status === 200 && response.data) {
         setSiteData(response.data)
         setMessages([
           {
             role: 'assistant',
-            content: `Hi! 👋 I just read ${response.data.title} and I'm ready to answer questions about it — services, pricing, hours, anything a visitor would ask.`,
+            content: `Done! I just read ${response.data.title} and I'm ready to answer like its receptionist would — services, pricing, hours, anything a visitor asks.`,
           },
         ])
         setStep('chatting')
       } else {
-        setErrorMessage(response.message || 'We could not read that website. Try another one?')
+        setErrorMessage(response.message || 'I could not read that website — try another one?')
         setStep('idle')
       }
     } catch (err: any) {
@@ -149,6 +180,11 @@ export default function InteractivePreviewChat() {
     } finally {
       cleanupProgress()
     }
+  }
+
+  const handleStartCrawl = (e: React.FormEvent) => {
+    e.preventDefault()
+    startCrawl(urlInput)
   }
 
   const sendMessage = async (text: string) => {
@@ -229,6 +265,7 @@ export default function InteractivePreviewChat() {
     setMessages([])
     setSiteData(null)
     setUrlInput('')
+    setCrawlUrl('')
     setErrorMessage('')
   }
 
@@ -236,7 +273,7 @@ export default function InteractivePreviewChat() {
     step === 'idle'
       ? 'Your future assistant'
       : step === 'scraping'
-        ? 'Building the assistant…'
+        ? crawlUrl
         : siteData?.title || 'Assistant'
 
   const headerAvatar = step === 'chatting' || step === 'cta' ? (siteData?.title?.[0] || 'A').toUpperCase() : null
@@ -266,8 +303,8 @@ export default function InteractivePreviewChat() {
           <div className="min-w-0">
             <p className="truncate text-sm font-semibold text-white">{headerTitle}</p>
             <p className="text-[11px] text-white/50">
-              {step === 'idle' && 'Live demo · no signup needed'}
-              {step === 'scraping' && 'Reading the website…'}
+              {step === 'idle' && 'Waiting for a website · no signup needed'}
+              {step === 'scraping' && 'Learning the website…'}
               {(step === 'chatting' || step === 'cta') && 'Live · trained seconds ago'}
             </p>
           </div>
@@ -289,113 +326,113 @@ export default function InteractivePreviewChat() {
 
         {/* Stage area */}
         <div className="flex h-[460px] flex-col sm:h-[480px]">
-          {/* ── Idle: invite ── */}
-          {step === 'idle' && (
-            <div className="flex flex-1 flex-col items-center justify-center px-6 py-8 text-center">
-              <span className="grid h-12 w-12 place-items-center rounded-2xl bg-[#eef0ff] text-[#5f60d8]">
-                <Globe className="h-5 w-5" />
-              </span>
-              <h3 className="mt-5 font-heading text-xl font-bold tracking-tight text-[#171d3b] sm:text-2xl">
-                Type a website. Watch it become an assistant.
-              </h3>
-              <p className="mx-auto mt-2.5 max-w-sm text-sm leading-6 text-[#5a6072]">
-                Yours, a client&apos;s, anyone&apos;s. In about 30 seconds you&apos;ll be talking to an assistant that
-                learned it — the exact thing your clients&apos; visitors get.
-              </p>
+          {/* ── Idle & scraping: the widget itself invites you ── */}
+          {(step === 'idle' || step === 'scraping') && (
+            <>
+              <div className="flex flex-1 flex-col justify-end overflow-hidden px-4 pb-4 pt-5">
+                <GhostConversation />
 
-              <form onSubmit={handleStartCrawl} className="mt-7 flex w-full max-w-md gap-2">
-                <div className="relative flex-1">
-                  <Globe className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#9aa0b5]" />
-                  <input
-                    type="text"
-                    placeholder="yourclient.com"
-                    value={urlInput}
-                    onChange={(e) => setUrlInput(e.target.value)}
-                    className="h-12 w-full rounded-xl border border-black/[0.1] bg-[#fafafc] pl-11 pr-4 text-sm text-[#171d3b] placeholder:text-[#b3b8c9] transition-shadow focus:border-[#7677f4] focus:outline-none focus:ring-4 focus:ring-[#7677f4]/15"
-                  />
-                </div>
-                <button
-                  type="submit"
-                  className="press inline-flex h-12 shrink-0 items-center gap-2 rounded-xl bg-[#7677f4] px-5 text-sm font-semibold text-white shadow-[0_10px_24px_-8px_rgba(118,119,244,0.7)] transition-colors hover:bg-[#696ae6]"
-                >
-                  Build it <ArrowRight className="h-4 w-4" />
-                </button>
-              </form>
+                {step === 'idle' && (
+                  <div className="sandbox-msg mt-4 flex justify-start">
+                    <div className="max-w-[85%] rounded-2xl rounded-bl-md border border-black/[0.06] bg-[#f4f5fa] px-4 py-3 text-[13px] leading-relaxed text-[#2b3046]">
+                      Hi! Give me any website — yours or a client&apos;s — and in about 30 seconds I&apos;ll answer
+                      questions the way its receptionist would. <span className="font-semibold">Type it below.</span>
+                    </div>
+                  </div>
+                )}
 
-              {errorMessage && (
-                <p className="mt-3 flex items-center gap-1.5 text-xs font-medium text-rose-500">
-                  <AlertCircle className="h-3.5 w-3.5" /> {errorMessage}
-                </p>
-              )}
-
-              <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
-                <span className="text-xs text-[#9aa0b5]">Try:</span>
-                {SUGGESTED_SITES.map((site) => (
-                  <button
-                    key={site}
-                    type="button"
-                    onClick={() => setUrlInput(site)}
-                    className="press rounded-full border border-black/[0.08] bg-white px-3 py-1.5 text-xs font-medium text-[#5a6072] transition-colors hover:border-[#7677f4]/40 hover:text-[#5f60d8]"
-                  >
-                    {site}
-                  </button>
-                ))}
-              </div>
-
-              <p className="mt-6 text-[11px] text-[#b3b8c9]">Free · No signup · Takes about 30 seconds</p>
-            </div>
-          )}
-
-          {/* ── Scraping: friendly progress ── */}
-          {step === 'scraping' && (
-            <div className="flex flex-1 flex-col items-center justify-center px-6">
-              <div className="w-full max-w-sm">
-                <p className="text-center text-sm font-semibold text-[#171d3b]">
-                  Reading <span className="text-[#5f60d8]">{urlInput.replace(/^https?:\/\//, '')}</span>
-                </p>
-                <div className="mt-7 space-y-3.5">
-                  {CRAWL_STAGES.map((label, index) => {
-                    const done = index < activeStage
-                    const active = index === activeStage
-                    return (
-                      <div
-                        key={label}
-                        className={`flex items-center gap-3 transition-opacity duration-300 ${
-                          done || active ? 'opacity-100' : 'opacity-35'
-                        }`}
-                      >
-                        <span
-                          className={`grid h-6 w-6 shrink-0 place-items-center rounded-full transition-colors duration-300 ${
-                            done
-                              ? 'bg-emerald-100 text-emerald-600'
-                              : active
-                                ? 'bg-[#eef0ff] text-[#5f60d8]'
-                                : 'bg-black/[0.04] text-[#b3b8c9]'
-                          }`}
-                        >
-                          {done ? (
-                            <Check className="h-3.5 w-3.5" />
-                          ) : active ? (
-                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                          ) : (
-                            <span className="h-1.5 w-1.5 rounded-full bg-current" />
-                          )}
-                        </span>
-                        <span className={`text-sm ${done || active ? 'font-medium text-[#171d3b]' : 'text-[#9aa0b5]'}`}>
-                          {label}
-                        </span>
+                {step === 'scraping' && (
+                  <div className="sandbox-msg mt-4 flex justify-start">
+                    <div className="w-[85%] max-w-[320px] rounded-2xl rounded-bl-md border border-black/[0.06] bg-[#f4f5fa] px-4 py-3.5">
+                      <p className="text-[13px] font-semibold text-[#171d3b]">
+                        Reading <span className="text-[#5f60d8]">{crawlUrl}</span>…
+                      </p>
+                      <div className="mt-3 space-y-2">
+                        {CRAWL_STAGES.map((label, index) => {
+                          const done = index < activeStage
+                          const active = index === activeStage
+                          return (
+                            <div
+                              key={label}
+                              className={`flex items-center gap-2 text-xs transition-opacity duration-300 ${
+                                done || active ? 'text-[#3c4257] opacity-100' : 'text-[#9aa0b5] opacity-50'
+                              }`}
+                            >
+                              {done ? (
+                                <Check className="h-3.5 w-3.5 shrink-0 text-emerald-600" />
+                              ) : active ? (
+                                <Loader2 className="h-3.5 w-3.5 shrink-0 animate-spin text-[#5f60d8]" />
+                              ) : (
+                                <span className="grid h-3.5 w-3.5 shrink-0 place-items-center">
+                                  <span className="h-1 w-1 rounded-full bg-current" />
+                                </span>
+                              )}
+                              {label}
+                            </div>
+                          )
+                        })}
                       </div>
-                    )
-                  })}
-                </div>
-                <div className="mt-8 h-1.5 overflow-hidden rounded-full bg-black/[0.05]">
-                  <div
-                    className="h-full rounded-full bg-[#7677f4] transition-all duration-700 ease-out-strong"
-                    style={{ width: `${crawlProgress}%` }}
-                  />
-                </div>
+                      <div className="mt-3.5 h-1 overflow-hidden rounded-full bg-black/[0.06]">
+                        <div
+                          className="h-full rounded-full bg-[#7677f4] transition-all duration-700 ease-out-strong"
+                          style={{ width: `${crawlProgress}%` }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {step === 'idle' && (
+                  <div className="sandbox-msg mt-3 flex flex-wrap items-center gap-2 pl-1">
+                    <span className="text-[11px] text-[#9aa0b5]">Try one:</span>
+                    {SUGGESTED_SITES.map((site) => (
+                      <button
+                        key={site}
+                        type="button"
+                        onClick={() => startCrawl(site)}
+                        className="press rounded-full border border-black/[0.08] bg-white px-3 py-1.5 text-xs font-medium text-[#5a6072] shadow-sm transition-colors hover:border-[#7677f4]/40 hover:text-[#5f60d8]"
+                      >
+                        {site}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {errorMessage && step === 'idle' && (
+                  <p className="mt-3 flex items-center gap-1.5 pl-1 text-xs font-medium text-rose-500">
+                    <AlertCircle className="h-3.5 w-3.5 shrink-0" /> {errorMessage}
+                  </p>
+                )}
               </div>
-            </div>
+
+              {/* The chat input doubles as the URL bar */}
+              <div className="border-t border-black/[0.05] px-4 py-3">
+                <form onSubmit={handleStartCrawl} className="flex items-center gap-2">
+                  <div className="relative flex-1">
+                    <Globe className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#9aa0b5]" />
+                    <input
+                      type="text"
+                      disabled={step === 'scraping'}
+                      placeholder={step === 'scraping' ? `Reading ${crawlUrl}…` : 'Type a website — e.g. yourclient.com'}
+                      value={urlInput}
+                      onChange={(e) => setUrlInput(e.target.value)}
+                      className="h-11 w-full rounded-xl bg-[#f2f3f8] pl-11 pr-4 text-sm text-[#171d3b] placeholder:text-[#9aa0b5] transition-shadow focus:outline-none focus:ring-4 focus:ring-[#7677f4]/15 disabled:opacity-60"
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={step === 'scraping' || !urlInput.trim()}
+                    aria-label="Build the assistant"
+                    className="press grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[#7677f4] text-white shadow-[0_10px_24px_-8px_rgba(118,119,244,0.7)] transition-colors hover:bg-[#696ae6] disabled:opacity-30"
+                  >
+                    {step === 'scraping' ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowUp className="h-4 w-4" />}
+                  </button>
+                </form>
+                <p className="mt-2 text-center text-[10px] text-[#b3b8c9]">
+                  Free · no signup · this is the exact widget your clients&apos; visitors get
+                </p>
+              </div>
+            </>
           )}
 
           {/* ── Chatting ── */}
