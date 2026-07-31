@@ -131,8 +131,8 @@ function VerticalsMarquee() {
   )
 
   return (
-    <div className="relative overflow-hidden py-2 [mask-image:linear-gradient(to_right,transparent,black_12%,black_88%,transparent)]">
-      <div className="flex w-max motion-reduce:animate-none">
+    <div className="group relative overflow-hidden py-2 [mask-image:linear-gradient(to_right,transparent,black_12%,black_88%,transparent)]">
+      <div className="flex w-max group-hover:[&>div]:[animation-play-state:paused] motion-reduce:animate-none">
         {items(false)}
         {items(true)}
       </div>
@@ -179,7 +179,14 @@ export default function Home() {
                     preserveAspectRatio="none"
                     aria-hidden="true"
                   >
-                    <path d="M2 9C60 3 150 2 298 7" stroke="currentColor" strokeWidth="5" strokeLinecap="round" />
+                    <path
+                      className="draw-underline"
+                      pathLength={1}
+                      d="M2 9C60 3 150 2 298 7"
+                      stroke="currentColor"
+                      strokeWidth="5"
+                      strokeLinecap="round"
+                    />
                   </svg>
                 </span>{' '}
                 that never sleeps.
@@ -275,8 +282,10 @@ export default function Home() {
           </div>
 
           <div className="relative mt-16 grid gap-5 lg:grid-cols-3">
-            {/* Connecting line (desktop) */}
-            <div className="absolute left-[16%] right-[16%] top-12 hidden border-t-2 border-dashed border-[#7677f4]/25 lg:block" />
+            {/* Connecting line draws itself as the steps appear (desktop) */}
+            <Reveal className="absolute left-[16%] right-[16%] top-12 hidden lg:block">
+              <div className="draw-line border-t-2 border-dashed border-[#7677f4]/25" />
+            </Reveal>
             {STEPS.map((step, index) => (
               <Reveal key={step.number} delay={index * 120} className="relative">
                 <article className="group h-full rounded-[24px] border border-black/[0.07] bg-[#fbfbfd] p-7 transition-all duration-300 ease-out-strong hover:-translate-y-1 hover:shadow-[0_24px_60px_-20px_rgba(23,29,59,0.18)] sm:p-8">
@@ -307,9 +316,93 @@ export default function Home() {
             </h2>
           </Reveal>
 
-          <div className="mt-14 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-            {FEATURES.map((feature, index) => (
-              <Reveal key={feature.title} delay={(index % 3) * 100}>
+          <div className="mt-14 grid gap-5 lg:grid-cols-6">
+            {/* Bento cell: brand — three client widgets, one platform */}
+            <Reveal className="lg:col-span-4">
+              <div className="group h-full rounded-[24px] border border-black/[0.07] bg-white p-7 transition-all duration-300 ease-out-strong hover:-translate-y-1 hover:border-[#7677f4]/30 hover:shadow-[0_24px_60px_-20px_rgba(23,29,59,0.15)] sm:p-8">
+                <div className="grid gap-7 sm:grid-cols-[1fr_240px] sm:items-center">
+                  <div>
+                    <span className="grid h-11 w-11 place-items-center rounded-xl bg-[#eef0ff] text-[#5f60d8] transition-colors duration-300 group-hover:bg-[#7677f4] group-hover:text-white">
+                      <Palette className="h-5 w-5" />
+                    </span>
+                    <h3 className="mt-6 font-heading text-lg font-bold tracking-tight">{FEATURES[0].title}</h3>
+                    <p className="mt-2.5 text-[15px] leading-7 text-[#5a6072]">{FEATURES[0].copy}</p>
+                  </div>
+                  <div aria-hidden="true" className="rounded-2xl bg-[#f6f7fb] p-4">
+                    {[
+                      ['Northstar Dental', '#7677f4', 'ml-0'],
+                      ['Luma Fitness', '#10b981', 'ml-5'],
+                      ['Aster & Co.', '#f59e0b', 'ml-10'],
+                    ].map(([name, color, offset], i) => (
+                      <div
+                        key={name}
+                        className={`${offset} ${i > 0 ? 'mt-2.5' : ''} flex w-fit items-center gap-2 rounded-xl px-3.5 py-2 text-xs font-semibold text-white shadow-sm transition-transform duration-300 ease-out-strong group-hover:translate-x-1`}
+                        style={{ backgroundColor: color as string, transitionDelay: `${i * 60}ms` }}
+                      >
+                        <span className="relative grid h-5 w-5 place-items-center rounded-full bg-white/20 text-[9px] font-bold">
+                          {(name as string)[0]}
+                          <span className="absolute -bottom-0.5 -right-0.5 h-1.5 w-1.5 rounded-full bg-emerald-300" />
+                        </span>
+                        {name}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </Reveal>
+
+            {[FEATURES[1], FEATURES[2]].map((feature, index) => (
+              <Reveal key={feature.title} delay={100 + index * 100} className="lg:col-span-2">
+                <div className="group h-full rounded-[24px] border border-black/[0.07] bg-white p-7 transition-all duration-300 ease-out-strong hover:-translate-y-1 hover:border-[#7677f4]/30 hover:shadow-[0_24px_60px_-20px_rgba(23,29,59,0.15)] sm:p-8">
+                  <span className="grid h-11 w-11 place-items-center rounded-xl bg-[#eef0ff] text-[#5f60d8] transition-colors duration-300 group-hover:bg-[#7677f4] group-hover:text-white">
+                    <feature.icon className="h-5 w-5" />
+                  </span>
+                  <h3 className="mt-6 font-heading text-lg font-bold tracking-tight">{feature.title}</h3>
+                  <p className="mt-2.5 text-[15px] leading-7 text-[#5a6072]">{feature.copy}</p>
+                </div>
+              </Reveal>
+            ))}
+
+            {/* Bento cell: inbox — conversations become leads and bookings */}
+            <Reveal delay={100} className="lg:col-span-4">
+              <div className="group h-full rounded-[24px] border border-black/[0.07] bg-white p-7 transition-all duration-300 ease-out-strong hover:-translate-y-1 hover:border-[#7677f4]/30 hover:shadow-[0_24px_60px_-20px_rgba(23,29,59,0.15)] sm:p-8">
+                <div className="grid gap-7 sm:grid-cols-[1fr_260px] sm:items-center">
+                  <div>
+                    <span className="grid h-11 w-11 place-items-center rounded-xl bg-[#eef0ff] text-[#5f60d8] transition-colors duration-300 group-hover:bg-[#7677f4] group-hover:text-white">
+                      <Inbox className="h-5 w-5" />
+                    </span>
+                    <h3 className="mt-6 font-heading text-lg font-bold tracking-tight">{FEATURES[4].title}</h3>
+                    <p className="mt-2.5 text-[15px] leading-7 text-[#5a6072]">{FEATURES[4].copy}</p>
+                  </div>
+                  <div aria-hidden="true" className="space-y-2 rounded-2xl bg-[#f6f7fb] p-3.5">
+                    {[
+                      ['S', 'Sarah M.', 'Can I book Thursday?', 'Booked', '#059669', '#d1fae5'],
+                      ['J', 'James K.', 'How much is a repair?', 'New lead', '#5f60d8', '#e5e6ff'],
+                      ['P', 'Priya R.', 'Do you take walk-ins?', 'Replying', '#8a8fa5', '#eef0f4'],
+                    ].map(([initial, name, snippet, badge, badgeColor, badgeBg]) => (
+                      <div key={name as string} className="flex items-center gap-2.5 rounded-xl border border-black/[0.05] bg-white px-3 py-2">
+                        <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-[#eef0ff] text-[10px] font-bold text-[#5f60d8]">
+                          {initial}
+                        </span>
+                        <span className="min-w-0 flex-1">
+                          <span className="block truncate text-[11px] font-bold text-[#171d3b]">{name}</span>
+                          <span className="block truncate text-[10px] text-[#9aa0b5]">{snippet}</span>
+                        </span>
+                        <span
+                          className="shrink-0 rounded-full px-2 py-0.5 text-[9px] font-bold"
+                          style={{ color: badgeColor as string, backgroundColor: badgeBg as string }}
+                        >
+                          {badge}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </Reveal>
+
+            {[FEATURES[3], FEATURES[5]].map((feature, index) => (
+              <Reveal key={feature.title} delay={200 + index * 100} className="lg:col-span-3">
                 <div className="group h-full rounded-[24px] border border-black/[0.07] bg-white p-7 transition-all duration-300 ease-out-strong hover:-translate-y-1 hover:border-[#7677f4]/30 hover:shadow-[0_24px_60px_-20px_rgba(23,29,59,0.15)] sm:p-8">
                   <span className="grid h-11 w-11 place-items-center rounded-xl bg-[#eef0ff] text-[#5f60d8] transition-colors duration-300 group-hover:bg-[#7677f4] group-hover:text-white">
                     <feature.icon className="h-5 w-5" />
@@ -344,10 +437,11 @@ export default function Home() {
                 <span>The duct-tape way</span>
                 <span className="text-[#5f60d8]">With ChatDock</span>
               </div>
-              {COMPARISON.map(([area, before, after]) => (
+              {COMPARISON.map(([area, before, after], rowIndex) => (
                 <div
                   key={area}
-                  className="grid grid-cols-1 gap-3 border-b border-black/[0.05] px-5 py-5 last:border-0 sm:grid-cols-[0.8fr_1fr_1fr] sm:gap-5 sm:px-7"
+                  className="stagger-item grid grid-cols-1 gap-3 border-b border-black/[0.05] px-5 py-5 last:border-0 sm:grid-cols-[0.8fr_1fr_1fr] sm:gap-5 sm:px-7"
+                  style={{ '--stagger-delay': `${200 + rowIndex * 110}ms` } as React.CSSProperties}
                 >
                   <p className="text-sm font-semibold text-[#171d3b]">{area}</p>
                   <p className="text-[13px] leading-6 text-[#9aa0b5] sm:line-through sm:decoration-[#d9dbe6]">{before}</p>
