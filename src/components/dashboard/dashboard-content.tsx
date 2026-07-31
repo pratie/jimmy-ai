@@ -95,7 +95,8 @@ export default function DashboardContent({ conversations, leads, appointments, p
   const router = useRouter()
   const { selectAgent } = useAgent()
   const [query, setQuery] = useState('')
-  const [showCreate, setShowCreate] = useState(false)
+  // New accounts land directly in the setup wizard instead of an empty dashboard
+  const [showCreate, setShowCreate] = useState(domains.length === 0)
 
   const totalKnownLeads = domains.reduce((sum, domain) => sum + (domain.customer || []).filter((customer) => customer.email).length, 0)
   const liveAgents = domains.filter((domain) => workspaceState(domain).label === 'Live').length
