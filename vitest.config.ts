@@ -1,6 +1,15 @@
 import { defineConfig } from 'vitest/config'
 import { fileURLToPath } from 'node:url'
 
+// Load .env.local here rather than relying on `node --env-file` in the npm
+// script, so `npx vitest` and IDE test runners work identically. A suite that
+// only passes when launched one specific way is a suite people stop running.
+try {
+  process.loadEnvFile('.env.local')
+} catch {
+  // Already loaded, or running in CI where the env is injected directly.
+}
+
 export default defineConfig({
   test: {
     // These suites talk to a real Postgres — they exist to prove tenant

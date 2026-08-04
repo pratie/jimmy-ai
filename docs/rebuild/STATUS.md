@@ -119,14 +119,38 @@ wrong reason, and nobody would know.
 > Supabase. Moving to a local Postgres for tests would cut this to seconds and is
 > worth doing before the suite grows.
 
-## Next up
+## Backend port — in progress
 
-1. **Provider interfaces** — crawl / extract / embed / rerank, so Firecrawl can
-   be swapped without touching product code.
-2. **Backend port** — 208 TS errors across ~14 files; this is what brings the
-   site back up.
-3. **Rate limiting** on the public chat endpoint — must exist before production
-   traffic returns.
+**209 → 125 type errors.** The build still does not compile and the site is
+still down.
+
+| Area | Status |
+|---|---|
+| `lib/tenant.ts` — Clerk → org → workspace resolution | ✅ |
+| `lib/knowledge/ingest.ts` — source/document/chunk lifecycle + jobs | ✅ |
+| `lib/widget/resolve.ts` — public widget auth + rate limit | ✅ built, **not yet wired** |
+| `lib/vector-search.ts` — tenant-scoped retrieval | ✅ |
+| actions: auth, settings, dashboard, conversation, appointment, firecrawl | ✅ |
+| `api/bot/stream` route (17) | ⬜ resolver exists, needs wiring |
+| `actions/bot` (17) | ⬜ |
+| `hooks/firecrawl/use-scrape` (29) | ⬜ consumes old return shapes |
+| Dodo billing + webhook + payments (21) | ⬜ |
+| `actions/mail` (9) | ⬜ |
+| dashboard pages + UI wiring (~30) | ⬜ |
+
+### Remaining known risks
+
+- **The rate limiter is process-local.** It stops casual abuse of the public
+  chat endpoint, not a distributed attack. Move to Redis or an edge limiter
+  before real traffic returns.
+- **The widget still sends a raw id.** `lib/widget/resolve.ts` expects an
+  `AssistantDeployment.publicKey`; `public/embed.min.js` and the chatbot
+  components must be updated to send one before the new endpoint goes live.
+- **Prompt injection** — `formatResultsForPrompt` now fences retrieved content
+  and labels it untrusted, but callers must keep it in a user/context message.
+  Never concatenate it into `Assistant.systemInstructions`.
+- **Supabase RLS** is still unconfigured. Application-level scoping is proven by
+  the test suite; row-level policies would be defence in depth.
 
 ## Phase 8 (frontend) — parked ideas
 
