@@ -16,6 +16,13 @@
  * OpenAI calls. That keeps seeding free and reproducible, and it is sufficient
  * for what the seed is for — exercising tenant SCOPING of retrieval, which is
  * the security-critical property. Semantic quality is not being tested here.
+ *
+ * ⚠ CONSEQUENCE: seeded chunks live in a different vector space from real
+ * queries, which are embedded with OpenAI. So a live chat against seeded data
+ * retrieves ZERO chunks and the assistant answers ungrounded — it will invent
+ * plausible hours and prices. That is expected, and it is a neat demonstration
+ * of why grounding matters. To exercise real retrieval, ingest a real website
+ * through the knowledge UI instead of relying on this seed.
  */
 
 import { PrismaClient } from '@prisma/client'

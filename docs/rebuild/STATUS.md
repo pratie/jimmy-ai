@@ -2,12 +2,25 @@
 
 Live tracker for the agency-first rebuild. Updated 2026-08-04.
 
-## ⚠ Current state
+## Current state
 
-**www.chatdock.io is DOWN.** The production database now holds the new schema;
-the deployed application code still targets the old one. This downtime was
-chosen deliberately (see §"Target DB" decision) and lasts until the backend port
-lands in Phase 5.
+**The backend port is complete.** 209 → 0 type errors, `npm run build` compiles,
+30/30 pages generate, and the 26-test tenant-isolation suite passes.
+
+Verified live against the dev server on the rebuilt production database:
+
+| Check | Result |
+|---|---|
+| Public chat, valid key + allowed origin | ✅ streams a grounded-format reply |
+| Conversation / message persistence | ✅ 2 messages, correct roles, model recorded |
+| Usage attribution | ✅ `assistant_message` against org + workspace + assistant |
+| Unknown or revoked key | ✅ 404 `unknown_deployment` (indistinguishable, by design) |
+| Disallowed origin | ✅ 403 `origin_not_allowed` |
+| Rate limit | ✅ 20/min then 429, bucketed per visitor |
+
+Not yet redeployed — `www.chatdock.io` still runs the old build. The widget
+contract change (raw id → `AssistantDeployment.publicKey`) must land in
+`public/embed.min.js` before deploying, or existing installs break.
 
 Rollback path if production must be restored:
 1. `docs/rebuild/legacy-sql/schema.legacy.prisma` → `prisma/schema.prisma`

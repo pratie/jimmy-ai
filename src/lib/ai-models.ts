@@ -13,8 +13,16 @@ const anthropic = createAnthropic({
   apiKey: process.env.ANTHROPIC_API_KEY || 'build_time_dummy_anthropic_key'
 })
 
+// Accepts either name. GOOGLE_GENERATIVE_AI_API_KEY is what the AI SDK reads by
+// default and what this project's environment actually sets; the code only ever
+// read GEMINI_API_KEY, so it silently fell back to the dummy key below and every
+// Gemini call failed with API_KEY_INVALID. Since gemini-2.5-flash-lite is the
+// default assistant model, that broke the default chat path outright.
 const google = createGoogleGenerativeAI({
-  apiKey: process.env.GEMINI_API_KEY || 'build_time_dummy_gemini_key'
+  apiKey:
+    process.env.GEMINI_API_KEY ||
+    process.env.GOOGLE_GENERATIVE_AI_API_KEY ||
+    'build_time_dummy_gemini_key'
 })
 
 /**
