@@ -18,9 +18,19 @@ Verified live against the dev server on the rebuilt production database:
 | Disallowed origin | ✅ 403 `origin_not_allowed` |
 | Rate limit | ✅ 20/min then 429, bucketed per visitor |
 
-Not yet redeployed — `www.chatdock.io` still runs the old build. The widget
-contract change (raw id → `AssistantDeployment.publicKey`) must land in
-`public/embed.min.js` before deploying, or existing installs break.
+The widget contract has landed: `public/embed.min.js` now sends `data-key`
+(an `AssistantDeployment.publicKey`), the settings panel issues and rotates one,
+and the marketing site's self-embed is env-driven.
+
+**Ready to deploy, with three caveats:**
+
+1. Every pre-existing embed on a client site is dead regardless of this change —
+   the ids they carried referenced rows the rebuild removed. Each live client
+   needs the new snippet copied from Settings → Code snippet.
+2. `NEXT_PUBLIC_CHATDOCK_WIDGET_KEY` must be set in Vercel or the marketing site
+   renders no widget of its own (deliberate — better than a broken one).
+3. Vercel already sets `GOOGLE_GENERATIVE_AI_API_KEY`; the code now reads it.
+   No action needed, but it is what fixed the default chat model.
 
 Rollback path if production must be restored:
 1. `docs/rebuild/legacy-sql/schema.legacy.prisma` → `prisma/schema.prisma`
