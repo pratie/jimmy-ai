@@ -13,6 +13,7 @@ import {
   Sparkles,
 } from 'lucide-react'
 import { onGeneratePreviewContext } from '@/actions/landing'
+import { LANDING_EVENTS, track } from '@/lib/analytics'
 
 type Role = 'user' | 'assistant'
 
@@ -23,9 +24,22 @@ interface ChatMessage {
 
 type SandboxStep = 'idle' | 'scraping' | 'chatting' | 'cta'
 
-const SUGGESTED_SITES = ['stripe.com', 'notion.so', 'airbnb.com']
+/**
+ * Examples deliberately match the ICP's client roster — a dental group, a home-
+ * services company and a law firm — rather than Stripe/Notion/Airbnb, which
+ * demo well and sell nothing to an agency running local-business websites.
+ */
+const SUGGESTED_SITES: { url: string; label: string }[] = [
+  { url: 'aspendental.com', label: 'Dental clinic' },
+  { url: 'arsrescuerooter.com', label: 'HVAC company' },
+  { url: 'morganandmorgan.com', label: 'Law firm' },
+]
 
-const SUGGESTED_QUESTIONS = ['What do you offer?', 'How much does it cost?', 'How do I get in touch?']
+const SUGGESTED_QUESTIONS = [
+  'What services do you offer?',
+  'How much does it cost?',
+  'Can I book an appointment?',
+]
 
 const CRAWL_STAGES = [
   'Reading pages, services & pricing',
@@ -77,13 +91,13 @@ function GhostConversation() {
         <div key={index} className={`flex ${row.side === 'right' ? 'justify-end' : 'justify-start'}`}>
           <div
             className={`space-y-2 rounded-2xl px-4 py-3 ${
-              row.side === 'right' ? 'rounded-br-md bg-[#7677f4]/10' : 'rounded-bl-md bg-[#f4f5fa]'
+              row.side === 'right' ? 'rounded-br-md bg-[#5B5CE2]/10' : 'rounded-bl-md bg-[#F7F8FA]'
             }`}
           >
             {row.widths.map((width, i) => (
               <div
                 key={i}
-                className={`h-2 rounded-full ${row.side === 'right' ? 'bg-[#7677f4]/25' : 'bg-[#171d3b]/10'}`}
+                className={`h-2 rounded-full ${row.side === 'right' ? 'bg-[#5B5CE2]/25' : 'bg-[#0E1726]/10'}`}
                 style={{ width }}
               />
             ))}
@@ -149,12 +163,22 @@ export default function InteractivePreviewChat() {
     return () => clearInterval(timer)
   }
 
-  const startCrawl = async (rawUrl: string) => {
+  /**
+   * A failure here has to say what went wrong and what to do next — an
+   * indefinite spinner or a bare "something went wrong" is the fastest way to
+   * lose a visitor who was one click from understanding the product.
+   */
+  const FALLBACK_ERROR =
+    'We could not read enough public content from this website. Try another URL, or create an account to upload documents the assistant can learn from.'
+
+  const startCrawl = async (rawUrl: string, source: 'input' | 'example' = 'input') => {
     const target = rawUrl.trim()
     if (!target || step === 'scraping') return
 
+    setErrorMessage('')
     setCrawlUrl(target.replace(/^https?:\/\//, ''))
     setStep('scraping')
+    track(LANDING_EVENTS.demoUrlSubmitted, { source })
     const cleanupProgress = runCrawlerProgress()
 
     try {
@@ -170,13 +194,16 @@ export default function InteractivePreviewChat() {
           },
         ])
         setStep('chatting')
+        track(LANDING_EVENTS.demoGenerated, { grounded: !response.data.isFallback })
       } else {
-        setErrorMessage(response.message || 'I could not read that website — try another one?')
+        setErrorMessage(response.message || FALLBACK_ERROR)
         setStep('idle')
+        track(LANDING_EVENTS.demoFailed, { reason: 'no_content' })
       }
     } catch (err: any) {
-      setErrorMessage(err.message || 'Something went wrong while reading the site.')
+      setErrorMessage(FALLBACK_ERROR)
       setStep('idle')
+      track(LANDING_EVENTS.demoFailed, { reason: err?.message ? 'exception' : 'unknown' })
     } finally {
       cleanupProgress()
     }
@@ -193,6 +220,9 @@ export default function InteractivePreviewChat() {
 
     const userMessage: ChatMessage = { role: 'user', content: trimmed }
     const updatedMessages = [...messages, userMessage]
+    // messages[0] is the assistant's greeting, so length 1 means this is the
+    // visitor's very first turn.
+    if (messages.length === 1) track(LANDING_EVENTS.demoConversationStarted)
     setMessages(updatedMessages)
     setInputVal('')
     setIsTyping(true)
@@ -280,13 +310,10 @@ export default function InteractivePreviewChat() {
 
   return (
     <div className="relative mx-auto w-full max-w-2xl">
-      {/* Soft glow, same language as the hero widget */}
-      <div className="absolute -inset-6 rounded-[2.5rem] bg-gradient-to-br from-primary/20 via-primary/5 to-emerald-400/15 blur-2xl" />
-
-      <div className="relative overflow-hidden rounded-[1.6rem] border border-black/[0.07] bg-white shadow-[0_40px_100px_-30px_rgba(23,29,59,0.4)]">
+      <div className="relative overflow-hidden rounded-2xl border border-[#E4E7EC] bg-white shadow-[0_16px_48px_-24px_rgba(16,24,40,0.28)]">
         {/* Header — matches the hero demo widget */}
-        <div className="flex items-center gap-3 border-b border-black/[0.05] bg-[#171d3b] px-5 py-4">
-          <span className="relative grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[#7677f4] text-sm font-bold text-white">
+        <div className="flex items-center gap-3 border-b border-black/[0.05] bg-[#0E1726] px-5 py-4">
+          <span className="relative grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[#5B5CE2] text-sm font-bold text-white">
             {step === 'scraping' ? (
               <Loader2 className="h-4 w-4 animate-spin" />
             ) : headerAvatar ? (
@@ -295,7 +322,7 @@ export default function InteractivePreviewChat() {
               <Sparkles className="h-4 w-4" />
             )}
             <span
-              className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-[#171d3b] ${
+              className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-[#0E1726] ${
                 step === 'scraping' ? 'animate-pulse bg-amber-400' : 'bg-emerald-400'
               }`}
             />
@@ -334,7 +361,7 @@ export default function InteractivePreviewChat() {
 
                 {step === 'idle' && (
                   <div className="sandbox-msg mt-4 flex justify-start">
-                    <div className="max-w-[85%] rounded-2xl rounded-bl-md border border-black/[0.06] bg-[#f4f5fa] px-4 py-3 text-[13px] leading-relaxed text-[#2b3046]">
+                    <div className="max-w-[85%] rounded-2xl rounded-bl-md border border-black/[0.06] bg-[#F7F8FA] px-4 py-3 text-[13px] leading-relaxed text-[#2b3046]">
                       Hi! Give me any website — yours or a client&apos;s — and in about 30 seconds I&apos;ll answer
                       questions the way its receptionist would. <span className="font-semibold">Type it below.</span>
                     </div>
@@ -343,9 +370,9 @@ export default function InteractivePreviewChat() {
 
                 {step === 'scraping' && (
                   <div className="sandbox-msg mt-4 flex justify-start">
-                    <div className="w-[85%] max-w-[320px] rounded-2xl rounded-bl-md border border-black/[0.06] bg-[#f4f5fa] px-4 py-3.5">
-                      <p className="text-[13px] font-semibold text-[#171d3b]">
-                        Reading <span className="text-[#5f60d8]">{crawlUrl}</span>…
+                    <div className="w-[85%] max-w-[320px] rounded-2xl rounded-bl-md border border-black/[0.06] bg-[#F7F8FA] px-4 py-3.5">
+                      <p className="text-[13px] font-semibold text-[#0E1726]">
+                        Reading <span className="text-[#5B5CE2]">{crawlUrl}</span>…
                       </p>
                       <div className="mt-3 space-y-2">
                         {CRAWL_STAGES.map((label, index) => {
@@ -355,13 +382,13 @@ export default function InteractivePreviewChat() {
                             <div
                               key={label}
                               className={`flex items-center gap-2 text-xs transition-opacity duration-300 ${
-                                done || active ? 'text-[#3c4257] opacity-100' : 'text-[#9aa0b5] opacity-50'
+                                done || active ? 'text-[#3c4257] opacity-100' : 'text-[#667085] opacity-50'
                               }`}
                             >
                               {done ? (
                                 <Check className="h-3.5 w-3.5 shrink-0 text-emerald-600" />
                               ) : active ? (
-                                <Loader2 className="h-3.5 w-3.5 shrink-0 animate-spin text-[#5f60d8]" />
+                                <Loader2 className="h-3.5 w-3.5 shrink-0 animate-spin text-[#5B5CE2]" />
                               ) : (
                                 <span className="grid h-3.5 w-3.5 shrink-0 place-items-center">
                                   <span className="h-1 w-1 rounded-full bg-current" />
@@ -374,7 +401,7 @@ export default function InteractivePreviewChat() {
                       </div>
                       <div className="mt-3.5 h-1 overflow-hidden rounded-full bg-black/[0.06]">
                         <div
-                          className="h-full rounded-full bg-[#7677f4] transition-all duration-700 ease-out-strong"
+                          className="h-full rounded-full bg-[#5B5CE2] transition-all duration-700 ease-out-strong"
                           style={{ width: `${crawlProgress}%` }}
                         />
                       </div>
@@ -384,15 +411,16 @@ export default function InteractivePreviewChat() {
 
                 {step === 'idle' && (
                   <div className="sandbox-msg mt-3 flex flex-wrap items-center gap-2 pl-1">
-                    <span className="text-[11px] text-[#9aa0b5]">Try one:</span>
+                    <span className="text-[11px] text-[#667085]">Or try one of these:</span>
                     {SUGGESTED_SITES.map((site) => (
                       <button
-                        key={site}
+                        key={site.url}
                         type="button"
-                        onClick={() => startCrawl(site)}
-                        className="press rounded-full border border-black/[0.08] bg-white px-3 py-1.5 text-xs font-medium text-[#5a6072] shadow-sm transition-colors hover:border-[#7677f4]/40 hover:text-[#5f60d8]"
+                        onClick={() => startCrawl(site.url, 'example')}
+                        className="press rounded-full border border-black/[0.08] bg-white px-3 py-1.5 text-xs font-medium text-[#667085] shadow-sm transition-colors hover:border-[#5B5CE2]/40 hover:text-[#5B5CE2]"
                       >
-                        {site}
+                        {site.label}
+                        <span className="ml-1.5 text-[#667085]">{site.url}</span>
                       </button>
                     ))}
                   </div>
@@ -409,27 +437,36 @@ export default function InteractivePreviewChat() {
               <div className="border-t border-black/[0.05] px-4 py-3">
                 <form onSubmit={handleStartCrawl} className="flex items-center gap-2">
                   <div className="relative flex-1">
-                    <Globe className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#9aa0b5]" />
+                    <Globe className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#667085]" />
                     <input
                       type="text"
                       disabled={step === 'scraping'}
                       placeholder={step === 'scraping' ? `Reading ${crawlUrl}…` : 'Type a website — e.g. yourclient.com'}
                       value={urlInput}
                       onChange={(e) => setUrlInput(e.target.value)}
-                      className="h-11 w-full rounded-xl bg-[#f2f3f8] pl-11 pr-4 text-sm text-[#171d3b] placeholder:text-[#9aa0b5] transition-shadow focus:outline-none focus:ring-4 focus:ring-[#7677f4]/15 disabled:opacity-60"
+                      className="h-11 w-full rounded-xl bg-[#F7F8FA] pl-11 pr-4 text-sm text-[#0E1726] placeholder:text-[#667085] transition-shadow focus:outline-none focus:ring-4 focus:ring-[#5B5CE2]/15 disabled:opacity-60"
                     />
                   </div>
                   <button
                     type="submit"
                     disabled={step === 'scraping' || !urlInput.trim()}
-                    aria-label="Build the assistant"
-                    className="press grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[#7677f4] text-white shadow-[0_10px_24px_-8px_rgba(118,119,244,0.7)] transition-colors hover:bg-[#696ae6] disabled:opacity-30"
+                    className="press inline-flex h-11 shrink-0 items-center justify-center gap-1.5 rounded-xl bg-[#5B5CE2] px-3 text-[13.5px] font-semibold text-white transition-colors hover:bg-[#4A4BD0] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5B5CE2] focus-visible:ring-offset-2 disabled:opacity-30 sm:px-4"
                   >
-                    {step === 'scraping' ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowUp className="h-4 w-4" />}
+                    {step === 'scraping' ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <span className="hidden sm:inline">Reading…</span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="hidden sm:inline">Create the assistant</span>
+                        <ArrowUp className="h-4 w-4 sm:hidden" />
+                      </>
+                    )}
                   </button>
                 </form>
-                <p className="mt-2 text-center text-[10px] text-[#b3b8c9]">
-                  Free · no signup · this is the exact widget your clients&apos; visitors get
+                <p className="mt-2 text-center text-[10.5px] text-[#667085]">
+                  No signup · no card · this is the exact widget your clients&apos; visitors get
                 </p>
               </div>
             </>
@@ -451,8 +488,8 @@ export default function InteractivePreviewChat() {
                     <div
                       className={`max-w-[85%] whitespace-pre-wrap rounded-2xl px-4 py-2.5 text-[13px] leading-relaxed ${
                         msg.role === 'user'
-                          ? 'rounded-br-md bg-[#7677f4] text-white'
-                          : 'rounded-bl-md border border-black/[0.06] bg-[#f4f5fa] text-[#2b3046]'
+                          ? 'rounded-br-md bg-[#5B5CE2] text-white'
+                          : 'rounded-bl-md border border-black/[0.06] bg-[#F7F8FA] text-[#2b3046]'
                       }`}
                     >
                       {renderSandboxContent(msg.content)}
@@ -466,8 +503,11 @@ export default function InteractivePreviewChat() {
                       <button
                         key={q}
                         type="button"
-                        onClick={() => sendMessage(q)}
-                        className="press rounded-full border border-black/[0.08] bg-white px-3 py-1.5 text-xs font-medium text-[#5a6072] shadow-sm transition-colors hover:border-[#7677f4]/40 hover:text-[#5f60d8]"
+                        onClick={() => {
+                          track(LANDING_EVENTS.demoSuggestedQuestionClicked, { question: q })
+                          sendMessage(q)
+                        }}
+                        className="press rounded-full border border-black/[0.08] bg-white px-3 py-1.5 text-xs font-medium text-[#667085] shadow-sm transition-colors hover:border-[#5B5CE2]/40 hover:text-[#5B5CE2]"
                       >
                         {q}
                       </button>
@@ -477,19 +517,19 @@ export default function InteractivePreviewChat() {
 
                 {isTyping && displayedText && (
                   <div className="flex justify-start">
-                    <div className="max-w-[85%] whitespace-pre-wrap rounded-2xl rounded-bl-md border border-black/[0.06] bg-[#f4f5fa] px-4 py-2.5 text-[13px] leading-relaxed text-[#2b3046]">
+                    <div className="max-w-[85%] whitespace-pre-wrap rounded-2xl rounded-bl-md border border-black/[0.06] bg-[#F7F8FA] px-4 py-2.5 text-[13px] leading-relaxed text-[#2b3046]">
                       {renderSandboxContent(displayedText)}
-                      <span className="ml-0.5 inline-block h-3.5 w-0.5 animate-pulse bg-[#7677f4] align-middle" />
+                      <span className="ml-0.5 inline-block h-3.5 w-0.5 animate-pulse bg-[#5B5CE2] align-middle" />
                     </div>
                   </div>
                 )}
 
                 {isTyping && !displayedText && (
                   <div className="sandbox-msg flex justify-start">
-                    <div className="flex items-center gap-1.5 rounded-2xl rounded-bl-md border border-black/[0.06] bg-[#f4f5fa] px-4 py-3">
-                      <span className="sandbox-dot h-1.5 w-1.5 rounded-full bg-[#9aa0b5]" />
-                      <span className="sandbox-dot h-1.5 w-1.5 rounded-full bg-[#9aa0b5]" style={{ animationDelay: '150ms' }} />
-                      <span className="sandbox-dot h-1.5 w-1.5 rounded-full bg-[#9aa0b5]" style={{ animationDelay: '300ms' }} />
+                    <div className="flex items-center gap-1.5 rounded-2xl rounded-bl-md border border-black/[0.06] bg-[#F7F8FA] px-4 py-3">
+                      <span className="sandbox-dot h-1.5 w-1.5 rounded-full bg-[#98A2B3]" />
+                      <span className="sandbox-dot h-1.5 w-1.5 rounded-full bg-[#98A2B3]" style={{ animationDelay: '150ms' }} />
+                      <span className="sandbox-dot h-1.5 w-1.5 rounded-full bg-[#98A2B3]" style={{ animationDelay: '300ms' }} />
                     </div>
                   </div>
                 )}
@@ -505,13 +545,13 @@ export default function InteractivePreviewChat() {
                     placeholder="Ask anything about this website…"
                     value={inputVal}
                     onChange={(e) => setInputVal(e.target.value)}
-                    className="h-11 flex-1 rounded-xl bg-[#f2f3f8] px-4 text-sm text-[#171d3b] placeholder:text-[#9aa0b5] transition-shadow focus:outline-none focus:ring-4 focus:ring-[#7677f4]/15 disabled:opacity-50"
+                    className="h-11 flex-1 rounded-xl bg-[#F7F8FA] px-4 text-sm text-[#0E1726] placeholder:text-[#667085] transition-shadow focus:outline-none focus:ring-4 focus:ring-[#5B5CE2]/15 disabled:opacity-50"
                   />
                   <button
                     type="submit"
                     disabled={isTyping || !inputVal.trim()}
                     aria-label="Send"
-                    className="press grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[#7677f4] text-white transition-colors hover:bg-[#696ae6] disabled:opacity-30"
+                    className="press grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[#5B5CE2] text-white transition-colors hover:bg-[#696ae6] disabled:opacity-30"
                   >
                     <Send className="h-4 w-4" />
                   </button>
@@ -529,17 +569,17 @@ export default function InteractivePreviewChat() {
               <span className="grid h-12 w-12 place-items-center rounded-2xl bg-emerald-100 text-emerald-600">
                 <CheckCircle2 className="h-6 w-6" />
               </span>
-              <h3 className="mt-5 font-heading text-xl font-bold tracking-tight text-[#171d3b] sm:text-2xl">
+              <h3 className="mt-5 font-heading text-xl font-bold tracking-tight text-[#0E1726] sm:text-2xl">
                 Now imagine this on a client&apos;s website
               </h3>
-              <p className="mx-auto mt-2.5 max-w-sm text-sm leading-6 text-[#5a6072]">
+              <p className="mx-auto mt-2.5 max-w-sm text-sm leading-6 text-[#667085]">
                 Everything it just said came from <strong>{siteData?.title}</strong>&apos;s real content. Launch the
                 same assistant — branded, qualifying leads, booking appointments — in an afternoon.
               </p>
               <div className="mt-7 flex w-full max-w-sm flex-col justify-center gap-2.5 sm:flex-row">
                 <a
                   href="/auth/sign-up"
-                  className="press inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-[#7677f4] text-sm font-semibold text-white shadow-[0_10px_24px_-8px_rgba(118,119,244,0.7)] transition-colors hover:bg-[#696ae6]"
+                  className="press inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-[#5B5CE2] text-sm font-semibold text-white shadow-[0_10px_24px_-8px_rgba(118,119,244,0.7)] transition-colors hover:bg-[#696ae6]"
                 >
                   Start free <Sparkles className="h-3.5 w-3.5" />
                 </a>
@@ -547,7 +587,7 @@ export default function InteractivePreviewChat() {
                   href="https://cal.com/prathap-reddy-caxwn4/15min"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="press inline-flex h-11 flex-1 items-center justify-center rounded-xl border border-black/[0.1] bg-white text-sm font-semibold text-[#171d3b] transition-colors hover:bg-black/[0.03]"
+                  className="press inline-flex h-11 flex-1 items-center justify-center rounded-xl border border-black/[0.1] bg-white text-sm font-semibold text-[#0E1726] transition-colors hover:bg-black/[0.03]"
                 >
                   Book a demo
                 </a>
@@ -555,7 +595,7 @@ export default function InteractivePreviewChat() {
               <button
                 type="button"
                 onClick={() => setStep('chatting')}
-                className="mt-5 text-xs font-semibold text-[#9aa0b5] transition-colors hover:text-[#5a6072]"
+                className="mt-5 text-xs font-semibold text-[#667085] transition-colors hover:text-[#667085]"
               >
                 Keep chatting instead
               </button>
