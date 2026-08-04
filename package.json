@@ -4,9 +4,24 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && next build",
+    "build": "prisma generate && prisma migrate deploy && next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy",
+    "db:status": "prisma migrate status",
+    "db:generate": "prisma generate",
+    "db:studio": "prisma studio",
+    "db:seed": "node --env-file=.env.local prisma/seed.mjs",
+    "db:audit": "node --env-file=.env.local scripts/audit-live-db.mjs",
+    "db:drift": "node --env-file=.env.local scripts/check-drift.mjs",
+    "db:backup": "node --env-file=.env.local scripts/backup-live-db.mjs",
+    "db:verify-backup": "node --env-file=.env.local scripts/verify-backup.mjs",
+    "db:verify-rebuild": "node --env-file=.env.local scripts/verify-rebuild.mjs",
+    "db:export-emails": "node --env-file=.env.local scripts/export-emails.ts",
+    "db:seed-plans": "node --env-file=.env.local prisma/seed-plans.mjs",
+    "test": "node --env-file=.env.local ./node_modules/vitest/vitest.mjs run",
+    "test:watch": "node --env-file=.env.local ./node_modules/vitest/vitest.mjs"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^2.0.40",
@@ -87,6 +102,7 @@
     "eslint-config-next": "15.5.7",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^2.1.9"
   }
 }

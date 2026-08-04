@@ -1,276 +1,1381 @@
+// ═══════════════════════════════════════════════════════════════════════════
+// ChatDock — agency-first multi-tenant schema (rebuild)
+//
+// STATUS: proposed. Not yet the live schema. Reviewed against
+// PRODUCT-OWNER-QUESTIONS.md, then promoted to prisma/schema.prisma as the
+// Phase 2 migration baseline.
+//
+// Design rules applied throughout:
+//
+// 1. TENANT SCOPING. Organization is the paying tenant; ClientWorkspace is the
+//    isolation boundary. Every row that can be read by a request carries
+//    clientWorkspaceId directly, even when it is reachable through a parent.
+//    This is deliberate denormalisation: it lets every query filter on the
+//    tenant in its own WHERE clause instead of trusting a join, and it makes an
+//    accidental cross-tenant read a missing-index problem rather than a silent
+//    data leak.
+//
+// 2. NO DESTRUCTIVE CASCADES ACROSS TENANT ROOTS. Deleting a person must never
+//    delete a business. User → membership cascades (the membership is the
+//    relationship). Everything authored by a user uses SetNull so history
+//    survives offboarding. Tenant roots soft-delete via deletedAt.
+//
+// 3. CHANNEL NEUTRALITY. Conversations, leads, bookings and usage are never
+//    tied to the web widget. The future_* enum values exist now because adding
+//    an enum value later is cheap, but restructuring a table is not. NO voice
+//    tables are created — only the seams.
+//
+// 4. MONEY IS ALWAYS (integer minor units + ISO currency). Never a float.
+// ═══════════════════════════════════════════════════════════════════════════
+
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  directUrl  = env("DIRECT_URL")
+  extensions = [vector, pgcrypto]
 }
 
+// ─────────────────────────────────────────────────────────────────────────
+// Identity
+// ─────────────────────────────────────────────────────────────────────────
+
+/// A human, authenticated by Clerk. Owns nothing directly — access always
+/// flows through a membership.
 model User {
-  id             String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  fullname       String
-  clerkId        String     @unique
-  type           String
-  createdAt      DateTime   @default(now())
-  updatedAt      DateTime   @updatedAt
-  dodoMerchantId String?
-  email          String?
-  agencyName     String?    @default("ChatDock")
-  agencyLogo     String?
-  agencyColor    String?    @default("#0f172a")
-  agencyDomain   String?    @unique
-  hideBranding   Boolean    @default(false)
-  Account        Account[]
-  subscription   Billings?
-  campaign       Campaign[]
-  domains        Domain[]
-  Session        Session[]
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  clerkId     String    @unique
+  email       String    @unique
+  fullName    String?
+  avatarUrl   String?
+  status      UserStatus @default(active)
+  lastLoginAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  organizationMemberships OrganizationMembership[] @relation("MembershipUser")
+  invitesSentOrg          OrganizationMembership[] @relation("MembershipInviter")
+  workspaceMemberships    ClientWorkspaceMembership[] @relation("WorkspaceMembershipUser")
+  invitesSentWorkspace    ClientWorkspaceMembership[] @relation("WorkspaceMembershipInviter")
+
+  workspacesCreated     ClientWorkspace[]  @relation("WorkspaceCreatedBy")
+  assistantsCreated     Assistant[]        @relation("AssistantCreatedBy")
+  deploymentsCreated    AssistantDeployment[] @relation("DeploymentCreatedBy")
+  knowledgeSources      KnowledgeSource[]  @relation("KnowledgeSourceCreatedBy")
+  crawlJobsRequested    CrawlJob[]         @relation("CrawlJobRequestedBy")
+  leadsAssigned         Lead[]             @relation("LeadAssignee")
+  integrationsConnected Integration[]      @relation("IntegrationConnectedBy")
+  auditLogs             AuditLog[]         @relation("AuditActor")
+
+  @@index([status])
 }
 
-model Domain {
-  id                  String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+enum UserStatus {
+  active
+  suspended
+  deactivated
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// Tenant
+// ─────────────────────────────────────────────────────────────────────────
+
+/// The paying tenant. Billing, branding and entitlements live here — never on
+/// a User.
+model Organization {
+  id                   String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name                 String
+  slug                 String             @unique
+  organizationType     OrganizationType   @default(agency)
+
+  // Agency white-labelling
+  logoUrl              String?
+  primaryColor         String?
+  secondaryColor       String?
+  customDomain         String?            @unique
+  hideChatDockBranding Boolean            @default(false)
+
+  timezone             String             @default("UTC")
+  locale               String             @default("en")
+  status               OrganizationStatus @default(active)
+  onboardingStatus     OnboardingStatus   @default(not_started)
+  settings             Json?
+
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+  archivedAt           DateTime?
+  deletedAt            DateTime?
+
+  memberships          OrganizationMembership[]
+  clientWorkspaces     ClientWorkspace[]
+  subscription         Subscription?
+  entitlementOverrides OrganizationEntitlement[]
+  usageEvents          UsageEvent[]
+  integrations         Integration[]
+  auditLogs            AuditLog[]
+
+  @@index([status])
+  @@index([organizationType])
+}
+
+enum OrganizationType {
+  agency
+  direct_business
+  internal
+}
+
+enum OrganizationStatus {
+  active
+  past_due
+  suspended
+  archived
+}
+
+enum OnboardingStatus {
+  not_started
+  organization_created
+  first_client_created
+  first_assistant_created
+  first_deployment_live
+  completed
+}
+
+/// User ↔ Organization. Cascades from both sides: the membership *is* the
+/// relationship, so removing either end correctly removes it — without
+/// touching the organization's data.
+model OrganizationMembership {
+  id              String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organizationId  String            @db.Uuid
+  userId          String            @db.Uuid
+  role            OrganizationRole  @default(member)
+  status          MembershipStatus  @default(invited)
+  invitedByUserId String?           @db.Uuid
+  invitedAt       DateTime?
+  acceptedAt      DateTime?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User         @relation("MembershipUser", fields: [userId], references: [id], onDelete: Cascade)
+  invitedBy    User?        @relation("MembershipInviter", fields: [invitedByUserId], references: [id], onDelete: SetNull)
+
+  @@unique([organizationId, userId])
+  @@index([userId, status])
+  @@index([organizationId, role])
+}
+
+enum OrganizationRole {
+  owner
+  admin
+  manager
+  member
+  analyst
+  billing
+}
+
+enum MembershipStatus {
+  invited
+  active
+  suspended
+  revoked
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// Client workspace — the isolation boundary
+// ─────────────────────────────────────────────────────────────────────────
+
+/// One agency client, or one direct-business customer's own business.
+/// Replaces the old `Domain`-as-client-workspace conflation.
+model ClientWorkspace {
+  id              String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organizationId  String        @db.Uuid
+  name            String
+  slug            String
+  businessName    String?
+  workspaceType   WorkspaceType @default(active_client)
+  industry        String?
+  timezone        String        @default("UTC")
+  locale          String        @default("en")
+
+  contactEmail    String?
+  contactPhone    String?
+  address         Json?
+  websiteUrl      String?
+
+  logoUrl         String?
+  primaryColor    String?
+  secondaryColor  String?
+
+  status          WorkspaceStatus @default(active)
+  settings        Json?
+
+  createdByUserId String?       @db.Uuid
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  archivedAt      DateTime?
+  deletedAt       DateTime?
+
+  /// Prospect demos only. Null for real clients.
+  expiresAt       DateTime?
+  /// Set when a prospect_demo becomes an active_client.
+  convertedAt     DateTime?
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdBy    User?        @relation("WorkspaceCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+
+  memberships       ClientWorkspaceMembership[]
+  websites          Website[]
+  assistants        Assistant[]
+  knowledgeSources  KnowledgeSource[]
+  knowledgeDocuments KnowledgeDocument[]
+  knowledgeChunks   KnowledgeChunk[]
+  crawlJobs         CrawlJob[]
+  indexingJobs      IndexingJob[]
+  visitors          Visitor[]
+  conversations     Conversation[]
+  messages          Message[]
+  leads             Lead[]
+  leadFieldDefinitions LeadFieldDefinition[]
+  bookingRequests   BookingRequest[]
+  serviceItems      ServiceItem[]
+  usageEvents       UsageEvent[]
+  integrations      Integration[]
+  auditLogs         AuditLog[]
+
+  @@unique([organizationId, slug])
+  @@index([organizationId, status])
+  @@index([workspaceType, expiresAt])
+}
+
+enum WorkspaceType {
+  active_client
+  direct_business
+  prospect_demo
+  internal_demo
+}
+
+enum WorkspaceStatus {
+  active
+  paused
+  archived
+}
+
+/// Explicit per-workspace access. Organization owners and admins have implicit
+/// access to every workspace and do NOT need a row here — the permission
+/// service resolves that. This table exists to (a) scope agency members to
+/// selected clients and (b) grant client-side users access to exactly one
+/// workspace.
+model ClientWorkspaceMembership {
+  id                String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  clientWorkspaceId String           @db.Uuid
+  userId            String           @db.Uuid
+  role              WorkspaceRole
+  status            MembershipStatus @default(invited)
+  invitedByUserId   String?          @db.Uuid
+  invitedAt         DateTime?
+  acceptedAt        DateTime?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+
+  clientWorkspace ClientWorkspace @relation(fields: [clientWorkspaceId], references: [id], onDelete: Cascade)
+  user            User            @relation("WorkspaceMembershipUser", fields: [userId], references: [id], onDelete: Cascade)
+  invitedBy       User?           @relation("WorkspaceMembershipInviter", fields: [invitedByUserId], references: [id], onDelete: SetNull)
+
+  @@unique([clientWorkspaceId, userId])
+  @@index([userId, status])
+}
+
+enum WorkspaceRole {
+  agency_manager
+  agency_member
+  client_admin
+  client_member
+  client_viewer
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// Websites
+// ─────────────────────────────────────────────────────────────────────────
+
+/// A client may have several: production, staging, campaign landing pages.
+/// Separated from ClientWorkspace so "the client" and "a site" stop being the
+/// same row.
+model Website {
+  id                  String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  clientWorkspaceId   String        @db.Uuid
   name                String
-  icon                String
-  userId              String?           @db.Uuid
-  campaignId          String?           @db.Uuid
-  knowledgeBaseSizeMB Float             @default(0)
-  trainingSourcesUsed Int               @default(0)
-  createdAt           DateTime          @default(now())
-  updatedAt           DateTime          @default(now()) @updatedAt
-  chatBot             ChatBot?
-  chatRooms           ChatRoom[]
-  customer            Customer[]
-  Campaign            Campaign?         @relation(fields: [campaignId], references: [id])
-  User                User?             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  filterQuestions     FilterQuestions[]
-  helpdesk            HelpDesk[]
-  knowledgeChunks     KnowledgeChunk[]
-  products            Product[]
+  url                 String
+  /// Normalised host used for widget origin checks, e.g. "brightsmiledental.com"
+  canonicalDomain     String
+  status              WebsiteStatus @default(active)
+  isPrimary           Boolean       @default(false)
+  /// Extra origins permitted to load this site's widget.
+  allowedWidgetDomains String[]     @default([])
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+  archivedAt          DateTime?
+  deletedAt           DateTime?
 
-  @@index([userId])
-  @@index([campaignId])
+  clientWorkspace ClientWorkspace       @relation(fields: [clientWorkspaceId], references: [id], onDelete: Cascade)
+  deployments     AssistantDeployment[]
+
+  @@index([clientWorkspaceId, status])
+  @@index([canonicalDomain])
 }
 
-model ChatBot {
-  id                       String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  welcomeMessage           String?
-  icon                     String?
-  background               String?
-  textColor                String?
-  theme                    Json?
-  helpdesk                 Boolean          @default(false)
-  domainId                 String?          @unique @db.Uuid
-  knowledgeBase            String?
-  knowledgeBaseUpdatedAt   DateTime?        @db.Timestamp(6)
-  knowledgeBaseStatus      String?          @default("pending")
-  mode                     String?          @default("SALES")
-  brandTone                String?          @default("friendly, concise")
-  language                 String?          @default("en")
-  // Advanced AI settings
-  llmModel                 String?          @default("gemini-2.5-flash-lite")
-  llmTemperature           Float?           @default(0.7)
-  modePrompts              Json?
-  embeddingStatus          String?          @default("not_started")
-  embeddingProgress        Int?             @default(0)
-  embeddingChunksTotal     Int?
-  embeddingChunksProcessed Int?
-  embeddingCompletedAt     DateTime?
-  hasEmbeddings            Boolean          @default(false)
-  Domain                   Domain?          @relation(fields: [domainId], references: [id], onDelete: Cascade)
-  knowledgeChunks          KnowledgeChunk[]
+enum WebsiteStatus {
+  active
+  paused
+  archived
 }
 
-model Billings {
-  id                     String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  plan                   Plans           @default(FREE)
-  messageCredits         Int             @default(100)
-  messagesUsed           Int             @default(0)
-  messagesResetAt        DateTime        @default(now())
-  billingInterval        BillingInterval @default(MONTHLY)
-  userId                 String?         @unique @db.Uuid
-  User                   User?           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  provider               String?
-  providerSubscriptionId String?         @unique
-  status                 String?
-  cancelAtPeriodEnd      Boolean?        @default(false)
-  endsAt                 DateTime?
-  createdAt              DateTime        @default(now())
-  updatedAt              DateTime        @default(now()) @updatedAt
+// ─────────────────────────────────────────────────────────────────────────
+// Assistants
+// ─────────────────────────────────────────────────────────────────────────
+
+/// Configuration only. Belongs to the workspace, NOT to a website — so one
+/// assistant can serve several sites, and a future voice channel can reuse it
+/// untouched.
+model Assistant {
+  id                  String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  clientWorkspaceId   String          @db.Uuid
+  name                String
+  slug                String
+  assistantType       AssistantType   @default(web_chat)
+  status              AssistantStatus @default(draft)
+  description         String?
+
+  welcomeMessage      String?
+  fallbackMessage     String?
+  /// Operator-authored. NEVER concatenated with crawled content — see the
+  /// prompt-injection note in the security review.
+  systemInstructions  String?
+  mode                AssistantMode   @default(sales)
+  brandTone           String?         @default("friendly, concise")
+  language            String          @default("en")
+
+  modelProvider       String          @default("google")
+  modelName           String          @default("gemini-2.5-flash-lite")
+  temperature         Float           @default(0.7)
+
+  leadCaptureEnabled  Boolean         @default(true)
+  bookingEnabled      Boolean         @default(true)
+  humanHandoffEnabled Boolean         @default(true)
+  citationsEnabled    Boolean         @default(true)
+
+  behaviorSettings    Json?
+  brandingSettings    Json?
+
+  createdByUserId     String?         @db.Uuid
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+  publishedAt         DateTime?
+  archivedAt          DateTime?
+  deletedAt           DateTime?
+
+  clientWorkspace ClientWorkspace @relation(fields: [clientWorkspaceId], references: [id], onDelete: Cascade)
+  createdBy       User?           @relation("AssistantCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+
+  deployments          AssistantDeployment[]
+  knowledgeSourceLinks AssistantKnowledgeSource[]
+  conversations        Conversation[]
+  messages             Message[]
+  leads                Lead[]
+  leadFieldDefinitions LeadFieldDefinition[]
+  bookingRequests      BookingRequest[]
+  usageEvents          UsageEvent[]
+
+  @@unique([clientWorkspaceId, slug])
+  @@index([clientWorkspaceId, status])
 }
 
-model HelpDesk {
-  id       String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  question String
-  answer   String
-  domainId String? @db.Uuid
-  Domain   Domain? @relation(fields: [domainId], references: [id], onDelete: Cascade)
-
-  @@index([domainId])
+enum AssistantType {
+  web_chat
+  internal_test
+  // Reserved — not implemented in this phase.
+  future_voice_inbound
+  future_voice_outbound
 }
 
-model FilterQuestions {
-  id       String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  question String
-  answered String?
-  domainId String? @db.Uuid
-  Domain   Domain? @relation(fields: [domainId], references: [id], onDelete: Cascade)
-
-  @@index([domainId])
+enum AssistantStatus {
+  draft
+  published
+  paused
+  archived
 }
 
-model CustomerResponses {
-  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  question   String
-  answered   String?
-  customerId String   @db.Uuid
-  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+enum AssistantMode {
+  sales
+  support
+  faq
 }
 
-model Customer {
-  id        String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  email     String?
-  domainId  String?             @db.Uuid
-  booking   Bookings[]
-  chatRoom  ChatRoom[]
-  Domain    Domain?             @relation(fields: [domainId], references: [id], onDelete: Cascade)
-  questions CustomerResponses[]
+/// Where and how an assistant is reachable. Splitting this from Assistant is
+/// what makes preview, prospect demos and (later) voice possible without
+/// duplicating configuration.
+model AssistantDeployment {
+  id             String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  assistantId    String            @db.Uuid
+  websiteId      String?           @db.Uuid
+  deploymentType DeploymentType
+  /// Public, non-guessable widget identifier. Rotate to invalidate embeds.
+  publicKey      String            @unique
+  /// Separate secret for shareable_demo links. Never derived from any id.
+  shareToken     String?           @unique
+  status         DeploymentStatus  @default(active)
+  allowedDomains String[]          @default([])
+  configuration  Json?
+  expiresAt      DateTime?
+  lastSeenAt     DateTime?
 
-  @@unique([email, domainId], name: "email_domainId")
-  @@index([domainId])
+  createdByUserId String?          @db.Uuid
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  revokedAt       DateTime?
+
+  assistant Assistant @relation(fields: [assistantId], references: [id], onDelete: Cascade)
+  website   Website?  @relation(fields: [websiteId], references: [id], onDelete: SetNull)
+  createdBy User?     @relation("DeploymentCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+
+  conversations  Conversation[]
+  engagementEvents DeploymentEngagementEvent[]
+
+  @@index([assistantId, status])
+  @@index([websiteId])
+  @@index([deploymentType, status])
 }
 
-model ChatRoom {
-  id          String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  live        Boolean       @default(false)
-  mailed      Boolean       @default(false)
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-  customerId  String?       @db.Uuid
-  anonymousId String?
-  domainId    String?       @db.Uuid
-  message     ChatMessage[]
-  Customer    Customer?     @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  Domain      Domain?       @relation(fields: [domainId], references: [id], onDelete: Cascade)
-
-  @@index([domainId])
-  @@index([anonymousId])
+enum DeploymentType {
+  website_widget
+  preview
+  shareable_demo
+  // Reserved — not implemented in this phase.
+  future_api
+  future_voice
 }
 
-model ChatMessage {
-  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  message    String
-  role       Role?
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
-  chatRoomId String?   @db.Uuid
-  seen       Boolean   @default(false)
-  ChatRoom   ChatRoom? @relation(fields: [chatRoomId], references: [id], onDelete: Cascade)
-
-  @@index([chatRoomId])
+enum DeploymentStatus {
+  active
+  paused
+  revoked
+  expired
 }
 
-model Bookings {
-  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  date       DateTime
-  slot       String
-  email      String
-  customerId String?   @db.Uuid
-  domainId   String?   @db.Uuid
-  createdAt  DateTime  @default(now())
-  Customer   Customer? @relation(fields: [customerId], references: [id], onDelete: Cascade)
+/// Prospect-demo engagement. Answers "did they open it?" without polluting
+/// conversation analytics.
+model DeploymentEngagementEvent {
+  id           String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  deploymentId String              @db.Uuid
+  eventType    EngagementEventType
+  anonymousId  String?
+  ipHash       String?
+  userAgent    String?
+  metadata     Json?
+  occurredAt   DateTime            @default(now())
+
+  deployment AssistantDeployment @relation(fields: [deploymentId], references: [id], onDelete: Cascade)
+
+  @@index([deploymentId, eventType, occurredAt])
 }
 
-model Campaign {
-  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name      String
-  customers String[]
-  template  String?
-  userId    String?  @db.Uuid
-  createdAt DateTime @default(now())
-  User      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  domain    Domain[]
+enum EngagementEventType {
+  opened
+  conversation_started
+  cta_clicked
 }
 
-model Product {
-  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name      String
-  price     Int
-  image     String
-  createdAt DateTime @default(now())
-  domainId  String?  @db.Uuid
-  Domain    Domain?  @relation(fields: [domainId], references: [id], onDelete: Cascade)
+// ─────────────────────────────────────────────────────────────────────────
+// Knowledge
+// ─────────────────────────────────────────────────────────────────────────
 
-  @@index([domainId])
+/// What the operator selected — a site, a sitemap, a file, pasted text.
+/// One source fans out to many documents.
+model KnowledgeSource {
+  id                String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  clientWorkspaceId String              @db.Uuid
+  sourceType        KnowledgeSourceType
+  name              String
+  originalUrl       String?
+  /// Object-storage key. Large raw files never live in Postgres.
+  storagePath       String?
+  mimeType          String?
+  status            KnowledgeSourceStatus @default(active)
+  syncStatus        SyncStatus            @default(never_synced)
+  metadata          Json?
+
+  createdByUserId   String?   @db.Uuid
+  lastSyncedAt      DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  deletedAt         DateTime?
+
+  clientWorkspace ClientWorkspace @relation(fields: [clientWorkspaceId], references: [id], onDelete: Cascade)
+  createdBy       User?           @relation("KnowledgeSourceCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+
+  documents     KnowledgeDocument[]
+  assistantLinks AssistantKnowledgeSource[]
+  crawlJobs     CrawlJob[]
+  indexingJobs  IndexingJob[]
+
+  @@index([clientWorkspaceId, status])
+  @@index([syncStatus])
 }
 
+enum KnowledgeSourceType {
+  website
+  sitemap
+  uploaded_file
+  manual_text
+  faq
+  integration
+}
+
+enum KnowledgeSourceStatus {
+  active
+  paused
+  failed
+  archived
+}
+
+enum SyncStatus {
+  never_synced
+  queued
+  syncing
+  synced
+  partially_synced
+  failed
+}
+
+/// One extracted page or document.
+model KnowledgeDocument {
+  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  knowledgeSourceId String   @db.Uuid
+  clientWorkspaceId String   @db.Uuid
+  /// Provider-side identifier, for idempotent re-crawls.
+  externalId        String?
+  canonicalUrl      String?
+  title             String?
+  language          String?
+  /// SHA-256 of extractedText. Unchanged hash ⇒ skip re-embedding entirely.
+  contentHash       String?
+  extractedText     String?
+  /// Object-storage key for the raw HTML/PDF.
+  rawContentPath    String?
+  status            DocumentStatus @default(active)
+  metadata          Json?
+  lastCrawledAt     DateTime?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  deletedAt         DateTime?
+
+  knowledgeSource KnowledgeSource @relation(fields: [knowledgeSourceId], references: [id], onDelete: Cascade)
+  clientWorkspace ClientWorkspace @relation(fields: [clientWorkspaceId], references: [id], onDelete: Cascade)
+  chunks          KnowledgeChunk[]
+  citations       MessageCitation[]
+
+  /// Prevents the same page being ingested twice by one source.
+  @@unique([knowledgeSourceId, canonicalUrl])
+  @@index([clientWorkspaceId, status])
+  @@index([contentHash])
+}
+
+enum DocumentStatus {
+  active
+  stale
+  failed
+  archived
+}
+
+/// The retrieval unit. `embedding` is pgvector and Prisma cannot read or write
+/// it — all vector work is raw SQL (see migrations/*_pgvector.sql).
 model KnowledgeChunk {
-  id         String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  domainId   String                 @db.Uuid
-  chatBotId  String                 @db.Uuid
-  content    String
-  embedding  Unsupported("vector")?
-  sourceType String
-  sourceUrl  String?
-  sourceName String?
-  createdAt  DateTime               @default(now())
-  updatedAt  DateTime               @default(now()) @updatedAt
-  chatBot    ChatBot                @relation(fields: [chatBotId], references: [id], onDelete: Cascade)
-  domain     Domain                 @relation(fields: [domainId], references: [id], onDelete: Cascade)
+  id                  String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  knowledgeDocumentId String   @db.Uuid
+  clientWorkspaceId   String   @db.Uuid
+  chunkIndex          Int
+  content             String
+  tokenCount          Int?
+  contentHash         String?
+  metadata            Json?
 
-  @@index([domainId])
-  @@index([chatBotId])
-  @@index([sourceType])
+  embeddingProvider   String   @default("openai")
+  embeddingModel      String   @default("text-embedding-3-small")
+  /// Bump to re-embed a corpus without dropping the live index.
+  embeddingVersion    Int      @default(1)
+  embedding           Unsupported("vector(1536)")?
+
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  knowledgeDocument KnowledgeDocument @relation(fields: [knowledgeDocumentId], references: [id], onDelete: Cascade)
+  clientWorkspace   ClientWorkspace   @relation(fields: [clientWorkspaceId], references: [id], onDelete: Cascade)
+  citations         MessageCitation[]
+
+  @@unique([knowledgeDocumentId, chunkIndex, embeddingVersion])
+  /// Leading clientWorkspaceId: every retrieval query MUST filter on the tenant
+  /// inside the SQL, never in application code after the fact.
+  @@index([clientWorkspaceId, embeddingVersion])
+  @@index([knowledgeDocumentId])
 }
 
-model Account {
-  id                String  @id
-  userId            String  @db.Uuid
-  type              String
+/// Lets one workspace keep shared knowledge while assistants use different
+/// subsets of it.
+model AssistantKnowledgeSource {
+  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  assistantId       String   @db.Uuid
+  knowledgeSourceId String   @db.Uuid
+  enabled           Boolean  @default(true)
+  priority          Int      @default(0)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  assistant       Assistant       @relation(fields: [assistantId], references: [id], onDelete: Cascade)
+  knowledgeSource KnowledgeSource @relation(fields: [knowledgeSourceId], references: [id], onDelete: Cascade)
+
+  @@unique([assistantId, knowledgeSourceId])
+  @@index([assistantId, enabled])
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// Ingestion jobs
+// ─────────────────────────────────────────────────────────────────────────
+
+model CrawlJob {
+  id                String    @db.Uuid @id @default(dbgenerated("gen_random_uuid()"))
+  knowledgeSourceId String    @db.Uuid
+  clientWorkspaceId String    @db.Uuid
+  requestedByUserId String?   @db.Uuid
   provider          String
-  providerAccountId String
-  refresh_token     String?
-  access_token      String?
-  expires_at        Int?
-  token_type        String?
-  scope             String?
-  id_token          String?
-  session_state     String?
-  User              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  providerJobId     String?
+  status            JobStatus @default(queued)
+  configuration     Json?
+  pagesDiscovered   Int       @default(0)
+  pagesProcessed    Int       @default(0)
+  pagesFailed       Int       @default(0)
+  retryCount        Int       @default(0)
+  errorCode         String?
+  errorMessage      String?
+  startedAt         DateTime?
+  completedAt       DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
 
-  @@unique([provider, providerAccountId])
+  knowledgeSource KnowledgeSource @relation(fields: [knowledgeSourceId], references: [id], onDelete: Cascade)
+  clientWorkspace ClientWorkspace @relation(fields: [clientWorkspaceId], references: [id], onDelete: Cascade)
+  requestedBy     User?           @relation("CrawlJobRequestedBy", fields: [requestedByUserId], references: [id], onDelete: SetNull)
+
+  @@index([knowledgeSourceId, status])
+  @@index([clientWorkspaceId, status])
+  @@index([provider, providerJobId])
 }
 
-model Session {
-  id           String   @id
-  sessionToken String   @unique
-  userId       String   @db.Uuid
-  expires      DateTime
-  User         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+model IndexingJob {
+  id                 String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  knowledgeSourceId  String    @db.Uuid
+  clientWorkspaceId  String    @db.Uuid
+  provider           String
+  model              String
+  /// Target version being built. The live index stays queryable until this
+  /// job completes — never delete an active index before its replacement lands.
+  embeddingVersion   Int       @default(1)
+  status             JobStatus @default(queued)
+  documentsProcessed Int       @default(0)
+  chunksCreated      Int       @default(0)
+  chunksFailed       Int       @default(0)
+  retryCount         Int       @default(0)
+  errorCode          String?
+  errorMessage       String?
+  startedAt          DateTime?
+  completedAt        DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  knowledgeSource KnowledgeSource @relation(fields: [knowledgeSourceId], references: [id], onDelete: Cascade)
+  clientWorkspace ClientWorkspace @relation(fields: [clientWorkspaceId], references: [id], onDelete: Cascade)
+
+  @@index([knowledgeSourceId, status])
+  @@index([clientWorkspaceId, status])
 }
 
-model VerificationToken {
-  identifier String
-  token      String
-  expires    DateTime
-
-  @@id([identifier, token])
+enum JobStatus {
+  queued
+  running
+  completed
+  partially_completed
+  failed
+  cancelled
 }
 
-enum Plans {
-  FREE
-  STARTER
-  PRO
-  BUSINESS
+// ─────────────────────────────────────────────────────────────────────────
+// Conversations
+// ─────────────────────────────────────────────────────────────────────────
+
+model Visitor {
+  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  clientWorkspaceId String   @db.Uuid
+  anonymousId       String
+  firstSeenAt       DateTime @default(now())
+  lastSeenAt        DateTime @default(now())
+  firstSourceUrl    String?
+  lastSourceUrl     String?
+  consentStatus     ConsentStatus @default(unknown)
+  metadata          Json?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  clientWorkspace ClientWorkspace @relation(fields: [clientWorkspaceId], references: [id], onDelete: Cascade)
+  conversations   Conversation[]
+  leads           Lead[]
+
+  @@unique([clientWorkspaceId, anonymousId])
+  @@index([clientWorkspaceId, lastSeenAt])
+}
+
+enum ConsentStatus {
+  unknown
+  granted
+  denied
+  withdrawn
+}
+
+model Conversation {
+  id                String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  clientWorkspaceId String             @db.Uuid
+  assistantId       String             @db.Uuid
+  deploymentId      String?            @db.Uuid
+  visitorId         String?            @db.Uuid
+  leadId            String?            @db.Uuid
+
+  channel           ConversationChannel @default(web_chat)
+  status            ConversationStatus  @default(active)
+  /// Replaces the old ambiguous `ChatRoom.live` boolean.
+  handoffStatus     HandoffStatus       @default(none)
+  resolutionStatus  ResolutionStatus    @default(unresolved)
+
+  startedAt         DateTime            @default(now())
+  lastMessageAt     DateTime?
+  endedAt           DateTime?
+  messageCount      Int                 @default(0)
+
+  sourceUrl         String?
+  referrer          String?
+  utmSource         String?
+  utmMedium         String?
+  utmCampaign       String?
+  detectedLanguage  String?
+  summary           String?
+  metadata          Json?
+
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+
+  clientWorkspace ClientWorkspace      @relation(fields: [clientWorkspaceId], references: [id], onDelete: Cascade)
+  assistant       Assistant            @relation(fields: [assistantId], references: [id], onDelete: Cascade)
+  deployment      AssistantDeployment? @relation(fields: [deploymentId], references: [id], onDelete: SetNull)
+  visitor         Visitor?             @relation(fields: [visitorId], references: [id], onDelete: SetNull)
+  lead            Lead?                @relation("LeadConversations", fields: [leadId], references: [id], onDelete: SetNull)
+
+  messages        Message[]
+  bookingRequests BookingRequest[]
+  usageEvents     UsageEvent[]
+  leadsOriginated Lead[]               @relation("LeadOriginConversation")
+
+  @@index([clientWorkspaceId, status, lastMessageAt])
+  @@index([assistantId, startedAt])
+  @@index([channel, status])
+  @@index([handoffStatus])
+}
+
+enum ConversationChannel {
+  web_chat
+  preview
+  shareable_demo
+  // Reserved — not implemented in this phase.
+  future_voice
+  future_api
+}
+
+enum ConversationStatus {
+  active
+  resolved
+  abandoned
+  spam
+  archived
+}
+
+enum HandoffStatus {
+  none
+  requested
+  accepted
+  active
+  completed
+  cancelled
+}
+
+enum ResolutionStatus {
+  unresolved
+  resolved_by_assistant
+  resolved_by_human
+  escalated
+  no_answer_available
+}
+
+model Message {
+  id                String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  conversationId    String        @db.Uuid
+  clientWorkspaceId String        @db.Uuid
+  assistantId       String?       @db.Uuid
+
+  role              MessageRole
+  messageType       MessageType   @default(text)
+  content           String
+  structuredContent Json?
+
+  modelProvider     String?
+  modelName         String?
+  promptTokens      Int?
+  completionTokens  Int?
+  latencyMs         Int?
+  status            MessageStatus @default(complete)
+  errorCode         String?
+
+  createdAt         DateTime      @default(now())
+
+  conversation    Conversation    @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  clientWorkspace ClientWorkspace @relation(fields: [clientWorkspaceId], references: [id], onDelete: Cascade)
+  assistant       Assistant?      @relation(fields: [assistantId], references: [id], onDelete: SetNull)
+  citations       MessageCitation[]
+
+  @@index([conversationId, createdAt])
+  @@index([clientWorkspaceId, createdAt])
+}
+
+enum MessageRole {
+  visitor
+  assistant
+  human_agent
+  system
+  tool
+}
+
+enum MessageType {
+  text
+  lead_form
+  booking_request
+  system_event
+  tool_call
+  // Reserved — no audio is stored in this phase.
+  future_transcript
+}
+
+enum MessageStatus {
+  streaming
+  complete
+  failed
+  filtered
+}
+
+/// What the answer was grounded in. Powers the "From /services" citation and
+/// gives agencies a way to audit answer quality.
+model MessageCitation {
+  id                  String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  messageId           String   @db.Uuid
+  knowledgeDocumentId String?  @db.Uuid
+  knowledgeChunkId    String?  @db.Uuid
+  sourceUrl           String?
+  title               String?
+  relevanceScore      Float?
+  createdAt           DateTime @default(now())
+
+  message           Message            @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  knowledgeDocument KnowledgeDocument? @relation(fields: [knowledgeDocumentId], references: [id], onDelete: SetNull)
+  knowledgeChunk    KnowledgeChunk?    @relation(fields: [knowledgeChunkId], references: [id], onDelete: SetNull)
+
+  @@index([messageId])
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// Leads
+// ─────────────────────────────────────────────────────────────────────────
+
+/// Replaces `Customer`. Critically: NO unique constraint on email. The old
+/// `@@unique([email, domainId])` made phone-only leads impossible to store,
+/// which silently dropped the most common lead shape for home-services clients.
+/// Deduplication is an application-level decision, not a database constraint.
+model Lead {
+  id                  String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  clientWorkspaceId   String              @db.Uuid
+  assistantId         String?             @db.Uuid
+  conversationId      String?             @db.Uuid
+  visitorId           String?             @db.Uuid
+
+  name                String?
+  email               String?
+  phone               String?
+  company             String?
+
+  status              LeadStatus          @default(new)
+  qualificationStatus QualificationStatus @default(unreviewed)
+  source              LeadSource          @default(web_chat)
+  assignedToUserId    String?             @db.Uuid
+  notes               String?
+  consentStatus       ConsentStatus       @default(unknown)
+  metadata            Json?
+
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+  archivedAt          DateTime?
+
+  clientWorkspace ClientWorkspace @relation(fields: [clientWorkspaceId], references: [id], onDelete: Cascade)
+  assistant       Assistant?      @relation(fields: [assistantId], references: [id], onDelete: SetNull)
+  originConversation Conversation? @relation("LeadOriginConversation", fields: [conversationId], references: [id], onDelete: SetNull)
+  visitor         Visitor?        @relation(fields: [visitorId], references: [id], onDelete: SetNull)
+  assignedTo      User?           @relation("LeadAssignee", fields: [assignedToUserId], references: [id], onDelete: SetNull)
+
+  conversations   Conversation[]  @relation("LeadConversations")
+  fieldValues     LeadFieldValue[]
+  bookingRequests BookingRequest[]
+
+  @@index([clientWorkspaceId, status, createdAt])
+  @@index([clientWorkspaceId, email])
+  @@index([clientWorkspaceId, phone])
+  @@index([assignedToUserId])
+}
+
+enum LeadStatus {
+  new
+  contacted
+  qualified
+  unqualified
+  converted
+  closed
+  spam
+}
+
+enum QualificationStatus {
+  unreviewed
+  qualified
+  disqualified
+  needs_follow_up
+}
+
+enum LeadSource {
+  web_chat
+  preview
+  shareable_demo
+  manual
+  import
+  // Reserved.
+  future_voice
+}
+
+/// The per-assistant qualifying questions. Replaces `FilterQuestions`, whose
+/// `answered` column stored one visitor's answer on the reusable question
+/// itself — so the second visitor overwrote the first.
+model LeadFieldDefinition {
+  id                String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  clientWorkspaceId String        @db.Uuid
+  assistantId       String?       @db.Uuid
+  key               String
+  label             String
+  fieldType         LeadFieldType @default(text)
+  required          Boolean       @default(false)
+  enabled           Boolean       @default(true)
+  options           Json?
+  displayOrder      Int           @default(0)
+  validationRules   Json?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  clientWorkspace ClientWorkspace @relation(fields: [clientWorkspaceId], references: [id], onDelete: Cascade)
+  assistant       Assistant?      @relation(fields: [assistantId], references: [id], onDelete: Cascade)
+  values          LeadFieldValue[]
+
+  @@unique([clientWorkspaceId, assistantId, key])
+  @@index([assistantId, enabled, displayOrder])
+}
+
+enum LeadFieldType {
+  text
+  textarea
+  email
+  phone
+  number
+  boolean
+  single_select
+  multi_select
+  date
+}
+
+/// One answer, per lead. Typed columns rather than a stringly-typed blob so
+/// filtering and reporting stay possible.
+model LeadFieldValue {
+  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  leadId            String    @db.Uuid
+  fieldDefinitionId String    @db.Uuid
+  valueText         String?
+  valueNumber       Float?
+  valueBoolean      Boolean?
+  valueDate         DateTime?
+  valueJson         Json?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  lead            Lead                @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  fieldDefinition LeadFieldDefinition @relation(fields: [fieldDefinitionId], references: [id], onDelete: Cascade)
+
+  @@unique([leadId, fieldDefinitionId])
+  @@index([fieldDefinitionId])
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// Bookings
+// ─────────────────────────────────────────────────────────────────────────
+
+/// Named BookingRequest, not Booking, on purpose: without a calendar
+/// integration ChatDock only ever collects a *requested* time. Nothing may
+/// present `requested` as confirmed.
+model BookingRequest {
+  id                String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  clientWorkspaceId String        @db.Uuid
+  assistantId       String?       @db.Uuid
+  conversationId    String?       @db.Uuid
+  leadId            String?       @db.Uuid
+  integrationId     String?       @db.Uuid
+
+  status            BookingStatus @default(requested)
+  requestedStartAt  DateTime?
+  requestedEndAt    DateTime?
+  confirmedStartAt  DateTime?
+  confirmedEndAt    DateTime?
+  timezone          String        @default("UTC")
+  externalEventId   String?
+
+  email             String?
+  phone             String?
+  notes             String?
+  metadata          Json?
+
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  clientWorkspace ClientWorkspace @relation(fields: [clientWorkspaceId], references: [id], onDelete: Cascade)
+  assistant       Assistant?      @relation(fields: [assistantId], references: [id], onDelete: SetNull)
+  conversation    Conversation?   @relation(fields: [conversationId], references: [id], onDelete: SetNull)
+  lead            Lead?           @relation(fields: [leadId], references: [id], onDelete: SetNull)
+  integration     Integration?    @relation(fields: [integrationId], references: [id], onDelete: SetNull)
+
+  @@index([clientWorkspaceId, status, requestedStartAt])
+  @@index([leadId])
+}
+
+enum BookingStatus {
+  requested
+  pending
+  confirmed
+  rescheduled
+  cancelled
+  completed
+  no_show
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// Service catalogue
+// ─────────────────────────────────────────────────────────────────────────
+
+/// Replaces `Product`. A local service business has services with pricing
+/// *shapes* ("from $450", "quote required"), not SKUs — and the assistant needs
+/// to quote them honestly.
+model ServiceItem {
+  id                String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  clientWorkspaceId String      @db.Uuid
+  name              String
+  description       String?
+  /// Minor units (cents). Never a float, never currency-less.
+  priceAmountMinor  Int?
+  currency          String?     @db.Char(3)
+  pricingType       PricingType @default(quote_required)
+  imageUrl          String?
+  active            Boolean     @default(true)
+  metadata          Json?
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  clientWorkspace ClientWorkspace @relation(fields: [clientWorkspaceId], references: [id], onDelete: Cascade)
+
+  @@index([clientWorkspaceId, active])
+}
+
+enum PricingType {
+  fixed
+  starting_at
+  hourly
+  quote_required
+  free
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// Billing
+// ─────────────────────────────────────────────────────────────────────────
+
+model Plan {
+  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code              String   @unique
+  name              String
+  description       String?
+  active            Boolean  @default(true)
+  monthlyPriceMinor Int      @default(0)
+  yearlyPriceMinor  Int      @default(0)
+  currency          String   @default("USD") @db.Char(3)
+  configuration     Json?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  entitlements  PlanEntitlement[]
+  subscriptions Subscription[]
+}
+
+/// One subscription per organization — never per user.
+model Subscription {
+  id                     String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organizationId         String             @unique @db.Uuid
+  planId                 String?            @db.Uuid
+  provider               String             @default("dodo")
+  externalCustomerId     String?
+  externalSubscriptionId String?            @unique
+  status                 SubscriptionStatus @default(active)
+  billingInterval        BillingInterval    @default(monthly)
+  /// Authoritative period boundaries from the provider. Replaces the old lazy
+  /// "reset 30 days after whenever the last chat happened" behaviour.
+  currentPeriodStart     DateTime?
+  currentPeriodEnd       DateTime?
+  cancelAtPeriodEnd      Boolean            @default(false)
+  trialEndsAt            DateTime?
+  createdAt              DateTime           @default(now())
+  updatedAt              DateTime           @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  plan         Plan?        @relation(fields: [planId], references: [id], onDelete: SetNull)
+
+  @@index([status])
+  @@index([provider, externalCustomerId])
+}
+
+enum SubscriptionStatus {
+  trialing
+  active
+  past_due
+  paused
+  cancelled
+  expired
 }
 
 enum BillingInterval {
-  MONTHLY
-  YEARLY
+  monthly
+  yearly
 }
 
-enum Role {
-  user
-  assistant
+/// Central capability definition. Plan limits must never be scattered across
+/// components again.
+model PlanEntitlement {
+  id        String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  planId    String          @db.Uuid
+  key       EntitlementKey
+  /// Null means unlimited. Booleans use 0/1.
+  limitValue BigInt?
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+
+  plan Plan @relation(fields: [planId], references: [id], onDelete: Cascade)
+
+  @@unique([planId, key])
+}
+
+/// Per-organization override — bespoke deals, grandfathering, temporary lifts.
+model OrganizationEntitlement {
+  id             String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organizationId String         @db.Uuid
+  key            EntitlementKey
+  limitValue     BigInt?
+  reason         String?
+  expiresAt      DateTime?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, key])
+}
+
+enum EntitlementKey {
+  maximum_client_workspaces
+  maximum_assistants
+  monthly_messages
+  monthly_crawl_pages
+  maximum_training_sources
+  storage_bytes
+  maximum_team_members
+  maximum_client_users
+  maximum_prospect_demos
+  hide_branding
+  shareable_demos
+  client_portal
+  custom_domain
+  advanced_reporting
+  api_access
+  // Reserved.
+  future_voice_minutes
+}
+
+/// Append-only. Never updated, never deleted. The billing source of truth —
+/// operational tables are not counted as a proxy for usage.
+model UsageEvent {
+  id                String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organizationId    String        @db.Uuid
+  clientWorkspaceId String?       @db.Uuid
+  assistantId       String?       @db.Uuid
+  conversationId    String?       @db.Uuid
+
+  eventType         UsageEventType
+  quantity          BigInt        @default(1)
+  unit              String
+  provider          String?
+  model             String?
+  promptTokens      Int?
+  completionTokens  Int?
+  /// Minor units. Internal cost visibility only — never shown to end clients.
+  estimatedCostMinor Int?
+  currency          String?       @db.Char(3)
+
+  /// Makes retries safe: a repeated write is rejected, not double-counted.
+  idempotencyKey    String        @unique
+  occurredAt        DateTime      @default(now())
+  metadata          Json?
+  createdAt         DateTime      @default(now())
+
+  organization    Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  clientWorkspace ClientWorkspace? @relation(fields: [clientWorkspaceId], references: [id], onDelete: SetNull)
+  assistant       Assistant?       @relation(fields: [assistantId], references: [id], onDelete: SetNull)
+  conversation    Conversation?    @relation(fields: [conversationId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, eventType, occurredAt])
+  @@index([clientWorkspaceId, occurredAt])
+  @@index([assistantId, occurredAt])
+}
+
+enum UsageEventType {
+  assistant_message
+  embedding_generated
+  rerank_request
+  crawl_page
+  file_processed
+  storage_used
+  // Reserved.
+  future_voice_minute
+  future_transcription_second
+  future_tts_character
+}
+
+/// Webhook idempotency ledger. `externalEventId` unique means a replayed
+/// provider event physically cannot be processed twice.
+model BillingEvent {
+  id              String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  provider        String
+  externalEventId String
+  eventType       String
+  processingStatus ProcessingStatus @default(received)
+  retryCount      Int              @default(0)
+  errorMessage    String?
+  receivedAt      DateTime         @default(now())
+  processedAt     DateTime?
+  /// Metadata only — never the raw payload, which can carry PII and card data.
+  payloadMetadata Json?
+
+  @@unique([provider, externalEventId])
+  @@index([processingStatus, receivedAt])
+}
+
+enum ProcessingStatus {
+  received
+  processing
+  processed
+  failed
+  ignored
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// Integrations, audit
+// ─────────────────────────────────────────────────────────────────────────
+
+model Integration {
+  id                   String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organizationId       String            @db.Uuid
+  clientWorkspaceId    String?           @db.Uuid
+  integrationType      IntegrationType
+  provider             String
+  status               IntegrationStatus @default(connected)
+  /// Envelope-encrypted at the application layer. NEVER selected into any
+  /// response that reaches a browser.
+  encryptedCredentials String?
+  configuration        Json?
+  connectedByUserId    String?           @db.Uuid
+  lastSyncedAt         DateTime?
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
+  disconnectedAt       DateTime?
+
+  organization    Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  clientWorkspace ClientWorkspace? @relation(fields: [clientWorkspaceId], references: [id], onDelete: Cascade)
+  connectedBy     User?            @relation("IntegrationConnectedBy", fields: [connectedByUserId], references: [id], onDelete: SetNull)
+
+  bookingRequests BookingRequest[]
+
+  @@index([organizationId, integrationType, status])
+  @@index([clientWorkspaceId])
+}
+
+enum IntegrationType {
+  calendar
+  crm
+  automation
+  webhook
+  email
+  // Reserved.
+  future_voice
+}
+
+enum IntegrationStatus {
+  connected
+  degraded
+  disconnected
+  error
+}
+
+model AuditLog {
+  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organizationId    String?  @db.Uuid
+  clientWorkspaceId String?  @db.Uuid
+  actorUserId       String?  @db.Uuid
+  action            String
+  entityType        String
+  entityId          String?
+  /// Redacted diffs only — never secrets or conversation bodies.
+  beforeData        Json?
+  afterData         Json?
+  ipAddress         String?
+  userAgent         String?
+  createdAt         DateTime @default(now())
+
+  organization    Organization?    @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  clientWorkspace ClientWorkspace? @relation(fields: [clientWorkspaceId], references: [id], onDelete: SetNull)
+  actor           User?            @relation("AuditActor", fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, createdAt])
+  @@index([clientWorkspaceId, createdAt])
+  @@index([entityType, entityId])
 }
