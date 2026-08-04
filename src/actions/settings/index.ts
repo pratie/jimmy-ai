@@ -1,5 +1,7 @@
 'use server'
 
+import { randomBytes } from 'node:crypto'
+
 import { clerkClient, currentUser } from '@clerk/nextjs/server'
 import { Prisma } from '@prisma/client'
 
@@ -514,6 +516,103 @@ export const onGetAllFilterQuestions = async (workspaceId: string) => {
   } catch (error) {
     console.error('[Settings] onGetAllFilterQuestions failed:', error)
     return { status: 400, questions: [] }
+  }
+}
+
+/* ── Widget deployment ──────────────────────────────────────────────────── */
+
+/**
+ * The public key the embed snippet carries, creating the deployment on first
+ * request.
+ *
+ * This is what replaced pasting an internal database id into a public script
+ * tag. The key is 32 random bytes, scoped to one assistant and one website, and
+ * can be rotated without touching anything else.
+ */
+export const onGetEmbedKey = async (workspaceId: string) => {
+  try {
+    const { ctx, access } = await requireWorkspace(workspaceId, 'manageClientWorkspace')
+
+    const existing = await client.assistantDeployment.findFirst({
+      where: {
+        deploymentType: 'website_widget',
+        status: 'active',
+        assistant: { clientWorkspaceId: access.clientWorkspaceId, deletedAt: null },
+      },
+      select: { publicKey: true, allowedDomains: true },
+    })
+    if (existing) return { status: 200, publicKey: existing.publicKey }
+
+    const assistant = await client.assistant.findFirst({
+      where: { clientWorkspaceId: access.clientWorkspaceId, deletedAt: null },
+      orderBy: { createdAt: 'asc' },
+      select: { id: true },
+    })
+    if (!assistant) return { status: 400, message: 'Create an assistant first' }
+
+    const website = await client.website.findFirst({
+      where: { clientWorkspaceId: access.clientWorkspaceId, deletedAt: null },
+      orderBy: [{ isPrimary: 'desc' }, { createdAt: 'asc' }],
+      select: { id: true, canonicalDomain: true, allowedWidgetDomains: true },
+    })
+
+    const deployment = await client.assistantDeployment.create({
+      data: {
+        assistantId: assistant.id,
+        websiteId: website?.id ?? null,
+        deploymentType: 'website_widget',
+        publicKey: randomBytes(24).toString('base64url'),
+        status: 'active',
+        allowedDomains: website
+          ? Array.from(
+              new Set(
+                [website.canonicalDomain, `www.${website.canonicalDomain}`, ...website.allowedWidgetDomains].filter(
+                  Boolean
+                )
+              )
+            )
+          : [],
+        createdByUserId: ctx.userId,
+      },
+      select: { publicKey: true },
+    })
+
+    return { status: 200, publicKey: deployment.publicKey }
+  } catch (error) {
+    if (error instanceof AuthorizationError) return { status: 403, message: error.message }
+    console.error('[Settings] onGetEmbedKey failed:', error)
+    return { status: 400, message: 'Could not issue an embed key' }
+  }
+}
+
+/** Invalidates the current key and issues a new one. Existing embeds stop working. */
+export const onRotateEmbedKey = async (workspaceId: string) => {
+  try {
+    const { access } = await requireWorkspace(workspaceId, 'manageClientWorkspace')
+
+    const deployment = await client.assistantDeployment.findFirst({
+      where: {
+        deploymentType: 'website_widget',
+        assistant: { clientWorkspaceId: access.clientWorkspaceId },
+      },
+      select: { id: true },
+    })
+    if (!deployment) return { status: 404, message: 'No widget deployment to rotate' }
+
+    const updated = await client.assistantDeployment.update({
+      where: { id: deployment.id },
+      data: { publicKey: randomBytes(24).toString('base64url') },
+      select: { publicKey: true },
+    })
+
+    return {
+      status: 200,
+      publicKey: updated.publicKey,
+      message: 'Key rotated — update the snippet on the client’s website',
+    }
+  } catch (error) {
+    console.error('[Settings] onRotateEmbedKey failed:', error)
+    return { status: 400, message: 'Could not rotate the key' }
   }
 }
 

@@ -475,15 +475,22 @@ export default function Home() {
         {JSON.stringify(faqSchema)}
       </Script>
 
-      {/* ChatDock's own assistant, running on ChatDock */}
-      <Script
-        id="46316941-5e6b-4222-adc4-48fc5221012c"
-        src="https://www.chatdock.io/embed.min.js"
-        strategy="afterInteractive"
-        data-app-origin="https://www.chatdock.io"
-        data-margin="24"
-        data-size="md"
-      />
+      {/* ChatDock's own assistant, running on ChatDock.
+          Key-driven and env-configured: the previous hardcoded id pointed at a
+          row that the schema rebuild removed, so it would have rendered a
+          permanently broken widget on the marketing site. Renders nothing until
+          a real deployment key is configured. */}
+      {process.env.NEXT_PUBLIC_CHATDOCK_WIDGET_KEY && (
+        <Script
+          id="chatdock-self-widget"
+          src="https://www.chatdock.io/embed.min.js"
+          strategy="afterInteractive"
+          data-key={process.env.NEXT_PUBLIC_CHATDOCK_WIDGET_KEY}
+          data-app-origin="https://www.chatdock.io"
+          data-margin="24"
+          data-size="md"
+        />
+      )}
     </main>
   )
 }

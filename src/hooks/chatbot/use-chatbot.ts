@@ -146,7 +146,11 @@ export const useChatBot = (options?: UseChatBotOptions) => {
     }
 
     let handled = false
-    const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+    // Deployment keys are random base64url, not UUIDs. Validating the shape
+    // here only catches an empty or obviously malformed attribute; whether the
+    // key is real, active and allowed on this origin is decided server-side in
+    // lib/widget/resolve.ts, which is the only place that can be trusted to.
+    const KEY_REGEX = /^[A-Za-z0-9_-]{16,128}$/
 
     const handleMessage = (e: MessageEvent) => {
       if (e.data && typeof e.data === 'object' && e.data.type === 'chatdock:command') {
@@ -158,13 +162,13 @@ export const useChatBot = (options?: UseChatBotOptions) => {
       const botid = e.data
       if (!handled && typeof botid === 'string') {
         // Validate UUID format
-        if (!UUID_REGEX.test(botid)) {
-          console.error('[Chatbot] Invalid domain ID format:', botid)
+        if (!KEY_REGEX.test(botid)) {
+          console.error('[Chatbot] Malformed deployment key')
           setOnChats([
             {
               role: 'assistant',
               content:
-                'Configuration error: Invalid domain ID. Please check your embed code.',
+                'This assistant is not configured correctly. Copy the embed snippet again from your ChatDock dashboard.',
             },
           ])
           setLoading(false)
