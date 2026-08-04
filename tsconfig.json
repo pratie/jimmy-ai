@@ -36,6 +36,8 @@
     "src/components/spinner"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "scratch",
+    "docs"
   ]
 }

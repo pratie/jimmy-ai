@@ -1,240 +1,165 @@
 'use server'
 
-import { client } from '@/lib/prisma'
 import { auth, currentUser } from '@clerk/nextjs/server'
-import { onGetAllAccountDomains } from '../settings'
+import type { OrganizationType } from '@prisma/client'
 
+import { client } from '@/lib/prisma'
+import { ensureUserAndOrganization, listWorkspacesForActor, getTenantContext } from '@/lib/tenant'
+
+/**
+ * Authentication actions.
+ *
+ * Clerk owns identity; this module owns *provisioning* — turning a Clerk
+ * identity into a User, an Organization, an owner membership and a
+ * subscription. All of that now happens inside one transaction in
+ * `ensureUserAndOrganization`, which is why this file lost most of its former
+ * bulk: the old version hand-rolled a race-prone create-then-check-then-create
+ * dance and a P2002 recovery path.
+ */
+
+/** Primary email from a Clerk user, falling back to the first verified one. */
+function primaryEmailOf(user: NonNullable<Awaited<ReturnType<typeof currentUser>>>) {
+  return (
+    user.emailAddresses.find((a) => a.id === user.primaryEmailAddressId)?.emailAddress ||
+    user.emailAddresses[0]?.emailAddress ||
+    null
+  )
+}
+
+function displayNameOf(user: NonNullable<Awaited<ReturnType<typeof currentUser>>>, email: string) {
+  return `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim() || email.split('@')[0] || 'User'
+}
+
+/**
+ * Completes registration after Clerk sign-up.
+ *
+ * @param organizationType `agency` (default) manages many client workspaces;
+ *   `direct_business` gets one workspace created automatically and never sees
+ *   the client switcher.
+ */
 export const onCompleteUserRegistration = async (
-  fullname: string,
+  fullName: string,
   clerkId: string,
-  type: string,
-  email: string
+  _type: string,
+  email: string,
+  organizationName?: string,
+  organizationType: OrganizationType = 'agency'
 ) => {
-  console.log('[Auth Registration] 🚀 Starting database user registration...')
-  console.log('[Auth Registration] 📊 Registration data:', { fullname, clerkId, type, email })
-
-  if (!email) {
-    console.error('[Auth Registration] ❌ Registration attempted without email for Clerk user:', clerkId)
+  if (!email?.trim()) {
     return { status: 400, message: 'Email address is required' }
   }
 
   try {
-    console.log('[Auth Registration] 💾 Upserting user in database...')
-    // 1) Ensure user exists (idempotent). We avoid overwriting existing fields.
-    const user = await client.user.upsert({
-      where: { clerkId },
-      create: { fullname, clerkId, type, email },
-      update: {},
-      select: {
-        fullname: true,
-        id: true,
-        type: true,
-        email: true,
-      },
+    const { userId, organizationId, created } = await ensureUserAndOrganization({
+      clerkId,
+      email,
+      fullName,
+      organizationName: organizationName ?? null,
+      organizationType,
     })
 
-    // 2) Ensure a billing row exists for this user (idempotent)
-    await client.billings.upsert({
-      where: { userId: user.id },
-      update: {},
-      create: { userId: user.id },
+    const user = await client.user.findUnique({
+      where: { id: userId },
+      select: { id: true, fullName: true, email: true },
     })
 
-    console.log('[Auth Registration] ✅ User ensured in database with billing record')
-    console.log('[Auth Registration] 👤 User details:', {
-      id: user.id,
-      email: user.email,
-      fullname: user.fullname,
-      type: user.type,
-    })
-    return { status: 200, user }
+    return { status: 200, user: { ...user, organizationId }, created }
   } catch (error: any) {
-    console.error('[Auth Registration] ❌ Database error during upsert')
-    console.error('[Auth Registration] 📊 Error details:', {
-      message: error?.message,
-      code: error?.code,
-      meta: error?.meta,
-    })
-    console.error('[Auth Registration] 🔍 Full error object:', error)
-    return { status: 400, message: error?.message || 'Database error during registration' }
+    console.error('[Auth] Registration failed:', error?.message ?? error)
+    return { status: 400, message: 'Could not complete registration' }
   }
 }
 
+/**
+ * Resolves the signed-in user for the dashboard shell.
+ *
+ * Self-heals: a user who signed in via OAuth without passing through the
+ * sign-up form is provisioned here rather than being bounced.
+ */
 export const onLoginUser = async () => {
-  if (process.env.NODE_ENV === 'development') {
-    console.log('[Auth] onLoginUser called')
-  }
   try {
-    const authResult = await auth()
-    const { userId } = authResult
+    const { userId: clerkId } = await auth()
+    if (!clerkId) return { status: 401, message: 'No user found' }
 
-    // Enhanced debugging for Clerk session
-    if (process.env.NODE_ENV === 'development') {
-      console.log('[Auth Debug] Full auth() result:', {
-        userId: authResult.userId,
-        sessionId: authResult.sessionId,
-        orgId: authResult.orgId,
-        hasSession: !!authResult.sessionId,
-      })
-    }
+    const clerk = await currentUser()
+    if (!clerk) return { status: 400, message: 'Unable to retrieve user information' }
 
-    if (!userId) {
-      if (process.env.NODE_ENV === 'development') {
-        console.log('[Auth] No authenticated user found (userId is null/undefined)')
-        console.log('[Auth] This is expected for unauthenticated users')
+    const email = primaryEmailOf(clerk)
+    if (!email) {
+      return {
+        status: 400,
+        message: 'No email address is associated with this account.',
       }
-      return { status: 401, message: 'No user found' }
     }
 
-    if (process.env.NODE_ENV === 'development') {
-      console.log('[Auth] ✅ Clerk userId found:', userId)
-    }
-
-    let authenticated = await client.user.findUnique({
-      where: {
-        clerkId: userId,
-      },
-      select: {
-        fullname: true,
-        id: true,
-        type: true,
-        email: true,
-      },
+    // Idempotent: returns the existing tenant when one is already provisioned.
+    const { organizationId } = await ensureUserAndOrganization({
+      clerkId,
+      email,
+      fullName: displayNameOf(clerk, email),
+      avatarUrl: clerk.imageUrl ?? null,
     })
 
-    if (authenticated) {
-      if (process.env.NODE_ENV === 'development') {
-        console.log('[Auth] User found in database:', authenticated.email)
-      }
-      const domains = await onGetAllAccountDomains()
-      return { status: 200, user: authenticated, domain: domains?.domains }
-    } else {
-      if (process.env.NODE_ENV === 'development') {
-        console.log('[Auth] User not in database, auto-creating for OAuth sign-in...')
-      }
+    await client.user.update({
+      where: { clerkId },
+      data: { lastLoginAt: new Date() },
+    })
 
-      // Get full user object from Clerk for OAuth auto-creation
-      const user = await currentUser()
+    const ctx = await getTenantContext(organizationId)
+    if (!ctx) return { status: 403, message: 'No active membership for this organization' }
 
-      if (!user) {
-        console.error('[Auth] Could not fetch user details from Clerk')
-        return { status: 400, message: 'Unable to retrieve user information' }
-      }
+    const [user, organization, workspaces] = await Promise.all([
+      client.user.findUnique({
+        where: { clerkId },
+        select: { id: true, fullName: true, email: true, avatarUrl: true },
+      }),
+      client.organization.findUnique({
+        where: { id: organizationId },
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          organizationType: true,
+          logoUrl: true,
+          primaryColor: true,
+          hideChatDockBranding: true,
+          onboardingStatus: true,
+          status: true,
+        },
+      }),
+      listWorkspacesForActor(ctx),
+    ])
 
-      // Validate that user has email addresses
-      if (!user.emailAddresses || user.emailAddresses.length === 0) {
-        console.error('[Auth] No email addresses found for Clerk user', userId)
-        return { status: 400, message: 'No email address associated with this account. Please use a different authentication method.' }
-      }
-
-      // Find primary email or fall back to first email
-      const primaryEmail =
-        user.emailAddresses.find(
-          (address) => address.id === user.primaryEmailAddressId
-        )?.emailAddress || user.emailAddresses[0]?.emailAddress
-
-      if (!primaryEmail || primaryEmail.trim() === '') {
-        console.error('[Auth] Unable to determine primary email for Clerk user', userId)
-        console.error('[Auth] Email addresses:', user.emailAddresses)
-        return { status: 400, message: 'Unable to retrieve email address. Please try again or contact support.' }
-      }
-
-      // Build user's full name with proper fallbacks
-      const fullname =
-        `${user.firstName || ''} ${user.lastName || ''}`.trim() ||
-        primaryEmail.split('@')[0] ||
-        'User'
-
-      if (process.env.NODE_ENV === 'development') {
-        console.log('[Auth] Creating new user with email:', primaryEmail)
-      }
-
-      try {
-        // Use transaction to ensure atomicity
-        const result = await client.$transaction(async (tx) => {
-          // Check if user exists again within transaction to prevent race condition
-          const existingUser = await tx.user.findUnique({
-            where: { clerkId: userId },
-            select: {
-              fullname: true,
-              id: true,
-              type: true,
-              email: true,
-            },
-          })
-
-          if (existingUser) {
-            if (process.env.NODE_ENV === 'development') {
-              console.log('[Auth] User already exists in transaction check:', existingUser.email)
-            }
-            return existingUser
-          }
-
-          // Create user
-          const newUser = await tx.user.create({
-            data: {
-              fullname,
-              clerkId: userId,
-              type: 'OWNER',
-              email: primaryEmail,
-            },
-            select: {
-              fullname: true,
-              id: true,
-              type: true,
-              email: true,
-            },
-          })
-
-          // Upsert billing record within the same transaction
-          await tx.billings.upsert({
-            where: { userId: newUser.id },
-            update: {},
-            create: {
-              userId: newUser.id,
-            },
-          })
-
-          return newUser
-        })
-
-        const newUser = result
-
-        if (process.env.NODE_ENV === 'development') {
-          console.log('[Auth] User created successfully:', newUser.email)
-        }
-        const domains = await onGetAllAccountDomains()
-        return { status: 200, user: newUser, domain: domains?.domains }
-      } catch (userCreationError: any) {
-        console.error('[Auth] User creation error:', userCreationError?.message || userCreationError)
-
-        // If user already exists (P2002 is unique constraint violation)
-        if (userCreationError.code === 'P2002') {
-          // Try to find the existing user
-          const existingUser = await client.user.findUnique({
-            where: { clerkId: userId },
-            select: {
-              fullname: true,
-              id: true,
-              type: true,
-              email: true,
-            },
-          })
-
-          if (existingUser) {
-            if (process.env.NODE_ENV === 'development') {
-              console.log('[Auth] Found existing user after creation conflict:', existingUser.email)
-            }
-            const domains = await onGetAllAccountDomains()
-            return { status: 200, user: existingUser, domain: domains?.domains }
-          }
-        }
-
-        return { status: 400, message: 'Failed to create or find user' }
-      }
+    return {
+      status: 200,
+      user,
+      organization,
+      role: ctx.actor.organizationRole,
+      workspaces,
     }
   } catch (error) {
-    console.error('[Auth] Error in onLoginUser:', error)
-    return { status: 400 }
+    console.error('[Auth] onLoginUser failed:', error)
+    return { status: 400, message: 'Sign-in failed' }
   }
+}
+
+/** Current tenant summary for client components that need to branch on it. */
+export const onGetCurrentTenant = async () => {
+  const ctx = await getTenantContext()
+  if (!ctx) return null
+
+  const organization = await client.organization.findUnique({
+    where: { id: ctx.organizationId },
+    select: {
+      id: true,
+      name: true,
+      slug: true,
+      organizationType: true,
+      hideChatDockBranding: true,
+      onboardingStatus: true,
+      status: true,
+    },
+  })
+
+  return { organization, role: ctx.actor.organizationRole, userId: ctx.userId }
 }

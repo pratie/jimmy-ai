@@ -25,7 +25,7 @@ export function pseudoEmbedding(text: string): number[] {
   let seed = createHash('sha256').update(text).digest()
   let sumSq = 0
   for (let i = 0; i < dims; i++) {
-    if (i % 32 === 0) seed = createHash('sha256').update(seed).digest()
+    if (i % 32 === 0) seed = createHash('sha256').update(new Uint8Array(seed)).digest()
     const v = (seed[i % 32] - 127.5) / 127.5
     out[i] = v
     sumSq += v * v

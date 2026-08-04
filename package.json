@@ -18,7 +18,6 @@
     "db:backup": "node --env-file=.env.local scripts/backup-live-db.mjs",
     "db:verify-backup": "node --env-file=.env.local scripts/verify-backup.mjs",
     "db:verify-rebuild": "node --env-file=.env.local scripts/verify-rebuild.mjs",
-    "db:export-emails": "node --env-file=.env.local scripts/export-emails.ts",
     "db:seed-plans": "node --env-file=.env.local prisma/seed-plans.mjs",
     "test": "node --env-file=.env.local ./node_modules/vitest/vitest.mjs run",
     "test:watch": "node --env-file=.env.local ./node_modules/vitest/vitest.mjs"

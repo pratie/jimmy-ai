@@ -1,206 +1,184 @@
 'use server'
 
 import { client } from '@/lib/prisma'
-import { currentUser } from '@clerk/nextjs/server'
+import { accessibleWorkspaceIds, requireTenantContext } from '@/lib/tenant'
+import { checkEntitlement, getBillingPeriod } from '@/lib/entitlements'
 
-// Get total conversations (anonymous + leads) across all domains
+/**
+ * Agency dashboard aggregates.
+ *
+ * Every count is scoped by `accessibleWorkspaceIds`, so a member assigned to two
+ * clients sees totals for two clients — not for the whole roster. The old
+ * versions counted by `clerkId` through a nested relation, which meant a scoped
+ * member silently saw organization-wide numbers.
+ */
+
+async function scope() {
+  const ctx = await requireTenantContext()
+  const workspaceIds = await accessibleWorkspaceIds(ctx)
+  return { ctx, workspaceIds }
+}
+
 export const getUserConversations = async () => {
   try {
-    const user = await currentUser()
-    if (user) {
-      const conversations = await client.chatRoom.count({
-        where: {
-          Domain: {
-            User: {
-              clerkId: user.id,
-            },
-          },
-        },
-      })
-      return conversations || 0
-    }
+    const { workspaceIds } = await scope()
+    if (workspaceIds.length === 0) return 0
+    return await client.conversation.count({
+      where: { clientWorkspaceId: { in: workspaceIds } },
+    })
   } catch (error) {
-    console.log(error)
+    console.error('[Dashboard] getUserConversations failed:', error)
     return 0
   }
 }
 
-// Get leads captured (customers with emails)
 export const getUserClients = async () => {
   try {
-    const user = await currentUser()
-    if (user) {
-      const clients = await client.customer.count({
-        where: {
-          Domain: {
-            User: {
-              clerkId: user.id,
-            },
-          },
-        },
-      })
-      if (clients) {
-        return clients
-      }
-    }
+    const { workspaceIds } = await scope()
+    if (workspaceIds.length === 0) return 0
+    return await client.lead.count({
+      where: { clientWorkspaceId: { in: workspaceIds }, archivedAt: null },
+    })
   } catch (error) {
-    console.log(error)
+    console.error('[Dashboard] getUserClients failed:', error)
+    return 0
   }
 }
 
-// Get appointments booked across all domains
 export const getUserAppointments = async () => {
   try {
-    const user = await currentUser()
-    if (user) {
-      const appointments = await client.bookings.count({
-        where: {
-          Customer: {
-            Domain: {
-              User: {
-                clerkId: user.id,
-              },
-            },
-          },
-        },
-      })
-      return appointments || 0
-    }
+    const { workspaceIds } = await scope()
+    if (workspaceIds.length === 0) return 0
+    return await client.bookingRequest.count({
+      where: { clientWorkspaceId: { in: workspaceIds } },
+    })
   } catch (error) {
-    console.log(error)
+    console.error('[Dashboard] getUserAppointments failed:', error)
     return 0
   }
 }
 
-// Get user's balance from Dodo Payments
-// NOTE: Feature temporarily disabled - will be implemented with Dodo Payments API
-// When implementing, use: GET https://test.dodopayments.com/payments?status=succeeded
-// See documentation: https://docs.dodopayments.com/api-reference/payments/get-payments
-export const getUserBalance = async () => {
-  try {
-    const user = await currentUser()
-    if (user) {
-      const connectedDodo = await client.user.findUnique({
-        where: {
-          clerkId: user.id,
-        },
-        select: {
-          dodoMerchantId: true,
-        },
-      })
-
-      if (connectedDodo?.dodoMerchantId) {
-        // IMPLEMENTATION PLACEHOLDER:
-        // 1. Fetch: GET /payments?status=succeeded&brand_id={merchantId}
-        // 2. Sum: payments.reduce((sum, p) => sum + p.total_amount, 0)
-        // 3. Return: total / 100 (convert cents to dollars)
-        return 0 // Returns $0 until feature is enabled
-      }
-      return 0
-    }
-    return 0
-  } catch (error) {
-    console.log(error)
-    return 0 // Safe fallback
-  }
-}
-
+/**
+ * Usage and plan state for the organization.
+ *
+ * Message consumption comes from the entitlement service, which sums
+ * `UsageEvent` over the provider's real billing period. The old version read a
+ * pooled counter that reset 30 days after whenever the last chat happened.
+ */
 export const getUserPlanInfo = async () => {
   try {
-    const user = await currentUser()
-    if (user) {
-      const plan = await client.user.findUnique({
-        where: {
-          clerkId: user.id,
-        },
+    const { ctx, workspaceIds } = await scope()
+
+    const [subscription, messages, workspaces, period] = await Promise.all([
+      client.subscription.findUnique({
+        where: { organizationId: ctx.organizationId },
         select: {
-          _count: {
-            select: {
-              domains: true,
-            },
-          },
-          subscription: {
-            select: {
-              plan: true,
-              messageCredits: true,
-              messagesUsed: true,
-            },
-          },
+          status: true,
+          billingInterval: true,
+          currentPeriodEnd: true,
+          cancelAtPeriodEnd: true,
+          plan: { select: { code: true, name: true } },
         },
-      })
-      if (plan) {
-        return {
-          plan: plan.subscription?.plan,
-          messageCredits: plan.subscription?.messageCredits,
-          messagesUsed: plan.subscription?.messagesUsed,
-          domains: plan._count.domains,
-        }
-      }
+      }),
+      checkEntitlement(ctx.organizationId, 'monthly_messages', 0),
+      checkEntitlement(ctx.organizationId, 'maximum_client_workspaces', 0),
+      getBillingPeriod(ctx.organizationId),
+    ])
+
+    return {
+      plan: subscription?.plan?.code ?? 'FREE',
+      planName: subscription?.plan?.name ?? 'Free',
+      status: subscription?.status ?? 'active',
+      billingInterval: subscription?.billingInterval ?? 'monthly',
+      cancelAtPeriodEnd: subscription?.cancelAtPeriodEnd ?? false,
+      periodEnd: subscription?.currentPeriodEnd ?? period.end,
+      domains: workspaceIds.length,
+      // A null limit means unlimited; the UI renders ∞ rather than a number.
+      credits: messages.limit === null ? null : Number(messages.limit),
+      messageLimit: messages.limit === null ? null : Number(messages.limit),
+      messagesUsed: Number(messages.used),
+      workspaceLimit: workspaces.limit === null ? null : Number(workspaces.limit),
+      workspacesUsed: Number(workspaces.used),
     }
   } catch (error) {
-    console.log(error)
+    console.error('[Dashboard] getUserPlanInfo failed:', error)
+    return null
   }
 }
 
+/**
+ * Value of the service catalogue across accessible clients, in minor units.
+ * Returns the currency alongside the amount — a bare number was ambiguous the
+ * moment more than one currency could exist.
+ */
 export const getUserTotalProductPrices = async () => {
   try {
-    const user = await currentUser()
-    if (user) {
-      const products = await client.product.findMany({
-        where: {
-          Domain: {
-            User: {
-              clerkId: user.id,
-            },
-          },
-        },
-        select: {
-          price: true,
-        },
-      })
+    const { workspaceIds } = await scope()
+    if (workspaceIds.length === 0) return { amountMinor: 0, currency: 'USD' }
 
-      if (products) {
-        const total = products.reduce((total, next) => {
-          return total + next.price
-        }, 0)
+    const items = await client.serviceItem.findMany({
+      where: { clientWorkspaceId: { in: workspaceIds }, active: true },
+      select: { priceAmountMinor: true, currency: true },
+    })
 
-        return total
-      }
-    }
+    const amountMinor = items.reduce((total, item) => total + (item.priceAmountMinor ?? 0), 0)
+    return { amountMinor, currency: items.find((i) => i.currency)?.currency ?? 'USD' }
   } catch (error) {
-    console.log(error)
+    console.error('[Dashboard] getUserTotalProductPrices failed:', error)
+    return { amountMinor: 0, currency: 'USD' }
   }
 }
 
-// Get user's transaction history from Dodo Payments
-// NOTE: Feature temporarily disabled - will be implemented with Dodo Payments API
-// When implementing, use: GET https://test.dodopayments.com/payments
-// See documentation: https://docs.dodopayments.com/api-reference/payments/get-payments
+/**
+ * Recent billing activity, read from the `BillingEvent` ledger rather than by
+ * calling the payment provider on every dashboard render.
+ */
 export const getUserTransactions = async () => {
   try {
-    const user = await currentUser()
-    if (user) {
-      const connectedDodo = await client.user.findUnique({
-        where: {
-          clerkId: user.id,
-        },
-        select: {
-          dodoMerchantId: true,
-        },
-      })
-
-      if (connectedDodo?.dodoMerchantId) {
-        // IMPLEMENTATION PLACEHOLDER:
-        // 1. Fetch: GET /payments?page_size=100&status=succeeded
-        // 2. Transform to: { id, amount, status, customer_email, created }
-        // 3. Return: { data: transactions }
-        return { data: [] } // Returns empty array until feature is enabled
-      }
-      return { data: [] }
-    }
-    return { data: [] }
+    await requireTenantContext()
+    const events = await client.billingEvent.findMany({
+      where: { processingStatus: 'processed' },
+      orderBy: { receivedAt: 'desc' },
+      take: 10,
+      select: {
+        id: true,
+        provider: true,
+        eventType: true,
+        receivedAt: true,
+        payloadMetadata: true,
+      },
+    })
+    return { data: events }
   } catch (error) {
-    console.log(error)
-    return { data: [] } // Safe fallback
+    console.error('[Dashboard] getUserTransactions failed:', error)
+    return { data: [] }
+  }
+}
+
+/** Per-client counts for the roster table. */
+export const getWorkspaceSummaries = async () => {
+  try {
+    const { workspaceIds } = await scope()
+    if (workspaceIds.length === 0) return []
+
+    return await client.clientWorkspace.findMany({
+      where: { id: { in: workspaceIds }, deletedAt: null },
+      orderBy: { updatedAt: 'desc' },
+      select: {
+        id: true,
+        name: true,
+        businessName: true,
+        logoUrl: true,
+        status: true,
+        workspaceType: true,
+        industry: true,
+        _count: {
+          select: { conversations: true, leads: true, bookingRequests: true, assistants: true },
+        },
+      },
+    })
+  } catch (error) {
+    console.error('[Dashboard] getWorkspaceSummaries failed:', error)
+    return []
   }
 }
