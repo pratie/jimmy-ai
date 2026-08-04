@@ -23,12 +23,14 @@ const WhiteLabelBranding = () => {
     const fetchBranding = async () => {
       try {
         const res = await onGetWhiteLabelSettings()
-        if (res?.status === 200 && res.data) {
-          setAgencyName(res.data.agencyName || 'ChatDock')
-          setAgencyLogo(res.data.agencyLogo || '')
-          setAgencyColor(res.data.agencyColor || '#0f172a')
-          setAgencyDomain(res.data.agencyDomain || '')
-          setHideBranding(res.data.hideBranding || false)
+        if (res?.status === 200 && res.settings) {
+          setAgencyName(res.settings.agencyName || 'ChatDock')
+          setAgencyLogo(res.settings.agencyLogo || '')
+          setAgencyColor(res.settings.agencyColor || '#0f172a')
+          // Custom agency domains are not implemented yet — the field stays
+          // empty rather than pretending to hold a configured value.
+          setAgencyDomain('')
+          setHideBranding(res.settings.hideBranding || false)
         }
       } catch (err) {
         console.error('Error fetching white label settings:', err)
@@ -47,7 +49,6 @@ const WhiteLabelBranding = () => {
         agencyName,
         agencyLogo: agencyLogo || null as any,
         agencyColor,
-        agencyDomain: agencyDomain || null as any,
         hideBranding,
       })
 

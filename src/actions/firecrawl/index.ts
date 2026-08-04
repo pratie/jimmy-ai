@@ -44,21 +44,46 @@ async function knowledgeContext(workspaceId: string) {
   }
 }
 
+/** The client's primary website URL, for actions that can infer their target. */
+async function primaryWebsiteUrl(clientWorkspaceId: string): Promise<string> {
+  const website = await client.website.findFirst({
+    where: { clientWorkspaceId, deletedAt: null },
+    orderBy: [{ isPrimary: 'desc' }, { createdAt: 'asc' }],
+    select: { url: true, canonicalDomain: true },
+  })
+  const workspace = await client.clientWorkspace.findUnique({
+    where: { id: clientWorkspaceId },
+    select: { websiteUrl: true, name: true },
+  })
+
+  const target = website?.url ?? website?.canonicalDomain ?? workspace?.websiteUrl ?? workspace?.name
+  if (!target) throw new Error('This client has no website on file')
+  return target
+}
+
 function toResponse(error: unknown, fallback: string) {
-  if (error instanceof EntitlementError) return { status: 402, message: error.message }
-  if (error instanceof AuthorizationError) return { status: 403, message: error.message }
+  // `upgradeRequired` lets the UI show an upgrade prompt instead of a generic
+  // failure when the wall is the plan rather than a bug.
+  if (error instanceof EntitlementError) {
+    return { status: 402, message: error.message, upgradeRequired: true }
+  }
+  if (error instanceof AuthorizationError) {
+    return { status: 403, message: error.message, upgradeRequired: false }
+  }
   devError(`[Knowledge] ${fallback}:`, error)
-  return { status: 400, message: fallback }
+  return { status: 400, message: fallback, upgradeRequired: false }
 }
 
 /* ── Website ────────────────────────────────────────────────────────────── */
 
-export const onScrapeWebsiteForDomain = async (workspaceId: string, url: string) => {
+export const onScrapeWebsiteForDomain = async (workspaceId: string, url?: string) => {
   try {
     const scope = await knowledgeContext(workspaceId)
     await assertEntitlement(scope.organizationId, 'monthly_crawl_pages')
 
-    const target = normalizeUrl(url)
+    // The caller may omit the URL, in which case the client's own primary
+    // website is used — that is the common case from the knowledge panel.
+    const target = normalizeUrl(url ?? (await primaryWebsiteUrl(scope.clientWorkspaceId)))
     const source = await createSource({
       ...scope,
       sourceType: 'website',
@@ -132,29 +157,34 @@ export const onScrapeWebsiteForDomain = async (workspaceId: string, url: string)
 }
 
 /** Lists the pages a site exposes so the operator can choose what to train on. */
-export const onDiscoverTrainingSources = async (workspaceId: string, url: string) => {
+export const onDiscoverTrainingSources = async (workspaceId: string, url?: string) => {
   try {
     const scope = await knowledgeContext(workspaceId)
     const remaining = await checkEntitlement(scope.organizationId, 'monthly_crawl_pages', 0)
 
-    const target = normalizeUrl(url)
+    const target = normalizeUrl(url ?? (await primaryWebsiteUrl(scope.clientWorkspaceId)))
     const mapped = await mapWebsite({ url: target })
 
     if (!mapped.success || !mapped.links?.length) {
       return { status: 400, message: 'No pages could be discovered for that website', pages: [] }
     }
 
+    const urls = mapped.links.slice(0, 200).map((link) => (typeof link === 'string' ? link : link.url))
+
     return {
       status: 200,
-      pages: mapped.links.slice(0, 200),
-      totalDiscovered: mapped.links.length,
-      // Surfaced so the UI can stop an operator selecting more pages than the
-      // plan allows, instead of failing them halfway through a crawl.
-      remainingPageBudget:
-        remaining.limit === null ? mapped.links.length : Number(remaining.remaining),
+      data: {
+        urls,
+        totalDiscovered: mapped.links.length,
+        // Surfaced so the UI can stop an operator selecting more pages than the
+        // plan allows, instead of failing them halfway through a crawl.
+        limit: remaining.limit === null ? Infinity : Number(remaining.limit),
+        remaining: remaining.limit === null ? Infinity : Number(remaining.remaining),
+        plan: '',
+      },
     }
   } catch (error) {
-    return { ...toResponse(error, 'Could not discover pages'), pages: [] }
+    return { ...toResponse(error, 'Could not discover pages'), data: null }
   }
 }
 
@@ -271,13 +301,22 @@ export const onScrapeSelectedSources = async (workspaceId: string, urls: string[
 
 export const onUploadTextKnowledgeBase = async (
   workspaceId: string,
-  name: string,
-  text: string
+  text: string,
+  append = false
 ) => {
   try {
     const scope = await knowledgeContext(workspaceId)
     if (!text.trim()) return { status: 400, message: 'No text provided' }
 
+    // `append: false` replaces previously pasted text rather than stacking a
+    // second copy of it, which is what the UI's toggle means.
+    if (!append) {
+      await client.knowledgeSource.deleteMany({
+        where: { clientWorkspaceId: scope.clientWorkspaceId, sourceType: 'manual_text' },
+      })
+    }
+
+    const name = `Pasted text (${new Date().toISOString().slice(0, 10)})`
     const source = await createSource({ ...scope, sourceType: 'manual_text', name })
     const { documentId } = await upsertDocument({
       knowledgeSourceId: source.id,
@@ -302,8 +341,9 @@ export const onUploadTextKnowledgeBase = async (
 
 export const onUploadPDFKnowledgeBase = async (
   workspaceId: string,
+  base64: string,
   fileName: string,
-  base64: string
+  _append = true
 ) => {
   try {
     const scope = await knowledgeContext(workspaceId)
@@ -382,22 +422,39 @@ export const onGetEmbeddingStatus = async (workspaceId: string) => {
   try {
     const { access } = await requireWorkspace(workspaceId, 'viewClientWorkspace')
     const knowledge = await getKnowledgeStatus(access.clientWorkspaceId)
+    const job = knowledge.lastIndex
+    const total = (job?.chunksCreated ?? 0) + (job?.chunksFailed ?? 0)
+
+    // Job statuses map onto the four states the progress panel understands.
+    const status =
+      job?.status === 'completed' || job?.status === 'partially_completed'
+        ? 'completed'
+        : job?.status === 'running' || job?.status === 'queued'
+          ? 'processing'
+          : job?.status === 'failed'
+            ? 'failed'
+            : 'not_started'
+
     return {
       status: 200,
-      hasEmbeddings: knowledge.hasEmbeddings,
-      chunkCount: knowledge.chunkCount,
-      embeddingStatus: knowledge.lastIndex?.status ?? 'not_started',
-      chunksCreated: knowledge.lastIndex?.chunksCreated ?? 0,
-      chunksFailed: knowledge.lastIndex?.chunksFailed ?? 0,
-      completedAt: knowledge.lastIndex?.completedAt ?? null,
+      data: {
+        status,
+        progress: total > 0 ? Math.round(((job?.chunksCreated ?? 0) / total) * 100) : 0,
+        processed: job?.chunksCreated ?? 0,
+        total,
+        hasEmbeddings: knowledge.hasEmbeddings,
+        chunkCount: knowledge.chunkCount,
+        completedAt: job?.completedAt ?? null,
+        kbUpdatedAt: knowledge.sources[0]?.lastSyncedAt ?? null,
+      },
     }
   } catch {
-    return { status: 400, hasEmbeddings: false, chunkCount: 0, embeddingStatus: 'unknown' }
+    return { status: 400, data: null }
   }
 }
 
 /** Re-embeds everything for a workspace, e.g. after an embedding model change. */
-export const onTrainChatbot = async (workspaceId: string) => {
+export const onTrainChatbot = async (workspaceId: string, _force = false) => {
   try {
     const scope = await knowledgeContext(workspaceId)
     const sources = await client.knowledgeSource.findMany({
@@ -426,11 +483,10 @@ export const onTrainChatbot = async (workspaceId: string) => {
         chunksCreated > 0
           ? `Trained on ${sources.length} sources (${chunksCreated} passages)`
           : 'Training produced no usable passages',
-      chunksCreated,
-      chunksFailed,
+      data: { chunksProcessed: chunksCreated, chunksFailed, skipped: false },
     }
   } catch (error) {
-    return toResponse(error, 'Training failed')
+    return { ...toResponse(error, 'Training failed'), data: null }
   }
 }
 

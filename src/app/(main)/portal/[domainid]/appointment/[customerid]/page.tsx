@@ -18,11 +18,11 @@ const CustomerSignUpForm = async ({
 
   return (
     <PortalForm
-      bookings={bookings}
+      bookings={bookings.filter((b) => b.date).map((b) => ({ date: b.date as Date, slot: b.slot }))}
       email={questions.email!}
       domainid={domainid}
       customerId={customerid}
-      questions={questions.questions}
+      questions={(questions.questions ?? []).map((q, i) => ({ id: String(i), ...q }))}
       type="Appointment"
     />
   )

@@ -125,7 +125,7 @@ export const useChatBot = (options?: UseChatBotOptions) => {
           },
         ])
       }
-      setCurrentBot(chatbot)
+      setCurrentBot({ ...chatbot, helpdesk: [] } as never)
       setLoading(false)
     } else {
       // Chatbot not found - show error message
@@ -223,7 +223,7 @@ export const useChatBot = (options?: UseChatBotOptions) => {
         if (response.live) {
           setOnRealTime((prev) => ({
             ...prev,
-            chatroom: response.chatRoom,
+            chatroom: ('chatRoom' in response ? (response.chatRoom as string) : (prev?.chatroom ?? '')),
             mode: response.live,
           }))
         } else {
@@ -377,7 +377,7 @@ export const useChatBot = (options?: UseChatBotOptions) => {
             // Enter realtime mode; remove empty assistant placeholder if present
             setOnRealTime((prev) => ({
               ...prev,
-              chatroom: response.chatRoom,
+              chatroom: ('chatRoom' in response ? (response.chatRoom as string) : (prev?.chatroom ?? '')),
               mode: response.live,
             }))
             setOnChats((prev: any) => {

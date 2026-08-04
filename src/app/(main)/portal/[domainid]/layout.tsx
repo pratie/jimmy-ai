@@ -16,25 +16,19 @@ const DomainPortalLayout = async ({ children, params }: Props) => {
 
   try {
     // Fetch the domain and the user's white-label settings
-    const domainInfo = await client.domain.findUnique({
-      where: {
-        id: domainid,
-      },
+    // Agency branding moved from User to Organization — where a paying tenant's
+    // brand actually belongs.
+    const workspace = await client.clientWorkspace.findUnique({
+      where: { id: domainid },
       select: {
-        User: {
-          select: {
-            agencyName: true,
-            agencyLogo: true,
-            agencyColor: true,
-          },
-        },
+        organization: { select: { name: true, logoUrl: true, primaryColor: true } },
       },
     })
 
-    if (domainInfo?.User) {
-      agencyLogo = domainInfo.User.agencyLogo || null
-      agencyName = domainInfo.User.agencyName || 'ChatDock'
-      agencyColor = domainInfo.User.agencyColor || '#0f172a'
+    if (workspace?.organization) {
+      agencyLogo = workspace.organization.logoUrl || null
+      agencyName = workspace.organization.name || 'ChatDock'
+      agencyColor = workspace.organization.primaryColor || '#0f172a'
     }
   } catch (error) {
     console.error('Error fetching portal white label settings:', error)

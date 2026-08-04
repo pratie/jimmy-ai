@@ -43,7 +43,7 @@ export const SIDE_BAR_MENU_SECONDARY: SIDE_BAR_MENU_PROPS[] = [
   {
     label: 'Email Marketing',
     icon: <EmailIcon />,
-    path: 'email-marketing',
+    path: 'leads',
   },
   {
     label: 'Experiments',

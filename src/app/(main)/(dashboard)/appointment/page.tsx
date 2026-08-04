@@ -19,8 +19,8 @@ const Page = async () => {
   const bookings = result?.bookings || []
   const now = new Date()
   const todayKey = now.toDateString()
-  const todayBookings = bookings.filter((booking) => booking.date.toDateString() === todayKey)
-  const upcoming = bookings.filter((booking) => booking.date >= now).length
+  const todayBookings = bookings.filter((booking) => (booking.date ?? new Date(0)).toDateString() === todayKey)
+  const upcoming = bookings.filter((booking) => (booking.date ?? new Date(0)) >= now).length
   const uniqueContacts = new Set(bookings.map((booking) => booking.email)).size
 
   return (
@@ -44,7 +44,7 @@ const Page = async () => {
           <div className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
             <section className="overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-[0_8px_30px_rgba(15,23,42,0.04)]">
               <div className="border-b border-slate-100 px-6 py-5"><h2 className="text-lg font-black text-slate-950">Booking pipeline</h2><p className="mt-1 text-xs font-medium text-slate-400">Appointments captured by every client agent.</p></div>
-              <div className="overflow-x-auto p-2"><AllAppointments bookings={bookings} /></div>
+              <div className="overflow-x-auto p-2"><AllAppointments bookings={bookings as never} /></div>
             </section>
 
             <aside className="rounded-3xl bg-[#0b1020] p-5 text-white shadow-[0_20px_60px_rgba(15,23,42,0.14)]">
@@ -52,8 +52,8 @@ const Page = async () => {
               <div className="mt-5 space-y-3">
                 {todayBookings.length ? todayBookings.map((booking) => (
                   <div key={booking.id} className="rounded-2xl border border-white/10 bg-white/[0.06] p-4">
-                    <div className="flex items-center justify-between"><span className="rounded-lg bg-[#7778ff]/20 px-2 py-1 text-[10px] font-black text-[#b9b9ff]">{booking.slot}</span><span className="text-[9px] font-bold uppercase tracking-wider text-emerald-400">Confirmed</span></div>
-                    <p className="mt-3 truncate text-xs font-black text-white">{booking.Customer?.Domain?.name || 'Client agent'}</p>
+                    <div className="flex items-center justify-between"><span className="rounded-lg bg-[#7778ff]/20 px-2 py-1 text-[10px] font-black text-[#b9b9ff]">{booking.slot}</span><span className="text-[9px] font-bold uppercase tracking-wider text-emerald-400">{booking.status === 'confirmed' ? 'Confirmed' : 'Requested'}</span></div>
+                    <p className="mt-3 truncate text-xs font-black text-white">{booking.Domain?.name || 'Client agent'}</p>
                     <p className="mt-2 flex items-center gap-1.5 truncate text-[10px] text-white/45"><Mail className="h-3 w-3" />{booking.email}</p>
                   </div>
                 )) : (

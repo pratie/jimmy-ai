@@ -72,7 +72,7 @@ export const MinMenu = ({
     {
       label: 'Leads',
       icon: <EmailIcon />,
-      path: 'email-marketing'
+      path: 'leads'
     },
     {
       label: 'Campaigns',

@@ -62,7 +62,7 @@ const AdvancedAISettings = ({
 
   const onSaveModel = async () => {
     setSavingModel(true)
-    const res = await onUpdateLlmConfig(model, temperature, domainId)
+    const res = await onUpdateLlmConfig(model, String(temperature), Number(domainId))
     toast({ title: res?.status === 200 ? 'Success' : 'Error', description: res?.message })
     setSavingModel(false)
     router.refresh()
@@ -76,7 +76,7 @@ const AdvancedAISettings = ({
       QUALIFIER: qualifier,
       FAQ_STRICT: faq,
     }
-    const res = await onUpdateModePrompts(payload, domainId)
+    const res = await onUpdateModePrompts(domainId, payload as never)
     toast({ title: res?.status === 200 ? 'Success' : 'Error', description: res?.message })
     setSavingPrompts(false)
     router.refresh()

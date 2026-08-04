@@ -17,7 +17,7 @@ const ConversationPage = async (props: Props) => {
     <>
       <InfoBar />
       <div className="min-h-0 flex-1 p-4 md:p-6">
-        <ConversationWorkspace domains={domains?.domains} />
+        <ConversationWorkspace domains={domains?.domains as never} />
       </div>
     </>
   )

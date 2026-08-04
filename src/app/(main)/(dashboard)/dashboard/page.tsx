@@ -38,7 +38,7 @@ const Page = async (props: Props) => {
           leads={leads || 0}
           appointments={appointments || 0}
           plan={plan}
-          domains={allDomainsList}
+          domains={allDomainsList as never}
         />
       </div>
     </>

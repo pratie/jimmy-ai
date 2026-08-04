@@ -68,7 +68,7 @@ const MaxMenu = ({ current, domains, onExpand, onSignOut, user }: Props) => {
     {
       label: 'Leads',
       icon: <EmailIcon />,
-      path: 'email-marketing'
+      path: 'leads'
     },
     {
       label: 'Campaigns',

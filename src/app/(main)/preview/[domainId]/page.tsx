@@ -14,7 +14,10 @@ export default async function PreviewPage({ params }: { params: Promise<{ domain
   const { domainId } = await params
   if (!domainId || typeof domainId !== 'string') redirect('/dashboard')
 
-  const domain = await client.domain.findUnique({ where: { id: domainId }, select: { name: true } })
+  const domain = await client.clientWorkspace.findUnique({
+    where: { id: domainId },
+    select: { name: true },
+  })
   if (!domain) redirect('/dashboard')
 
   return (

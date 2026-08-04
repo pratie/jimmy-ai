@@ -9,7 +9,7 @@ const routeDetails: Record<string, { title: string; eyebrow: string }> = {
   dashboard: { title: 'Agency overview', eyebrow: 'Command center' },
   conversation: { title: 'Conversation inbox', eyebrow: 'Customer activity' },
   appointment: { title: 'Bookings', eyebrow: 'Pipeline' },
-  'email-marketing': { title: 'Leads', eyebrow: 'Audience' },
+  'leads': { title: 'Leads', eyebrow: 'Audience' },
   integration: { title: 'Integrations', eyebrow: 'Connections' },
   settings: { title: 'Agency settings', eyebrow: 'Workspace' },
   experiments: { title: 'Labs', eyebrow: 'Experiments' },

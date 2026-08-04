@@ -31,7 +31,7 @@ type Props = {
 const primaryNavigation = [
   { label: 'Overview', href: '/dashboard', icon: BarChart3 },
   { label: 'Inbox', href: '/conversation', icon: Inbox },
-  { label: 'Leads', href: '/email-marketing', icon: UsersRound },
+  { label: 'Leads', href: '/leads', icon: UsersRound },
   { label: 'Bookings', href: '/appointment', icon: CalendarDays },
 ]
 

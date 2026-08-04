@@ -20,11 +20,11 @@ const CustomerPaymentPage = async ({
   return (
     <PortalForm
       email={questions.email!}
-      products={products?.products}
+      products={products?.products.map((p) => ({ name: p.name, image: p.image ?? '', price: p.price }))}
       amount={products?.amount}
       domainid={domainid}
       customerId={customerid}
-      questions={questions.questions}
+      questions={(questions.questions ?? []).map((q, i) => ({ id: String(i), ...q }))}
       dodoMerchantId={products?.dodoMerchantId || undefined}
       type="Payment"
     />

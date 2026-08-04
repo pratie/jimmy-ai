@@ -270,7 +270,7 @@ export const useDiscoverSources = () => {
       const result = await onDiscoverTrainingSources(domainId)
 
       if (result.status === 200 && result.data) {
-        setUrls(result.data.urls)
+        setUrls(result.data.urls.map((url: string) => ({ url })))
         setLimit(result.data.limit)
         setRemaining(result.data.remaining)
         setPlan(result.data.plan)
@@ -329,7 +329,7 @@ export const useScrapeSelected = () => {
         return true
       } else {
         toast({
-          title: result.upgradeRequired ? 'Upgrade Required' : 'Error',
+          title: 'upgradeRequired' in result && result.upgradeRequired ? 'Upgrade Required' : 'Error',
           description: result.message,
           variant: 'destructive',
         })

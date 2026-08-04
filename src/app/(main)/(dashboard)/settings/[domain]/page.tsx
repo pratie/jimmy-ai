@@ -22,7 +22,7 @@ const DomainSettingsPage = async (
         <div className="mx-auto max-w-6xl px-5 py-7 md:px-8">
           <SettingsForm
             plan={domain.subscription?.plan!}
-            chatBot={activeDomain.chatBot}
+            chatBot={activeDomain.chatBot as never}
             id={activeDomain.id}
             name={activeDomain.name}
             trainingSourcesUsed={activeDomain.trainingSourcesUsed}

@@ -193,7 +193,7 @@ export const useHelpDesk = (id: string) => {
     setLoading(true)
     const questions = await onGetAllHelpDeskQuestions(id)
     if (questions) {
-      setIsQuestions(questions.questions)
+      setIsQuestions('questions' in questions ? questions.questions : [])
       setLoading(false)
     }
   }
@@ -231,7 +231,7 @@ export const useFilterQuestions = (id: string) => {
     setLoading(true)
     const questions = await onCreateFilterQuestions(id, values.question)
     if (questions) {
-      setIsQuestions(questions.questions!)
+      setIsQuestions(('questions' in questions ? questions.questions : []) as never)
       toast({
         title: questions.status == 200 ? 'Success' : 'Error',
         description: questions.message,
@@ -245,7 +245,7 @@ export const useFilterQuestions = (id: string) => {
     setLoading(true)
     const questions = await onGetAllFilterQuestions(id)
     if (questions) {
-      setIsQuestions(questions.questions)
+      setIsQuestions('questions' in questions ? questions.questions : [])
       setLoading(false)
     }
   }

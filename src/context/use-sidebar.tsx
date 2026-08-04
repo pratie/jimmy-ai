@@ -24,7 +24,7 @@ const useSideBar = () => {
         e.target.ariaChecked == 'true' ? false : true
       )
       if (realtime) {
-        setRealtime(realtime.chatRoom.live)
+        setRealtime((realtime.chatRoom?.live ?? false))
         toast({
           title: 'Success',
           description: realtime.message,

@@ -42,8 +42,8 @@ const OwnerLayout = async ({ children }: Props) => {
         <div className="flex h-screen min-h-screen w-full bg-[#f5f6fa] text-foreground">
           <DashboardThemeEnforcer />
           <SideBar
-            domains={authenticated.domain}
-            user={authenticated.user}
+            domains={(authenticated.workspaces ?? []).map((w) => ({ id: w.id, name: w.name, icon: w.logoUrl }))}
+            user={{ ...authenticated.user, fullname: authenticated.user?.fullName ?? '' }}
           />
           <main className="flex h-screen min-w-0 flex-1 flex-col overflow-x-hidden pl-[72px] md:pl-0">
             {children}
