@@ -1,671 +1,270 @@
-// Streaming API for main chatbot
+// Public streaming chat endpoint.
 // Route: /api/bot/stream
 
-import { client } from '@/lib/prisma'
-import { extractEmailsFromString, devLog, devError } from '@/lib/utils'
-import { truncateMarkdown } from '@/lib/firecrawl'
-import { buildSystemPrompt } from '@/lib/promptBuilder'
-import { searchKnowledgeBaseWithFallback, formatResultsForPrompt, hasTrainedEmbeddings, searchKnowledgeBaseMultiQuery } from '@/lib/vector-search'
-import { getPlanLimits, shouldResetCredits, getNextResetDate } from '@/lib/plans'
 import { streamText } from 'ai'
+
 import { getModel } from '@/lib/ai-models'
+import { buildSystemPrompt } from '@/lib/promptBuilder'
+import { devError, devLog, extractEmailsFromString } from '@/lib/utils'
+import {
+  formatResultsForPrompt,
+  searchKnowledgeBaseMultiQuery,
+  searchKnowledgeBaseWithFallback,
+  type SearchResult,
+} from '@/lib/vector-search'
+import { checkRateLimit, resolveWidgetRequest, type WidgetContext } from '@/lib/widget/resolve'
+import {
+  appendAssistantMessage,
+  appendVisitorMessage,
+  captureLead,
+  recentMessages,
+  resolveSession,
+} from '@/lib/chat/session'
 
-// --- Minimal in-memory LRU cache for domain config ---
-type DomainConfig = {
-  name: string
-  userId?: string | null
-  chatBot: {
-    mode: string | null
-    brandTone: string | null
-    language: string | null
-    hasEmbeddings: boolean | null
-    llmModel?: string | null
-    llmTemperature?: number | null
-    modePrompts?: any | null
-  } | null
+/**
+ * The only unauthenticated write path in the product.
+ *
+ * Rewritten from ~670 lines in which authorisation, billing, visitor lookup,
+ * lead creation, message storage and prompt assembly were interleaved. Each of
+ * those now lives in its own module:
+ *
+ *   lib/widget/resolve  — is this caller allowed, and can they afford it
+ *   lib/chat/session    — visitor, conversation, lead, message persistence
+ *   lib/vector-search   — tenant-scoped retrieval
+ *
+ * Security properties this endpoint now has and previously did not:
+ *  - callers present a rotatable deployment key, not an internal row id
+ *  - rate limited
+ *  - the plan allowance is checked BEFORE any model call
+ *  - retrieval is scoped to one workspace in SQL
+ *  - crawled content is fenced as untrusted data, never merged into the system
+ *    prompt where an instruction inside a client's website would be obeyed
+ */
+
+export const maxDuration = 60
+
+/* ── Response formatting ────────────────────────────────────────────────── */
+
+const removeMarkdownBold = (text: string) => text.replace(/\*\*(.*?)\*\*/g, '$1')
+
+const convertMarkdownLinksToHtml = (text: string) =>
+  text.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
+
+/** Rough phone detection for lead capture. Deliberately conservative. */
+function extractPhone(text: string): string | null {
+  const match = text.match(/(\+?\d[\d\s().-]{7,}\d)/)
+  if (!match) return null
+  const digits = match[1].replace(/\D/g, '')
+  return digits.length >= 8 && digits.length <= 15 ? match[1].trim() : null
 }
 
-const DOMAIN_CACHE_TTL_MS = 300_000 // 5 minutes
-const DOMAIN_CACHE_CAPACITY = 100
-const domainCache = new Map<string, { value: DomainConfig; expires: number }>()
-
-// Simple metrics for cache hits/misses (global + per-domain)
-let cacheHits = 0
-let cacheMisses = 0
-const domainCacheStats = new Map<string, { hits: number; misses: number }>()
-
-function recordCacheStat(domainId: string, hit: boolean) {
-  const stat = domainCacheStats.get(domainId) || { hits: 0, misses: 0 }
-  if (hit) {
-    cacheHits++
-    stat.hits++
-  } else {
-    cacheMisses++
-    stat.misses++
-  }
-  domainCacheStats.set(domainId, stat)
-}
-
-function getDomainFromCache(domainId: string): DomainConfig | undefined {
-  const entry = domainCache.get(domainId)
-  if (!entry) return undefined
-  if (Date.now() > entry.expires) {
-    domainCache.delete(domainId)
-    return undefined
-  }
-  // LRU update: reinsert to refresh recency
-  domainCache.delete(domainId)
-  domainCache.set(domainId, entry)
-  return entry.value
-}
-
-function setDomainInCache(domainId: string, value: DomainConfig) {
-  // Trim if over capacity
-  if (domainCache.size >= DOMAIN_CACHE_CAPACITY) {
-    const firstKey = domainCache.keys().next().value
-    if (firstKey) domainCache.delete(firstKey)
-  }
-  domainCache.set(domainId, { value, expires: Date.now() + DOMAIN_CACHE_TTL_MS })
-}
-
-export const maxDuration = 30
-export const dynamic = 'force-dynamic'
-
-// Helper to remove markdown bold syntax from text
-function removeMarkdownBold(text: string): string {
-  return text.replace(/\*\*/g, '')
-}
-
-// Helper to convert markdown links to HTML anchor tags
-function convertMarkdownLinksToHtml(text: string): string {
-  // Match [text](url) pattern and convert to <a href="url" target="_blank" rel="noopener noreferrer">text</a>
-  return text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-blue-500 hover:text-blue-600 underline">$1</a>')
-}
-
-// Helper to store conversations
-async function storeConversation(id: string, message: string, role: 'assistant' | 'user') {
-  await client.chatRoom.update({
-    where: { id },
-    data: {
-      message: {
-        create: { message, role },
-      },
-    },
+const json = (body: unknown, status: number, headers: Record<string, string> = {}) =>
+  new Response(JSON.stringify(body), {
+    status,
+    headers: { 'Content-Type': 'application/json', ...headers },
   })
-}
+
+/* ── Handler ────────────────────────────────────────────────────────────── */
 
 export async function POST(req: Request) {
-  const startTime = Date.now()
+  const startedAt = Date.now()
+
   try {
-    const { domainId, chat, message, anonymousId } = await req.json()
-    // Track resolved customer id (if we have an email / existing customer)
-    let resolvedCustomerId: string | undefined
+    const body = await req.json()
+    const {
+      // `deploymentKey` is the new contract; `domainId` is accepted only so an
+      // old embed script fails with a clear message instead of a type error.
+      deploymentKey,
+      domainId,
+      chat,
+      message,
+      anonymousId,
+      sourceUrl,
+    } = body ?? {}
 
-    devLog('[Bot Stream] ⏱️  Request started')
-
-    if (!domainId || !message || !Array.isArray(chat)) {
-      return new Response(JSON.stringify({ error: 'Invalid request format' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' },
-      })
+    const key: string | undefined = deploymentKey ?? domainId
+    if (!key || !message || typeof message !== 'string') {
+      return json({ error: 'Missing deployment key or message' }, 400)
+    }
+    if (!anonymousId || typeof anonymousId !== 'string') {
+      return json({ error: 'Missing anonymousId' }, 400)
     }
 
-    // Extract email if present (do this early)
-    let customerEmail: string | undefined
-    const extractedEmail = extractEmailsFromString(message)
-    if (extractedEmail) {
-      customerEmail = extractedEmail[0]
+    const origin = req.headers.get('origin') ?? req.headers.get('referer')
+
+    // Rate limit before touching the database: an abusive caller should cost a
+    // map lookup, not a query.
+    const limit = checkRateLimit(`${key}:${anonymousId}`)
+    if (!limit.allowed) {
+      return json(
+        { error: 'Too many messages. Please slow down.', retryAfter: limit.retryAfterSeconds },
+        429,
+        { 'Retry-After': String(limit.retryAfterSeconds) }
+      )
     }
 
-    // ⚡ Domain config: use in-memory cache to avoid repeated DB round-trips
-    const parallelStartTime = Date.now()
-    const dbQueryStart = Date.now()
-    let chatBotDomain = getDomainFromCache(domainId)
-    let cacheHit = false
+    const resolution = await resolveWidgetRequest(key, origin)
+    if (!resolution.ok) {
+      return json({ error: resolution.message, code: resolution.code }, resolution.status)
+    }
+    const context: WidgetContext = resolution.context
 
-    if (!chatBotDomain) {
-      const found = await client.domain.findUnique({
-        where: { id: domainId },
-        select: {
-          name: true,
-          userId: true,
-          chatBot: {
-            select: {
-              mode: true,
-              brandTone: true,
-              language: true,
-              hasEmbeddings: true,
-              llmModel: true,
-              llmTemperature: true,
-              modePrompts: true,
-            },
-          },
-        },
-      })
+    const session = await resolveSession({
+      context,
+      anonymousId,
+      sourceUrl: typeof sourceUrl === 'string' ? sourceUrl : null,
+      referrer: origin,
+    })
 
-      if (found) {
-        chatBotDomain = found as DomainConfig
-        setDomainInCache(domainId, chatBotDomain)
-      }
-      recordCacheStat(domainId, false)
-      devLog(`[Bot Stream]   └─ Domain query: ${Date.now() - dbQueryStart}ms`)
-    } else {
-      cacheHit = true
-      recordCacheStat(domainId, true)
-      devLog('[Bot Stream]   └─ Domain query: 0ms (cache hit)')
+    await appendVisitorMessage(session, context, message)
+
+    // A human has taken over: stay silent rather than talking over the agent.
+    if (session.isLive) {
+      return json({ live: true, message: 'A team member is replying to this conversation.' }, 200)
     }
 
-    // CHECK MESSAGE CREDITS BEFORE RESPONDING
-    if (chatBotDomain && chatBotDomain.userId) {
-      const billing = await client.billings.findUnique({
-        where: { userId: chatBotDomain.userId },
-        select: {
-          plan: true,
-          messageCredits: true,
-          messagesUsed: true,
-          messagesResetAt: true,
-        }
-      })
+    // Contact details volunteered in the message body.
+    const email = extractEmailsFromString(message)?.[0] ?? null
+    const phone = extractPhone(message)
+    const leadId = context.assistant.leadCaptureEnabled
+      ? await captureLead({ context, session, email, phone })
+      : session.leadId
 
-      if (billing) {
-        // Check if credits should reset
-        if (shouldResetCredits(billing.messagesResetAt)) {
-          const limits = getPlanLimits(billing.plan)
-          await client.billings.update({
-            where: { userId: chatBotDomain.userId },
-            data: {
-              messagesUsed: 0,
-              messageCredits: limits.messageCredits,
-              messagesResetAt: getNextResetDate()
-            }
-          })
-          devLog('[Bot Stream] 🔄 Credits reset for new billing period')
-        } else {
-          // Check if user has credits remaining
-          if (billing.messagesUsed >= billing.messageCredits) {
-            devLog('[Bot Stream] ❌ Message limit reached')
-            return new Response(
-              JSON.stringify({
-                error: 'Message limit reached',
-                message: 'This chatbot has reached its monthly message limit. Please contact the website owner to upgrade their plan.',
-                limitReached: true,
-                plan: billing.plan
-              }),
-              {
-                status: 429,
-                headers: { 'Content-Type': 'application/json' }
-              }
-            )
-          }
-        }
-      }
-    }
-
-    const hasTrained = !!(chatBotDomain?.chatBot?.hasEmbeddings)
-
-    devLog(`[Bot Stream] ✅ Parallel queries took: ${Date.now() - parallelStartTime}ms (max of both)`)    
-
-    if (!chatBotDomain) {
-      return new Response(JSON.stringify({ error: 'Chatbot not found' }), {
-        status: 404,
-        headers: { 'Content-Type': 'application/json' },
-      })
-    }
-
-    // RAG: Retrieve knowledge based on embeddings availability
-    const ragStartTime = Date.now()
-    let knowledgeBase: string
-
-    if (hasTrained) {
-      // Multi-query RAG with reranking (embeddings required)
-      devLog('[Bot Stream] 🔍 Using multi-query RAG with reranking')
-      const vectorSearchStart = Date.now()
-      try {
-        // Defaults tuned for speed/quality; can be made configurable later
-        const chunksPerQuery = 4  // 4 queries × 4 chunks = 16 total (reduced from 20)
-        const finalTopN = 3
-        const searchResults = await searchKnowledgeBaseMultiQuery(message, domainId, chunksPerQuery, finalTopN)
-        devLog(`[Bot Stream] ✅ Multi-query search took: ${Date.now() - vectorSearchStart}ms (final ${searchResults.length} chunks)`) 
-        // If multi-query returned no chunks (edge), fallback to single-query search
-        if (searchResults.length === 0) {
-          const fallbackStart = Date.now()
-          const fallbackResults = await searchKnowledgeBaseWithFallback(message, domainId, 5)
-          devLog(`[Bot Stream] ⚠️  Fallback single-query took: ${Date.now() - fallbackStart}ms (found ${fallbackResults.length} chunks)`) 
-          knowledgeBase = formatResultsForPrompt(fallbackResults)
-        } else {
-          knowledgeBase = formatResultsForPrompt(searchResults)
-        }
-      } catch (e) {
-        devError('[Bot Stream] Multi-query RAG failed, using fallback:', e)
-        const vectorSearchStart2 = Date.now()
-        const searchResults = await searchKnowledgeBaseWithFallback(message, domainId, 5)
-        devLog(`[Bot Stream] ✅ Vector search (fallback) took: ${Date.now() - vectorSearchStart2}ms (found ${searchResults.length} chunks)`) 
-        knowledgeBase = formatResultsForPrompt(searchResults)
-      }
-    } else {
-      devLog('[Bot Stream] ⚠️  Using fallback: fetching full knowledge base (no embeddings trained)')
-      // Only fetch knowledgeBase when embeddings aren't trained (rare case)
-      const kbData = await client.chatBot.findUnique({
-        where: { domainId: domainId },
-        select: { knowledgeBase: true }
-      })
-      knowledgeBase = kbData?.knowledgeBase
-        ? kbData.knowledgeBase // Pass full KB without truncation
-        : 'No knowledge base available yet. Please ask the customer to provide more details about their inquiry.'
-    }
-    devLog(`[Bot Stream] ✅ RAG retrieval took: ${Date.now() - ragStartTime}ms`)
-
-    // ═══════════════════════════════════════════════════════════
-    // CONVERSATION STATE MANAGEMENT: Handle both customer & anonymous users
-    // ═══════════════════════════════════════════════════════════
-    let chatRoomId: string | undefined
-    let isLiveMode = false
-
-    if (customerEmail) {
-      // ──────────────────────────────────────────────────────────
-      // CUSTOMER FLOW: Email provided (new or returning customer)
-      // ──────────────────────────────────────────────────────────
-      devLog('[Bot Stream] 📧 Customer email detected')
-
-      try {
-        // 1. Find existing customer first
-        let customer = await client.customer.findFirst({
-          where: {
-            email: customerEmail,
-            domainId: domainId
-          },
-          select: {
-            id: true,
-            chatRoom: {
-              select: {
-                id: true,
-                live: true,
-                mailed: true
-              }
-            }
-          }
-        })
-
-        // 2. Create customer if doesn't exist (with proper error handling for race conditions)
-        if (!customer) {
-          try {
-            customer = await client.customer.create({
-              data: {
-                email: customerEmail,
-                domainId: domainId
-              },
-              select: {
-                id: true,
-                chatRoom: {
-                  select: {
-                    id: true,
-                    live: true,
-                    mailed: true
-                  }
-                }
-              }
-            })
-          } catch (createError: any) {
-            // Handle race condition: another request created the customer simultaneously
-            if (createError.code === 'P2002') {
-              devLog('[Bot Stream] 🔄 Race condition detected - customer created by concurrent request')
-              // Retry findFirst to get the customer that was just created
-              customer = await client.customer.findFirst({
-                where: {
-                  email: customerEmail,
-                  domainId: domainId
-                },
-                select: {
-                  id: true,
-                  chatRoom: {
-                    select: {
-                      id: true,
-                      live: true,
-                      mailed: true
-                    }
-                  }
-                }
-              })
-            } else {
-              throw createError
-            }
-          }
-        }
-
-        if (!customer) {
-          throw new Error('Failed to create or find customer')
-        }
-
-        devLog('[Bot Stream] ✅ Customer found/created')
-        // Capture customer id for appointment link generation later
-        resolvedCustomerId = customer.id
-
-        // 3. Check for anonymous history to link
-        if (anonymousId) {
-          const anonymousChatRoom = await client.chatRoom.findFirst({
-            where: {
-              anonymousId: anonymousId,
-              domainId: domainId,
-              customerId: null
-            },
-            select: {
-              id: true,
-              live: true
-            }
-          })
-
-          if (anonymousChatRoom) {
-            devLog('[Bot Stream] 🔗 Linking anonymous chat history')
-
-            // Link anonymous chat to customer (atomic update)
-            await client.chatRoom.update({
-              where: { id: anonymousChatRoom.id },
-              data: {
-                customerId: customer.id,
-                anonymousId: null
-              }
-            })
-
-            chatRoomId = anonymousChatRoom.id
-            isLiveMode = anonymousChatRoom.live
-          }
-        }
-
-        // 4. Get or create customer chat room (if no anonymous history linked)
-        if (!chatRoomId) {
-          if (customer.chatRoom && customer.chatRoom.length > 0) {
-            // Returning customer - use existing chat room
-            chatRoomId = customer.chatRoom[0].id
-            isLiveMode = customer.chatRoom[0].live
-            devLog('[Bot Stream] 🔄 Returning customer, using existing chat room')
-          } else {
-            // New customer - create chat room
-            const newChatRoom = await client.chatRoom.create({
-              data: {
-                customerId: customer.id,
-                domainId: domainId
-              },
-              select: {
-                id: true,
-                live: true
-              }
-            })
-            chatRoomId = newChatRoom.id
-            isLiveMode = newChatRoom.live
-            devLog('[Bot Stream] 🆕 New customer, created chat room')
-          }
-        }
-
-        // 5. Store user message
-        await storeConversation(chatRoomId, message, 'user')
-
-        // 6. Check if live mode is active
-        if (isLiveMode) {
-          devLog('[Bot Stream] 👤 Live mode active - human agent will respond')
-          return new Response(
-            JSON.stringify({
-              error: 'Live mode active',
-              live: true,
-              chatRoom: chatRoomId
-            }),
-            {
-              status: 200,
-              headers: { 'Content-Type': 'application/json' }
-            }
-          )
-        }
-
-      } catch (error: any) {
-        devError('[Bot Stream] ❌ Customer handling error:', error)
-
-        // Fallback: Continue with anonymous flow if customer creation fails
-        // This prevents total failure - conversation still works
-        devLog('[Bot Stream] ⚠️  Falling back to anonymous mode due to error')
-        customerEmail = undefined // Clear email to trigger anonymous flow below
-      }
-    }
-
-    if (!customerEmail && anonymousId) {
-      // ──────────────────────────────────────────────────────────
-      // ANONYMOUS FLOW: No email provided yet
-      // ──────────────────────────────────────────────────────────
-      devLog('[Bot Stream] 👤 Anonymous user')
-
-      let anonymousChatRoom = await client.chatRoom.findFirst({
-        where: {
-          anonymousId: anonymousId,
-          domainId: domainId,
-          customerId: null,
-        },
-        select: {
-          id: true,
-          live: true,
-        },
-      })
-
-      if (!anonymousChatRoom) {
-        anonymousChatRoom = await client.chatRoom.create({
-          data: {
-            anonymousId: anonymousId,
-            domainId: domainId,
-          },
-          select: {
-            id: true,
-            live: true,
-          },
-        })
-        devLog('[Bot Stream] 🆕 Created anonymous chat room')
-      }
-
-      chatRoomId = anonymousChatRoom.id
-      isLiveMode = anonymousChatRoom.live
-
-      // Store user message
-      await storeConversation(chatRoomId, message, 'user')
-
-      // If live mode, don't stream AI response
-      if (isLiveMode) {
-        devLog('[Bot Stream] 👤 Live mode active - human agent will respond')
-        return new Response(
-          JSON.stringify({
-            error: 'Live mode active',
-            live: true,
-            chatRoom: chatRoomId
-          }),
-          {
-            status: 200,
-            headers: { 'Content-Type': 'application/json' },
-          }
+    /* ── Retrieval ── */
+    const ragStart = Date.now()
+    let citations: SearchResult[] = []
+    try {
+      citations = await searchKnowledgeBaseMultiQuery(
+        message,
+        { clientWorkspaceId: context.clientWorkspaceId, assistantId: context.assistantId },
+        5,
+        8
+      )
+      if (citations.length === 0) {
+        citations = await searchKnowledgeBaseWithFallback(
+          message,
+          { clientWorkspaceId: context.clientWorkspaceId, assistantId: context.assistantId },
+          5
         )
       }
+    } catch (error) {
+      devError('[Bot Stream] retrieval failed:', error)
     }
+    const knowledgeBase = formatResultsForPrompt(citations)
+    devLog(`[Bot Stream] retrieval ${Date.now() - ragStart}ms (${citations.length} chunks)`)
 
-    // Build system prompt
-    const promptStartTime = Date.now()
-    // Build appointment link if we have a resolved customer id; leave paymentUrl empty (not used for now)
-    const appointmentUrl = resolvedCustomerId
-      ? `${process.env.NEXT_PUBLIC_APP_URL}/portal/${domainId}/appointment/${resolvedCustomerId}`
-      : ''
+    /* ── Prompt ── */
+    const appBase = process.env.NEXT_PUBLIC_APP_URL ?? ''
+    const mode = !leadId
+      ? 'QUALIFIER'
+      : context.assistant.mode === 'support'
+        ? 'SUPPORT'
+        : context.assistant.mode === 'faq'
+          ? 'FAQ_STRICT'
+          : 'SALES'
+
+    const behavior = (context.assistant.behaviorSettings ?? {}) as Record<string, unknown>
+
     const systemPrompt = buildSystemPrompt({
-      businessName: chatBotDomain.name,
-      domain: `${process.env.NEXT_PUBLIC_APP_URL}/portal/${domainId}`,
+      businessName: context.assistant.name,
+      domain: appBase,
       knowledgeBase,
-      mode: !customerEmail ? 'QUALIFIER' : (chatBotDomain.chatBot?.mode === 'SALES' || chatBotDomain.chatBot?.mode === 'SUPPORT' || chatBotDomain.chatBot?.mode === 'QUALIFIER' || chatBotDomain.chatBot?.mode === 'FAQ_STRICT' ? chatBotDomain.chatBot.mode : 'SUPPORT'),
-      brandTone: chatBotDomain.chatBot?.brandTone || 'friendly, warm, conversational',
-      language: chatBotDomain.chatBot?.language || 'en',
-      qualificationQuestions: !customerEmail ? ['What is your email address so I can assist you better?'] : [],
-      appointmentUrl,
+      mode: mode as never,
+      brandTone: context.assistant.brandTone ?? 'friendly, warm, conversational',
+      language: context.assistant.language,
+      qualificationQuestions: !leadId
+        ? ['What is the best email or phone number to reach you on?']
+        : [],
+      appointmentUrl:
+        context.assistant.bookingEnabled && leadId
+          ? `${appBase}/portal/${context.clientWorkspaceId}/appointment/${leadId}`
+          : '',
       paymentUrl: '',
-      portalBaseUrl: `${process.env.NEXT_PUBLIC_APP_URL}/portal/${domainId}`,
-      customerId: resolvedCustomerId || '',
-      customModeBlocks: (chatBotDomain.chatBot?.modePrompts as any) || undefined,
+      portalBaseUrl: `${appBase}/portal/${context.clientWorkspaceId}`,
+      customerId: leadId ?? '',
+      customModeBlocks: (behavior.modePrompts as never) ?? undefined,
     })
-    devLog(`[Bot Stream] ✅ Prompt building took: ${Date.now() - promptStartTime}ms`)
 
-    // Prepare OpenAI request data
-    const llmModel = chatBotDomain.chatBot?.llmModel || 'gemini-2.5-flash-lite'
-    const llmTemperature = (typeof chatBotDomain.chatBot?.llmTemperature === 'number') ? chatBotDomain.chatBot?.llmTemperature as number : 0.7
+    const history = await recentMessages(session.conversationId, 20)
+    const priorTurns = Array.isArray(chat) && chat.length > 0 ? chat : history
+
     const messages = [
       { role: 'system', content: systemPrompt },
-      ...chat,
+      ...priorTurns,
       { role: 'user', content: message },
     ]
 
-    // ═══════════════════════════════════════════════════════════
-    // 🔍 DEBUG: LOG COMPLETE LLM REQUEST DATA
-    // ═══════════════════════════════════════════════════════════
-    if (process.env.DEBUG_LLM === 'true') {
-      console.log('\n' + '='.repeat(80))
-      console.log('📤 AI SDK REQUEST')
-      console.log('='.repeat(80))
-      console.log('Model:', llmModel)
-      console.log('Temperature:', llmTemperature)
-      console.log('Max Tokens:', 4096)
-      console.log('Stream:', true)
-      console.log('\n' + '-'.repeat(80))
-      console.log('MESSAGES:')
-      console.log('-'.repeat(80))
-      messages.forEach((msg, idx) => {
-        console.log(`\n[Message ${idx + 1}] Role: ${msg.role}`)
-        console.log('-'.repeat(80))
-        console.log(msg.content)
-        console.log('-'.repeat(80))
-      })
-      console.log('\n' + '='.repeat(80) + '\n')
-    }
-
-    // Get AI model dynamically (supports OpenAI, Anthropic, Google)
-    const model = getModel(llmModel)
-
-    devLog('[Bot Stream] 🤖 Calling AI API...')
-    devLog('[Bot Stream] 📍 Model:', llmModel)
-    devLog('[Bot Stream] 🌡️  Temperature:', llmTemperature)
-
-    const llmStartTime = Date.now()
-
-    // Create AI SDK streaming result
+    /* ── Stream ── */
+    const llmStart = Date.now()
     const result = streamText({
-      model: model as any,
-      messages: messages as any,
-      temperature: llmTemperature,
+      model: getModel(context.assistant.modelName) as never,
+      messages: messages as never,
+      temperature: context.assistant.temperature,
       maxOutputTokens: 2000,
     })
 
-    // Custom stream processing to maintain per-chunk markdown cleaning
     const encoder = new TextEncoder()
     let fullResponse = ''
-    let firstTokenTime: number | null = null
-    let tokenCount = 0
+    let firstTokenAt: number | null = null
 
-    const customStream = new ReadableStream({
+    const stream = new ReadableStream({
       async start(controller) {
-        let controllerErrored = false
-
+        let errored = false
         try {
-          // Consume AI SDK text stream
-          for await (const textPart of result.textStream) {
-            if (!firstTokenTime) {
-              firstTokenTime = Date.now()
-              const ttft = firstTokenTime - llmStartTime
-              devLog(`[Bot Stream] ⚡ First token received in: ${ttft}ms (TTFT - Time To First Token)`)
-            }
-
-            tokenCount++
-            fullResponse += textPart
-
-            // Process markdown: remove bold and convert links to HTML
-            let cleanContent = removeMarkdownBold(textPart)
-            cleanContent = convertMarkdownLinksToHtml(cleanContent)
-
-            // Send as Server-Sent Events format
+          for await (const chunk of result.textStream) {
+            if (firstTokenAt === null) firstTokenAt = Date.now()
+            fullResponse += chunk
             controller.enqueue(
-              encoder.encode(`data: ${JSON.stringify({ content: cleanContent })}\n\n`)
+              encoder.encode(`data: ${JSON.stringify({ content: removeMarkdownBold(chunk) })}\n\n`)
             )
           }
-
-          // Calculate metrics
-          const totalTime = Date.now() - startTime
-          const streamTime = Date.now() - llmStartTime
-          const ttft = (firstTokenTime ?? llmStartTime) - llmStartTime
-
-          devLog(`[Bot Stream] ✅ Stream completed: ${tokenCount} tokens in ${streamTime}ms`)
-          devLog(`[Bot Stream] 📊 Total request time: ${totalTime}ms`)
-
-          if (process.env.DEBUG_LLM === 'true') {
-            console.log('\n' + '='.repeat(80))
-            console.log('📥 AI SDK RESPONSE')
-            console.log('='.repeat(80))
-            console.log('Model:', llmModel)
-            console.log('Tokens:', tokenCount)
-            console.log('TTFT (Time to First Token):', ttft, 'ms')
-            console.log('Stream Duration:', streamTime, 'ms')
-            console.log('Total Duration:', totalTime, 'ms')
-            console.log('\n' + '-'.repeat(80))
-            console.log('COMPLETE RESPONSE:')
-            console.log('-'.repeat(80))
-            console.log(fullResponse)
-            console.log('-'.repeat(80))
-            console.log('='.repeat(80) + '\n')
-          }
-
-          // Metrics (safe - no PII, only timing data)
-          const stats = domainCacheStats.get(domainId) || { hits: 0, misses: 0 }
-          const globalRatio = (cacheHits + cacheMisses) > 0 ? (cacheHits / (cacheHits + cacheMisses)) : 0
-          const domainRatio = (stats.hits + stats.misses) > 0 ? (stats.hits / (stats.hits + stats.misses)) : 0
-          const metricsMsg = `` +
-            `[Metrics] cache=${cacheHit ? 'hit' : 'miss'} ` +
-            `ttftMs=${ttft} streamMs=${streamTime} totalMs=${totalTime} ` +
-            `domainHits=${stats.hits} domainMisses=${stats.misses} ` +
-            `domainHitRatio=${domainRatio.toFixed(2)} globalHitRatio=${globalRatio.toFixed(2)}`
-          devLog(metricsMsg)
         } catch (error) {
-          controllerErrored = true
-          devError('[Bot Stream] ❌ Stream error:', error)
-          // Signal error to client; we'll still persist any partial content in finally
-          try { controller.error(error) } catch (_) {}
+          errored = true
+          devError('[Bot Stream] stream error:', error)
+          try {
+            controller.error(error)
+          } catch {
+            /* controller already closed */
+          }
         } finally {
-          // Persist any generated content (complete or partial) to ensure dashboard consistency
-          if (chatRoomId && fullResponse && fullResponse.trim().length > 0) {
+          // Persist whatever was produced, including a partial answer after an
+          // error — a visitor who saw half a reply should find it in the inbox.
+          if (fullResponse.trim()) {
             try {
-              let cleanFullResponse = removeMarkdownBold(fullResponse)
-              cleanFullResponse = convertMarkdownLinksToHtml(cleanFullResponse)
-              await storeConversation(chatRoomId, cleanFullResponse, 'assistant')
-            } catch (e) {
-              devError('[Bot Stream] Failed to persist assistant message (finalize):', e)
+              await appendAssistantMessage({
+                session,
+                context,
+                content: convertMarkdownLinksToHtml(removeMarkdownBold(fullResponse)),
+                citations,
+                latencyMs: firstTokenAt ? firstTokenAt - llmStart : undefined,
+              })
+            } catch (error) {
+              devError('[Bot Stream] failed to persist assistant message:', error)
             }
           }
 
-          // Increment message usage if any response was actually produced
-          if (chatBotDomain?.userId && fullResponse && fullResponse.trim().length > 0) {
-            client.billings.update({
-              where: { userId: chatBotDomain.userId },
-              data: { messagesUsed: { increment: 1 } }
-            }).catch((e) => {
-              devError('[Bot Stream] Failed to increment message count:', e)
-            })
+          if (!errored) {
+            try {
+              controller.enqueue(encoder.encode('data: [DONE]\n\n'))
+              controller.close()
+            } catch {
+              /* already closed */
+            }
           }
-
-          // Finish the SSE stream if we haven't already errored the controller
-          if (!controllerErrored) {
-            try { controller.enqueue(encoder.encode('data: [DONE]\n\n')) } catch (_) {}
-            try { controller.close() } catch (_) {}
-          }
+          devLog(`[Bot Stream] total ${Date.now() - startedAt}ms`)
         }
       },
     })
 
-    return new Response(customStream, {
+    return new Response(stream, {
       headers: {
         'Content-Type': 'text/event-stream',
         'Cache-Control': 'no-cache',
-        'Connection': 'keep-alive',
+        Connection: 'keep-alive',
       },
     })
-  } catch (error: any) {
-    devError('[Bot Stream] Error:', error)
-    return new Response(JSON.stringify({ error: error.message || 'Failed to generate response' }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    })
+  } catch (error: unknown) {
+    devError('[Bot Stream] unhandled error:', error)
+    return json({ error: 'Failed to generate a response' }, 500)
   }
 }

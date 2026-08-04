@@ -1,242 +1,203 @@
 'use server'
 
-import { client } from '@/lib/prisma'
-import { currentUser } from '@clerk/nextjs/server'
 import nodemailer from 'nodemailer'
 
-export const onGetAllCustomers = async (id: string) => {
+import { client } from '@/lib/prisma'
+import { accessibleWorkspaceIds, requireTenantContext, requireWorkspace } from '@/lib/tenant'
+import { AuthorizationError } from '@/lib/permissions'
+
+/**
+ * Leads surface.
+ *
+ * The sidebar labels this route "Leads", and that is what it actually is — the
+ * `Campaign` bulk-email model behind the old version was template scaffolding
+ * that never served the agency use case, and it is not part of the rebuilt data
+ * model.
+ *
+ * What survives is the useful half: reading captured leads and their
+ * qualification answers across the clients the caller may see, plus a one-to-one
+ * follow-up email. Bulk campaign sending is removed rather than stubbed — a
+ * function that silently does nothing is worse than one that does not exist.
+ */
+
+/** Every lead across the caller's accessible clients. */
+export const onGetAllCustomers = async () => {
   try {
-    const customers = await client.user.findUnique({
-      where: {
-        clerkId: id,
-      },
+    const ctx = await requireTenantContext()
+    const workspaceIds = await accessibleWorkspaceIds(ctx)
+    if (workspaceIds.length === 0) return { customer: [] }
+
+    const leads = await client.lead.findMany({
+      where: { clientWorkspaceId: { in: workspaceIds }, archivedAt: null },
+      orderBy: { createdAt: 'desc' },
       select: {
-        subscription: {
-          select: {
-            plan: true,
-          },
-        },
-        domains: {
-          select: {
-            customer: {
-              select: {
-                id: true,
-                email: true,
-                Domain: {
-                  select: {
-                    name: true,
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    })
-
-    if (customers) {
-      return customers
-    }
-  } catch (error) {}
-}
-
-export const onGetAllCampaigns = async (id: string) => {
-  try {
-    const campaigns = await client.user.findUnique({
-      where: {
-        clerkId: id,
-      },
-      select: {
-        campaign: {
-          select: {
-            name: true,
-            id: true,
-            customers: true,
-            createdAt: true,
-          },
-        },
-      },
-    })
-
-    if (campaigns) {
-      return campaigns
-    }
-  } catch (error) {
-    console.log(error)
-  }
-}
-
-export const onCreateMarketingCampaign = async (name: string) => {
-  try {
-    const user = await currentUser()
-    if (!user) return null
-
-    const campaign = await client.user.update({
-      where: {
-        clerkId: user.id,
-      },
-      data: {
-        campaign: {
-          create: {
-            name,
-          },
-        },
-      },
-    })
-
-    if (campaign) {
-      return { status: 200, message: 'You campaign was created' }
-    }
-  } catch (error) {
-    console.log(error)
-  }
-}
-
-export const onSaveEmailTemplate = async (
-  template: string,
-  campainId: string
-) => {
-  try {
-    const newTemplate = await client.campaign.update({
-      where: {
-        id: campainId,
-      },
-      data: {
-        template,
-      },
-    })
-
-    return { status: 200, message: 'Email template created' }
-  } catch (error) {
-    console.log(error)
-  }
-}
-
-export const onAddCustomersToEmail = async (
-  customers: string[],
-  id: string
-) => {
-  try {
-    console.log(customers, id)
-    const customerAdd = await client.campaign.update({
-      where: {
-        id,
-      },
-      data: {
-        customers,
-      },
-    })
-
-    if (customerAdd) {
-      return { status: 200, message: 'Customer added to campaign' }
-    }
-  } catch (error) {}
-}
-
-export const onBulkMailer = async (email: string[], campaignId: string) => {
-  try {
-    const user = await currentUser()
-    if (!user) return null
-
-    //get the template for this campaign
-    const template = await client.campaign.findUnique({
-      where: {
-        id: campaignId,
-      },
-      select: {
+        id: true,
         name: true,
-        template: true,
+        email: true,
+        phone: true,
+        status: true,
+        qualificationStatus: true,
+        createdAt: true,
+        clientWorkspace: { select: { id: true, name: true, businessName: true } },
       },
     })
 
-    if (template && template.template) {
-      const transporter = nodemailer.createTransport({
-        host: 'smtp.gmail.com',
-        port: 465,
-        secure: true,
-        auth: {
-          user: process.env.NODE_MAILER_EMAIL,
-          pass: process.env.NODE_MAILER_GMAIL_APP_PASSWORD,
-        },
-      })
-
-      const mailOptions = {
-        to: email,
-        subject: template.name,
-        text: JSON.parse(template.template),
-      }
-
-      transporter.sendMail(mailOptions, function (error, info) {
-        if (error) {
-          console.log(error)
-        } else {
-          console.log('Email sent: ' + info.response)
-        }
-      })
-
-      return { status: 200, message: 'Campaign emails sent' }
+    return {
+      // Shape retained for the existing UI.
+      customer: leads.map((lead) => ({
+        id: lead.id,
+        email: lead.email,
+        name: lead.name,
+        phone: lead.phone,
+        status: lead.status,
+        createdAt: lead.createdAt,
+        Domain: lead.clientWorkspace,
+      })),
     }
   } catch (error) {
-    console.log(error)
+    console.error('[Leads] onGetAllCustomers failed:', error)
+    return { customer: [] }
   }
 }
 
-export const onGetAllCustomerResponses = async (id: string) => {
+/** A lead's answers to the qualifying questions. */
+export const onGetAllCustomerResponses = async (leadId: string) => {
   try {
-    const user = await currentUser()
-    if (!user) return null
-    const answers = await client.user.findUnique({
-      where: {
-        clerkId: user.id,
-      },
+    const ctx = await requireTenantContext()
+    const workspaceIds = await accessibleWorkspaceIds(ctx)
+
+    const lead = await client.lead.findFirst({
+      where: { id: leadId, clientWorkspaceId: { in: workspaceIds } },
       select: {
-        domains: {
+        id: true,
+        fieldValues: {
+          orderBy: { fieldDefinition: { displayOrder: 'asc' } },
           select: {
-            customer: {
-              select: {
-                questions: {
-                  where: {
-                    customerId: id,
-                    answered: {
-                      not: null,
-                    },
-                  },
-                  select: {
-                    question: true,
-                    answered: true,
-                  },
-                },
-              },
-            },
+            valueText: true,
+            valueNumber: true,
+            valueBoolean: true,
+            valueDate: true,
+            fieldDefinition: { select: { label: true } },
           },
         },
       },
     })
+    if (!lead) return undefined
 
-    if (answers) {
-      return answers.domains
-    }
+    return lead.fieldValues.map((value) => ({
+      question: value.fieldDefinition.label,
+      answered:
+        value.valueText ??
+        value.valueNumber?.toString() ??
+        (value.valueBoolean === null || value.valueBoolean === undefined
+          ? null
+          : value.valueBoolean
+            ? 'Yes'
+            : 'No') ??
+        value.valueDate?.toISOString() ??
+        null,
+    }))
   } catch (error) {
-    console.log(error)
+    console.error('[Leads] onGetAllCustomerResponses failed:', error)
+    return undefined
   }
 }
 
-
-export const onGetEmailTemplate = async (id: string) => {
+/** Leads for one client workspace. */
+export const onGetWorkspaceLeads = async (workspaceId: string) => {
   try {
-    const template = await client.campaign.findUnique({
-      where: {
-        id,
-      },
-      select: {
-        template: true,
-      },
-    });
+    const { access } = await requireWorkspace(workspaceId, 'viewLeads')
 
-    if (template) {
-      return template.template;
-    }
+    return await client.lead.findMany({
+      where: { clientWorkspaceId: access.clientWorkspaceId, archivedAt: null },
+      orderBy: { createdAt: 'desc' },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        phone: true,
+        status: true,
+        qualificationStatus: true,
+        source: true,
+        createdAt: true,
+        assignedToUserId: true,
+      },
+    })
   } catch (error) {
-    console.log(error);
+    if (error instanceof AuthorizationError) return []
+    console.error('[Leads] onGetWorkspaceLeads failed:', error)
+    return []
   }
-};
+}
+
+export const onUpdateLeadStatus = async (
+  leadId: string,
+  status: 'new' | 'contacted' | 'qualified' | 'unqualified' | 'converted' | 'closed' | 'spam'
+) => {
+  try {
+    const ctx = await requireTenantContext()
+    const workspaceIds = await accessibleWorkspaceIds(ctx)
+
+    const lead = await client.lead.findFirst({
+      where: { id: leadId, clientWorkspaceId: { in: workspaceIds } },
+      select: { id: true, clientWorkspaceId: true },
+    })
+    if (!lead) return { status: 404, message: 'Lead not found' }
+
+    await requireWorkspace(lead.clientWorkspaceId, 'manageLeads')
+    await client.lead.update({ where: { id: lead.id }, data: { status } })
+
+    return { status: 200, message: 'Lead updated' }
+  } catch (error) {
+    if (error instanceof AuthorizationError) return { status: 403, message: error.message }
+    console.error('[Leads] onUpdateLeadStatus failed:', error)
+    return { status: 400, message: 'Could not update the lead' }
+  }
+}
+
+/**
+ * One-to-one follow-up email to a captured lead.
+ *
+ * Deliberately not a bulk sender. These addresses belong to a client's end
+ * customers who spoke to an assistant — they did not opt into marketing from
+ * the agency, let alone from ChatDock. Sending in bulk here would be a consent
+ * problem, not a feature. Consent status is checked before every send.
+ */
+export const onSendLeadFollowUp = async (leadId: string, subject: string, body: string) => {
+  try {
+    const ctx = await requireTenantContext()
+    const workspaceIds = await accessibleWorkspaceIds(ctx)
+
+    const lead = await client.lead.findFirst({
+      where: { id: leadId, clientWorkspaceId: { in: workspaceIds } },
+      select: { id: true, email: true, clientWorkspaceId: true, consentStatus: true },
+    })
+    if (!lead?.email) return { status: 400, message: 'This lead has no email address' }
+    if (lead.consentStatus === 'denied' || lead.consentStatus === 'withdrawn') {
+      return { status: 403, message: 'This lead has not consented to being contacted' }
+    }
+
+    await requireWorkspace(lead.clientWorkspaceId, 'manageLeads')
+
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.NODE_MAILER_EMAIL,
+        pass: process.env.NODE_MAILER_GMAIL_APP_PASSWORD,
+      },
+    })
+
+    await transporter.sendMail({
+      from: process.env.NODE_MAILER_EMAIL,
+      to: lead.email,
+      subject,
+      text: body,
+    })
+
+    await client.lead.update({ where: { id: lead.id }, data: { status: 'contacted' } })
+    return { status: 200, message: 'Email sent' }
+  } catch (error) {
+    console.error('[Leads] onSendLeadFollowUp failed:', error)
+    return { status: 400, message: 'Could not send the email' }
+  }
+}

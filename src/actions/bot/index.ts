@@ -1,624 +1,248 @@
 'use server'
 
-import { client } from '@/lib/prisma'
-import { extractEmailsFromString, extractURLfromString, devLog, devError } from '@/lib/utils'
-import { truncateMarkdown } from '@/lib/firecrawl'
-import { buildSystemPrompt } from '@/lib/promptBuilder'
-import { onRealTimeChat } from '../conversation'
-import { clerkClient } from '@clerk/nextjs/server'
-import { onMailer } from '../mailer'
 import { generateText } from 'ai'
+
 import { getModel } from '@/lib/ai-models'
-import { searchKnowledgeBaseWithFallback, formatResultsForPrompt, hasTrainedEmbeddings } from '@/lib/vector-search'
+import { buildSystemPrompt } from '@/lib/promptBuilder'
+import { client } from '@/lib/prisma'
+import { devError, extractEmailsFromString } from '@/lib/utils'
+import {
+  formatResultsForPrompt,
+  searchKnowledgeBaseWithFallback,
+  type SearchResult,
+} from '@/lib/vector-search'
+import { checkRateLimit, resolveWidgetRequest } from '@/lib/widget/resolve'
+import {
+  appendAssistantMessage,
+  appendVisitorMessage,
+  captureLead,
+  resolveSession,
+} from '@/lib/chat/session'
 
-// Helper to remove markdown bold syntax from text
-function removeMarkdownBold(text: string): string {
-  return text.replace(/\*\*/g, '')
-}
+/**
+ * Non-streaming widget path.
+ *
+ * Shares every guarantee of the streaming route — same `resolveWidgetRequest`,
+ * same `lib/chat/session` — so there is no second, weaker way into the
+ * assistant. The old version duplicated the entire pipeline with its own auth,
+ * retrieval and persistence, which meant a fix in one path silently missed the
+ * other.
+ */
 
-// Helper to convert markdown links to HTML anchor tags
-function convertMarkdownLinksToHtml(text: string): string {
-  // Match [text](url) pattern and convert to <a href="url" target="_blank" rel="noopener noreferrer">text</a>
-  return text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-blue-500 hover:text-blue-600 underline">$1</a>')
-}
+const removeMarkdownBold = (text: string) => text.replace(/\*\*(.*?)\*\*/g, '$1')
 
-export const onStoreConversations = async (
-  id: string,
-  message: string,
-  role: 'assistant' | 'user'
-) => {
-  await client.chatRoom.update({
-    where: {
-      id,
-    },
-    data: {
-      message: {
-        create: {
-          message,
-          role,
-        },
-      },
-    },
-  })
-}
+const convertMarkdownLinksToHtml = (text: string) =>
+  text.replace(
+    /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,
+    '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>'
+  )
 
-export const onGetCurrentChatBot = async (id: string) => {
+/** Public widget configuration — branding, greeting, appearance. */
+export const onGetCurrentChatBot = async (key: string) => {
   try {
-    const chatbot = await client.domain.findUnique({
-      where: {
-        id,
-      },
-      select: {
-        helpdesk: true,
-        name: true,
-        icon: true,
-        // Used to determine branding gate by plan
-        User: {
-          select: {
-            agencyName: true,
-            hideBranding: true,
-            subscription: {
-              select: {
-                plan: true,
-              },
-            },
-          },
-        },
-        chatBot: {
-          select: {
-            id: true,
-            welcomeMessage: true,
-            icon: true,
-            textColor: true,
-            background: true,
-            theme: true,
-            helpdesk: true,
-          },
-        },
-      },
-    })
+    const resolution = await resolveWidgetRequest(key, null)
+    if (!resolution.ok) return undefined
 
-    if (chatbot) {
-      // Determine if we should show attribution badge
-      const plan = chatbot.User?.subscription?.plan || 'FREE'
-      const canHideBranding = plan === 'PRO' || plan === 'BUSINESS'
-      const showBranding = canHideBranding ? !chatbot.User?.hideBranding : true
-      const agencyName = chatbot.User?.agencyName || 'ChatDock'
+    const { context } = resolution
+    const behavior = (context.assistant.behaviorSettings ?? {}) as Record<string, unknown>
 
-      // Avoid leaking nested User object to client; return only needed fields + flag
-      const { User, ...rest } = chatbot as any
-      return { ...rest, showBranding, agencyName }
+    const [assistant, organization] = await Promise.all([
+      client.assistant.findUnique({
+        where: { id: context.assistantId },
+        select: { brandingSettings: true },
+      }),
+      client.organization.findUnique({
+        where: { id: context.organizationId },
+        select: { name: true, logoUrl: true },
+      }),
+    ])
+    const appearance = (assistant?.brandingSettings ?? {}) as Record<string, unknown>
+
+    return {
+      id: context.assistantId,
+      name: context.assistant.name,
+      icon: (appearance.icon as string) ?? organization?.logoUrl ?? null,
+      chatBot: {
+        id: context.assistantId,
+        welcomeMessage: context.assistant.welcomeMessage,
+        icon: (appearance.icon as string) ?? null,
+        textColor: (appearance.textColor as string) ?? null,
+        background: (appearance.background as string) ?? null,
+        theme: appearance.theme ?? null,
+        helpdesk: Boolean(behavior.helpdesk),
+      },
+      // Branding is gated by the plan entitlement, resolved centrally, rather
+      // than by the hardcoded plan-name comparison this used to do.
+      showBranding: !context.hideChatDockBranding,
+      agencyName: organization?.name ?? 'ChatDock',
     }
-
   } catch (error) {
-    devError('[Bot] Error fetching chatbot:', error)
+    devError('[Bot] onGetCurrentChatBot failed:', error)
+    return undefined
   }
 }
 
+/**
+ * One assistant turn.
+ *
+ * @param key deployment public key, or a share token for a demo link.
+ */
 export const onAiChatBotAssistant = async (
-  id: string,
+  key: string,
   chat: { role: 'assistant' | 'user'; content: string }[],
-  author: 'user',
+  _author: 'user',
   message: string,
-  anonymousId?: string // UUID from browser localStorage
+  anonymousId?: string
 ) => {
   try {
-    // Extract email from message (local variable, not module-level)
-    let customerEmail: string | undefined
-    const extractedEmail = extractEmailsFromString(message)
-    if (extractedEmail) {
-      customerEmail = extractedEmail[0]
+    if (!message?.trim()) return undefined
+    const visitorKey = anonymousId ?? 'anonymous'
+
+    const limit = checkRateLimit(`${key}:${visitorKey}`)
+    if (!limit.allowed) {
+      return {
+        response: {
+          role: 'assistant' as const,
+          content: 'You are sending messages very quickly — please wait a moment and try again.',
+        },
+      }
     }
 
-    const chatBotDomain = await client.domain.findUnique({
+    const resolution = await resolveWidgetRequest(key, null)
+    if (!resolution.ok) {
+      return { response: { role: 'assistant' as const, content: resolution.message } }
+    }
+    const { context } = resolution
+
+    const session = await resolveSession({ context, anonymousId: visitorKey })
+    await appendVisitorMessage(session, context, message)
+
+    // A human is handling this conversation — do not talk over them.
+    if (session.isLive) return { live: true }
+
+    const email = extractEmailsFromString(message)?.[0] ?? null
+    const leadId = context.assistant.leadCaptureEnabled
+      ? await captureLead({ context, session, email })
+      : session.leadId
+
+    let citations: SearchResult[] = []
+    try {
+      citations = await searchKnowledgeBaseWithFallback(
+        message,
+        { clientWorkspaceId: context.clientWorkspaceId, assistantId: context.assistantId },
+        5
+      )
+    } catch (error) {
+      devError('[Bot] retrieval failed:', error)
+    }
+
+    const appBase = process.env.NEXT_PUBLIC_APP_URL ?? ''
+    const mode = !leadId
+      ? 'QUALIFIER'
+      : context.assistant.mode === 'support'
+        ? 'SUPPORT'
+        : context.assistant.mode === 'faq'
+          ? 'FAQ_STRICT'
+          : 'SALES'
+
+    const behavior = (context.assistant.behaviorSettings ?? {}) as Record<string, unknown>
+
+    // Qualification questions this lead has not answered yet.
+    const pending = await client.leadFieldDefinition.findMany({
       where: {
-        id,
+        clientWorkspaceId: context.clientWorkspaceId,
+        enabled: true,
+        ...(leadId ? { values: { none: { leadId } } } : {}),
       },
-      select: {
-        name: true,
-        filterQuestions: {
-          where: {
-            answered: null,
-          },
-          select: {
-            question: true,
-          },
-        },
-        chatBot: {
-          select: {
-            knowledgeBase: true,
-            mode: true,
-            brandTone: true,
-            language: true,
-            llmModel: true,
-            llmTemperature: true,
-            modePrompts: true,
-          },
-        },
-      },
+      orderBy: { displayOrder: 'asc' },
+      select: { label: true },
+      take: 5,
     })
-    if (chatBotDomain) {
-      // RAG: Check if embeddings are trained, use vector search if available
-      let knowledgeBase: string
-      const hasTrained = await hasTrainedEmbeddings(id)
 
-      if (hasTrained) {
-        devLog('[Bot] Using RAG vector search for knowledge retrieval')
-        const searchResults = await searchKnowledgeBaseWithFallback(message, id, 5)
-        knowledgeBase = formatResultsForPrompt(searchResults)
-      } else {
-        devLog('[Bot] Using fallback: full knowledge base')
-        knowledgeBase = chatBotDomain.chatBot?.knowledgeBase
-          ? chatBotDomain.chatBot.knowledgeBase // Pass full KB without truncation
-          : 'No knowledge base available yet. Please ask the customer to provide more details about their inquiry.'
-      }
+    const systemPrompt = buildSystemPrompt({
+      businessName: context.assistant.name,
+      domain: appBase,
+      knowledgeBase: formatResultsForPrompt(citations),
+      mode: mode as never,
+      brandTone: context.assistant.brandTone ?? 'friendly, warm, conversational',
+      language: context.assistant.language,
+      qualificationQuestions: pending.map((q) => q.label),
+      appointmentUrl:
+        context.assistant.bookingEnabled && leadId
+          ? `${appBase}/portal/${context.clientWorkspaceId}/appointment/${leadId}`
+          : '',
+      paymentUrl: '',
+      portalBaseUrl: `${appBase}/portal/${context.clientWorkspaceId}`,
+      customerId: leadId ?? '',
+      customModeBlocks: (behavior.modePrompts as never) ?? undefined,
+    })
 
-      // Handle anonymous conversations (no email yet)
-      if (!customerEmail && anonymousId) {
-        // Declare outside try-catch so it's accessible throughout the block
-        let anonymousChatRoom
+    const startedAt = Date.now()
+    const { text, usage } = await generateText({
+      model: getModel(context.assistant.modelName) as never,
+      messages: [
+        { role: 'system', content: systemPrompt },
+        ...chat,
+        { role: 'user', content: message },
+      ],
+      temperature: context.assistant.temperature,
+      maxOutputTokens: 800,
+    })
 
-        try {
-          // Check if anonymous chat room exists
-          anonymousChatRoom = await client.chatRoom.findFirst({
-            where: {
-              anonymousId: anonymousId,
-              domainId: id,
-              customerId: null, // Ensure it's still anonymous
-            },
-            select: {
-              id: true,
-              live: true,
-              mailed: true,
-            },
-          })
+    if (!text) return undefined
 
-          // Create anonymous chat room if doesn't exist
-          if (!anonymousChatRoom) {
-            const newChatRoom = await client.chatRoom.create({
-              data: {
-                anonymousId: anonymousId,
-                domainId: id,
-              },
-              select: {
-                id: true,
-                live: true,
-                mailed: true,
-              },
-            })
-            anonymousChatRoom = newChatRoom
-          }
+    const content = convertMarkdownLinksToHtml(removeMarkdownBold(text))
 
-          // Store the message
-          await onStoreConversations(
-            anonymousChatRoom.id,
-            message,
-            author
-          )
-        } catch (error) {
-          devError('[Bot] Anonymous chat error:', error)
-          return {
-            response: {
-              role: 'assistant',
-              content: 'Sorry, I encountered an error. Please try again in a moment.',
-            },
-          }
-        }
+    await appendAssistantMessage({
+      session,
+      context,
+      content,
+      citations,
+      promptTokens: usage?.inputTokens ?? undefined,
+      completionTokens: usage?.outputTokens ?? undefined,
+      latencyMs: Date.now() - startedAt,
+    })
 
-        // Check if live mode is active
-        if (anonymousChatRoom.live) {
-          onRealTimeChat(
-            anonymousChatRoom.id,
-            message,
-            'user',
-            author
-          )
-
-          // Send email notification to owner (first time only)
-          if (!anonymousChatRoom.mailed) {
-            const domainOwner = await client.domain.findUnique({
-              where: { id },
-              select: {
-                User: {
-                  select: {
-                    clerkId: true,
-                  },
-                },
-              },
-            })
-
-            if (domainOwner?.User?.clerkId) {
-              const clerk = await clerkClient()
-              const user = await clerk.users.getUser(
-                domainOwner.User.clerkId
-              )
-              onMailer(user.emailAddresses[0].emailAddress)
-
-              await client.chatRoom.update({
-                where: { id: anonymousChatRoom.id },
-                data: { mailed: true },
-              })
-            }
-          }
-
-          return {
-            live: true,
-            chatRoom: anonymousChatRoom.id,
-          }
-        }
-
-        // Generate AI response for anonymous user
-        const systemPromptNoEmail = buildSystemPrompt({
-          businessName: chatBotDomain.name,
-          domain: `${process.env.NEXT_PUBLIC_APP_URL}/portal/${id}`,
-          knowledgeBase,
-          mode: 'QUALIFIER',
-          brandTone: chatBotDomain.chatBot?.brandTone || 'friendly, warm, conversational',
-          language: chatBotDomain.chatBot?.language || 'en',
-          qualificationQuestions: ['What is your email address so I can assist you better?'],
-          appointmentUrl: '',
-          paymentUrl: '',
-          portalBaseUrl: `${process.env.NEXT_PUBLIC_APP_URL}/portal/${id}`,
-          customerId: '',
-          customModeBlocks: (chatBotDomain.chatBot?.modePrompts as any) || undefined,
-        })
-
-        const { text } = await generateText({
-          model: getModel(chatBotDomain.chatBot?.llmModel || 'gemini-2.5-flash-lite') as any,
-          messages: [
-            {
-              role: 'system',
-              content: systemPromptNoEmail,
-            },
-            ...chat,
-            {
-              role: 'user',
-              content: message,
-            },
-          ],
-          temperature: (typeof chatBotDomain.chatBot?.llmTemperature === 'number') ? (chatBotDomain.chatBot?.llmTemperature as number) : 0.7,
-          maxOutputTokens: 2000,
-        })
-
-        if (text) {
-          let cleanContent = removeMarkdownBold(text)
-          cleanContent = convertMarkdownLinksToHtml(cleanContent)
-          const response = {
-            role: 'assistant',
-            content: cleanContent,
-          }
-
-          // Store AI response
-          await onStoreConversations(
-            anonymousChatRoom.id,
-            `${response.content}`,
-            'assistant'
-          )
-
-          return { response }
-        }
-      }
-
-      if (customerEmail) {
-        const checkCustomer = await client.domain.findUnique({
-          where: {
-            id,
-          },
-          select: {
-            User: {
-              select: {
-                clerkId: true,
-              },
-            },
-            name: true,
-            customer: {
-              where: {
-                email: {
-                  startsWith: customerEmail,
-                },
-              },
-              select: {
-                id: true,
-                email: true,
-                questions: true,
-                chatRoom: {
-                  select: {
-                    id: true,
-                    live: true,
-                    mailed: true,
-                  },
-                },
-              },
-            },
-          },
-        })
-        if (checkCustomer && !checkCustomer.customer.length) {
-          // Check if this user was previously anonymous
-          let anonymousChatRoomId: string | undefined
-          if (anonymousId) {
-            const existingAnonymousChatRoom = await client.chatRoom.findFirst({
-              where: {
-                anonymousId: anonymousId,
-                domainId: id,
-                customerId: null,
-              },
-              select: {
-                id: true,
-              },
-            })
-            if (existingAnonymousChatRoom) {
-              anonymousChatRoomId = existingAnonymousChatRoom.id
-            }
-          }
-
-          // Create new customer and link anonymous chat history
-          const newCustomer = await client.domain.update({
-            where: {
-              id,
-            },
-            data: {
-              customer: {
-                create: {
-                  email: customerEmail,
-                  questions: {
-                    create: chatBotDomain.filterQuestions,
-                  },
-                  chatRoom: anonymousChatRoomId
-                    ? {
-                      // Link existing anonymous chat room to customer
-                      connect: { id: anonymousChatRoomId },
-                    }
-                    : {
-                      // Create new chat room if no anonymous history
-                      create: {
-                        domainId: id,
-                      },
-                    },
-                },
-              },
-            },
-          })
-
-          // Update the anonymous chat room to link it to customer
-          if (anonymousChatRoomId) {
-            await client.chatRoom.update({
-              where: { id: anonymousChatRoomId },
-              data: {
-                anonymousId: null, // Clear anonymous ID since now linked to customer
-              },
-            })
-          }
-
-          if (newCustomer) {
-            devLog('[Bot] New customer created, linked anonymous history')
-            const response = {
-              role: 'assistant',
-              content: `Welcome aboard ${customerEmail.split('@')[0]
-                }! I'm glad to connect with you. Is there anything you need help with?`,
-            }
-            return { response }
-          }
-        }
-        if (checkCustomer && checkCustomer.customer[0].chatRoom[0].live) {
-          await onStoreConversations(
-            checkCustomer?.customer[0].chatRoom[0].id!,
-            message,
-            author
-          )
-
-          onRealTimeChat(
-            checkCustomer.customer[0].chatRoom[0].id,
-            message,
-            'user',
-            author
-          )
-
-          if (!checkCustomer.customer[0].chatRoom[0].mailed) {
-            const clerk = await clerkClient()
-            const user = await clerk.users.getUser(
-              checkCustomer.User?.clerkId!
-            )
-
-            onMailer(user.emailAddresses[0].emailAddress)
-
-            //update mail status to prevent spamming
-            const mailed = await client.chatRoom.update({
-              where: {
-                id: checkCustomer.customer[0].chatRoom[0].id,
-              },
-              data: {
-                mailed: true,
-              },
-            })
-
-            if (mailed) {
-              return {
-                live: true,
-                chatRoom: checkCustomer.customer[0].chatRoom[0].id,
-              }
-            }
-          }
-          return {
-            live: true,
-            chatRoom: checkCustomer.customer[0].chatRoom[0].id,
-          }
-        }
-
-        await onStoreConversations(
-          checkCustomer?.customer[0].chatRoom[0].id!,
-          message,
-          author
-        )
-
-        const systemPrompt = buildSystemPrompt({
-          businessName: chatBotDomain.name,
-          domain: `${process.env.NEXT_PUBLIC_APP_URL}/portal/${id}`,
-          knowledgeBase,
-          mode: (chatBotDomain.chatBot?.mode as 'SALES' | 'SUPPORT' | 'QUALIFIER' | 'FAQ_STRICT') || 'SALES',
-          brandTone: chatBotDomain.chatBot?.brandTone || 'friendly, concise',
-          language: chatBotDomain.chatBot?.language || 'en',
-          qualificationQuestions: chatBotDomain.filterQuestions.map((q) => q.question),
-          appointmentUrl: `${process.env.NEXT_PUBLIC_APP_URL}/portal/${id}/appointment/${checkCustomer?.customer[0].id}`,
-          paymentUrl: `${process.env.NEXT_PUBLIC_APP_URL}/portal/${id}/payment/${checkCustomer?.customer[0].id}`,
-          portalBaseUrl: `${process.env.NEXT_PUBLIC_APP_URL}/portal/${id}`,
-          customerId: checkCustomer?.customer[0].id || '',
-          customModeBlocks: (chatBotDomain.chatBot?.modePrompts as any) || undefined,
-        })
-
-        const { text } = await generateText({
-          model: getModel(chatBotDomain.chatBot?.llmModel || 'gemini-2.5-flash-lite') as any,
-          messages: [
-            {
-              role: 'system',
-              content: systemPrompt,
-            },
-            ...chat,
-            {
-              role: 'user',
-              content: message,
-            },
-          ],
-          temperature: (typeof chatBotDomain.chatBot?.llmTemperature === 'number') ? (chatBotDomain.chatBot?.llmTemperature as number) : 0.7,
-          maxOutputTokens: 2000,
-        })
-
-        if (text?.includes('(realtime)')) {
-          const realtime = await client.chatRoom.update({
-            where: {
-              id: checkCustomer?.customer[0].chatRoom[0].id,
-            },
-            data: {
-              live: true,
-            },
-          })
-
-          if (realtime) {
-            let cleanContent = removeMarkdownBold(
-              text.replace('(realtime)', '')
-            )
-            cleanContent = convertMarkdownLinksToHtml(cleanContent)
-            const response = {
-              role: 'assistant',
-              content: cleanContent,
-            }
-
-            await onStoreConversations(
-              checkCustomer?.customer[0].chatRoom[0].id!,
-              response.content,
-              'assistant'
-            )
-
-            return { response }
-          }
-        }
-        if (chat[chat.length - 1].content.includes('(complete)')) {
-          const firstUnansweredQuestion =
-            await client.customerResponses.findFirst({
-              where: {
-                customerId: checkCustomer?.customer[0].id,
-                answered: null,
-              },
-              select: {
-                id: true,
-              },
-              orderBy: {
-                question: 'asc',
-              },
-            })
-          if (firstUnansweredQuestion) {
-            await client.customerResponses.update({
-              where: {
-                id: firstUnansweredQuestion.id,
-              },
-              data: {
-                answered: message,
-              },
-            })
-          }
-        }
-
-        if (text) {
-          const generatedLink = extractURLfromString(text)
-
-          if (generatedLink) {
-            const link = generatedLink[0]
-            const response = {
-              role: 'assistant',
-              content: `Great! you can follow the link to proceed`,
-              link: link.slice(0, -1),
-            }
-
-            await onStoreConversations(
-              checkCustomer?.customer[0].chatRoom[0].id!,
-              `${response.content} ${response.link}`,
-              'assistant'
-            )
-
-            return { response }
-          }
-
-          let cleanContent = removeMarkdownBold(text)
-          cleanContent = convertMarkdownLinksToHtml(cleanContent)
-          const response = {
-            role: 'assistant',
-            content: cleanContent,
-          }
-
-          await onStoreConversations(
-            checkCustomer?.customer[0].chatRoom[0].id!,
-            `${response.content}`,
-            'assistant'
-          )
-
-          return { response }
-        }
-      }
-      devLog('[Bot] No customer email provided')
-
-      const systemPromptNoEmail = buildSystemPrompt({
-        businessName: chatBotDomain.name,
-        domain: `${process.env.NEXT_PUBLIC_APP_URL}/portal/${id}`,
-        knowledgeBase,
-        mode: 'QUALIFIER',
-        brandTone: chatBotDomain.chatBot?.brandTone || 'friendly, warm, conversational',
-        language: chatBotDomain.chatBot?.language || 'en',
-        qualificationQuestions: ['What is your email address so I can assist you better?'],
-        appointmentUrl: '',
-        paymentUrl: '',
-        portalBaseUrl: `${process.env.NEXT_PUBLIC_APP_URL}/portal/${id}`,
-        customerId: '',
-        customModeBlocks: (chatBotDomain.chatBot?.modePrompts as any) || undefined,
-      })
-
-      const { text } = await generateText({
-        model: getModel(chatBotDomain.chatBot?.llmModel || 'gemini-2.5-flash-lite') as any,
-        messages: [
-          {
-            role: 'system',
-            content: systemPromptNoEmail,
-          },
-          ...chat,
-          {
-            role: 'user',
-            content: message,
-          },
-        ],
-        temperature: (typeof chatBotDomain.chatBot?.llmTemperature === 'number') ? (chatBotDomain.chatBot?.llmTemperature as number) : 0.7,
-        maxOutputTokens: 800, // Limit response length to control costs and latency
-      })
-
-      if (text) {
-        let cleanContent = removeMarkdownBold(text)
-        cleanContent = convertMarkdownLinksToHtml(cleanContent)
-        const response = {
-          role: 'assistant',
-          content: cleanContent,
-        }
-
-        return { response }
-      }
-    }
+    return { response: { role: 'assistant' as const, content } }
   } catch (error) {
-    devError('[Bot] Error in chatbot assistant:', error)
+    devError('[Bot] onAiChatBotAssistant failed:', error)
+    return undefined
+  }
+}
+
+/**
+ * Persists a message delivered over the realtime channel, where Pusher has
+ * already handled delivery and only storage is needed.
+ */
+export const onStoreConversations = async (
+  conversationId: string,
+  message: string,
+  role: 'assistant' | 'user'
+) => {
+  try {
+    const conversation = await client.conversation.findUnique({
+      where: { id: conversationId },
+      select: { id: true, clientWorkspaceId: true, assistantId: true },
+    })
+    if (!conversation) return
+
+    const created = await client.message.create({
+      data: {
+        conversationId: conversation.id,
+        clientWorkspaceId: conversation.clientWorkspaceId,
+        assistantId: conversation.assistantId,
+        role: role === 'user' ? 'visitor' : 'assistant',
+        messageType: 'text',
+        content: message,
+      },
+      select: { createdAt: true },
+    })
+
+    await client.conversation.update({
+      where: { id: conversation.id },
+      data: { lastMessageAt: created.createdAt, messageCount: { increment: 1 } },
+    })
+  } catch (error) {
+    devError('[Bot] onStoreConversations failed:', error)
   }
 }

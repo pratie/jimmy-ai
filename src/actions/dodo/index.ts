@@ -2,7 +2,13 @@
 
 import { client } from '@/lib/prisma'
 import { currentUser } from '@clerk/nextjs/server'
-import { getPlanLimits, getNextResetDate } from '@/lib/plans'
+
+import { requireOrganizationPermission, requireTenantContext } from '@/lib/tenant'
+import {
+  applyPlanToOrganization,
+  getOrganizationSubscription,
+  type PlanCode,
+} from '@/lib/billing/subscription'
 
 // Dodo Payments Configuration
 const DODO_API_BASE = process.env.NEXT_PUBLIC_DODO_API_URL || 'https://test.dodopayments.com'
@@ -108,19 +114,31 @@ export const onCreateCustomerPaymentLink = async (
   customerId: string
 ) => {
   try {
-    const domain = await client.domain.findUnique({
+    // Marketplace payments run through a connected-account Integration on the
+    // organization. The merchant id used to sit on `User.dodoMerchantId`, a
+    // column that had never actually been applied to production.
+    const workspace = await client.clientWorkspace.findUnique({
       where: { id: domainId },
       select: {
-        User: {
+        organizationId: true,
+        organization: {
           select: {
-            dodoMerchantId: true,
+            integrations: {
+              where: { provider: 'dodo', status: 'connected' },
+              select: { configuration: true },
+              take: 1,
+            },
           },
         },
       },
     })
 
-    if (!domain?.User?.dodoMerchantId) {
-      throw new Error('Domain owner has not connected Dodo Payments account')
+    const merchantId = (workspace?.organization?.integrations?.[0]?.configuration as
+      | { merchantId?: string }
+      | null)?.merchantId
+
+    if (!merchantId) {
+      throw new Error('This client\'s agency has not connected a Dodo Payments account')
     }
 
     // Calculate total amount
@@ -177,66 +195,34 @@ export const onCreateCustomerPaymentLink = async (
 
 // Update user subscription after successful payment
 export const onUpdateSubscription = async (
-  plan: 'FREE' | 'STARTER' | 'PRO' | 'BUSINESS',
+  plan: PlanCode,
   providerSubscriptionId?: string,
   status?: string,
   billingInterval: 'MONTHLY' | 'YEARLY' = 'MONTHLY'
 ) => {
   try {
-    const user = await currentUser()
-    if (!user) throw new Error('User not authenticated')
+    const ctx = await requireOrganizationPermission('manageBilling')
 
-    // First, get the user's database ID
-    const dbUser = await client.user.findUnique({
-      where: { clerkId: user.id },
-      select: { id: true }
+    // Plan limits are NOT copied onto the subscription. They resolve live from
+    // PlanEntitlement, so changing a plan's allowance reaches existing
+    // customers — the old code snapshotted messageCredits at purchase time and
+    // those customers never saw an update.
+    const subscription = await applyPlanToOrganization({
+      organizationId: ctx.organizationId,
+      planCode: plan,
+      externalSubscriptionId: providerSubscriptionId ?? null,
+      status,
+      billingInterval,
+      cancelAtPeriodEnd: false,
     })
 
-    if (!dbUser) throw new Error('User not found in database')
-
-    // Update or create billing record directly
-    const limits = getPlanLimits(plan)
-    const nextReset = getNextResetDate()
-
-    const billing = await client.billings.upsert({
-      where: { userId: dbUser.id },
-      create: {
-        userId: dbUser.id,
-        plan,
-        messageCredits: limits.messageCredits,
-        messagesUsed: 0,
-        messagesResetAt: nextReset,
-        billingInterval,
-        provider: 'dodo',
-        providerSubscriptionId,
-        status: status || 'active',
-        cancelAtPeriodEnd: false,
-        endsAt: null,
-      },
-      update: {
-        plan,
-        messageCredits: limits.messageCredits,
-        messagesUsed: 0,
-        messagesResetAt: nextReset,
-        billingInterval,
-        provider: 'dodo',
-        // Only set providerSubscriptionId if provided (avoid overwriting with undefined)
-        ...(providerSubscriptionId ? { providerSubscriptionId } : {}),
-        status: status || 'active',
-        cancelAtPeriodEnd: false,
-        endsAt: null,
-      },
-    })
-
-    if (billing) {
-      return {
-        status: 200,
-        message: 'Subscription updated successfully',
-        plan: billing.plan,
-      }
+    return {
+      status: 200,
+      message: 'Subscription updated successfully',
+      plan: subscription.plan?.code ?? plan,
     }
   } catch (error) {
-    console.error('Subscription update error:', error)
+    console.error('[Dodo] Subscription update failed:', error)
     throw error
   }
 }
@@ -293,132 +279,99 @@ async function callDodoCancel(subscriptionId: string, atPeriodEnd: boolean) {
 // Cancel current user's subscription
 export const onCancelSubscription = async ({ atPeriodEnd = true }: { atPeriodEnd?: boolean }) => {
   try {
-    const user = await currentUser()
-    if (!user) throw new Error('User not authenticated')
+    const ctx = await requireOrganizationPermission('manageBilling')
+    const subscription = await getOrganizationSubscription(ctx.organizationId)
 
-    const dbUser = await client.user.findUnique({
-      where: { clerkId: user.id },
-      select: { id: true, subscription: { select: { providerSubscriptionId: true } } },
-    })
+    const subscriptionId = subscription?.externalSubscriptionId
+    if (!subscriptionId) return { status: 400, message: 'No active subscription found' }
 
-    const subscriptionId = dbUser?.subscription?.providerSubscriptionId
-    if (!subscriptionId) {
-      return { status: 400, message: 'No active subscription found' }
-    }
-
-    // Call Dodo API to cancel (at period end by default)
     await callDodoCancel(subscriptionId, atPeriodEnd)
 
-    // Mark as scheduled to cancel, keep plan active until webhook confirms
-    await client.billings.update({
-      where: { userId: dbUser!.id },
-      data: {
-        cancelAtPeriodEnd: true,
-        status: 'active',
-      },
+    // Flagged only. The plan stays active until the provider's webhook confirms
+    // the period actually ended — cancelling locally first would cut off a
+    // customer who has already paid for the rest of the month.
+    await client.subscription.update({
+      where: { organizationId: ctx.organizationId },
+      data: { cancelAtPeriodEnd: true },
     })
 
-    return { status: 200, message: 'Subscription cancellation scheduled at period end' }
+    return { status: 200, message: 'Subscription will cancel at the end of the current period' }
   } catch (error) {
-    console.error('Cancel subscription error:', error)
-    return { status: 400, message: 'Failed to cancel subscription' }
+    console.error('[Dodo] Cancel failed:', error)
+    return { status: 400, message: 'Could not cancel the subscription' }
   }
 }
 
-// Change current user's subscription plan (no new checkout), using Dodo change-plan API
 export const onChangeSubscriptionPlan = async (
-  newPlan: 'STARTER' | 'PRO' | 'BUSINESS',
-  proration: 'prorated_immediately' | 'full_immediately' | 'difference_immediately' = 'prorated_immediately'
+  plan: PlanCode,
+  interval: 'MONTHLY' | 'YEARLY' = 'MONTHLY'
 ) => {
   try {
-    const user = await currentUser()
-    if (!user) return { status: 401, message: 'User not authenticated' }
+    const ctx = await requireOrganizationPermission('manageBilling')
+    const subscription = await getOrganizationSubscription(ctx.organizationId)
 
-    // Get DB user + current subscription id
-    const dbUser = await client.user.findUnique({
-      where: { clerkId: user.id },
-      select: { id: true, subscription: { select: { providerSubscriptionId: true, plan: true } } },
-    })
-
-    const subscriptionId = dbUser?.subscription?.providerSubscriptionId
-    if (!subscriptionId) {
-      return { status: 400, message: 'No active subscription found. Please subscribe first.' }
-    }
-
-    // Map target plan to Dodo product id
-    const productId = getPlanProductId(newPlan)
-    if (!productId) {
-      return { status: 400, message: 'Invalid target plan or product id not configured' }
-    }
-
-    // Make Dodo change-plan call
-    const res = await fetch(`${DODO_API_BASE}/subscriptions/change-plan`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${DODO_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        subscription_id: subscriptionId,
-        product_id: productId,
-        proration_option: proration,
-      }),
-    })
-
-    if (!res.ok) {
-      const err = await res.text().catch(() => '')
-      console.error('[Dodo change-plan] Error:', res.status, err)
-      return { status: 400, message: 'Failed to change plan' }
-    }
-
-    // Update local billing record to reflect new plan immediately
-    const limits = getPlanLimits(newPlan)
-    await client.billings.update({
-      where: { userId: dbUser.id },
-      data: {
-        plan: newPlan,
-        messageCredits: limits.messageCredits,
+    // Downgrade to FREE: cancel upstream, then apply locally.
+    if (plan === 'FREE') {
+      if (subscription?.externalSubscriptionId) {
+        await callDodoCancel(subscription.externalSubscriptionId, true).catch((error) =>
+          console.error('[Dodo] upstream cancel failed, applying FREE anyway:', error)
+        )
+      }
+      await applyPlanToOrganization({
+        organizationId: ctx.organizationId,
+        planCode: 'FREE',
         status: 'active',
+        billingInterval: interval,
         cancelAtPeriodEnd: false,
-      },
-    })
+      })
+      return { status: 200, message: 'Moved to the Free plan' }
+    }
 
-    return { status: 200, message: 'Plan changed successfully', plan: newPlan }
+    // Paid plans go through a fresh checkout link; the webhook applies the plan
+    // once payment actually succeeds. Applying it here would grant the new plan
+    // before any money moved.
+    const link = await onCreateSubscriptionPaymentLink(plan, interval)
+    return { status: 200, ...link }
   } catch (error) {
-    console.error('Change subscription plan error:', error)
-    return { status: 400, message: 'Failed to change plan' }
+    console.error('[Dodo] Plan change failed:', error)
+    return { status: 400, message: 'Could not change the plan' }
   }
 }
 
-// Connect user to Dodo Payments for receiving payments (marketplace functionality)
 export const onConnectDodoPayments = async () => {
   try {
-    const user = await currentUser()
-    if (!user) throw new Error('User not authenticated')
+    const ctx = await requireOrganizationPermission('manageIntegrations')
 
-    // Note: Dodo Payments might not have direct marketplace/connect functionality like Stripe
-    // This would need to be implemented based on Dodo's actual capabilities
-    // For now, we'll store a placeholder merchant ID
+    // Placeholder: Dodo has no Stripe-Connect-style onboarding wired up yet.
+    // The record is created so the integration surface is real, and the
+    // merchant id is stored in `configuration` rather than on a user column.
+    const merchantId = `dodo_merchant_${ctx.organizationId}`
 
-    // In a real implementation, this would:
-    // 1. Create a merchant account with Dodo
-    // 2. Get the merchant ID
-    // 3. Store it in the database
-
-    const merchantId = `dodo_merchant_${user.id}_${Date.now()}`
-
-    const updatedUser = await client.user.update({
-      where: { clerkId: user.id },
-      data: { dodoMerchantId: merchantId },
+    const integration = await client.integration.upsert({
+      where: {
+        id:
+          (
+            await client.integration.findFirst({
+              where: { organizationId: ctx.organizationId, provider: 'dodo' },
+              select: { id: true },
+            })
+          )?.id ?? '00000000-0000-0000-0000-000000000000',
+      },
+      create: {
+        organizationId: ctx.organizationId,
+        integrationType: 'crm',
+        provider: 'dodo',
+        status: 'connected',
+        configuration: { merchantId },
+        connectedByUserId: ctx.userId,
+      },
+      update: { status: 'connected', configuration: { merchantId } },
+      select: { id: true, configuration: true },
     })
 
-    return {
-      success: true,
-      merchantId: updatedUser.dodoMerchantId,
-      message: 'Dodo Payments account connected successfully',
-    }
+    return { success: true, merchantId, integrationId: integration.id }
   } catch (error) {
-    console.error('Dodo connect error:', error)
-    throw error
+    console.error('[Dodo] Connect failed:', error)
+    return { success: false, message: 'Could not connect Dodo Payments' }
   }
 }
