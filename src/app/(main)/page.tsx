@@ -9,7 +9,7 @@ import ClientReport from '@/components/landing/client-report'
 import Faq from '@/components/landing/faq'
 import { Footer } from '@/components/landing/footer'
 import GroundedAnswers from '@/components/landing/grounded-answers'
-import HeroPipeline from '@/components/landing/hero-pipeline'
+import HeroStage from '@/components/landing/hero-stage'
 import IndustryTabs from '@/components/landing/industry-tabs'
 import InteractivePreviewChat from '@/components/landing/interactive-preview-chat'
 import LaunchSteps from '@/components/landing/launch-steps'
@@ -200,7 +200,7 @@ export default function Home() {
           </div>
 
           <Reveal delay={160}>
-            <HeroPipeline />
+            <HeroStage />
           </Reveal>
         </div>
       </section>
