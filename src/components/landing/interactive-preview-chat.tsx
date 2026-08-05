@@ -30,9 +30,9 @@ type SandboxStep = 'idle' | 'scraping' | 'chatting' | 'cta'
  * demo well and sell nothing to an agency running local-business websites.
  */
 const SUGGESTED_SITES: { url: string; label: string }[] = [
-  { url: 'aspendental.com', label: 'Dental clinic' },
-  { url: 'arsrescuerooter.com', label: 'HVAC company' },
-  { url: 'morganandmorgan.com', label: 'Law firm' },
+  { url: 'aspendental.com', label: 'Dental' },
+  { url: 'arsrescuerooter.com', label: 'HVAC' },
+  { url: 'morganandmorgan.com', label: 'Legal' },
 ]
 
 const SUGGESTED_QUESTIONS = [
@@ -74,38 +74,6 @@ function renderSandboxContent(raw: string): React.ReactNode[] {
   }
   if (last < raw.length) nodes.push(raw.slice(last))
   return nodes
-}
-
-/** Faded skeleton bubbles — reads as earlier conversations, fills the frame
- *  with the product's own shape instead of empty whitespace. */
-function GhostConversation() {
-  const rows: { side: 'left' | 'right'; widths: number[] }[] = [
-    { side: 'left', widths: [150, 190] },
-    { side: 'right', widths: [110] },
-    { side: 'left', widths: [200, 140, 90] },
-    { side: 'right', widths: [150, 80] },
-  ]
-  return (
-    <div aria-hidden="true" className="space-y-3 [mask-image:linear-gradient(to_bottom,transparent,black_80%)]">
-      {rows.map((row, index) => (
-        <div key={index} className={`flex ${row.side === 'right' ? 'justify-end' : 'justify-start'}`}>
-          <div
-            className={`space-y-2 rounded-2xl px-4 py-3 ${
-              row.side === 'right' ? 'rounded-br-md bg-[#5B5CE2]/10' : 'rounded-bl-md bg-[#F7F8FA]'
-            }`}
-          >
-            {row.widths.map((width, i) => (
-              <div
-                key={i}
-                className={`h-2 rounded-full ${row.side === 'right' ? 'bg-[#5B5CE2]/25' : 'bg-[#0E1726]/10'}`}
-                style={{ width }}
-              />
-            ))}
-          </div>
-        </div>
-      ))}
-    </div>
-  )
 }
 
 export default function InteractivePreviewChat() {
@@ -352,13 +320,17 @@ export default function InteractivePreviewChat() {
         </div>
 
         {/* Stage area */}
-        <div className="flex h-[460px] flex-col sm:h-[480px]">
+        <div
+          className={
+            step === 'idle'
+              ? 'flex flex-col'
+              : 'flex h-[460px] flex-col sm:h-[480px]'
+          }
+        >
           {/* ── Idle & scraping: the widget itself invites you ── */}
           {(step === 'idle' || step === 'scraping') && (
             <>
-              <div className="flex flex-1 flex-col justify-end overflow-hidden px-4 pb-4 pt-5">
-                <GhostConversation />
-
+              <div className="flex flex-1 flex-col justify-end overflow-hidden px-4 pb-4 pt-4">
                 {step === 'idle' && (
                   <div className="sandbox-msg mt-4 flex justify-start">
                     <div className="max-w-[85%] rounded-2xl rounded-bl-md border border-black/[0.06] bg-[#F7F8FA] px-4 py-3 text-[13px] leading-relaxed text-[#2b3046]">
@@ -417,10 +389,10 @@ export default function InteractivePreviewChat() {
                         key={site.url}
                         type="button"
                         onClick={() => startCrawl(site.url, 'example')}
-                        className="press rounded-full border border-black/[0.08] bg-white px-3 py-1.5 text-xs font-medium text-[#667085] shadow-sm transition-colors hover:border-[#5B5CE2]/40 hover:text-[#5B5CE2]"
+                        className="press rounded-full border border-black/[0.08] bg-white px-2.5 py-1 text-[11.5px] transition-colors hover:border-[#5B5CE2]/40"
                       >
-                        {site.label}
-                        <span className="ml-1.5 text-[#667085]">{site.url}</span>
+                        <span className="font-semibold text-[#344054]">{site.label}</span>
+                        <span className="ml-1.5 text-[#8A94A6]">{site.url}</span>
                       </button>
                     ))}
                   </div>
@@ -508,7 +480,7 @@ export default function InteractivePreviewChat() {
                           track(LANDING_EVENTS.demoSuggestedQuestionClicked, { question: q })
                           sendMessage(q)
                         }}
-                        className="press rounded-full border border-black/[0.08] bg-white px-3 py-1.5 text-xs font-medium text-[#667085] shadow-sm transition-colors hover:border-[#5B5CE2]/40 hover:text-[#5B5CE2]"
+                        className="press rounded-full border border-black/[0.08] bg-white px-2.5 py-1 text-[11.5px] transition-colors hover:border-[#5B5CE2]/40"
                       >
                         {q}
                       </button>
