@@ -2,7 +2,7 @@
 
 import * as React from 'react'
 import { useRouter } from 'next/navigation'
-import { ArrowRight, Check, Globe, Loader2 } from 'lucide-react'
+import { ArrowRight, Globe, Loader2 } from 'lucide-react'
 
 import { onIntegrateDomain } from '@/actions/settings'
 import { onScrapeWebsiteForDomain } from '@/actions/firecrawl'
@@ -110,15 +110,6 @@ const OUTCOME_CARDS = [
   },
 ]
 
-/** The five things an agency actually does to get a client live. */
-const CHECKLIST = [
-  'Add client website',
-  'Review imported knowledge',
-  'Customize assistant',
-  'Test responses',
-  'Install widget',
-]
-
 /** The primary button's label for each real phase — never a generic spinner. */
 const CTA_LABEL: Record<string, string> = {
   idle: 'Create client assistant',
@@ -138,9 +129,6 @@ export default function FirstClientSetup({ organizationName }: { organizationNam
   const [error, setError] = React.useState<string | null>(null)
   const [createdId, setCreatedId] = React.useState<string | null>(null)
   const [pagesFound, setPagesFound] = React.useState<number | null>(null)
-
-  /** Only the first step can complete on this screen; the rest live elsewhere. */
-  const completedSteps = phase === 'ready' ? 1 : 0
   const inputId = React.useId()
   const errorId = React.useId()
 
@@ -305,48 +293,6 @@ export default function FirstClientSetup({ organizationName }: { organizationNam
         </div>
       </div>
 
-      {/* Getting a client live, as five real tasks. The right rail describes
-          what ChatDock does; this is what the operator does. */}
-      <ol
-        className="flex flex-wrap items-center gap-x-1 gap-y-2 rounded-[12px] px-4 py-3"
-        style={{ backgroundColor: cd.surface }}
-      >
-        {CHECKLIST.map((item, i) => {
-          // Step one completes when the client exists; everything after it
-          // stays unreachable until then, so the list never invites a click
-          // that would land nowhere.
-          const done = i < completedSteps
-          const active = i === completedSteps
-          return (
-          <li key={item} className="flex items-center gap-1">
-            <span
-              className="grid h-[18px] w-[18px] shrink-0 place-items-center rounded-full text-[10px] font-bold"
-              style={{
-                backgroundColor: done ? cd.successSoft : active ? cd.accent : cd.sunken,
-                color: done ? cd.success : active ? '#fff' : cd.faint,
-              }}
-            >
-              {done ? <Check className="h-2.5 w-2.5" strokeWidth={3} /> : i + 1}
-            </span>
-            <span
-              className="text-[12px]"
-              style={{
-                color: done ? cd.success : active ? cd.ink : cd.muted,
-                fontWeight: active || done ? 600 : 400,
-              }}
-            >
-              {item}
-            </span>
-            {i < CHECKLIST.length - 1 && (
-              <span className="mx-1.5 text-[11px]" style={{ color: cd.line }} aria-hidden="true">
-                ›
-              </span>
-            )}
-          </li>
-          )
-        })}
-      </ol>
-
       {/* Outcome cards — real interface fragments, no illustrations */}
       <p className="pt-1 text-[11.5px]" style={{ color: cd.faint }}>
         Example outcomes using demonstration data
@@ -355,17 +301,17 @@ export default function FirstClientSetup({ organizationName }: { organizationNam
         {OUTCOME_CARDS.map((card) => (
           <div
             key={card.title}
-            className="rounded-[12px] p-4"
+            className="rounded-[12px] p-3.5"
             style={{ backgroundColor: cd.surface }}
           >
             <h2 className="text-[13.5px] font-semibold" style={{ color: cd.ink }}>
               {card.title}
             </h2>
-            <p className="mt-1 text-[12.5px] leading-5" style={{ color: cd.muted }}>
+            <p className="mt-1 text-[12.5px] leading-[1.4]" style={{ color: cd.muted }}>
               {card.body}
             </p>
             <div
-              className="mt-3 rounded-[10px] p-2.5"
+              className="mt-2.5 rounded-[10px] p-2.5"
               style={{ backgroundColor: cd.canvas }}
               aria-hidden="true"
             >
