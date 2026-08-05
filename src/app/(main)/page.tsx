@@ -18,6 +18,7 @@ import PricingSection from '@/components/landing/pricing-section'
 import { Reveal } from '@/components/landing/reveal'
 import ServiceLayers from '@/components/landing/service-layers'
 import StackComparison from '@/components/landing/stack-comparison'
+import SelfWidget from '@/components/landing/self-widget'
 import StickyCta from '@/components/landing/sticky-cta'
 import NavBar from '@/components/navbar'
 import { FAQS } from '@/constants/faq'
@@ -475,21 +476,11 @@ export default function Home() {
         {JSON.stringify(faqSchema)}
       </Script>
 
-      {/* ChatDock's own assistant, running on ChatDock.
-          Key-driven and env-configured: the previous hardcoded id pointed at a
-          row that the schema rebuild removed, so it would have rendered a
-          permanently broken widget on the marketing site. Renders nothing until
-          a real deployment key is configured. */}
+      {/* ChatDock's own assistant — marketing site only. SelfWidget owns the
+          teardown, because the embed appends its iframe outside React's tree
+          and would otherwise follow a signed-in user into the dashboard. */}
       {process.env.NEXT_PUBLIC_CHATDOCK_WIDGET_KEY && (
-        <Script
-          id="chatdock-self-widget"
-          src="https://www.chatdock.io/embed.min.js"
-          strategy="afterInteractive"
-          data-key={process.env.NEXT_PUBLIC_CHATDOCK_WIDGET_KEY}
-          data-app-origin="https://www.chatdock.io"
-          data-margin="24"
-          data-size="md"
-        />
+        <SelfWidget widgetKey={process.env.NEXT_PUBLIC_CHATDOCK_WIDGET_KEY} />
       )}
     </main>
   )
