@@ -174,11 +174,11 @@ function IngestScene({ beat }: { beat: Beat }) {
           return (
             <div
               key={page.path}
-              className="flex items-center gap-2.5 rounded-lg border border-[#E4E7EC] bg-white px-3 py-2 transition-all duration-500 ease-out-strong"
+              className="flex items-center gap-2.5 rounded-lg border border-[#E4E7EC] bg-white px-3 py-2 transition-[opacity,transform] duration-300 ease-out-strong"
               style={{
                 opacity: revealed ? 1 : 0,
                 transform: revealed ? 'none' : 'translateY(6px)',
-                transitionDelay: `${i * 130}ms`,
+                transitionDelay: `${i * 70}ms`,
               }}
             >
               <FileText className="h-3.5 w-3.5 shrink-0 text-[#667085]" />
@@ -186,7 +186,7 @@ function IngestScene({ beat }: { beat: Beat }) {
               <span className="hidden text-[11px] text-[#667085] sm:inline">{page.label}</span>
               <Check
                 className="h-3.5 w-3.5 shrink-0 text-[#16A67A] transition-opacity duration-300"
-                style={{ opacity: revealed ? 1 : 0, transitionDelay: `${i * 130 + 260}ms` }}
+                style={{ opacity: revealed ? 1 : 0, transitionDelay: `${i * 70 + 220}ms` }}
               />
             </div>
           )
@@ -197,11 +197,11 @@ function IngestScene({ beat }: { beat: Beat }) {
         {KNOWLEDGE.map((item, i) => (
           <span
             key={item}
-            className="rounded-md border border-[#E4E7EC] bg-[#F7F8FA] px-2.5 py-1 text-[11px] font-medium text-[#344054] transition-all duration-400 ease-out-strong"
+            className="rounded-md border border-[#E4E7EC] bg-[#F7F8FA] px-2.5 py-1 text-[11px] font-medium text-[#344054] transition-[opacity,transform] duration-300 ease-out-strong"
             style={{
               opacity: learned ? 1 : 0,
               transform: learned ? 'none' : 'scale(0.94)',
-              transitionDelay: `${i * 80}ms`,
+              transitionDelay: `${i * 55}ms`,
             }}
           >
             {item}
@@ -212,32 +212,48 @@ function IngestScene({ beat }: { beat: Beat }) {
   )
 }
 
-/** One chat row. Mounted only once its beat arrives, so it animates in place. */
+/**
+ * One chat row.
+ *
+ * Rendered only once its beat arrives. It used to stay mounted at `opacity: 0`
+ * from the start, which meant four invisible rows held 285px of the 400px
+ * stage open — so the first bubble was pinned near the top with a white void
+ * underneath it for two seconds. Mounting on arrival lets the column grow
+ * upward off `justify-end`, the way a real chat does.
+ */
 function Bubble({
   side,
-  show,
   children,
-  className = '',
 }: {
   side: 'left' | 'right'
-  show: boolean
   children: React.ReactNode
-  className?: string
 }) {
   return (
     <div
-      className={`max-w-[86%] rounded-2xl px-3.5 py-2.5 text-[13px] leading-relaxed transition-all duration-500 ease-out-strong ${
+      className={`hero-row max-w-[86%] rounded-2xl px-3.5 py-2.5 text-[13px] leading-relaxed ${
         side === 'right'
           ? 'self-end rounded-br-md bg-[#5B5CE2] text-white'
           : 'self-start rounded-bl-md border border-[#E4E7EC] bg-white text-[#344054]'
-      } ${className}`}
-      style={{
-        opacity: show ? 1 : 0,
-        transform: show ? 'none' : 'translateY(8px) scale(0.97)',
-        transformOrigin: side === 'right' ? 'bottom right' : 'bottom left',
-      }}
+      }`}
+      style={{ transformOrigin: side === 'right' ? 'bottom right' : 'bottom left' }}
     >
       {children}
+    </div>
+  )
+}
+
+/** Fills the beat between the visitor's question and the answer, so the pause
+ *  reads as the assistant thinking rather than as nothing happening. */
+function Typing() {
+  return (
+    <div className="hero-row flex w-fit items-center gap-1.5 self-start rounded-2xl rounded-bl-md border border-[#E4E7EC] bg-white px-3.5 py-3">
+      {[0, 1, 2].map((i) => (
+        <span
+          key={i}
+          className="hero-dot h-1.5 w-1.5 rounded-full bg-[#98A2B3]"
+          style={{ animationDelay: `${i * 140}ms` }}
+        />
+      ))}
     </div>
   )
 }
@@ -261,41 +277,43 @@ function AssistantScene({ beat }: { beat: Beat }) {
       </div>
 
       <div className="flex flex-1 flex-col justify-end gap-2 overflow-hidden p-4">
-        <Bubble side="right" show={beat >= BEAT.QUESTION}>
-          Do you offer teeth whitening on Saturdays?
-        </Bubble>
+        {beat >= BEAT.QUESTION && (
+          <Bubble side="right">Do you offer teeth whitening on Saturdays?</Bubble>
+        )}
 
-        <Bubble side="left" show={beat >= BEAT.ANSWER}>
-          Yes — in-office whitening is $199 and takes about 45 minutes. Saturday hours are 9:00 AM to
-          2:00 PM.
-          <span className="mt-2 flex items-center gap-1.5 text-[10px] font-medium text-[#667085]">
-            <FileText className="h-3 w-3" />
-            From /services · /hours-location
-          </span>
-        </Bubble>
+        {beat === BEAT.QUESTION && <Typing />}
 
-        <Bubble side="left" show={beat >= BEAT.CONTACT}>
-          Happy to get you booked. What&apos;s your name and the best number to reach you?
-        </Bubble>
+        {beat >= BEAT.ANSWER && (
+          <Bubble side="left">
+            Yes — in-office whitening is $199 and takes about 45 minutes. Saturday hours are 9:00 AM to
+            2:00 PM.
+            <span className="mt-2 flex items-center gap-1.5 text-[10px] font-medium text-[#667085]">
+              <FileText className="h-3 w-3" />
+              From /services · /hours-location
+            </span>
+          </Bubble>
+        )}
 
-        <Bubble side="right" show={beat >= BEAT.BOOKED} className="!bg-[#5B5CE2]">
-          Sarah Mitchell — (555) 014-2288
-        </Bubble>
+        {beat >= BEAT.CONTACT && (
+          <Bubble side="left">
+            Happy to get you booked. What&apos;s your name and the best number to reach you?
+          </Bubble>
+        )}
 
-        <div
-          className="flex items-center gap-2.5 rounded-xl border border-[#16A67A]/25 bg-[#ECFDF3] px-3 py-2.5 transition-all duration-500 ease-out-strong"
-          style={{
-            opacity: beat >= BEAT.BOOKED ? 1 : 0,
-            transform: beat >= BEAT.BOOKED ? 'none' : 'translateY(8px)',
-            transitionDelay: '260ms',
-          }}
-        >
-          <CalendarCheck2 className="h-4 w-4 shrink-0 text-[#16A67A]" />
-          <span className="min-w-0 flex-1">
-            <span className="block text-[12px] font-semibold text-[#101828]">Appointment requested</span>
-            <span className="block text-[11px] text-[#667085]">Saturday · 10:30 AM · Whitening</span>
-          </span>
-        </div>
+        {beat >= BEAT.BOOKED && <Bubble side="right">Sarah Mitchell — (555) 014-2288</Bubble>}
+
+        {beat >= BEAT.BOOKED && (
+          <div
+            className="hero-row flex items-center gap-2.5 rounded-xl border border-[#16A67A]/25 bg-[#ECFDF3] px-3 py-2.5"
+            style={{ animationDelay: '220ms' }}
+          >
+            <CalendarCheck2 className="h-4 w-4 shrink-0 text-[#16A67A]" />
+            <span className="min-w-0 flex-1">
+              <span className="block text-[12px] font-semibold text-[#101828]">Appointment requested</span>
+              <span className="block text-[11px] text-[#667085]">Saturday · 10:30 AM · Whitening</span>
+            </span>
+          </div>
+        )}
       </div>
     </div>
   )
@@ -316,16 +334,16 @@ function DashboardStrip({ beat }: { beat: Beat }) {
         return (
           <div
             key={row.label}
-            className="flex flex-col gap-1.5 rounded-xl px-2.5 py-2.5 transition-colors duration-500"
+            className="flex flex-col gap-1.5 rounded-xl px-2.5 py-2.5 transition-colors duration-200"
             style={{ backgroundColor: on ? '#F7F8FA' : 'transparent' }}
           >
             <span className="flex items-center gap-1.5">
               <row.icon
-                className="h-3.5 w-3.5 shrink-0 transition-colors duration-500"
+                className="h-3.5 w-3.5 shrink-0 transition-colors duration-200"
                 style={{ color: on ? row.tone : '#98A2B3' }}
               />
               <span
-                className="text-[15px] font-bold tabular-nums transition-colors duration-500 sm:text-base"
+                className="text-[15px] font-bold tabular-nums transition-colors duration-200 sm:text-base"
                 style={{ color: on ? '#101828' : '#667085' }}
               >
                 {on ? '+1' : '—'}
@@ -354,13 +372,15 @@ export default function HeroPipeline() {
         {stages.map((stage, i) => (
           <div key={stage} className="flex min-w-0 flex-1 flex-col gap-1.5">
             <span className="h-[3px] overflow-hidden rounded-full bg-[#E4E7EC]">
+              {/* scaleX, not width: width relayouts every frame, transform
+                  stays on the compositor. */}
               <span
-                className="block h-full rounded-full bg-[#5B5CE2] transition-all duration-700 ease-out-strong"
-                style={{ width: i <= stageIndex ? '100%' : '0%' }}
+                className="block h-full w-full origin-left rounded-full bg-[#5B5CE2] transition-transform duration-500 ease-out-strong"
+                style={{ transform: `scaleX(${i <= stageIndex ? 1 : 0})` }}
               />
             </span>
             <span
-              className="truncate text-[9.5px] font-medium transition-colors duration-500 sm:text-[10px]"
+              className="truncate text-[9.5px] font-medium transition-colors duration-200 sm:text-[10px]"
               style={{ color: i <= stageIndex ? '#344054' : '#667085' }}
             >
               {stage}
@@ -374,22 +394,35 @@ export default function HeroPipeline() {
         {/* The outgoing scene clears well before the incoming one arrives —
             a symmetrical cross-fade leaves both legible at once and reads as a
             rendering fault rather than a transition. */}
+        {/* A true cross-fade: same window, no delay, both scenes blurring
+            through the handover.
+
+            The previous version sequenced them — outgoing cleared first, then
+            the incoming started — to avoid two legible layouts stacked on each
+            other. But ease-out-strong is ~87% done at its midpoint, so the
+            outgoing scene was at 0.13 opacity while the incoming one was still
+            waiting out its delay, and the card went visibly blank. Overlapping
+            them keeps combined alpha near 1 the whole way across, and the blur
+            is what buys permission to overlap: two sharp layouts on top of
+            each other read as a rendering fault, two blurred ones read as one
+            thing becoming another. */}
         <div
-          className="absolute inset-0 transition-opacity ease-out-strong"
+          className="absolute inset-0 transition-[opacity,filter] ease-out-strong"
           style={{
             opacity: showAssistant ? 0 : 1,
-            transitionDuration: showAssistant ? '200ms' : '300ms',
+            filter: showAssistant ? 'blur(5px)' : 'blur(0px)',
+            transitionDuration: '240ms',
             pointerEvents: showAssistant ? 'none' : 'auto',
           }}
         >
           <IngestScene beat={beat} />
         </div>
         <div
-          className="absolute inset-0 bg-white transition-opacity ease-out-strong"
+          className="absolute inset-0 bg-white transition-[opacity,filter] ease-out-strong"
           style={{
             opacity: showAssistant ? 1 : 0,
-            transitionDuration: '350ms',
-            transitionDelay: showAssistant ? '200ms' : '0ms',
+            filter: showAssistant ? 'blur(0px)' : 'blur(5px)',
+            transitionDuration: '240ms',
             pointerEvents: showAssistant ? 'auto' : 'none',
           }}
         >
