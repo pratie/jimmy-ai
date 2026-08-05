@@ -371,3 +371,104 @@ export const onGetWorkspaceSwitcherOptions = async () => {
     return { status: 400 as const, workspaces: [], organization: null, role: null }
   }
 }
+
+/* ── Activity ───────────────────────────────────────────────────────────── */
+
+export type ActivityItem = {
+  id: string
+  kind: 'lead' | 'booking' | 'handoff' | 'published' | 'knowledge'
+  title: string
+  clientName: string
+  clientId: string
+  at: Date
+}
+
+/**
+ * Recent events worth an operator's attention, across accessible clients.
+ *
+ * Deliberately excludes message-level noise: an agency owner does not need a
+ * feed entry per chat turn, and burying a booking request under two hundred of
+ * them is how a feed becomes something people stop reading.
+ */
+export const onGetRecentActivity = async (limit = 12) => {
+  try {
+    const ctx = await requireTenantContext()
+    const ids = await accessibleWorkspaceIds(ctx)
+    if (ids.length === 0) return { status: 200 as const, activity: [] as ActivityItem[] }
+
+    const scope = { clientWorkspaceId: { in: ids } }
+    const naming = { clientWorkspace: { select: { id: true, name: true, businessName: true } } }
+
+    const [leads, bookings, handoffs, published] = await Promise.all([
+      client.lead.findMany({
+        where: { ...scope, archivedAt: null },
+        orderBy: { createdAt: 'desc' },
+        take: limit,
+        select: { id: true, name: true, email: true, phone: true, createdAt: true, ...naming },
+      }),
+      client.bookingRequest.findMany({
+        where: scope,
+        orderBy: { createdAt: 'desc' },
+        take: limit,
+        select: { id: true, status: true, requestedStartAt: true, createdAt: true, ...naming },
+      }),
+      client.conversation.findMany({
+        where: { ...scope, handoffStatus: { in: ['requested', 'accepted', 'active'] } },
+        orderBy: { lastMessageAt: 'desc' },
+        take: limit,
+        select: { id: true, handoffStatus: true, lastMessageAt: true, startedAt: true, ...naming },
+      }),
+      client.assistant.findMany({
+        where: { ...scope, status: 'published', publishedAt: { not: null } },
+        orderBy: { publishedAt: 'desc' },
+        take: limit,
+        select: { id: true, name: true, publishedAt: true, ...naming },
+      }),
+    ])
+
+    const label = (w: { name: string; businessName: string | null }) => w.businessName ?? w.name
+
+    const activity: ActivityItem[] = [
+      ...leads.map((l) => ({
+        id: `lead-${l.id}`,
+        kind: 'lead' as const,
+        title: `New lead — ${l.name ?? l.email ?? l.phone ?? 'contact captured'}`,
+        clientName: label(l.clientWorkspace),
+        clientId: l.clientWorkspace.id,
+        at: l.createdAt,
+      })),
+      ...bookings.map((b) => ({
+        id: `booking-${b.id}`,
+        kind: 'booking' as const,
+        // "requested", never "confirmed" — nothing has checked a calendar.
+        title: `Booking ${b.status === 'confirmed' ? 'confirmed' : 'requested'}`,
+        clientName: label(b.clientWorkspace),
+        clientId: b.clientWorkspace.id,
+        at: b.createdAt,
+      })),
+      ...handoffs.map((h) => ({
+        id: `handoff-${h.id}`,
+        kind: 'handoff' as const,
+        title: 'Human handoff waiting',
+        clientName: label(h.clientWorkspace),
+        clientId: h.clientWorkspace.id,
+        at: h.lastMessageAt ?? h.startedAt,
+      })),
+      ...published.map((a) => ({
+        id: `published-${a.id}`,
+        kind: 'published' as const,
+        title: `${a.name} published`,
+        clientName: label(a.clientWorkspace),
+        clientId: a.clientWorkspace.id,
+        at: a.publishedAt as Date,
+      })),
+    ]
+      .sort((a, b) => b.at.getTime() - a.at.getTime())
+      .slice(0, limit)
+
+    return { status: 200 as const, activity }
+  } catch (error) {
+    console.error('[Clients] onGetRecentActivity failed:', error)
+    return { status: 400 as const, activity: [] as ActivityItem[] }
+  }
+}
