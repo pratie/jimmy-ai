@@ -403,8 +403,8 @@ export default function HeroPipeline() {
 
       <p className="mt-2.5 text-center text-[11px] text-[#667085]">
         {reduced
-          ? 'Product walkthrough · illustrative data'
-          : 'What happens after you paste a client website · illustrative data'}
+          ? 'Product walkthrough · sample data'
+          : 'What happens after you paste a client website · sample data'}
       </p>
     </div>
   )

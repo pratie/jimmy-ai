@@ -63,7 +63,7 @@ export default function StackComparison() {
           </ul>
 
           <p className="mt-4 text-[12px] leading-5 text-[#667085]">
-            Every new client repeats the list. So does every time one of the pieces changes underneath you.
+            Every new client repeats the list, and so does every change to one of the pieces underneath you.
           </p>
         </div>
 

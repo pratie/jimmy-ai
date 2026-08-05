@@ -351,7 +351,7 @@ export default function DemoSandbox({ initialUrl }: { initialUrl?: string }) {
           </h1>
           <p className="mt-4 text-[15px] leading-7 text-[#667085]">
             ChatDock reads the public pages and answers from what it finds. Use your own site or a
-            client&apos;s — no signup, no card, nothing to install.
+            client&apos;s. No signup, no card, nothing to install.
           </p>
 
           <form
@@ -617,8 +617,7 @@ export default function DemoSandbox({ initialUrl }: { initialUrl?: string }) {
           <Panel title="What it learned" hint="From public pages">
             <p className="text-[12.5px] leading-5 text-[#667085]">
               Every answer above is written from this content and nothing else. When the content
-              doesn&apos;t cover a question, the assistant says so instead of guessing — that&apos;s the
-              difference between a demo and something you can put on a client&apos;s site.
+              doesn&apos;t cover a question, the assistant says so instead of guessing.
             </p>
             <div className="mt-3 flex items-center gap-2 rounded-lg border border-[#E4E7EC] bg-[#F7F8FA] px-3 py-2">
               <ShieldCheck className="h-4 w-4 shrink-0 text-[#0B6E51]" />
@@ -645,7 +644,7 @@ export default function DemoSandbox({ initialUrl }: { initialUrl?: string }) {
                   ))}
               </ul>
               <p className="mt-3 text-[11.5px] leading-5 text-[#667085]">
-                In a real workspace this list is the client&apos;s monthly report — what visitors asked,
+                In a real workspace this list is the client&apos;s monthly report: what visitors asked,
                 what converted, and which questions the site never answered.
               </p>
             </Panel>
@@ -656,7 +655,7 @@ export default function DemoSandbox({ initialUrl }: { initialUrl?: string }) {
               Now put this on a client&apos;s site
             </h2>
             <p className="mt-1.5 text-[12.5px] leading-5 text-[#475467]">
-              Branded, capturing leads, booking appointments — and billed as a monthly service.
+              Branded, capturing leads, booking appointments, and billed as a monthly service.
             </p>
             <div className="mt-4 flex flex-col gap-2 sm:flex-row">
               <Link

@@ -215,7 +215,7 @@ export default function Capabilities() {
                 ))}
                 <p className="flex items-center gap-1.5 border-t border-[#E4E7EC] pt-2.5 text-[10.5px] text-[#667085]">
                   <Play className="h-2.5 w-2.5" />
-                  Demo workspace · illustrative data
+                  Sample data
                 </p>
               </div>
             </div>
@@ -228,7 +228,7 @@ export default function Capabilities() {
           <FileText className="mt-0.5 h-4 w-4 shrink-0 text-[#667085]" />
           <span>
             Everything listed above works today. Shareable prospect demo links, client logins and CSV export
-            are on the roadmap — you will not find them advertised here until they ship.
+            are on the roadmap. You will not find them advertised here until they ship.
           </span>
         </p>
       </Reveal>

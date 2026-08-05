@@ -141,7 +141,7 @@ export default function DemoLauncher() {
             is the only thing a visitor with zero clients can actually do. */}
         <div className="rounded-xl border border-[#5B5CE2]/25 bg-white p-4 sm:p-5">
           <h3 className="font-heading text-[15px] font-bold tracking-tight text-[#101828]">
-            Add a client — try it on a real website
+            Add a client: try it on a real website
           </h3>
           <p className="mt-1 text-[13px] leading-5 text-[#667085]">
             Paste any URL. ChatDock reads the public pages and opens a working assistant you can talk
@@ -250,7 +250,7 @@ export default function DemoLauncher() {
           </ul>
 
           <p className="border-t border-[#E4E7EC] bg-[#FAFBFC] px-4 py-2.5 text-[11px] text-[#667085]">
-            Illustrative workspace — these are not real customers. The demo you open above runs on a
+            Sample data, not real customers. The demo you open above runs on a
             real website of your choosing.
           </p>
         </div>

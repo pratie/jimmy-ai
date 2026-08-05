@@ -192,7 +192,7 @@ export default function IndustryTabs() {
               </span>
               <span className="min-w-0">
                 <span className="block truncate text-[12.5px] font-semibold text-white">{industry.client}</span>
-                <span className="block text-[10.5px] text-white/45">Sample client · illustrative</span>
+                <span className="block text-[10.5px] text-white/45">Sample data</span>
               </span>
             </div>
 

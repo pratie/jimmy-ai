@@ -18,7 +18,7 @@ export const FAQS: Faq[] = [
   {
     question: 'Will the assistant make up answers?',
     answer:
-      'It answers from content you approve — the client’s website pages and the documents you upload — and nothing else. When a question falls outside that, it says it cannot confirm and offers to take the visitor’s details so a person can follow up. You will still want to test it before launch, which is why every workspace has a private test chat.',
+      'It answers from content you approve (the client’s website pages and the documents you upload) and nothing else. When a question falls outside that, it says it cannot confirm and offers to take the visitor’s details so a person can follow up. You will still want to test it before launch, which is why every workspace has a private test chat.',
   },
   {
     question: 'How long does setup take?',
@@ -33,7 +33,7 @@ export const FAQS: Faq[] = [
   {
     question: 'Can I manage multiple clients from one account?',
     answer:
-      'Yes — that is the point of the product. Each client gets a separate workspace and you run all of them from one agency dashboard with one login. How many workspaces you can have live depends on your plan: one on Free and Starter, five on Pro, unlimited on Business.',
+      'Yes. That is the point of the product. Each client gets a separate workspace and you run all of them from one agency dashboard with one login. How many workspaces you can have live depends on your plan: one on Free and Starter, five on Pro, unlimited on Business.',
   },
   {
     question: 'Does each client’s data stay separate?',
@@ -83,6 +83,6 @@ export const FAQS: Faq[] = [
   {
     question: 'How should an agency price this service?',
     answer:
-      'That is your call and it depends on your market and what the client’s existing retainer looks like. Most agencies fold it into an existing website or SEO retainer as an added line item rather than selling it standalone. Use the margin calculator on this page to model your own numbers — we do not publish a recommended price, because we do not have enough real customer data to responsibly claim one.',
+      'That is your call and it depends on your market and what the client’s existing retainer looks like. You can fold it into an existing website or SEO retainer as an added line item, or sell it standalone. Use the margin calculator on this page to model your own numbers. We do not publish a recommended price, because we do not have enough real customer data to responsibly claim one.',
   },
 ]

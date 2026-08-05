@@ -155,7 +155,7 @@ export default function ClientReport() {
             Assistant live
           </span>
           <span className="shrink-0 rounded-full bg-[#FFFAEB] px-2.5 py-1 text-[11px] font-semibold text-[#B54708]">
-            Demo workspace · Illustrative data
+            Sample data
           </span>
         </div>
 

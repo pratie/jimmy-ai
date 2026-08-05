@@ -129,7 +129,7 @@ function StepPanel({ step }: { step: StepId }) {
         </div>
         <div className="mt-3 rounded-lg border border-[#E4E7EC] bg-[#F7F8FA] p-3">
           <p className="flex items-center gap-1.5 text-[11px] font-semibold text-[#344054]">
-            <Play className="h-3 w-3 text-[#5B5CE2]" /> Private test — not visible to visitors
+            <Play className="h-3 w-3 text-[#5B5CE2]" /> Private test: not visible to visitors
           </p>
           <div className="mt-2.5 space-y-2">
             <p className="ml-auto w-fit max-w-[80%] rounded-lg rounded-br-sm bg-[#5B5CE2] px-2.5 py-1.5 text-[11.5px] text-white">
@@ -208,7 +208,7 @@ function StepPanel({ step }: { step: StepId }) {
   return (
     <Panel label="Install & dashboard">
       <Field
-        label="Embed snippet — paste once, before </body>"
+        label="Embed snippet: paste once, before </body>"
         value='<script src="https://chatdock.io/embed.min.js" …>'
         mono
       />
@@ -236,7 +236,7 @@ function StepPanel({ step }: { step: StepId }) {
           </div>
         ))}
       </div>
-      <p className="mt-2.5 text-[10.5px] text-[#667085]">Demo workspace · illustrative data</p>
+      <p className="mt-2.5 text-[10.5px] text-[#667085]">Sample data</p>
     </Panel>
   )
 }

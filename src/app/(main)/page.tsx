@@ -36,7 +36,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: '/' },
   openGraph: {
-    title: 'Turn every client website into an AI receptionist — and a new monthly service',
+    title: 'Turn every client website into an AI receptionist, and a new monthly service',
     description:
       'For web, SEO and lead-generation agencies. Launch a branded assistant that answers from approved content, qualifies visitors and books appointments.',
     url: '/',
@@ -157,8 +157,8 @@ export default function Home() {
 
             <Reveal delay={70}>
               <h1 className="mt-5 text-balance font-heading text-[34px] font-bold leading-[1.08] tracking-[-0.03em] text-[#101828] sm:text-[44px] lg:text-[52px]">
-                Turn every client website into an AI receptionist
-                <span className="text-[#5B5CE2]">—and a new monthly service.</span>
+                Turn every client website into an AI receptionist,{' '}
+                <span className="text-[#5B5CE2]">and a new monthly service.</span>
               </h1>
             </Reveal>
 
@@ -218,8 +218,8 @@ export default function Home() {
         <div className="mx-auto max-w-6xl">
           <SectionHeading
             eyebrow="See it for yourself"
-            title="Don’t take our word for it. Test it on a real website."
-            copy="This is the workspace you’d run your client roster from. Paste any URL and ChatDock opens a working assistant built from that site’s public content — no signup, no card, nothing to install."
+            title="Test it on a real website before you believe any of this."
+            copy="This is the workspace you’d run your client roster from. Paste any URL and ChatDock opens a working assistant built from that site’s public content."
           />
 
           <Reveal delay={100} className="mt-10">
@@ -237,7 +237,7 @@ export default function Home() {
                   Answers come from approved content
                 </h3>
                 <p className="mt-2 text-[13.5px] leading-6 text-[#667085]">
-                  The demo reads real pages from whatever URL you give it — the same way a client
+                  The demo reads real pages from whatever URL you give it, the same way a client
                   workspace does. What it can&apos;t find, it won&apos;t invent.
                 </p>
               </div>
@@ -291,7 +291,7 @@ export default function Home() {
         <div className="mx-auto max-w-6xl">
           <SectionHeading
             eyebrow="Why this sells"
-            title="Your clients don’t need another chatbot. They need more captured opportunities."
+            title="Your clients want more captured opportunities, not another chatbot."
             copy="Three things make an AI receptionist an easy conversation with a client you already have."
           />
           <div className="mt-12">
@@ -306,7 +306,7 @@ export default function Home() {
           <SectionHeading
             eyebrow="How it works"
             title="From client website to working AI receptionist in one afternoon."
-            copy="The same four steps for every client you sign — dental practice, plumber or law firm. No custom development at any point."
+            copy="The same four steps for every client you sign: dental practice, plumber or law firm. No custom development at any point."
           />
           <div className="mt-12">
             <LaunchSteps />
@@ -320,7 +320,7 @@ export default function Home() {
           <SectionHeading
             eyebrow="What you’re selling"
             title="One repeatable service for every website client."
-            copy="Four connected layers — what the visitor experiences, what you capture, how each client stays separate, and how you run the whole roster."
+            copy="Four connected layers: what the visitor experiences, what you capture, how each client stays separate, and how you run the whole roster."
           />
           <div className="mt-12">
             <ServiceLayers />
@@ -333,7 +333,7 @@ export default function Home() {
         <div className="mx-auto max-w-6xl">
           <SectionHeading
             eyebrow="Keep the retainer"
-            title="Don’t tell clients the assistant is running. Show them what it produced."
+            title="Show clients what the assistant produced."
             copy="This is the screen you open on a monthly review call. Every number answers one question: what did it handle, what did it capture, what should the business fix, and why should they keep paying."
           />
           <div className="mt-12">
@@ -365,7 +365,7 @@ export default function Home() {
           <SectionHeading
             eyebrow="Before and after"
             title="Stop rebuilding the same chatbot stack for every client."
-            copy="The pieces are not the hard part. Keeping nine of them working across a dozen client accounts is."
+            copy="Keeping nine moving pieces working across a dozen client accounts is the hard part."
           />
           <div className="mt-12">
             <StackComparison />
@@ -379,7 +379,7 @@ export default function Home() {
           <SectionHeading
             eyebrow="Capabilities"
             title="Everything between “a visitor had a question” and “the client got a booking.”"
-            copy="Grouped by what it does for your agency, not by what it is technically."
+            copy="Grouped by what it does for your agency."
           />
           <div className="mt-12">
             <Capabilities />
@@ -392,8 +392,8 @@ export default function Home() {
         <div className="mx-auto max-w-6xl">
           <SectionHeading
             eyebrow="Answer quality"
-            title="Helpful when it knows. Honest when it doesn’t."
-            copy="The question every agency owner asks before putting this on a client’s site — answered by showing both branches rather than promising accuracy."
+            title="Helpful when it knows, and honest when it doesn’t."
+            copy="The question every agency owner asks before putting this on a client’s site, answered by showing both branches rather than promising accuracy."
           />
           <div className="mt-12">
             <GroundedAnswers />
@@ -407,7 +407,7 @@ export default function Home() {
           <SectionHeading
             eyebrow="Industry examples"
             title="Built for the local businesses already in your client roster."
-            copy="The same assistant, configured for what each kind of business actually gets asked — and what a good lead looks like there."
+            copy="The same assistant, configured for what each kind of business actually gets asked, and what a good lead looks like there."
           />
           <div className="mt-12">
             <IndustryTabs />
@@ -423,7 +423,7 @@ export default function Home() {
         <div className="mx-auto max-w-6xl">
           <SectionHeading
             eyebrow="Questions before you commit"
-            title="The things you’d ask on a sales call — answered here instead."
+            title="The things you’d ask on a sales call, answered here instead."
             copy="Including the parts that aren’t built yet."
           />
           <Reveal delay={100} className="mt-10">

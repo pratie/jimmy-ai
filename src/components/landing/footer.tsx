@@ -65,8 +65,7 @@ export function Footer() {
               sell to every client on their roster.
             </p>
             <p className="mt-4 max-w-xs text-[12px] leading-5 text-white/30">
-              Built and supported by Prathap Reddy. No sales team, no call centre — the founder answers
-              support.
+              Built by Prathap Reddy, who answers support himself.
             </p>
           </div>
 
