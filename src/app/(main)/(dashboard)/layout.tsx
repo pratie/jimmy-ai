@@ -1,4 +1,5 @@
 import { onLoginUser } from '@/actions/auth'
+import { onGetWorkspaceSwitcherOptions } from '@/actions/clients'
 import SideBar from '@/components/sidebar'
 import { ChatProvider } from '@/context/user-chat-context'
 import { redirect } from 'next/navigation'
@@ -37,13 +38,21 @@ const OwnerLayout = async ({ children }: Props) => {
       redirect('/auth/sign-in')
     }
 
+    // Switcher options are read separately so the sidebar shows every workspace
+    // the member may reach, which is not necessarily every workspace the
+    // organization owns.
+    const switcher = await onGetWorkspaceSwitcherOptions()
+
     return (
       <ChatProvider>
         <div className="flex h-screen min-h-screen w-full bg-[#f5f6fa] text-foreground">
           <DashboardThemeEnforcer />
           <SideBar
-            domains={(authenticated.workspaces ?? []).map((w) => ({ id: w.id, name: w.name, icon: w.logoUrl }))}
+            workspaces={switcher.workspaces}
+            organization={switcher.organization}
             user={{ ...authenticated.user, fullname: authenticated.user?.fullName ?? '' }}
+            canCreateClient={['owner', 'admin', 'manager'].includes(authenticated.role ?? '')}
+            canManageBilling={['owner', 'admin', 'billing'].includes(authenticated.role ?? '')}
           />
           <main className="flex h-screen min-w-0 flex-1 flex-col overflow-x-hidden pl-[72px] md:pl-0">
             {children}
