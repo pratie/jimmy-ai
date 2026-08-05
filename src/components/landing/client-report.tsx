@@ -150,7 +150,7 @@ export default function ClientReport() {
             <p className="truncate text-[14px] font-bold text-[#101828]">Bright Smile Dental</p>
             <p className="text-[11.5px] text-[#667085]">Monthly assistant summary · March</p>
           </div>
-          <span className="flex shrink-0 items-center gap-1.5 rounded-full bg-[#ECFDF3] px-2.5 py-1 text-[11px] font-semibold text-[#16A67A]">
+          <span className="flex shrink-0 items-center gap-1.5 rounded-full bg-[#ECFDF3] px-2.5 py-1 text-[11px] font-semibold text-[#0B6E51]">
             <span className="h-1.5 w-1.5 rounded-full bg-[#16A67A]" />
             Assistant live
           </span>

@@ -322,11 +322,11 @@ function DashboardStrip({ beat }: { beat: Beat }) {
             <span className="flex items-center gap-1.5">
               <row.icon
                 className="h-3.5 w-3.5 shrink-0 transition-colors duration-500"
-                style={{ color: on ? row.tone : '#C6CBD6' }}
+                style={{ color: on ? row.tone : '#98A2B3' }}
               />
               <span
                 className="text-[15px] font-bold tabular-nums transition-colors duration-500 sm:text-base"
-                style={{ color: on ? '#101828' : '#C6CBD6' }}
+                style={{ color: on ? '#101828' : '#667085' }}
               >
                 {on ? '+1' : '—'}
               </span>
@@ -361,7 +361,7 @@ export default function HeroPipeline() {
             </span>
             <span
               className="truncate text-[9.5px] font-medium transition-colors duration-500 sm:text-[10px]"
-              style={{ color: i <= stageIndex ? '#344054' : '#98A2B3' }}
+              style={{ color: i <= stageIndex ? '#344054' : '#667085' }}
             >
               {stage}
             </span>

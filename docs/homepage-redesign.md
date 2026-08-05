@@ -271,12 +271,27 @@ ChatDash offers it.
       failed WCAG AA, so every text use was replaced with `#667085` (**4.95:1**).
       `#98A2B3` now survives only in non-text roles.
 
-**Still to check before launch**
-- [ ] Widths 390 / 430 / 1024 (only 375/768/1440 were measured)
+**Closed 2026-08-05**
+- [x] Widths 390 / 430 / 1024 — no horizontal overflow at any of them; desktop
+      nav fits at 1024
+- [x] Focus indicators — no global outline reset, and every live component
+      pairing `outline-none` with a ring. The only unguarded `outline-none` is
+      in `animated-chat-hero.tsx`, an orphaned component with zero importers.
+- [x] Accessible names — both sandbox inputs had only a placeholder, which is
+      not an accessible name (it disappears on input and several screen readers
+      ignore it). Both now carry `aria-label`.
+- [x] Contrast — `#16A67A` measured **2.94:1** as small text and failed AA.
+      Text uses moved to `#0B6E51` (**6.24:1**); the green is kept for icons and
+      dots, which need 3:1 and score 3.1. Two inline styles in the hero
+      (`#98A2B3`, `#C6CBD6`) that the earlier class-only sweep could not reach
+      are now `#667085` (**4.97:1**). Zero opaque text failures remain.
+- [x] `prefers-reduced-motion` — 6 guard blocks cover reveal, draw-line,
+      stagger, underline, grow-bars, marquee and the sandbox. The hero loop is
+      JS-guarded and jumps to its final frame. `animate-ping` was unguarded and
+      now carries `motion-reduce:animate-none`.
+
+**Still open**
 - [ ] Lighthouse mobile performance ≥ 90
-- [ ] Full keyboard pass: tab order, visible focus on every control, tab rails
-- [ ] Remaining contrast: `#C6CBD6` on white for the hero's inactive “—”
-      counters (decorative state; adjacent label carries the meaning)
 - [ ] Screen-reader pass on the hero loop (`aria-hidden` coverage)
 - [ ] `prefers-reduced-motion` end-to-end
 - [ ] Sandbox against a slow/large real site, and against a site that blocks crawling

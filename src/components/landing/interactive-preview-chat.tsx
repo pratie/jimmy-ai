@@ -441,6 +441,7 @@ export default function InteractivePreviewChat() {
                     <input
                       type="text"
                       disabled={step === 'scraping'}
+                      aria-label="Website address to build an assistant from"
                       placeholder={step === 'scraping' ? `Reading ${crawlUrl}…` : 'Type a website — e.g. yourclient.com'}
                       value={urlInput}
                       onChange={(e) => setUrlInput(e.target.value)}
@@ -542,6 +543,7 @@ export default function InteractivePreviewChat() {
                   <input
                     type="text"
                     disabled={isTyping}
+                    aria-label="Ask the assistant a question"
                     placeholder="Ask anything about this website…"
                     value={inputVal}
                     onChange={(e) => setInputVal(e.target.value)}

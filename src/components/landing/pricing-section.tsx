@@ -143,7 +143,7 @@ export default function PricingSection() {
               >
                 {option}
                 {option === 'yearly' && (
-                  <span className="ml-1.5 rounded bg-[#ECFDF3] px-1.5 py-0.5 text-[10.5px] font-bold text-[#16A67A]">
+                  <span className="ml-1.5 rounded bg-[#ECFDF3] px-1.5 py-0.5 text-[10.5px] font-bold text-[#0B6E51]">
                     save up to 50%
                   </span>
                 )}

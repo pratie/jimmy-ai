@@ -77,7 +77,7 @@ export default function AgencyProblem() {
           </div>
 
           <div className="rounded-xl bg-[#ECFDF3] p-4">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#16A67A]">With an assistant on the page</p>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#0B6E51]">With an assistant on the page</p>
             <div className="mt-3 flex flex-wrap items-center gap-2">
               {AFTER.map((node, i) => (
                 <span

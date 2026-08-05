@@ -147,7 +147,7 @@ export default function Home() {
             <Reveal>
               <p className="inline-flex items-center gap-2 rounded-full border border-[#E4E7EC] bg-white px-3.5 py-1.5 text-[12px] font-semibold text-[#475467]">
                 <span className="relative flex h-1.5 w-1.5">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#16A67A] opacity-60" />
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#16A67A] opacity-60 motion-reduce:animate-none" />
                   <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-[#16A67A]" />
                 </span>
                 For web, SEO and lead-generation agencies

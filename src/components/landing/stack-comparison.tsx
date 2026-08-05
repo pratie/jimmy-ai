@@ -71,7 +71,7 @@ export default function StackComparison() {
         <div className="rounded-2xl border border-[#5B5CE2]/25 bg-white p-5 shadow-[0_8px_28px_-14px_rgba(16,24,40,0.18)] sm:p-6">
           <div className="flex items-center justify-between gap-3">
             <h3 className="font-heading text-[15px] font-bold tracking-tight text-[#101828]">With ChatDock</h3>
-            <span className="shrink-0 rounded-full bg-[#ECFDF3] px-2.5 py-1 text-[11px] font-semibold text-[#16A67A]">
+            <span className="shrink-0 rounded-full bg-[#ECFDF3] px-2.5 py-1 text-[11px] font-semibold text-[#0B6E51]">
               1 workflow · every client
             </span>
           </div>

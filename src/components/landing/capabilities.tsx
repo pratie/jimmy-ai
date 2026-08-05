@@ -154,7 +154,7 @@ export default function Capabilities() {
                     <span className="block truncate text-[12px] font-bold text-[#101828]">Sarah Mitchell</span>
                     <span className="block truncate text-[11px] text-[#667085]">(555) 014-2288</span>
                   </span>
-                  <span className="shrink-0 rounded-full bg-[#ECFDF3] px-2 py-0.5 text-[10px] font-bold text-[#16A67A]">
+                  <span className="shrink-0 rounded-full bg-[#ECFDF3] px-2 py-0.5 text-[10px] font-bold text-[#0B6E51]">
                     Qualified
                   </span>
                 </div>
