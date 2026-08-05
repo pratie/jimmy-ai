@@ -1,31 +1,22 @@
 'use client'
 
 import * as React from 'react'
-import {
-  CalendarCheck2,
-  Check,
-  FileSearch,
-  Globe,
-  Loader2,
-  MessagesSquare,
-  Palette,
-  UserRoundCheck,
-  X,
-} from 'lucide-react'
+import { AlertTriangle, ArrowRight, Check, FileText, Loader2 } from 'lucide-react'
 
 import { cd } from '@/lib/design-tokens'
 
 /**
- * The right-hand panel of the zero-client screen.
+ * The right rail of the zero-client screen.
  *
- * Replaces the old "What happens next", which restated the stepper as prose and
- * carried no state. This has two jobs and switches between them:
+ * Two states, deliberately different:
  *
- * - idle: what ChatDock will build, as a compact event stream of real product
- *   states rather than a marketing animation
- * - running: live setup feedback tied to the actual request
+ * - idle — a five-stage flow of what will happen, plus one concrete outcome so
+ *   the product is understandable without reading every line. Nothing is shown
+ *   as running, because nothing is.
+ * - active — the same five stages carrying real progress, with a recovery
+ *   action on failure.
  *
- * Progress never advances past the step actually reached. A bar that glides to
+ * Progress never advances past the stage actually reached. A bar that glides to
  * 90% and waits is a lie an operator only has to catch once.
  */
 
@@ -39,189 +30,202 @@ export type SetupPhase =
   | 'ready'
   | 'failed'
 
-const PIPELINE: { phase: SetupPhase; icon: React.ElementType; label: string; detail: string }[] = [
-  { phase: 'connecting', icon: Globe, label: 'Connecting to the website', detail: 'Checking the address resolves' },
-  { phase: 'discovering', icon: FileSearch, label: 'Discovering public pages', detail: 'Services, pricing, hours, FAQs' },
-  { phase: 'reading', icon: FileSearch, label: 'Reading business information', detail: 'Only publicly available content' },
-  { phase: 'indexing', icon: Loader2, label: 'Preparing knowledge', detail: 'So answers can cite their source' },
-  { phase: 'drafting', icon: Palette, label: 'Creating the draft assistant', detail: 'Branded to the client' },
+const STAGES: { phase: SetupPhase; idle: string; active: string }[] = [
+  { phase: 'connecting', idle: 'Website connected', active: 'Connecting to website' },
+  { phase: 'discovering', idle: 'Pages discovered', active: 'Discovering pages' },
+  { phase: 'reading', idle: 'Business information read', active: 'Extracting business information' },
+  { phase: 'indexing', idle: 'Knowledge prepared', active: 'Creating knowledge' },
+  { phase: 'drafting', idle: 'Assistant ready to test', active: 'Preparing assistant preview' },
 ]
 
 const ORDER: SetupPhase[] = ['connecting', 'discovering', 'reading', 'indexing', 'drafting', 'ready']
 
-/** What the assistant will do once it exists — shown before anything is entered. */
-const OUTCOMES = [
-  { icon: MessagesSquare, label: 'Answers a visitor question', detail: 'From the client’s own pages, with the source cited' },
-  { icon: UserRoundCheck, label: 'Captures a qualified lead', detail: 'Name and number, plus your qualifying questions' },
-  { icon: CalendarCheck2, label: 'Creates a booking request', detail: 'Handed to the client to confirm' },
-]
+/** The citation chip. One of the few components meant to be recognisably ours. */
+export function SourceCitation({ label }: { label: string }) {
+  return (
+    <span
+      className="mt-1.5 inline-flex items-center gap-1 rounded-[5px] border px-1.5 py-0.5 text-[10px] font-medium"
+      style={{ borderColor: cd.accentLine, backgroundColor: cd.accentSoft, color: cd.accent }}
+    >
+      <FileText className="h-2.5 w-2.5" />
+      {label}
+    </span>
+  )
+}
+
+function StageRow({
+  index,
+  total,
+  label,
+  state,
+}: {
+  index: number
+  total: number
+  label: string
+  state: 'pending' | 'active' | 'done'
+}) {
+  return (
+    <li className="relative flex gap-2.5 pb-3.5 last:pb-0">
+      {index < total - 1 && (
+        <span
+          className="absolute left-[10px] top-6 h-[calc(100%-14px)] w-px transition-colors"
+          style={{ backgroundColor: state === 'done' ? cd.accent : cd.line }}
+          aria-hidden="true"
+        />
+      )}
+      <span
+        className="relative z-10 mt-0.5 grid h-[21px] w-[21px] shrink-0 place-items-center rounded-full border transition-colors"
+        style={{
+          borderColor: state === 'pending' ? cd.line : cd.accent,
+          backgroundColor: state === 'done' ? cd.accent : cd.surface,
+          color: state === 'done' ? '#fff' : cd.accent,
+        }}
+      >
+        {state === 'done' ? (
+          <Check className="h-3 w-3" strokeWidth={3} />
+        ) : state === 'active' ? (
+          <Loader2 className="h-3 w-3 animate-spin motion-reduce:animate-none" />
+        ) : (
+          <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: cd.line }} />
+        )}
+      </span>
+      <span
+        className="pt-0.5 text-[12.5px] transition-colors"
+        style={{
+          color: state === 'pending' ? cd.faint : cd.ink,
+          fontWeight: state === 'active' ? 600 : 400,
+        }}
+      >
+        {label}
+      </span>
+    </li>
+  )
+}
 
 export default function SetupPreview({
   phase,
   domain,
-  pagesFound,
   error,
+  onRetry,
 }: {
   phase: SetupPhase
   domain?: string
-  pagesFound?: number
   error?: string | null
+  onRetry?: () => void
 }) {
   const activeIndex = ORDER.indexOf(phase)
-
-  if (phase === 'idle') {
-    return (
-      <div className="flex h-full flex-col">
-        <p
-          className="text-[11px] font-semibold uppercase tracking-[0.1em]"
-          style={{ color: cd.faint }}
-        >
-          What ChatDock builds
-        </p>
-
-        <ol className="mt-4 space-y-0">
-          {PIPELINE.map((step, i) => (
-            <li key={step.label} className="relative flex gap-3 pb-4 last:pb-0">
-              {i < PIPELINE.length - 1 && (
-                <span
-                  className="absolute left-[13px] top-7 h-[calc(100%-16px)] w-px"
-                  style={{ backgroundColor: cd.line }}
-                  aria-hidden="true"
-                />
-              )}
-              <span
-                className="relative z-10 grid h-[27px] w-[27px] shrink-0 place-items-center rounded-full border"
-                style={{ borderColor: cd.line, backgroundColor: cd.surface, color: cd.faint }}
-              >
-                <step.icon className="h-3.5 w-3.5" />
-              </span>
-              <span className="min-w-0 pt-0.5">
-                <span className="block text-[13px] font-medium" style={{ color: cd.body }}>
-                  {step.label}
-                </span>
-                <span className="mt-0.5 block text-[11.5px]" style={{ color: cd.faint }}>
-                  {step.detail}
-                </span>
-              </span>
-            </li>
-          ))}
-        </ol>
-
-        <div className="mt-5 border-t pt-4" style={{ borderColor: cd.line }}>
-          <p
-            className="text-[11px] font-semibold uppercase tracking-[0.1em]"
-            style={{ color: cd.faint }}
-          >
-            Then it starts working
-          </p>
-          <ul className="mt-3 space-y-2.5">
-            {OUTCOMES.map((o) => (
-              <li key={o.label} className="flex gap-2.5">
-                <o.icon className="mt-0.5 h-3.5 w-3.5 shrink-0" style={{ color: cd.accent }} />
-                <span className="min-w-0">
-                  <span className="block text-[12.5px] font-medium" style={{ color: cd.body }}>
-                    {o.label}
-                  </span>
-                  <span className="block text-[11.5px]" style={{ color: cd.faint }}>
-                    {o.detail}
-                  </span>
-                </span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
-    )
-  }
 
   if (phase === 'failed') {
     return (
       <div className="flex h-full flex-col justify-center">
         <span
-          className="grid h-9 w-9 place-items-center rounded-full"
+          className="grid h-8 w-8 place-items-center rounded-full"
           style={{ backgroundColor: cd.dangerSoft, color: cd.danger }}
         >
-          <X className="h-4 w-4" />
+          <AlertTriangle className="h-4 w-4" />
         </span>
-        <p className="mt-3 text-[14px] font-semibold" style={{ color: cd.ink }}>
+        <p className="mt-3 text-[13.5px] font-semibold" style={{ color: cd.ink }}>
           Could not read that website
         </p>
         <p className="mt-1.5 text-[12.5px] leading-5" style={{ color: cd.muted }}>
-          {error ??
-            'We could not reach enough public content at that address. Check the domain, or add the client and upload documents instead.'}
+          {error ?? 'We could not reach enough public content at that address.'}
         </p>
+        {onRetry && (
+          <button
+            type="button"
+            onClick={onRetry}
+            className="mt-3 inline-flex h-8 w-fit items-center gap-1.5 rounded-[8px] border px-3 text-[12.5px] font-semibold"
+            style={{ borderColor: cd.lineStrong, color: cd.ink }}
+          >
+            Try another website
+          </button>
+        )}
       </div>
     )
   }
 
+  const running = phase !== 'idle'
+
   return (
     <div className="flex h-full flex-col">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.1em]" style={{ color: cd.faint }}>
-        Setting up {domain}
+      <p className="text-[11px] font-semibold uppercase tracking-[0.08em]" style={{ color: cd.faint }}>
+        {running ? `Setting up ${domain ?? 'your client'}` : 'How it works'}
       </p>
 
-      <ol className="mt-4 space-y-0">
-        {PIPELINE.map((step, i) => {
-          const done = activeIndex > i
-          const current = activeIndex === i
-          return (
-            <li key={step.label} className="relative flex gap-3 pb-4 last:pb-0">
-              {i < PIPELINE.length - 1 && (
-                <span
-                  className="absolute left-[13px] top-7 h-[calc(100%-16px)] w-px transition-colors"
-                  style={{ backgroundColor: done ? cd.accent : cd.line }}
-                  aria-hidden="true"
-                />
-              )}
-              <span
-                className="relative z-10 grid h-[27px] w-[27px] shrink-0 place-items-center rounded-full border transition-colors"
-                style={{
-                  borderColor: done || current ? cd.accent : cd.line,
-                  backgroundColor: done ? cd.accent : cd.surface,
-                  color: done ? '#fff' : current ? cd.accent : cd.faint,
-                }}
-              >
-                {done ? (
-                  <Check className="h-3.5 w-3.5" />
-                ) : current ? (
-                  <Loader2 className="h-3.5 w-3.5 animate-spin motion-reduce:animate-none" />
-                ) : (
-                  <step.icon className="h-3.5 w-3.5" />
-                )}
-              </span>
-              <span className="min-w-0 pt-0.5">
-                <span
-                  className="block text-[13px] font-medium transition-colors"
-                  style={{ color: done || current ? cd.ink : cd.faint }}
-                >
-                  {step.label}
-                </span>
-                <span className="mt-0.5 block text-[11.5px]" style={{ color: cd.faint }}>
-                  {current && step.phase === 'discovering' && pagesFound
-                    ? `${pagesFound} pages found so far`
-                    : step.detail}
-                </span>
-              </span>
-            </li>
-          )
-        })}
+      <ol className="mt-3.5">
+        {STAGES.map((stage, i) => (
+          <StageRow
+            key={stage.phase}
+            index={i}
+            total={STAGES.length}
+            label={running ? stage.active : stage.idle}
+            state={
+              !running ? 'pending' : activeIndex > i ? 'done' : activeIndex === i ? 'active' : 'pending'
+            }
+          />
+        ))}
       </ol>
 
-      {phase === 'ready' && (
-        <div
-          className="mt-4 rounded-[10px] border px-3 py-2.5"
-          style={{ borderColor: cd.successSoft, backgroundColor: cd.successSoft }}
-        >
-          <p className="text-[12.5px] font-semibold" style={{ color: cd.success }}>
-            Ready to review
+      {/* One concrete outcome, so the product is legible at a glance. Shown only
+          while idle — during setup the stages are the information. */}
+      {!running && (
+        <div className="mt-4 border-t pt-4" style={{ borderColor: cd.line }}>
+          <p
+            className="text-[11px] font-semibold uppercase tracking-[0.08em]"
+            style={{ color: cd.faint }}
+          >
+            Then it answers, like this
+          </p>
+
+          <div
+            className="mt-2.5 rounded-[10px] border p-2.5"
+            style={{ borderColor: cd.line, backgroundColor: cd.surface }}
+          >
+            <p
+              className="ml-auto w-fit max-w-[85%] rounded-[9px] rounded-br-[3px] px-2.5 py-1.5 text-[11.5px] text-white"
+              style={{ backgroundColor: cd.accent }}
+            >
+              Are you open this Saturday?
+            </p>
+            <div className="mt-1.5">
+              <p
+                className="w-fit max-w-[92%] rounded-[9px] rounded-bl-[3px] border px-2.5 py-1.5 text-[11.5px] leading-[1.45]"
+                style={{ borderColor: cd.line, color: cd.body }}
+              >
+                Yes. Acme Dental is open from 9 AM to 2 PM on Saturdays.
+              </p>
+              <SourceCitation label="Opening hours" />
+            </div>
+
+            <div
+              className="mt-2.5 flex items-center justify-between gap-2 rounded-[8px] px-2.5 py-2"
+              style={{ backgroundColor: cd.canvas }}
+            >
+              <span className="text-[11px]" style={{ color: cd.muted }}>
+                Interested in booking?
+              </span>
+              <span
+                className="inline-flex shrink-0 items-center gap-1 rounded-[6px] px-2 py-1 text-[10.5px] font-semibold text-white"
+                style={{ backgroundColor: cd.accent }}
+              >
+                Request appointment
+                <ArrowRight className="h-2.5 w-2.5" />
+              </span>
+            </div>
+          </div>
+
+          <p className="mt-2 text-[10.5px]" style={{ color: cd.faint }}>
+            Sample business — your client’s own content replaces this.
           </p>
         </div>
       )}
 
-      <p className="mt-auto pt-4 text-[11.5px] leading-5" style={{ color: cd.faint }}>
-        Most websites are ready to preview within a few minutes. Larger sites keep indexing in the
-        background — you can start reviewing before it finishes.
-      </p>
+      {running && (
+        <p className="mt-auto pt-4 text-[11.5px] leading-5" style={{ color: cd.faint }}>
+          Most websites are ready to preview within a few minutes. Larger sites keep indexing in the
+          background.
+        </p>
+      )}
     </div>
   )
 }

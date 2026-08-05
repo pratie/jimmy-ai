@@ -2,11 +2,11 @@
 
 import * as React from 'react'
 import { useRouter } from 'next/navigation'
-import { ArrowRight, CalendarCheck2, Globe, Loader2, MessagesSquare, UserRoundCheck } from 'lucide-react'
+import { ArrowRight, Globe, Loader2 } from 'lucide-react'
 
 import { onIntegrateDomain } from '@/actions/settings'
 import { cd } from '@/lib/design-tokens'
-import SetupPreview, { type SetupPhase } from './setup-preview'
+import SetupPreview, { SourceCitation, type SetupPhase } from './setup-preview'
 
 /**
  * The zero-client dashboard.
@@ -40,79 +40,85 @@ function normaliseDomain(raw: string): { ok: true; domain: string } | { ok: fals
 
 const OUTCOME_CARDS = [
   {
-    icon: MessagesSquare,
-    title: 'Answer customer questions',
-    body: 'The assistant replies from the client’s approved pages and cites where the answer came from.',
+    title: 'Answer questions',
+    body: 'Replies from the client’s own pages, and shows which page it used.',
     fragment: (
-      <div className="space-y-1.5">
+      <>
         <p
           className="ml-auto w-fit max-w-[85%] rounded-[8px] rounded-br-[3px] px-2.5 py-1.5 text-[11px] text-white"
           style={{ backgroundColor: cd.accent }}
         >
-          Do you open on Saturdays?
+          How much is a cleaning?
         </p>
-        <p
-          className="w-fit max-w-[92%] rounded-[8px] rounded-bl-[3px] border px-2.5 py-1.5 text-[11px]"
-          style={{ borderColor: cd.line, color: cd.body }}
-        >
-          Yes — 9:00 AM to 2:00 PM.
-          <span className="mt-1 block text-[9.5px]" style={{ color: cd.faint }}>
-            From /hours-location
+        <div className="mt-1.5">
+          <p
+            className="w-fit max-w-[92%] rounded-[8px] rounded-bl-[3px] border px-2.5 py-1.5 text-[11px]"
+            style={{ borderColor: cd.line, color: cd.body }}
+          >
+            $120 for returning patients, $89 for new ones.
+          </p>
+          <SourceCitation label="Services" />
+        </div>
+      </>
+    ),
+  },
+  {
+    title: 'Capture leads',
+    body: 'Contact details plus the questions that qualify a lead for that business.',
+    fragment: (
+      <div className="rounded-[8px] border px-2.5 py-2" style={{ borderColor: cd.line }}>
+        <div className="flex items-center justify-between gap-2">
+          <p className="text-[11.5px] font-semibold" style={{ color: cd.ink }}>
+            Sarah Mitchell
+          </p>
+          <span
+            className="shrink-0 rounded-full px-1.5 py-0.5 text-[9px] font-bold"
+            style={{ backgroundColor: cd.successSoft, color: cd.success }}
+          >
+            Qualified
           </span>
+        </div>
+        <p className="mt-0.5 text-[10.5px]" style={{ color: cd.muted }}>
+          (555) 014-2288
+        </p>
+        <p className="mt-1.5 border-t pt-1.5 text-[10px]" style={{ borderColor: cd.line, color: cd.faint }}>
+          New patient · Whitening
         </p>
       </div>
     ),
   },
   {
-    icon: UserRoundCheck,
-    title: 'Capture qualified leads',
-    body: 'It asks the questions that qualify a lead for that business, then saves the contact details.',
+    title: 'Request bookings',
+    body: 'A requested time, handed to the client to confirm — never auto-confirmed.',
     fragment: (
       <div className="rounded-[8px] border px-2.5 py-2" style={{ borderColor: cd.line }}>
-        <p className="text-[11px] font-semibold" style={{ color: cd.ink }}>
-          Sarah Mitchell
+        <p className="text-[11.5px] font-semibold" style={{ color: cd.ink }}>
+          Saturday 14 March
         </p>
-        <p className="text-[10px]" style={{ color: cd.muted }}>
-          (555) 014-2288
+        <p className="mt-0.5 text-[10.5px]" style={{ color: cd.muted }}>
+          10:30 AM · Whitening
         </p>
         <span
           className="mt-1.5 inline-block rounded-full px-1.5 py-0.5 text-[9px] font-bold"
-          style={{ backgroundColor: cd.successSoft, color: cd.success }}
+          style={{ backgroundColor: cd.warningSoft, color: cd.warning }}
         >
-          Qualified
+          Pending confirmation
         </span>
-      </div>
-    ),
-  },
-  {
-    icon: CalendarCheck2,
-    title: 'Prove value to clients',
-    body: 'Every conversation, lead and booking request is logged per client, ready for the review call.',
-    fragment: (
-      <div className="space-y-1.5">
-        {[
-          ['Conversations', '—'],
-          ['Qualified leads', '—'],
-          ['Booking requests', '—'],
-        ].map(([label, value]) => (
-          <div key={label} className="flex items-center justify-between">
-            <span className="text-[10.5px]" style={{ color: cd.muted }}>
-              {label}
-            </span>
-            <span className="text-[11px] font-semibold tabular-nums" style={{ color: cd.faint }}>
-              {value}
-            </span>
-          </div>
-        ))}
-        <p className="pt-0.5 text-[9.5px]" style={{ color: cd.faint }}>
-          Fills in once the assistant is live
-        </p>
       </div>
     ),
   },
 ]
 
-export default function FirstClientSetup() {
+/** The five things an agency actually does to get a client live. */
+const CHECKLIST = [
+  'Add client website',
+  'Review imported knowledge',
+  'Customize assistant',
+  'Test responses',
+  'Install widget',
+]
+
+export default function FirstClientSetup({ organizationName }: { organizationName: string }) {
   const router = useRouter()
   const [value, setValue] = React.useState('')
   const [phase, setPhase] = React.useState<SetupPhase>('idle')
@@ -167,6 +173,9 @@ export default function FirstClientSetup() {
 
   return (
     <div className="space-y-4">
+      <p className="text-[12px] font-medium" style={{ color: cd.faint }}>
+        {organizationName} · getting started
+      </p>
       <div
         className="grid overflow-hidden rounded-[14px] border lg:grid-cols-[minmax(0,1fr)_340px]"
         style={{ borderColor: cd.line, backgroundColor: cd.surface }}
@@ -177,11 +186,11 @@ export default function FirstClientSetup() {
             className="text-[26px] font-semibold leading-tight tracking-[-0.02em] sm:text-[30px]"
             style={{ color: cd.ink }}
           >
-            Create your first client assistant
+            Launch your first client assistant
           </h1>
           <p className="mt-2.5 max-w-md text-[14px] leading-6" style={{ color: cd.muted }}>
-            Enter a client website. ChatDock collects its public business information and prepares a
-            branded AI receptionist you can review before installing it.
+            Start with a client website. ChatDock will prepare the knowledge, branding and assistant
+            experience for you to review.
           </p>
 
           <form onSubmit={submit} className="mt-6 max-w-md" noValidate>
@@ -247,6 +256,101 @@ export default function FirstClientSetup() {
               {error ?? 'Use the main public domain. No sitemap or technical access needed.'}
             </p>
           </form>
+
+          {/* The assistant as it will appear. Favicon-led, so the client is
+              identifiable at a glance, and every claim in it is either the
+              typed domain or clearly-labelled sample content. */}
+          <div className="mt-6 max-w-md">
+            <div className="flex items-center justify-between">
+              <p
+                className="text-[11px] font-semibold uppercase tracking-[0.08em]"
+                style={{ color: cd.faint }}
+              >
+                What your client’s visitors will see
+              </p>
+              {!parsedDomain && (
+                <span
+                  className="rounded-[5px] px-1.5 py-0.5 text-[10px] font-semibold"
+                  style={{ backgroundColor: cd.sunken, color: cd.muted }}
+                >
+                  Sample
+                </span>
+              )}
+            </div>
+
+            <div
+              className="mt-2 overflow-hidden rounded-[12px] border"
+              style={{ borderColor: cd.line }}
+            >
+              <div
+                className="flex items-center gap-2.5 px-3 py-2.5"
+                style={{ backgroundColor: cd.navy }}
+              >
+                {parsedDomain ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={`https://www.google.com/s2/favicons?domain=${parsedDomain}&sz=64`}
+                    alt=""
+                    width={26}
+                    height={26}
+                    className="h-[26px] w-[26px] shrink-0 rounded-[6px] bg-white object-contain p-0.5"
+                  />
+                ) : (
+                  <span
+                    className="grid h-[26px] w-[26px] shrink-0 place-items-center rounded-[6px] text-[10px] font-bold text-white"
+                    style={{ backgroundColor: cd.accent }}
+                  >
+                    AD
+                  </span>
+                )}
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-[12.5px] font-semibold text-white">
+                    {parsedDomain ?? 'Acme Dental'}
+                  </span>
+                  <span className="flex items-center gap-1.5 text-[10px] text-white/50">
+                    <span
+                      className="h-1.5 w-1.5 rounded-full"
+                      style={{ backgroundColor: cd.success }}
+                    />
+                    Answers 24/7
+                  </span>
+                </span>
+              </div>
+
+              <div className="p-3" style={{ backgroundColor: cd.surface }}>
+                <p
+                  className="ml-auto w-fit max-w-[80%] rounded-[9px] rounded-br-[3px] px-2.5 py-1.5 text-[12px] text-white"
+                  style={{ backgroundColor: cd.accent }}
+                >
+                  Do you take new patients?
+                </p>
+                <div className="mt-1.5">
+                  <p
+                    className="w-fit max-w-[90%] rounded-[9px] rounded-bl-[3px] border px-2.5 py-1.5 text-[12px] leading-[1.45]"
+                    style={{ borderColor: cd.line, color: cd.body }}
+                  >
+                    Yes — we’re accepting new patients this month.
+                  </p>
+                  <SourceCitation label="New patients" />
+                </div>
+
+                <div
+                  className="mt-2.5 flex items-center justify-between gap-2 rounded-[8px] px-2.5 py-2"
+                  style={{ backgroundColor: cd.canvas }}
+                >
+                  <span className="text-[11px]" style={{ color: cd.muted }}>
+                    Can I take your name and number?
+                  </span>
+                  <span
+                    className="shrink-0 rounded-[6px] px-2 py-1 text-[10.5px] font-semibold text-white"
+                    style={{ backgroundColor: cd.accent }}
+                  >
+                    Share details
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Right — what gets built, or live progress */}
@@ -258,9 +362,45 @@ export default function FirstClientSetup() {
             phase={phase}
             domain={parsedDomain ?? undefined}
             error={error}
+            onRetry={() => {
+              setPhase('idle')
+              setError(null)
+            }}
           />
         </div>
       </div>
+
+      {/* Getting a client live, as five real tasks. The right rail describes
+          what ChatDock does; this is what the operator does. */}
+      <ol
+        className="flex flex-wrap items-center gap-x-1 gap-y-2 rounded-[12px] border px-4 py-3"
+        style={{ borderColor: cd.line, backgroundColor: cd.surface }}
+      >
+        {CHECKLIST.map((item, i) => (
+          <li key={item} className="flex items-center gap-1">
+            <span
+              className="grid h-[18px] w-[18px] shrink-0 place-items-center rounded-full text-[10px] font-bold"
+              style={{
+                backgroundColor: i === 0 ? cd.accent : cd.sunken,
+                color: i === 0 ? '#fff' : cd.faint,
+              }}
+            >
+              {i + 1}
+            </span>
+            <span
+              className="text-[12px]"
+              style={{ color: i === 0 ? cd.ink : cd.faint, fontWeight: i === 0 ? 600 : 400 }}
+            >
+              {item}
+            </span>
+            {i < CHECKLIST.length - 1 && (
+              <span className="mx-1.5 text-[11px]" style={{ color: cd.line }} aria-hidden="true">
+                ›
+              </span>
+            )}
+          </li>
+        ))}
+      </ol>
 
       {/* Outcome cards — real interface fragments, no illustrations */}
       <div className="grid gap-3 md:grid-cols-3">
@@ -270,8 +410,7 @@ export default function FirstClientSetup() {
             className="rounded-[12px] border p-4"
             style={{ borderColor: cd.line, backgroundColor: cd.surface }}
           >
-            <card.icon className="h-4 w-4" style={{ color: cd.accent }} />
-            <h2 className="mt-3 text-[13.5px] font-semibold" style={{ color: cd.ink }}>
+            <h2 className="text-[13.5px] font-semibold" style={{ color: cd.ink }}>
               {card.title}
             </h2>
             <p className="mt-1 text-[12.5px] leading-5" style={{ color: cd.muted }}>

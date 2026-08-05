@@ -44,6 +44,10 @@ export default function ClientSwitcher({
 
   const active = workspaces.find((w) => w.id === activeWorkspaceId) ?? null
 
+  // Prospect demos are not clients — counting them here would overstate the
+  // roster on the one surface an owner glances at most.
+  const realClientCount = workspaces.filter((w) => w.workspaceType !== 'prospect_demo').length
+
   React.useEffect(() => {
     if (!open) return
     const onClick = (e: MouseEvent) => {
@@ -106,7 +110,13 @@ export default function ClientSwitcher({
           <span className="block truncate text-[13px] font-semibold leading-tight">
             {active ? label(active) : 'All clients'}
           </span>
-          <span className="block truncate text-[10.5px] text-white/45">{organizationName}</span>
+          <span className="block truncate text-[10.5px] text-white/45">
+            {active
+              ? active.workspaceType === 'prospect_demo'
+                ? 'Prospect demo'
+                : 'Client workspace'
+              : `${realClientCount} active client${realClientCount === 1 ? '' : 's'}`}
+          </span>
         </span>
         <ChevronsUpDown className="h-3.5 w-3.5 shrink-0 text-white/40" />
       </button>

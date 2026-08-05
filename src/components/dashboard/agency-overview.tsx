@@ -12,6 +12,7 @@ import {
 
 import type { ActivityItem, ClientRow } from '@/actions/clients'
 import { cd, deriveClientStatus } from '@/lib/design-tokens'
+import ContextHeader from './context-header'
 import MetricCard from './ui/metric-card'
 import StatusBadge from './ui/status-badge'
 import EmptyState from './ui/empty-state'
@@ -91,29 +92,22 @@ export default function AgencyOverview({
 
   return (
     <div className="space-y-4">
-      {/* Context header */}
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <p className="text-[12px] font-medium" style={{ color: cd.faint }}>
-            {organizationName} · all clients
-          </p>
-          <h1
-            className="mt-0.5 text-[26px] font-semibold leading-tight tracking-[-0.02em]"
-            style={{ color: cd.ink }}
-          >
-            Overview
-          </h1>
-        </div>
-        {canCreate && (
-          <Link
-            href="/clients?new=1"
-            className="inline-flex h-10 items-center gap-1.5 rounded-[10px] px-4 text-[13.5px] font-semibold text-white"
-            style={{ backgroundColor: cd.accent }}
-          >
-            Add a client
-          </Link>
-        )}
-      </div>
+      <ContextHeader
+        scope={`${organizationName} · all clients`}
+        title="Overview"
+        supporting={`${totals.clients} client${totals.clients === 1 ? '' : 's'} · ${live} live · last 30 days`}
+        action={
+          canCreate ? (
+            <Link
+              href="/clients?new=1"
+              className="inline-flex h-10 items-center gap-1.5 rounded-[10px] px-4 text-[13.5px] font-semibold text-white"
+              style={{ backgroundColor: cd.accent }}
+            >
+              Add a client
+            </Link>
+          ) : null
+        }
+      />
 
       {/* Metrics — every one states its window; no invented deltas */}
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">

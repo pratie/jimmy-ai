@@ -84,9 +84,13 @@ export async function ensureUserAndOrganization(input: {
   }
 
   const orgType = input.organizationType ?? 'agency'
+  // The organization is a business, not a possession. "Ada Lovelace's
+  // workspace" reads as placeholder text in every surface that shows it; the
+  // person's own name is a better default, and the sidebar labels it
+  // "Agency workspace" separately.
   const baseName =
     input.organizationName?.trim() ||
-    (input.fullName?.trim() ? `${input.fullName.trim()}'s workspace` : null) ||
+    input.fullName?.trim() ||
     input.email.split('@')[0]
 
   return client.$transaction(async (tx) => {

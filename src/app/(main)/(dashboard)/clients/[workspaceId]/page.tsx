@@ -4,7 +4,6 @@ import React from 'react'
 
 import { onGetClientOverview } from '@/actions/clients'
 import ClientOverview from '@/components/clients/client-overview'
-import InfoBar from '@/components/infobar'
 
 export const metadata: Metadata = {
   title: 'Client — ChatDock',
@@ -26,7 +25,6 @@ const Page = async ({ params }: { params: Promise<{ workspaceId: string }> }) =>
 
   return (
     <>
-      <InfoBar />
       <div className="min-h-0 flex-1 overflow-y-auto">
         <div className="mx-auto w-full max-w-[1280px] px-5 py-7 md:px-8">
           <ClientOverview data={data} />

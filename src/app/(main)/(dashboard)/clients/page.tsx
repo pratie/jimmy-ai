@@ -5,7 +5,6 @@ import { onGetClients } from '@/actions/clients'
 import { getTenantContext } from '@/lib/tenant'
 import { can } from '@/lib/permissions'
 import ClientsGrid from '@/components/clients/clients-grid'
-import InfoBar from '@/components/infobar'
 
 export const metadata: Metadata = {
   title: 'Clients — ChatDock',
@@ -19,7 +18,6 @@ const Page = async () => {
 
   return (
     <>
-      <InfoBar />
       <div className="min-h-0 flex-1 overflow-y-auto">
         <div className="mx-auto w-full max-w-[1280px] px-5 py-7 md:px-8">
           <ClientsGrid clients={result.clients} canCreate={canCreate} />

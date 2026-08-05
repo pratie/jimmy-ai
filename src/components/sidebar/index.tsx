@@ -99,8 +99,23 @@ const SideBar = ({
         </Link>
       </div>
 
-      {/* Client switcher — hidden on the icon rail, where it has no room */}
+      {/* Organization and client are two different concepts, so they get two
+          different blocks. Collapsing them into one control made "all clients"
+          and "which agency" indistinguishable. */}
       <div className="hidden border-b border-white/10 px-3 py-3 md:block">
+        <div className="flex items-center gap-2.5 px-1 pb-3">
+          <span className="grid h-8 w-8 shrink-0 place-items-center rounded-[8px] bg-white/10 text-[11px] font-bold">
+            {(organization?.name ?? 'CD').slice(0, 2).toUpperCase()}
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block truncate text-[13.5px] font-semibold leading-tight">
+              {organization?.name ?? 'ChatDock'}
+            </span>
+            <span className="block text-[10.5px] text-white/40">
+              {isDirectBusiness ? 'Business workspace' : 'Agency workspace'}
+            </span>
+          </span>
+        </div>
         <ClientSwitcher
           workspaces={workspaces}
           organizationName={organization?.name ?? 'Your agency'}
@@ -120,13 +135,20 @@ const SideBar = ({
                 href={item.href}
                 title={item.label}
                 className={cn(
-                  'group flex h-11 items-center justify-center gap-3 rounded-xl text-sm font-bold transition md:justify-start md:px-3',
+                  'group relative flex h-9 items-center justify-center gap-2.5 rounded-[8px] text-[13.5px] transition-colors md:justify-start md:px-2.5',
                   isActive(item.href)
-                    ? 'bg-white text-[#0b1020] shadow-lg shadow-black/20'
-                    : 'text-white/60 hover:bg-white/10 hover:text-white'
+                    ? 'bg-white/[0.09] font-semibold text-white'
+                    : 'font-medium text-white/55 hover:bg-white/[0.05] hover:text-white/90'
                 )}
               >
-                <Icon className="h-[18px] w-[18px] shrink-0" />
+                {isActive(item.href) && (
+                  <span
+                    className="absolute left-0 top-1/2 h-4 w-[2.5px] -translate-y-1/2 rounded-r-full"
+                    style={{ backgroundColor: '#7B7CF0' }}
+                    aria-hidden="true"
+                  />
+                )}
+                <Icon className="h-[17px] w-[17px] shrink-0" strokeWidth={1.75} />
                 <span className="hidden md:block">{item.label}</span>
               </Link>
             )
@@ -144,13 +166,20 @@ const SideBar = ({
                 href={item.href}
                 title={item.label}
                 className={cn(
-                  'flex h-10 items-center justify-center gap-3 rounded-xl text-xs font-bold transition md:justify-start md:px-3',
+                  'relative flex h-9 items-center justify-center gap-2.5 rounded-[8px] text-[13px] transition-colors md:justify-start md:px-2.5',
                   isActive(item.href)
-                    ? 'bg-white/15 text-white'
-                    : 'text-white/45 hover:bg-white/10 hover:text-white'
+                    ? 'bg-white/[0.09] font-semibold text-white'
+                    : 'font-medium text-white/45 hover:bg-white/[0.05] hover:text-white/80'
                 )}
               >
-                <Icon className="h-4 w-4" />
+                {isActive(item.href) && (
+                  <span
+                    className="absolute left-0 top-1/2 h-4 w-[2.5px] -translate-y-1/2 rounded-r-full"
+                    style={{ backgroundColor: '#7B7CF0' }}
+                    aria-hidden="true"
+                  />
+                )}
+                <Icon className="h-[17px] w-[17px] shrink-0" strokeWidth={1.75} />
                 <span className="hidden md:block">{item.label}</span>
               </Link>
             )

@@ -8,7 +8,6 @@ import { client } from '@/lib/prisma'
 import AgencyOverview from '@/components/dashboard/agency-overview'
 import FirstClientSetup from '@/components/dashboard/first-client-setup'
 import AutoUpgradeRedirect from '@/components/dashboard/auto-upgrade-redirect'
-import InfoBar from '@/components/infobar'
 
 export const metadata: Metadata = {
   title: 'Overview — ChatDock',
@@ -50,11 +49,10 @@ const Page = async () => {
       <AutoUpgradeRedirect
         currentPlan={(organization?.subscription?.plan?.code ?? 'FREE') as 'FREE'}
       />
-      <InfoBar />
       <div className="min-h-0 flex-1 overflow-y-auto">
         <div className="mx-auto w-full max-w-[1440px] px-5 py-6 md:px-8">
           {clients.length === 0 ? (
-            <FirstClientSetup />
+            <FirstClientSetup organizationName={organization?.name ?? 'Your agency'} />
           ) : (
             <AgencyOverview
               organizationName={organization?.name ?? 'Your agency'}
