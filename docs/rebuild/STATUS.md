@@ -63,7 +63,7 @@ Rollback path if production must be restored:
 | 4 | Database backup instructions | 🟡 | scripts done; prose doc outstanding |
 | 5 | Product-owner questions | ✅ | `PRODUCT-OWNER-QUESTIONS.md` |
 | 6 | New ERD | ⬜ | outstanding |
-| 7 | New Prisma schema | ✅ | `prisma/schema.prisma` — 32 models, 54 enums |
+| 7 | New Prisma schema | ✅ | `prisma/schema.prisma` — 32 models, 42 enums |
 | 8 | Tracked pgvector SQL migration | ✅ | `prisma/migrations/20260804000100_pgvector_index_and_search/` |
 | 9 | Complete migration baseline | ✅ | `20260804000000_init_agency_foundation` + `migration_lock.toml` |
 | 10 | Seed script | ✅ | `prisma/seed-plans.mjs` (reference data) + `prisma/seed.mjs` (dev, guarded by `ALLOW_SEED=1`) |
