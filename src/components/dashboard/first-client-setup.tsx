@@ -2,7 +2,7 @@
 
 import * as React from 'react'
 import { useRouter } from 'next/navigation'
-import { ArrowRight, Globe, Loader2 } from 'lucide-react'
+import { ArrowRight, Check, Globe, Loader2 } from 'lucide-react'
 
 import { onIntegrateDomain } from '@/actions/settings'
 import { cd } from '@/lib/design-tokens'
@@ -41,7 +41,7 @@ function normaliseDomain(raw: string): { ok: true; domain: string } | { ok: fals
 const OUTCOME_CARDS = [
   {
     title: 'Answer questions',
-    body: 'Replies from the client’s own pages, and shows which page it used.',
+    body: 'Answers from the client’s own pages and cites the source.',
     fragment: (
       <>
         <p
@@ -64,7 +64,7 @@ const OUTCOME_CARDS = [
   },
   {
     title: 'Capture leads',
-    body: 'Contact details plus the questions that qualify a lead for that business.',
+    body: 'Collects contact details and the answers needed to qualify each lead.',
     fragment: (
       <div className="rounded-[8px] border px-2.5 py-2" style={{ borderColor: cd.line }}>
         <div className="flex items-center justify-between gap-2">
@@ -89,7 +89,7 @@ const OUTCOME_CARDS = [
   },
   {
     title: 'Request bookings',
-    body: 'A requested time, handed to the client to confirm — never auto-confirmed.',
+    body: 'Collects the visitor’s preferred time and sends it to the client for confirmation.',
     fragment: (
       <div className="rounded-[8px] border px-2.5 py-2" style={{ borderColor: cd.line }}>
         <p className="text-[11.5px] font-semibold" style={{ color: cd.ink }}>
@@ -118,11 +118,27 @@ const CHECKLIST = [
   'Install widget',
 ]
 
+/** The primary button's label for each real phase — never a generic spinner. */
+const CTA_LABEL: Record<string, string> = {
+  idle: 'Create client assistant',
+  connecting: 'Connecting…',
+  discovering: 'Discovering pages…',
+  reading: 'Reading business info…',
+  indexing: 'Preparing knowledge…',
+  drafting: 'Preparing assistant…',
+  ready: 'Test assistant',
+  failed: 'Try again',
+}
+
 export default function FirstClientSetup({ organizationName }: { organizationName: string }) {
   const router = useRouter()
   const [value, setValue] = React.useState('')
   const [phase, setPhase] = React.useState<SetupPhase>('idle')
   const [error, setError] = React.useState<string | null>(null)
+  const [createdId, setCreatedId] = React.useState<string | null>(null)
+
+  /** Only the first step can complete on this screen; the rest live elsewhere. */
+  const completedSteps = phase === 'ready' ? 1 : 0
   const inputId = React.useId()
   const errorId = React.useId()
 
@@ -136,6 +152,10 @@ export default function FirstClientSetup({ organizationName }: { organizationNam
 
   const submit = async (event: React.FormEvent) => {
     event.preventDefault()
+    if (phase === 'ready' && createdId) {
+      router.push(`/clients/${createdId}`)
+      return
+    }
     setError(null)
 
     const parsed = normaliseDomain(value)
@@ -163,7 +183,10 @@ export default function FirstClientSetup({ organizationName }: { organizationNam
     if (result?.status === 200 && result.id) {
       setPhase('drafting')
       await pace('ready', 500)
-      router.push(`/clients/${result.id}`)
+      // Deliberately no auto-redirect. Yanking the operator to another screen
+      // the instant a background job finishes loses the summary they just
+      // waited for; "Test assistant" hands the choice back to them.
+      setCreatedId(result.id)
       return
     }
 
@@ -232,17 +255,9 @@ export default function FirstClientSetup({ organizationName }: { organizationNam
                 className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-[10px] px-5 text-[13.5px] font-semibold text-white transition-colors disabled:opacity-70"
                 style={{ backgroundColor: cd.accent }}
               >
-                {busy ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin motion-reduce:animate-none" />
-                    Setting up…
-                  </>
-                ) : (
-                  <>
-                    Create client assistant
-                    <ArrowRight className="h-4 w-4" />
-                  </>
-                )}
+                {busy && <Loader2 className="h-4 w-4 animate-spin motion-reduce:animate-none" />}
+                {CTA_LABEL[phase] ?? CTA_LABEL.idle}
+                {!busy && <ArrowRight className="h-4 w-4" />}
               </button>
             </div>
 
@@ -273,15 +288,12 @@ export default function FirstClientSetup({ organizationName }: { organizationNam
                   className="rounded-[5px] px-1.5 py-0.5 text-[10px] font-semibold"
                   style={{ backgroundColor: cd.sunken, color: cd.muted }}
                 >
-                  Sample
+                  Sample preview
                 </span>
               )}
             </div>
 
-            <div
-              className="mt-2 overflow-hidden rounded-[12px] border"
-              style={{ borderColor: cd.line }}
-            >
+            <div className="mt-2 overflow-hidden rounded-[12px]" style={{ backgroundColor: cd.canvas }}>
               <div
                 className="flex items-center gap-2.5 px-3 py-2.5"
                 style={{ backgroundColor: cd.navy }}
@@ -310,9 +322,11 @@ export default function FirstClientSetup({ organizationName }: { organizationNam
                   <span className="flex items-center gap-1.5 text-[10px] text-white/50">
                     <span
                       className="h-1.5 w-1.5 rounded-full"
-                      style={{ backgroundColor: cd.success }}
+                      style={{ backgroundColor: busy ? cd.warning : cd.success }}
                     />
-                    Answers 24/7
+                    {busy ? 'Preparing…' : 'Online'}
+                    <span className="text-white/25">·</span>
+                    <span className="truncate">{parsedDomain ?? 'acmedental.com'}</span>
                   </span>
                 </span>
               </div>
@@ -325,13 +339,31 @@ export default function FirstClientSetup({ organizationName }: { organizationNam
                   Do you take new patients?
                 </p>
                 <div className="mt-1.5">
-                  <p
-                    className="w-fit max-w-[90%] rounded-[9px] rounded-bl-[3px] border px-2.5 py-1.5 text-[12px] leading-[1.45]"
-                    style={{ borderColor: cd.line, color: cd.body }}
-                  >
-                    Yes — we’re accepting new patients this month.
-                  </p>
-                  <SourceCitation label="New patients" />
+                  {busy ? (
+                    <span
+                      className="inline-flex items-center gap-1 rounded-[9px] rounded-bl-[3px] border px-2.5 py-2"
+                      style={{ borderColor: cd.line }}
+                      aria-label="Assistant is preparing"
+                    >
+                      {[0, 1, 2].map((i) => (
+                        <span
+                          key={i}
+                          className="h-1.5 w-1.5 animate-pulse rounded-full motion-reduce:animate-none"
+                          style={{ backgroundColor: cd.faint, animationDelay: `${i * 150}ms` }}
+                        />
+                      ))}
+                    </span>
+                  ) : (
+                    <>
+                      <p
+                        className="w-fit max-w-[90%] rounded-[9px] rounded-bl-[3px] border px-2.5 py-1.5 text-[12px] leading-[1.45]"
+                        style={{ borderColor: cd.line, color: cd.body }}
+                      >
+                        Yes — we’re accepting new patients this month.
+                      </p>
+                      <SourceCitation label="New patients" />
+                    </>
+                  )}
                 </div>
 
                 <div
@@ -362,10 +394,12 @@ export default function FirstClientSetup({ organizationName }: { organizationNam
             phase={phase}
             domain={parsedDomain ?? undefined}
             error={error}
+            pagesFound={undefined}
             onRetry={() => {
               setPhase('idle')
               setError(null)
             }}
+            onTest={() => createdId && router.push(`/clients/${createdId}`)}
           />
         </div>
       </div>
@@ -373,23 +407,32 @@ export default function FirstClientSetup({ organizationName }: { organizationNam
       {/* Getting a client live, as five real tasks. The right rail describes
           what ChatDock does; this is what the operator does. */}
       <ol
-        className="flex flex-wrap items-center gap-x-1 gap-y-2 rounded-[12px] border px-4 py-3"
-        style={{ borderColor: cd.line, backgroundColor: cd.surface }}
+        className="flex flex-wrap items-center gap-x-1 gap-y-2 rounded-[12px] px-4 py-3"
+        style={{ backgroundColor: cd.surface }}
       >
-        {CHECKLIST.map((item, i) => (
+        {CHECKLIST.map((item, i) => {
+          // Step one completes when the client exists; everything after it
+          // stays unreachable until then, so the list never invites a click
+          // that would land nowhere.
+          const done = i < completedSteps
+          const active = i === completedSteps
+          return (
           <li key={item} className="flex items-center gap-1">
             <span
               className="grid h-[18px] w-[18px] shrink-0 place-items-center rounded-full text-[10px] font-bold"
               style={{
-                backgroundColor: i === 0 ? cd.accent : cd.sunken,
-                color: i === 0 ? '#fff' : cd.faint,
+                backgroundColor: done ? cd.successSoft : active ? cd.accent : cd.sunken,
+                color: done ? cd.success : active ? '#fff' : cd.faint,
               }}
             >
-              {i + 1}
+              {done ? <Check className="h-2.5 w-2.5" strokeWidth={3} /> : i + 1}
             </span>
             <span
               className="text-[12px]"
-              style={{ color: i === 0 ? cd.ink : cd.faint, fontWeight: i === 0 ? 600 : 400 }}
+              style={{
+                color: done ? cd.success : active ? cd.ink : cd.muted,
+                fontWeight: active || done ? 600 : 400,
+              }}
             >
               {item}
             </span>
@@ -399,16 +442,20 @@ export default function FirstClientSetup({ organizationName }: { organizationNam
               </span>
             )}
           </li>
-        ))}
+          )
+        })}
       </ol>
 
       {/* Outcome cards — real interface fragments, no illustrations */}
+      <p className="pt-1 text-[11.5px]" style={{ color: cd.faint }}>
+        Example outcomes using demonstration data
+      </p>
       <div className="grid gap-3 md:grid-cols-3">
         {OUTCOME_CARDS.map((card) => (
           <div
             key={card.title}
-            className="rounded-[12px] border p-4"
-            style={{ borderColor: cd.line, backgroundColor: cd.surface }}
+            className="rounded-[12px] p-4"
+            style={{ backgroundColor: cd.surface }}
           >
             <h2 className="text-[13.5px] font-semibold" style={{ color: cd.ink }}>
               {card.title}

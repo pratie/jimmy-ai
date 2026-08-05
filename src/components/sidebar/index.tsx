@@ -187,21 +187,31 @@ const SideBar = ({
         </nav>
       </div>
 
-      <div className="border-t border-white/10 p-3 md:p-4">
-        <div className="flex items-center justify-center gap-3 rounded-2xl bg-white/[0.06] p-2 md:justify-start">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#7778ff] to-[#4f46e5] text-xs font-black">
+      {/* The signed-in person, not the organization — that identity already
+          sits at the top of the sidebar, and repeating it here read as a
+          duplicate card. Email leads, because it is the part that actually
+          distinguishes the account. */}
+      <div className="border-t border-white/10 p-2.5 md:p-3">
+        <div className="flex items-center justify-center gap-2.5 rounded-[10px] px-1.5 py-1.5 md:justify-start">
+          <div
+            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold"
+            style={{ backgroundColor: '#4F46E5' }}
+          >
             {user?.fullname?.charAt(0).toUpperCase() || 'C'}
           </div>
           <div className="hidden min-w-0 flex-1 md:block">
-            <p className="truncate text-xs font-extrabold">{user?.fullname || 'ChatDock user'}</p>
-            <p className="mt-0.5 truncate text-[10px] text-white/40">{user?.email || ''}</p>
+            <p className="truncate text-[12px] font-medium leading-tight">
+              {user?.fullname || 'ChatDock user'}
+            </p>
+            <p className="truncate text-[10.5px] text-white/40">{user?.email || ''}</p>
           </div>
           <button
             onClick={() => signOut(() => router.push('/'))}
-            className="hidden rounded-lg p-2 text-white/35 transition hover:bg-white/10 hover:text-white md:block"
+            className="hidden shrink-0 rounded-[7px] p-1.5 text-white/35 transition hover:bg-white/10 hover:text-white md:block"
             title="Sign out"
+            aria-label="Sign out"
           >
-            <LogOut className="h-4 w-4" />
+            <LogOut className="h-[15px] w-[15px]" />
           </button>
         </div>
       </div>
