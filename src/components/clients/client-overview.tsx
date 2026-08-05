@@ -12,6 +12,8 @@ import {
   UserRoundCheck,
 } from 'lucide-react'
 
+import PublishToggle from '@/components/clients/publish-toggle'
+
 type Overview = Extract<
   Awaited<ReturnType<typeof import('@/actions/clients').onGetClientOverview>>,
   { status: 200 }
@@ -27,7 +29,7 @@ type Overview = Extract<
  * precision we have not earned.
  */
 export default function ClientOverview({ data }: { data: Overview }) {
-  const { workspace, metrics, topQuestions, contentGaps, canManage } = data
+  const { workspace, metrics, topQuestions, contentGaps, canManage, canPublish } = data
   const assistant = workspace.assistants[0]
   const isLive = assistant?.status === 'published'
   const hasKnowledge = workspace._count.knowledgeChunks > 0
@@ -68,26 +70,51 @@ export default function ClientOverview({ data }: { data: Overview }) {
               </a>
             )}
             {workspace.industry && <span className="capitalize">{workspace.industry}</span>}
-            <span
-              className={`rounded-full px-2 py-0.5 text-[10px] font-bold ring-1 ${
-                isLive
-                  ? 'bg-emerald-50 text-emerald-700 ring-emerald-600/20'
-                  : 'bg-amber-50 text-amber-700 ring-amber-600/20'
-              }`}
-            >
-              {isLive ? 'Assistant live' : 'Not published'}
-            </span>
+            {assistant?.publishedAt && isLive && (
+              <span>
+                Live since{' '}
+                {new Date(assistant.publishedAt).toLocaleDateString(undefined, {
+                  day: 'numeric',
+                  month: 'short',
+                  year: 'numeric',
+                })}
+              </span>
+            )}
           </div>
         </div>
-        {canManage && assistant && (
-          <Link
-            href={`/settings/${workspace.id}`}
-            className="inline-flex h-10 shrink-0 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-4 text-sm font-bold text-slate-900 hover:bg-slate-50"
-          >
-            Configure
-          </Link>
-        )}
+        <div className="flex shrink-0 items-center gap-2">
+          {assistant && (
+            <PublishToggle
+              workspaceId={workspace.id}
+              status={(assistant.status ?? 'draft') as 'published' | 'paused' | 'draft'}
+              canPublish={canPublish}
+            />
+          )}
+          {canManage && assistant && (
+            <Link
+              href={`/settings/${workspace.id}`}
+              className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-4 text-[13px] font-bold text-slate-900 hover:bg-slate-50"
+            >
+              Configure
+            </Link>
+          )}
+        </div>
       </div>
+
+      {/* Draft is the default an assistant is created in, and nothing about a
+          finished-looking dashboard says the widget is returning 403. Say it. */}
+      {assistant && !isLive && (
+        <div className="flex items-start gap-2.5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
+          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-700" />
+          <p className="text-[13px] leading-6 text-amber-900">
+            <strong className="font-bold">
+              {assistant.status === 'paused' ? 'This assistant is paused.' : 'This assistant is not live yet.'}
+            </strong>{' '}
+            The installed widget will not answer visitors until you publish it
+            {canPublish ? ' — use “Go live” above.' : '. Ask an agency manager to publish it.'}
+          </p>
+        </div>
+      )}
 
       {/* States that need doing something about, before any numbers */}
       {!hasKnowledge && (

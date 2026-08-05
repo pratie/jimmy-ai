@@ -325,6 +325,7 @@ export const onGetClientOverview = async (workspaceId: string) => {
       status: 200 as const,
       workspace,
       canManage: access.permissions.has('manageClientWorkspace'),
+      canPublish: access.permissions.has('publishAssistant'),
       metrics: {
         conversations,
         leads,

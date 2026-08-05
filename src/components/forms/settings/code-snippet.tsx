@@ -4,7 +4,13 @@ import { useToast } from '@/components/ui/use-toast'
 import { Copy, Loader2, RefreshCw } from 'lucide-react'
 import React from 'react'
 
-import { onGetEmbedKey, onRotateEmbedKey } from '@/actions/settings'
+import {
+  onGetAssistantPublishState,
+  onGetEmbedKey,
+  onRotateEmbedKey,
+  type PublishableStatus,
+} from '@/actions/settings'
+import PublishToggle from '@/components/clients/publish-toggle'
 
 type Props = {
   id: string
@@ -26,6 +32,30 @@ const CodeSnippet = ({ id }: Props) => {
   const [size, setSize] = React.useState<'sm'|'md'>('md')
   const [publicKey, setPublicKey] = React.useState<string | null>(null)
   const [loadingKey, setLoadingKey] = React.useState(true)
+
+  const [publishState, setPublishState] = React.useState<{
+    assistantStatus: PublishableStatus
+    canPublish: boolean
+  } | null>(null)
+
+  // Copying the snippet is the moment someone believes the widget works. If the
+  // assistant is still a draft it will 403 on every visitor, so the state has to
+  // be visible right here rather than one screen away.
+  React.useEffect(() => {
+    let cancelled = false
+    onGetAssistantPublishState(id).then((res) => {
+      if (cancelled) return
+      if (res.status === 200 && res.assistantStatus) {
+        setPublishState({
+          assistantStatus: res.assistantStatus,
+          canPublish: res.canPublish === true,
+        })
+      }
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [id])
 
   React.useEffect(() => {
     let cancelled = false
@@ -61,6 +91,25 @@ const CodeSnippet = ({ id }: Props) => {
         label="Code snippet"
         message="Paste this in <head> (defer) or before </body> on your site."
       />
+
+      {publishState && (
+        <div className="flex w-full flex-wrap items-center justify-between gap-3 rounded-lg border border-slate-200 px-4 py-3">
+          <p className="text-sm text-slate-600">
+            {publishState.assistantStatus === 'published'
+              ? 'This assistant is live. The snippet below is answering visitors.'
+              : 'This assistant is not live yet — the snippet below will be installed but will not answer.'}
+          </p>
+          <PublishToggle
+            workspaceId={id}
+            status={publishState.assistantStatus}
+            canPublish={publishState.canPublish}
+            compact
+            onChanged={(next) =>
+              setPublishState((s) => (s ? { ...s, assistantStatus: next } : s))
+            }
+          />
+        </div>
+      )}
       <div className="w-full flex items-center gap-3">
         <label className="text-sm">Margin</label>
         <select

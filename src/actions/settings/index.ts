@@ -209,7 +209,10 @@ export const onGetAllAccountDomains = async () => {
           email: lead.email,
           chatRoom: lead.conversations.map((c) => ({
             id: c.id,
-            live: c.handoffStatus === 'active',
+            // `accepted` and `active` both mean a human owns the conversation
+            // and the assistant must stay silent — `src/lib/chat/session.ts`
+            // is the behavioural truth and this projection now matches it.
+            live: c.handoffStatus === 'accepted' || c.handoffStatus === 'active',
           })),
         })),
       })),
@@ -457,6 +460,123 @@ export const onUpdateModePrompts = async (
   } catch (error) {
     console.error('[Settings] onUpdateModePrompts failed:', error)
     return { status: 400, message: 'Could not update prompts' }
+  }
+}
+
+/* ── Publishing ─────────────────────────────────────────────────────────── */
+
+/**
+ * Publishing is the switch between "configured" and "answering the client's
+ * visitors".
+ *
+ * `Assistant.status` defaults to `draft` and `resolveWidgetRequest` refuses any
+ * `website_widget` deployment whose assistant is not `published`, so until this
+ * runs the embed snippet is installed and permanently returning 403. Preview
+ * deployments are unaffected either way — a draft is reachable from preview by
+ * design, which is what makes "check it before it goes live" possible.
+ *
+ * `paused` takes a client's widget offline without deleting a single row;
+ * `archived` is reserved for the workspace-level lifecycle and is not offered
+ * here.
+ */
+export type PublishableStatus = 'published' | 'paused' | 'draft'
+
+const PUBLISH_MESSAGE: Record<PublishableStatus, string> = {
+  published: 'Assistant is live',
+  paused: 'Assistant paused — the widget is offline',
+  draft: 'Assistant moved back to draft — the widget is offline',
+}
+
+export const onSetAssistantStatus = async (
+  workspaceId: string,
+  status: PublishableStatus
+) => {
+  try {
+    if (!['published', 'paused', 'draft'].includes(status)) {
+      return { status: 400, message: 'Unknown assistant status' }
+    }
+
+    const { access } = await requireWorkspace(workspaceId, 'publishAssistant')
+
+    const assistant = await client.assistant.findFirst({
+      where: { clientWorkspaceId: access.clientWorkspaceId, deletedAt: null },
+      orderBy: { createdAt: 'asc' },
+      select: { id: true, status: true, publishedAt: true },
+    })
+    if (!assistant) return { status: 404, message: 'No assistant for this client' }
+
+    const updated = await client.assistant.update({
+      where: { id: assistant.id },
+      data: {
+        status,
+        // First go-live only. Re-publishing after a pause does not reset it —
+        // "live since" is the number an agency reports to its client.
+        publishedAt:
+          status === 'published' ? (assistant.publishedAt ?? new Date()) : assistant.publishedAt,
+      },
+      select: { status: true, publishedAt: true },
+    })
+
+    // Publishing an assistant with nothing indexed produces a widget that
+    // declines every question. Allowed — an agency may publish ahead of a crawl
+    // — but never silently.
+    const chunks =
+      status === 'published'
+        ? await client.knowledgeChunk.count({ where: { clientWorkspaceId: access.clientWorkspaceId } })
+        : 0
+
+    return {
+      status: 200,
+      assistantStatus: updated.status as PublishableStatus,
+      publishedAt: updated.publishedAt,
+      message: PUBLISH_MESSAGE[status],
+      warning:
+        status === 'published' && chunks === 0
+          ? 'No content is indexed yet, so the assistant will decline every question until you train it.'
+          : null,
+    }
+  } catch (error) {
+    if (error instanceof AuthorizationError) return { status: 403, message: error.message }
+    console.error('[Settings] onSetAssistantStatus failed:', error)
+    return { status: 400, message: 'Could not change the assistant status' }
+  }
+}
+
+// Async, not a bare arrow returning a promise: every export in a `'use server'`
+// module has to be an async function or the build rejects the file.
+export const onPublishAssistant = async (workspaceId: string) =>
+  onSetAssistantStatus(workspaceId, 'published')
+
+export const onPauseAssistant = async (workspaceId: string) =>
+  onSetAssistantStatus(workspaceId, 'paused')
+
+/**
+ * Read-only publish state, for surfaces that hold a workspace id and nothing
+ * else (the code-snippet panel). `canPublish` is the caller's permission, not
+ * the assistant's readiness — a member can see that a client is live without
+ * being able to change it.
+ */
+export const onGetAssistantPublishState = async (workspaceId: string) => {
+  try {
+    const { access } = await requireWorkspace(workspaceId, 'viewClientWorkspace')
+
+    const assistant = await client.assistant.findFirst({
+      where: { clientWorkspaceId: access.clientWorkspaceId, deletedAt: null },
+      orderBy: { createdAt: 'asc' },
+      select: { status: true, publishedAt: true },
+    })
+    if (!assistant) return { status: 404, message: 'No assistant for this client' }
+
+    return {
+      status: 200,
+      assistantStatus: assistant.status as PublishableStatus,
+      publishedAt: assistant.publishedAt,
+      canPublish: access.permissions.has('publishAssistant'),
+    }
+  } catch (error) {
+    if (error instanceof AuthorizationError) return { status: 403, message: error.message }
+    console.error('[Settings] onGetAssistantPublishState failed:', error)
+    return { status: 400, message: 'Could not read the assistant status' }
   }
 }
 

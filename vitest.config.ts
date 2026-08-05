@@ -25,6 +25,11 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
+      // `server-only` throws the moment it is imported outside a React Server
+      // Component, which is exactly right in the app and useless here: these
+      // tests ARE the server. Stubbing it lets us exercise the real
+      // `src/lib/widget/resolve.ts` instead of a copy of its logic.
+      'server-only': fileURLToPath(new URL('./tests/helpers/server-only-stub.ts', import.meta.url)),
     },
   },
 })

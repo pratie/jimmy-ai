@@ -150,6 +150,17 @@ export default function ClientsGrid({
                 </span>
               </div>
 
+              {/* The inverse of `starved`: content indexed, but nothing served,
+                  because the assistant was never published. Read-only here —
+                  publishing lives on the client page, and a button nested in a
+                  card-wide link is a trap. */}
+              {c.assistantStatus !== 'published' && c.workspaceType !== 'prospect_demo' && (
+                <p className="mt-3 flex items-center gap-1.5 rounded-lg bg-amber-50 px-2.5 py-1.5 text-[11px] font-medium text-amber-800">
+                  <AlertTriangle className="h-3 w-3 shrink-0" />
+                  Not published — the installed widget will not answer
+                </p>
+              )}
+
               {starved && (
                 <p className="mt-3 flex items-center gap-1.5 rounded-lg bg-amber-50 px-2.5 py-1.5 text-[11px] font-medium text-amber-800">
                   <AlertTriangle className="h-3 w-3 shrink-0" />
