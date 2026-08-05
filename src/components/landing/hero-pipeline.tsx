@@ -193,7 +193,12 @@ function IngestScene({ beat }: { beat: Beat }) {
         })}
       </div>
 
-      <div className="mt-auto flex flex-wrap gap-1.5 pt-4">
+      {/* Not mt-auto. Pinning these to the bottom of a fixed-height stage while
+          they are still invisible punches a hole through the middle of the card
+          for the whole crawl. Flowing them under the page list keeps the empty
+          space in one block at the bottom, which reads as "more is coming"
+          rather than as something failing to load. */}
+      <div className="flex flex-wrap gap-1.5 pt-4">
         {KNOWLEDGE.map((item, i) => (
           <span
             key={item}
@@ -277,6 +282,13 @@ function AssistantScene({ beat }: { beat: Beat }) {
       </div>
 
       <div className="flex flex-1 flex-col justify-end gap-2 overflow-hidden p-4">
+        {/* The greeting lands with the scene, not with the first question.
+            Without it this card sits completely blank for the whole ASSISTANT
+            beat — a 400px white box as the most prominent thing on the page.
+            A real widget opens with its welcome message, so showing one here is
+            both truthful and the thing that fills the space. */}
+        <Bubble side="left">Hi! I can help with treatments, pricing and booking.</Bubble>
+
         {beat >= BEAT.QUESTION && (
           <Bubble side="right">Do you offer teeth whitening on Saturdays?</Bubble>
         )}
