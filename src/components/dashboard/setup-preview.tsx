@@ -69,14 +69,14 @@ function StageRow({
       {index < total - 1 && (
         <span
           className="absolute left-[10px] top-6 h-[calc(100%-14px)] w-px transition-colors"
-          style={{ backgroundColor: state === 'done' ? cd.accent : cd.line }}
+          style={{ backgroundColor: state === 'done' ? cd.accent : cd.lineStrong }}
           aria-hidden="true"
         />
       )}
       <span
         className="relative z-10 mt-0.5 grid h-[21px] w-[21px] shrink-0 place-items-center rounded-full border transition-colors"
         style={{
-          borderColor: state === 'pending' ? cd.line : cd.accent,
+          borderColor: state === 'pending' ? cd.lineStrong : cd.accent,
           backgroundColor: state === 'done' ? cd.accent : cd.surface,
           color: state === 'done' ? '#fff' : cd.accent,
         }}
@@ -85,9 +85,7 @@ function StageRow({
           <Check className="h-3 w-3" strokeWidth={3} />
         ) : state === 'active' ? (
           <Loader2 className="h-3 w-3 animate-spin motion-reduce:animate-none" />
-        ) : (
-          <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: cd.line }} />
-        )}
+        ) : null}
       </span>
       <span
         className="pt-0.5 text-[12.5px] transition-colors"
