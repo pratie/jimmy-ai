@@ -32,7 +32,10 @@ export default async function DemoPage({
       <header className="sticky top-0 z-30 border-b border-[#E4E7EC] bg-white/90 backdrop-blur">
         <div className="mx-auto flex h-14 max-w-6xl items-center gap-3 px-5 sm:px-8">
           <Link href="/" className="flex items-center gap-2">
-            <Image src="/images/logo.svg" alt="" width={26} height={26} className="rounded-md" />
+            {/* Not logo.svg — that file is an <svg> wrapping <image href="…png">,
+                which browsers refuse to resolve inside an <img>, so it renders
+                blank. The PNG is what the navbar uses. */}
+            <Image src="/images/chatdock-mark.png" alt="" width={26} height={26} className="rounded-md" />
             <span className="font-heading text-[15px] font-extrabold tracking-tight text-[#101828]">
               ChatDock
             </span>
