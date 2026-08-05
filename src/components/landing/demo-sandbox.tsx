@@ -448,9 +448,11 @@ export default function DemoSandbox({ initialUrl }: { initialUrl?: string }) {
                 })}
               </div>
               <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-[#EEF0F4]">
+                {/* scaleX, not width — width relayouts on every frame of a bar
+                    that ticks six times during the crawl. */}
                 <div
-                  className="h-full rounded-full bg-[#5B5CE2] transition-all duration-700 ease-out"
-                  style={{ width: `${crawlProgress}%` }}
+                  className="h-full w-full origin-left rounded-full bg-[#5B5CE2] transition-transform duration-700 ease-out"
+                  style={{ transform: `scaleX(${crawlProgress / 100})` }}
                 />
               </div>
             </div>
