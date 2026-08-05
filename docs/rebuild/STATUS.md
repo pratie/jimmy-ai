@@ -1,6 +1,6 @@
 # Rebuild status
 
-Live tracker for the agency-first rebuild. Updated 2026-08-04.
+Live tracker for the agency-first rebuild. Updated 2026-08-05.
 
 ## Current state
 
@@ -45,10 +45,10 @@ Rollback path if production must be restored:
 |---|---|---|
 | 1 | Audit & preservation | ✅ **Complete** |
 | 2 | New database foundation | ✅ **Complete** |
-| 3 | Authentication & permissions | 🟡 In progress — services built, Clerk wiring + tests outstanding |
-| 4 | Knowledge & RAG | ⬜ Not started |
-| 5 | Core product flows | ⬜ Not started |
-| 6 | Billing & reporting | 🟡 Schema + entitlements done; Dodo webhooks outstanding |
+| 3 | Authentication & permissions | ✅ **Complete** — Clerk→tenant provisioning, permission service, 26 isolation tests |
+| 4 | Knowledge & RAG | ✅ **Complete** — crawl/index jobs, provider seams, tenant-scoped retrieval, citations |
+| 5 | Core product flows | ✅ **Complete** — onboarding, client creation, assistant, widget, conversations, leads, bookings |
+| 6 | Billing & reporting | 🟡 Subscriptions, entitlements, usage and idempotent webhooks done; agency/client reporting outstanding |
 | 7 | Prospect demos | 🟡 Schema seams done; flows outstanding |
 | 8 | Frontend redesign | ⬜ Not started |
 | 9 | Reliability & launch | ⬜ Not started |
@@ -72,13 +72,13 @@ Rollback path if production must be restored:
 | 13 | API architecture | ⬜ | outstanding |
 | 14 | Background-job architecture | ⬜ | outstanding |
 | 15 | Provider-interface design | ⬜ | outstanding |
-| 16 | Updated backend | ⬜ | **208 TS errors across ~14 legacy files** |
+| 16 | Updated backend | ✅ | 0 type errors; build compiles; verified live end to end |
 | 17 | Updated frontend | ⬜ | outstanding |
 | 18 | Unit tests | ⬜ | outstanding |
 | 19 | Integration tests | ⬜ | outstanding |
 | 20 | Multi-tenant security tests | ✅ | `tests/security/tenant-isolation.test.ts` — **26/26 passing** |
 | 21 | End-to-end tests | ⬜ | outstanding |
-| 22 | Env-var documentation | ⬜ | outstanding |
+| 22 | Env-var documentation | 🟡 | `.env.example` updated; prose guide outstanding |
 | 23 | Deployment guide | 🟡 | `build` now runs `migrate deploy`; prose outstanding |
 | 24 | Security review | ⬜ | outstanding |
 | 25 | Voice-readiness document | ⬜ | outstanding (seams are in the schema) |
@@ -110,7 +110,7 @@ Rollback path if production must be restored:
 | `Customer @@unique([email, domainId])` blocked phone-only leads | `Lead` with no email uniqueness; dedupe is an application decision |
 | `FilterQuestions.answered` overwritten per visitor | `LeadFieldDefinition` (reusable) + `LeadFieldValue` (per lead) |
 | Bookings shown as confirmed when only a time was collected | `BookingRequest.status` starts at `requested` |
-| Plan limits scattered and drifting | Central entitlement service; `seed-plans.mjs` is the only definition |
+| Plan limits scattered and drifting | Central entitlement service enforces `PlanEntitlement` (⚠ `src/lib/plans.ts` still feeds the marketing page — see gaps) |
 | Usage pooled per user, unattributable | Append-only `UsageEvent` with org + workspace + assistant |
 | Credits reset 30 days after last activity | Provider period boundaries from `Subscription` |
 | Webhooks could double-process | `BillingEvent(provider, externalEventId)` unique |
@@ -185,6 +185,18 @@ still down.
   reintroduces exactly the "AI toy" read we just designed out.
 
 ## Known gaps to close before launch
+
+- **Two sources of truth for plan limits.** `PlanEntitlement` (enforced) and
+  `src/lib/plans.ts` (advertised, read by 9 files incl. the pricing page and
+  margin calculator). Verified identical on 2026-08-05, but nothing keeps them
+  that way — the first divergence makes the pricing page lie. Fix: have the
+  pricing page read plans server-side from the database, then delete
+  `plans.ts`.
+- **No conversation-retention enforcement.** `conversationHistoryDays` existed
+  only in `plans.ts` and nothing ever pruned history, so the pricing page was
+  advertising a 30-day Free limit that did not exist. The claim has been
+  removed. If retention is wanted, it needs a real entitlement key plus a
+  pruning job — see Q37 in PRODUCT-OWNER-QUESTIONS.md.
 
 - **No rate limiting** on the public chat endpoint. It is unauthenticated and
   calls a paid LLM per request — a live cost-attack surface.

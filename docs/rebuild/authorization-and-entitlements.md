@@ -109,8 +109,15 @@ resolve at all, so there is nothing to accidentally leak.
 
 ## 4. Entitlement matrix
 
-`null` = unlimited. Booleans are 0/1. Single source:
+`null` = unlimited. Booleans are 0/1. Defined in
 [`prisma/seed-plans.mjs`](../../prisma/seed-plans.mjs) — re-runnable, upsert-based.
+
+> ⚠ **Not yet the single source.** `src/lib/plans.ts` still exists and is read by
+> nine files, including the landing pricing section and margin calculator. The
+> product *enforces* `PlanEntitlement`; the marketing page *advertises*
+> `plans.ts`. The two agree today (verified 2026-08-05) but nothing keeps them
+> in sync, so this is live drift risk. Closing it means having the pricing page
+> read plans from the database and deleting `plans.ts`. Tracked in STATUS.md.
 
 | Entitlement | Free | Starter | Pro | Business |
 |---|--:|--:|--:|--:|

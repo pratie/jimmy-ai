@@ -84,9 +84,6 @@ function planRows(plan: PlanType) {
     `${limits.messageCredits.toLocaleString()} messages / month`,
     `${limits.knowledgeBaseMB} MB knowledge base`,
     `${fmtLimit(limits.trainingSources)} training sources`,
-    limits.conversationHistoryDays === Infinity
-      ? 'Full conversation history'
-      : `${limits.conversationHistoryDays}-day conversation history`,
     BRANDING[plan],
     SUPPORT[plan],
   ]
