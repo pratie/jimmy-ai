@@ -13,6 +13,11 @@ const isPublicRoute = createRouteMatcher([
   // The live demo is the top-of-funnel proof; asking for a login to reach it
   // would defeat the entire point of it.
   '/demo(.*)',
+  // A shared prospect demo. The share token in the path IS the credential —
+  // a prospect who has to sign in to see their own demo will not see it.
+  '/d(.*)',
+  // The engagement beacon that page fires. Public for the same reason.
+  '/api/demo(.*)',
   // Make blogs public for SEO
   '/blogs(.*)',
   '/favicon\\.ico',

@@ -13,6 +13,7 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   PlugZap,
+  Sparkles,
   Settings,
   UsersRound,
 } from 'lucide-react'
@@ -58,6 +59,9 @@ type Props = {
 const AGENCY_NAV = [
   { label: 'Overview', href: '/dashboard', icon: BarChart3 },
   { label: 'Clients', href: '/clients', icon: Building2, agencyOnly: true },
+  // Agency-only for the same reason as Clients: a direct business has its own
+  // one workspace and no prospects to pitch.
+  { label: 'Demos', href: '/demos', icon: Sparkles, agencyOnly: true },
   { label: 'Inbox', href: '/conversation', icon: Inbox },
   { label: 'Leads', href: '/leads', icon: UsersRound },
   { label: 'Bookings', href: '/appointment', icon: CalendarDays },
