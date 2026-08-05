@@ -28,7 +28,10 @@ export default function ContextHeader({
   return (
     <div className="flex flex-wrap items-start justify-between gap-3">
       <div className="min-w-0">
-        <p className="truncate text-[12px] font-medium" style={{ color: cd.faint }}>
+        {/* Raised from cd.faint — the scope line is how a user knows whether
+            they are looking at every client or just one, so it has to be
+            legible at a glance rather than decorative. */}
+        <p className="truncate text-[12.5px] font-medium" style={{ color: cd.muted }}>
           {scope}
         </p>
         <h1

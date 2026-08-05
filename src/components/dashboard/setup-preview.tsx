@@ -92,7 +92,10 @@ function StageRow({
       <span
         className="pt-0.5 text-[12.5px] transition-colors"
         style={{
-          color: state === 'pending' ? cd.faint : cd.ink,
+          // Upcoming stages stay readable. cd.faint measured as disabled-looking
+          // against the panel tint, which implied they were unavailable rather
+          // than simply not started yet.
+          color: state === 'pending' ? cd.muted : cd.ink,
           fontWeight: state === 'active' ? 600 : 400,
         }}
       >
@@ -177,9 +180,11 @@ export default function SetupPreview({
         <div className="mt-4 border-t pt-4" style={{ borderColor: cd.line }}>
           <dl className="space-y-2">
             {[
-              ['Pages imported', pagesFound ? `${pagesFound}` : '—'],
-              ['Knowledge', 'Indexed'],
-              ['Assistant', 'Draft ready'],
+              // chunksCreated counts indexed passages, not pages. Calling them
+              // pages would be a number the operator could check and find wrong.
+              ['Passages indexed', pagesFound !== undefined ? `${pagesFound}` : '—'],
+              ['Knowledge', pagesFound ? 'Ready' : 'Needs sources'],
+              ['Assistant', 'Draft created'],
             ].map(([label, value]) => (
               <div key={label} className="flex items-center justify-between gap-3">
                 <dt className="text-[12px]" style={{ color: cd.muted }}>

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { ArrowRight, Check, Globe, Loader2 } from 'lucide-react'
 
 import { onIntegrateDomain } from '@/actions/settings'
+import { onScrapeWebsiteForDomain } from '@/actions/firecrawl'
 import { cd } from '@/lib/design-tokens'
 import SetupPreview, { SourceCitation, type SetupPhase } from './setup-preview'
 
@@ -136,6 +137,7 @@ export default function FirstClientSetup({ organizationName }: { organizationNam
   const [phase, setPhase] = React.useState<SetupPhase>('idle')
   const [error, setError] = React.useState<string | null>(null)
   const [createdId, setCreatedId] = React.useState<string | null>(null)
+  const [pagesFound, setPagesFound] = React.useState<number | null>(null)
 
   /** Only the first step can complete on this screen; the rest live elsewhere. */
   const completedSteps = phase === 'ready' ? 1 : 0
@@ -165,39 +167,49 @@ export default function FirstClientSetup({ organizationName }: { organizationNam
       return
     }
 
-    // Phases advance only as far as the work actually reaches. The request is a
-    // single server action, so the intermediate labels are paced rather than
-    // reported — but none of them claim completion, and the run stops where the
-    // work stops.
+    // Each phase now corresponds to work that is actually running. The stage
+    // labels previously described crawling and indexing that never happened —
+    // onIntegrateDomain only creates the workspace — which made the panel a
+    // more convincing lie than a plain progress bar would have been.
     setPhase('connecting')
-    const pace = (next: SetupPhase, ms: number) =>
-      new Promise<void>((r) => setTimeout(() => { setPhase(next); r() }, ms))
+    const created = await onIntegrateDomain(parsed.domain, '')
 
-    const work = onIntegrateDomain(parsed.domain, '')
-    await pace('discovering', 500)
-    await pace('reading', 900)
-    await pace('indexing', 900)
+    if (created?.status !== 200 || !created.id) {
+      setPhase('failed')
+      setError(created?.message ?? 'Could not add that client. Try another address.')
+      return
+    }
+    setCreatedId(created.id)
 
-    const result = await work
+    // Real crawl + embed. This is the slow part, and the two labels either side
+    // of it bracket a single call rather than reporting sub-steps we cannot see.
+    setPhase('discovering')
+    const ingest = await onScrapeWebsiteForDomain(created.id)
 
-    if (result?.status === 200 && result.id) {
-      setPhase('drafting')
-      await pace('ready', 500)
-      // Deliberately no auto-redirect. Yanking the operator to another screen
-      // the instant a background job finishes loses the summary they just
-      // waited for; "Test assistant" hands the choice back to them.
-      setCreatedId(result.id)
+    if (ingest?.status !== 200) {
+      // The client exists and is usable — only the automatic import failed, so
+      // this is a partial success, not a dead end.
+      setPhase('ready')
+      setPagesFound(0)
+      setError(
+        'message' in (ingest ?? {})
+          ? `Client created, but we could not import the website automatically. ${ingest?.message ?? ''}`
+          : 'Client created, but the website import failed. You can add sources manually.'
+      )
       return
     }
 
-    setPhase('failed')
-    setError(result?.message ?? 'Could not add that client. Try another address.')
+    // The remaining stages all happen inside that one call, so they complete
+    // together rather than being animated one at a time for effect.
+    setPagesFound('chunksCreated' in ingest ? Number(ingest.chunksCreated ?? 0) : 0)
+    setPhase('ready')
+
   }
 
   return (
     <div className="space-y-4">
-      <p className="text-[12px] font-medium" style={{ color: cd.faint }}>
-        {organizationName} · getting started
+      <p className="text-[12.5px] font-medium" style={{ color: cd.muted }}>
+        {organizationName} <span style={{ color: cd.faint }}>/</span> Getting started
       </p>
       <div
         className="grid overflow-hidden rounded-[14px] border lg:grid-cols-[minmax(0,1fr)_340px]"
@@ -394,7 +406,7 @@ export default function FirstClientSetup({ organizationName }: { organizationNam
             phase={phase}
             domain={parsedDomain ?? undefined}
             error={error}
-            pagesFound={undefined}
+            pagesFound={pagesFound ?? undefined}
             onRetry={() => {
               setPhase('idle')
               setError(null)
