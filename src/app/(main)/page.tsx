@@ -11,7 +11,7 @@ import { Footer } from '@/components/landing/footer'
 import GroundedAnswers from '@/components/landing/grounded-answers'
 import HeroStage from '@/components/landing/hero-stage'
 import IndustryTabs from '@/components/landing/industry-tabs'
-import InteractivePreviewChat from '@/components/landing/interactive-preview-chat'
+import DemoLauncher from '@/components/landing/demo-launcher'
 import LaunchSteps from '@/components/landing/launch-steps'
 import MarginCalculator from '@/components/landing/margin-calculator'
 import PricingSection from '@/components/landing/pricing-section'
@@ -219,11 +219,11 @@ export default function Home() {
           <SectionHeading
             eyebrow="See it for yourself"
             title="Don’t take our word for it. Test it on a real website."
-            copy="Paste your website or a client’s website. ChatDock will create a working preview using the public content it finds — no signup, no card, nothing to install."
+            copy="This is the workspace you’d run your client roster from. Paste any URL and ChatDock opens a working assistant built from that site’s public content — no signup, no card, nothing to install."
           />
 
           <Reveal delay={100} className="mt-10">
-            <InteractivePreviewChat />
+            <DemoLauncher />
           </Reveal>
 
           {/* Product-driven credibility. No logos, testimonials or user counts —
@@ -237,8 +237,8 @@ export default function Home() {
                   Answers come from approved content
                 </h3>
                 <p className="mt-2 text-[13.5px] leading-6 text-[#667085]">
-                  The preview above is reading real pages from whatever URL you give it — the same way a
-                  client workspace does. What it can&apos;t find, it won&apos;t invent.
+                  The demo reads real pages from whatever URL you give it — the same way a client
+                  workspace does. What it can&apos;t find, it won&apos;t invent.
                 </p>
               </div>
 

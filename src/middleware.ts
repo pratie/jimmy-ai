@@ -10,6 +10,9 @@ const isPublicRoute = createRouteMatcher([
   '/chatbot',
   // Public preview so you can share a link
   '/preview(.*)',
+  // The live demo is the top-of-funnel proof; asking for a login to reach it
+  // would defeat the entire point of it.
+  '/demo(.*)',
   // Make blogs public for SEO
   '/blogs(.*)',
   '/favicon\\.ico',

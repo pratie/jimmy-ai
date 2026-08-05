@@ -16,6 +16,10 @@ export const LANDING_EVENTS = {
   homepageViewed: 'homepage_viewed',
   /** Any primary/secondary CTA click. Props: { location, label }. */
   ctaClicked: 'cta_clicked',
+  /** The homepage launcher sent a visitor to /demo. Props: { source }.
+   *  Separate from demoUrlSubmitted so the two are not double counted — this
+   *  measures homepage intent, that one measures demos actually started. */
+  demoLauncherClicked: 'demo_launcher_clicked',
   /** A URL was submitted to the no-signup sandbox. Props: { source }. */
   demoUrlSubmitted: 'demo_url_submitted',
   /** The sandbox finished building an assistant. Props: { grounded }. */
