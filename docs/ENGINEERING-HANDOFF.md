@@ -3,10 +3,17 @@
 Written 2026-08-05 by reading the code, not the docs. Where a doc and the code
 disagreed, the code won and the disagreement is recorded here.
 
+> **New here? Read [`START-HERE.md`](START-HERE.md) first.** It is the dated
+> entry point: where the product actually stands, the mind map, and the next
+> five steps. This file is the depth behind it.
+
 Companion documents — read them, do not re-derive them:
 
 | Document | What it holds |
 |---|---|
+| [`START-HERE.md`](START-HERE.md) | **Entry point.** Dated snapshot, mind map, next five steps, market intelligence, corrections log. |
+| [`ARCHITECTURE.md`](ARCHITECTURE.md) | Current technical architecture: all 32 models grouped, every page, every API route, every server action, security-critical libs. |
+| [`BACKLOG.md`](BACKLOG.md) | Everything worth doing, ordered P0–P3, with why / what to touch / done-when. |
 | [`docs/database-architecture.md`](database-architecture.md) | The **legacy** 16-model schema and why it was replaced. Historical. |
 | [`docs/rebuild/STATUS.md`](rebuild/STATUS.md) | Phase tracker, deliverable list, live-verification results, backlog. |
 | [`docs/rebuild/authorization-and-entitlements.md`](rebuild/authorization-and-entitlements.md) | Full permission and entitlement matrices as tables. |
