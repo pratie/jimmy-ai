@@ -1,5 +1,5 @@
 import type * as React from 'react'
-import { ArrowRight, CalendarCheck2, MessageSquareOff, MessageSquareText, UserRoundCheck, UserRoundX, Wrench } from 'lucide-react'
+import { ArrowRight, CalendarCheck2, MessageSquareOff, MessageSquareText, PhoneOff, UserRoundCheck, UserRoundX, Wrench } from 'lucide-react'
 
 import { Reveal } from '@/components/landing/reveal'
 
@@ -26,6 +26,11 @@ const PROBLEMS = [
     title: '“The bot is live” does not renew retainers.',
     copy: 'Clients keep paying when you can show conversations, leads and appointments. Message volume is not a result they recognise.',
   },
+  {
+    icon: PhoneOff,
+    title: 'Somebody answers the same five questions all day.',
+    copy: 'Hours, pricing, insurance, parking, whether they take new patients. Every one of those is a call or an email a person has to stop and handle, and none of them needs a person. This is usually the first thing the client notices, because they feel it in week one.',
+  },
 ]
 
 const BEFORE = [
@@ -42,7 +47,7 @@ const AFTER = [
 export default function AgencyProblem() {
   return (
     <div className="mx-auto max-w-6xl">
-      <div className="grid gap-4 lg:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2">
         {PROBLEMS.map((problem, index) => (
           <Reveal key={problem.title} delay={index * 110}>
             <article className="h-full rounded-2xl border border-[#E4E7EC] bg-white p-6 sm:p-7">

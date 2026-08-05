@@ -345,13 +345,14 @@ export default function DemoSandbox({ initialUrl }: { initialUrl?: string }) {
             <ConciergeBell className="h-3.5 w-3.5 text-[#5B5CE2]" /> Live demo
           </span>
           <h1 className="mt-5 font-heading text-[30px] font-extrabold leading-[1.12] tracking-tight text-[#101828] sm:text-[38px]">
-            Point it at a website.
+            Build the demo on their
             <br />
-            See what its receptionist would say.
+            website, before the call.
           </h1>
           <p className="mt-4 text-[15px] leading-7 text-[#667085]">
-            ChatDock reads the public pages and answers from what it finds. Use your own site or a
-            client&apos;s. No signup, no card, nothing to install.
+            Paste a prospect&apos;s domain. ChatDock reads their public pages and gives you a working
+            assistant that answers about their pricing, their hours, their services. Walk into the call
+            with it already running. No signup, no card.
           </p>
 
           <form
@@ -368,7 +369,7 @@ export default function DemoSandbox({ initialUrl }: { initialUrl?: string }) {
                 autoFocus
                 disabled={step === 'scraping'}
                 aria-label="Website address to build an assistant from"
-                placeholder="yourclient.com"
+                placeholder="theirdomain.com"
                 value={urlInput}
                 onChange={(e) => setUrlInput(e.target.value)}
                 className="h-12 w-full rounded-xl border border-[#E4E7EC] bg-white pl-11 pr-4 text-[15px] text-[#101828] placeholder:text-[#98A2B3] transition-shadow focus:outline-none focus:ring-4 focus:ring-[#5B5CE2]/15 disabled:opacity-60"

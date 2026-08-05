@@ -7,6 +7,7 @@ import AgencyProblem from '@/components/landing/agency-problem'
 import Capabilities from '@/components/landing/capabilities'
 import ClientReport from '@/components/landing/client-report'
 import Faq from '@/components/landing/faq'
+import FirstCall from '@/components/landing/first-call'
 import { Footer } from '@/components/landing/footer'
 import GroundedAnswers from '@/components/landing/grounded-answers'
 import HeroStage from '@/components/landing/hero-stage'
@@ -292,7 +293,7 @@ export default function Home() {
           <SectionHeading
             eyebrow="Why this sells"
             title="Your clients want more captured opportunities, not another chatbot."
-            copy="Three things make an AI receptionist an easy conversation with a client you already have."
+            copy="Four things make an AI receptionist an easy conversation with a client you already have."
           />
           <div className="mt-12">
             <AgencyProblem />
@@ -356,6 +357,20 @@ export default function Home() {
           <Reveal delay={100} className="mt-12">
             <MarginCalculator />
           </Reveal>
+        </div>
+      </section>
+
+      {/* ═══════════════ Section 8b · How to actually sell it ═══════════════ */}
+      <section id="first-call" className="scroll-mt-20 px-5 py-20 sm:px-8 lg:py-24">
+        <div className="mx-auto max-w-6xl">
+          <SectionHeading
+            eyebrow="Selling it"
+            title="Installing it is the easy half."
+            copy="The questions below are the ones that decide whether there is a deal at all. Ask them in this order, and be willing to walk away on the answers."
+          />
+          <div className="mt-12">
+            <FirstCall />
+          </div>
         </div>
       </section>
 

@@ -12,9 +12,9 @@ import DemoSandbox from '@/components/landing/demo-sandbox'
  * typed, so they are not asked to enter it twice.
  */
 export const metadata: Metadata = {
-  title: 'Try ChatDock on any website — live demo',
+  title: 'Build a client demo on any website — ChatDock',
   description:
-    'Paste any website and ChatDock builds a working AI receptionist from its public pages. No signup, no card, nothing to install.',
+    'Paste a prospect\u2019s website and ChatDock builds a working AI receptionist from their public pages, so you can open the sales call with it already running. No signup, no card.',
   // A demo keyed to an arbitrary URL is not a page worth indexing, and every
   // ?url= variant would be a near-duplicate of the last.
   robots: { index: false, follow: true },

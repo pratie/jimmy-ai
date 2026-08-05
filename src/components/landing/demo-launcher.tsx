@@ -141,11 +141,11 @@ export default function DemoLauncher() {
             is the only thing a visitor with zero clients can actually do. */}
         <div className="rounded-xl border border-[#5B5CE2]/25 bg-white p-4 sm:p-5">
           <h3 className="font-heading text-[15px] font-bold tracking-tight text-[#101828]">
-            Add a client: try it on a real website
+            Add a client: build the demo on their site
           </h3>
           <p className="mt-1 text-[13px] leading-5 text-[#667085]">
-            Paste any URL. ChatDock reads the public pages and opens a working assistant you can talk
-            to. No signup, no card.
+            Paste a prospect&apos;s URL. ChatDock reads their public pages and opens an assistant that
+            answers about their business, which is the version worth showing them. No signup, no card.
           </p>
 
           <form
@@ -160,7 +160,7 @@ export default function DemoLauncher() {
               <input
                 type="text"
                 aria-label="Website address to build an assistant from"
-                placeholder="yourclient.com"
+                placeholder="theirdomain.com"
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
                 className="h-11 w-full rounded-xl border border-[#E4E7EC] bg-[#F7F8FA] pl-11 pr-4 text-[14px] text-[#101828] placeholder:text-[#98A2B3] transition-shadow focus:border-[#5B5CE2]/40 focus:bg-white focus:outline-none focus:ring-4 focus:ring-[#5B5CE2]/15"
