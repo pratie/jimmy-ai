@@ -54,7 +54,10 @@ const OwnerLayout = async ({ children }: Props) => {
             canCreateClient={['owner', 'admin', 'manager'].includes(authenticated.role ?? '')}
             canManageBilling={['owner', 'admin', 'billing'].includes(authenticated.role ?? '')}
           />
-          <main className="flex h-screen min-w-0 flex-1 flex-col overflow-x-hidden pl-[72px] md:pl-0">
+          {/* The sidebar is an overlay drawer below md, so it claims no
+              horizontal space there. The top padding clears its floating
+              trigger instead. */}
+          <main className="flex h-screen min-w-0 flex-1 flex-col overflow-x-hidden pt-14 md:pt-0">
             {children}
           </main>
         </div>
