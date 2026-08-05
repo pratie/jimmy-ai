@@ -15,52 +15,44 @@ Companion docs: [`START-HERE.md`](START-HERE.md) ·
 
 ## P0 — the product does not work without these
 
-### 1. Publish an assistant
+### 1. ~~Publish an assistant~~ · 2. ~~Unpublish / pause~~ — **done 2026-08-05**
 
-**Why:** every widget an agency installs on a client site returns
-`403 assistant_unpublished`, forever. This is the single reason the product
-cannot be used end-to-end.
+Both shipped in one change. `onSetAssistantStatus(workspaceId, status)` in
+`src/actions/settings/index.ts` gates on
+`requireWorkspace(workspaceId, 'publishAssistant')` and moves an assistant
+between `published` / `paused` / `draft`; `onPublishAssistant`,
+`onPauseAssistant` and `onGetAssistantPublishState` sit on top of it.
 
-**The chain, verified 2026-08-05:**
-`settings/index.ts:131` creates an assistant with no `status` → schema default
-`draft` → no code anywhere writes `status: 'published'` or `publishedAt` →
-`widget/resolve.ts:148` rejects any `website_widget` deployment whose assistant
-is not published.
+Decisions taken while implementing, so nobody re-litigates them:
 
-**Touch:** `src/actions/settings/index.ts` — a server action calling
-`requireWorkspace(workspaceId, 'publishAssistant')` then writing
-`{ status: 'published', publishedAt: new Date() }`. Wire to the existing status
-badges in `clients-grid.tsx`.
-
-**Already built:** the permission, the role matrices, the badges, the
-widget-side gate. Only the write is missing.
-
-**Done when:** a widget key that previously 403'd serves a real answer, and
-`tests/security/tenant-isolation.test.ts` is still green.
-
-**Size:** half a day.
-
-### 2. Also add unpublish / pause
-
-Same action, inverse. `AssistantStatus` already has `paused` and `archived`.
-Without it there is no way to take a client's widget down without deleting data.
-
-**Size:** an hour, once #1 exists.
+- `publishedAt` is set on **first** publish and preserved across a
+  pause/republish. It answers "live since", not "last toggled".
+- Publishing with zero indexed chunks is **allowed** and returns a `warning`.
+  An agency may reasonably publish ahead of a crawl; blocking it would be a
+  guess about their order of work. It is never silent.
+- `archived` is not offered here — that is the workspace lifecycle
+  (`onDeleteUserDomain`), not an assistant toggle.
+- The roster card shows the unpublished state but has no button: a control
+  nested inside a card-wide `<Link>` is a misclick trap. Publishing lives on the
+  client page and beside the embed snippet, which is where someone is when they
+  believe the widget is working.
 
 ---
 
 ## P1 — required to take money or to grow
 
-### 3. Prove the billing path end to end
+### 3. Prove the billing path end to end — **owner-deferred, 2026-08-05**
 
-**Why:** Dodo is configured but **has never processed a transaction**.
-Configured is not working.
+**Why:** Dodo has never processed a transaction, and the products behind the
+configured ids **do not exist on the provider side**. Env vars are not
+configuration. The owner is setting Dodo up later; until then treat billing as
+greenfield and do not build on it.
 
-Verified present: `DODO_API_KEY`, `DODO_WEBHOOK_SECRET`, all six
-`DODO_PRODUCT_ID_*` (monthly and yearly). Verified missing: `DODO_API_BASE`,
-which falls back to a hardcoded default.
+Present in `.env.local`: `DODO_API_KEY`, `DODO_WEBHOOK_SECRET`, all six
+`DODO_PRODUCT_ID_*` (monthly and yearly). Missing: `DODO_API_BASE`, which falls
+back to a hardcoded default.
 
-**Do:** one real checkout in test mode. Confirm
+**Do (once the products exist):** one real checkout in test mode. Confirm
 `src/app/api/dodo/webhook/route.ts` verifies its signature, writes a
 `Subscription`, records a `BillingEvent` (unique on `provider` +
 `externalEventId`), and that `entitlements.ts` then returns the new limits. Set
@@ -144,10 +136,13 @@ Either wire the server half into the conversation actions, or rip out both
 halves plus the `pusher` / `pusher-js` dependencies deliberately. Note
 `pusher-server.ts` **throws at module load** if the `PUSHER_*` vars are unset.
 
-### 8. Fix the handoff-status inconsistency
+### 8. ~~Fix the handoff-status inconsistency~~ — **done 2026-08-05**
 
-`actions/settings/index.ts:212` maps only `active` back to `live`;
-`lib/chat/session.ts:88` treats `accepted` **and** `active` as live. Pick one.
+`actions/settings/index.ts` mapped only `active` back to `live` while
+`lib/chat/session.ts:88` treated `accepted` **and** `active` as live. The
+session file won: from `accepted` onward a human owns the conversation and the
+assistant stays silent, so a dashboard that showed those rooms as not-live was
+showing the wrong thing.
 
 ### 9. Client-facing login
 
@@ -167,10 +162,20 @@ not hold across instances. Move to Redis or the database.
 
 ### 12. Test coverage beyond tenancy
 
-`tests/security/tenant-isolation.test.ts` (26 tests, real Postgres) is the only
-suite. No unit, integration or E2E anywhere. Highest-value additions, in order:
-the entitlement service, `resolveWidgetRequest`'s rejection chain, and the
-knowledge ingest pipeline.
+Two suites now, both against a real Postgres:
+`tests/security/tenant-isolation.test.ts` (26 tests) and
+`tests/security/publish-gate.test.ts` (7 tests — draft/published/paused through
+the real `resolveWidgetRequest`, plus who may publish). Still no unit,
+integration or E2E anywhere.
+
+`vitest.config.ts` aliases `server-only` to a stub
+(`tests/helpers/server-only-stub.ts`) so suites can import the real
+`src/lib/**` modules that carry that import, rather than re-implementing their
+logic in the test.
+
+Highest-value additions, in order: the rest of `resolveWidgetRequest`'s
+rejection chain (origin allow-list, expiry, suspended org, message limit), the
+entitlement service, and the knowledge ingest pipeline.
 
 ### 13. Supabase RLS
 
@@ -227,13 +232,15 @@ would have caught it.
 
 ```mermaid
 graph LR
-    A["1. Publish<br/>P0 · 0.5d"] --> B["3. Prove billing<br/>P1 · 0.5d"]
-    A --> C["2. Unpublish<br/>P0 · 1h"]
+    A["1+2. Publish / pause<br/>P0 · DONE"] --> E["5. Prospect demo links<br/>P1 · 2-3d"]
+    A --> B["3. Prove billing<br/>P1 · blocked on owner<br/>setting up Dodo"]
     B --> D["4. Reprice +<br/>one source of truth<br/>P1 · 1d"]
-    A --> E["5. Prospect demo links<br/>P1 · 2-3d"]
     D --> F["6. Voice decision<br/>owner"]
     E --> F
 ```
 
-Items 1 → 3 → 4 take about two days and turn this from a product that demos
-into a product that ships and charges. Everything else can wait behind that.
+With publishing shipped, the widget works end to end. The next item that is
+*not* waiting on the owner is **5, prospect demo links** — it needs no billing
+and it is the growth wedge. Repricing (4) is partly doable now: collapsing
+`plans.ts` into the database is worth doing before the Dodo products are
+created, so the new prices are only entered once.

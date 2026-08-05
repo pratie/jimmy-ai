@@ -2,10 +2,20 @@
 
 Live tracker for the agency-first rebuild. Updated 2026-08-05.
 
+> Several rows in this file were corrected on 2026-08-05 after being checked
+> against the code — the widget resolver, `api/bot/stream`, `actions/bot` and
+> rate limiting were all marked outstanding while already shipped. If a claim
+> here disagrees with [`../START-HERE.md`](../START-HERE.md), that file wins.
+
 ## Current state
 
-**The backend port is complete.** 209 → 0 type errors, `npm run build` compiles,
-30/30 pages generate, and the 26-test tenant-isolation suite passes.
+**The backend port is complete.** 209 → 0 type errors, `npx next build`
+compiles, 30/30 pages generate, and both security suites pass — 26 tenant
+isolation + 7 publish gate.
+
+**The publish path shipped 2026-08-05**, which was the last thing standing
+between an installed widget and a working one. An agency can now take a client
+live and take them offline again.
 
 Verified live against the dev server on the rebuilt production database:
 
@@ -151,11 +161,12 @@ still down.
 |---|---|
 | `lib/tenant.ts` — Clerk → org → workspace resolution | ✅ |
 | `lib/knowledge/ingest.ts` — source/document/chunk lifecycle + jobs | ✅ |
-| `lib/widget/resolve.ts` — public widget auth + rate limit | ✅ built, **not yet wired** |
+| `lib/widget/resolve.ts` — public widget auth + rate limit | ✅ built **and wired** — `api/bot/stream` calls it on every request (corrected 2026-08-05) |
 | `lib/vector-search.ts` — tenant-scoped retrieval | ✅ |
 | actions: auth, settings, dashboard, conversation, appointment, firecrawl | ✅ |
-| `api/bot/stream` route (17) | ⬜ resolver exists, needs wiring |
-| `actions/bot` (17) | ⬜ |
+| assistant publish / pause (`onSetAssistantStatus`) | ✅ shipped 2026-08-05, 7 tests |
+| `api/bot/stream` route (17) | ✅ resolve → session → retrieve → stream → persist (corrected 2026-08-05) |
+| `actions/bot` (17) | ✅ `src/actions/bot/index.ts` exists |
 | `hooks/firecrawl/use-scrape` (29) | ⬜ consumes old return shapes |
 | Dodo billing + webhook + payments (21) | ⬜ |
 | `actions/mail` (9) | ⬜ |
@@ -166,9 +177,9 @@ still down.
 - **The rate limiter is process-local.** It stops casual abuse of the public
   chat endpoint, not a distributed attack. Move to Redis or an edge limiter
   before real traffic returns.
-- **The widget still sends a raw id.** `lib/widget/resolve.ts` expects an
-  `AssistantDeployment.publicKey`; `public/embed.min.js` and the chatbot
-  components must be updated to send one before the new endpoint goes live.
+- ~~**The widget still sends a raw id.**~~ Closed — `public/embed.min.js` sends
+  `data-key` (an `AssistantDeployment.publicKey`), as the top of this file
+  already records. Corrected 2026-08-05.
 - **Prompt injection** — `formatResultsForPrompt` now fences retrieved content
   and labels it untrusted, but callers must keep it in a user/context message.
   Never concatenate it into `Assistant.systemInstructions`.
@@ -198,8 +209,11 @@ still down.
   removed. If retention is wanted, it needs a real entitlement key plus a
   pruning job — see Q37 in PRODUCT-OWNER-QUESTIONS.md.
 
-- **No rate limiting** on the public chat endpoint. It is unauthenticated and
-  calls a paid LLM per request — a live cost-attack surface.
+- ~~**No rate limiting** on the public chat endpoint.~~ Corrected 2026-08-05:
+  `checkRateLimit` runs in `api/bot/stream` before any database or model call,
+  at 20 requests / 60s per `key:anonymousId`. The **real** remaining risk is
+  that the bucket is a module-level `Map` — process-local, so it does not hold
+  across serverless instances (see the first bullet above).
 - **Prompt injection**: crawled content must never be concatenated into system
   instructions. `Assistant.systemInstructions` is operator-authored and must stay
   structurally separate from retrieved chunks.

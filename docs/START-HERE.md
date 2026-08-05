@@ -1,6 +1,7 @@
 # START HERE
 
-**Snapshot taken:** 2026-08-05, 12:43 PDT
+**Snapshot taken:** 2026-08-05, 12:43 PDT · **updated 13:25 PDT** (publish path
+shipped; Dodo corrected to *not configured* on the owner's word)
 **Commit at time of writing:** `05f5f0f` — working tree clean
 **Deployed:** chatdock.io (Vercel, auto-deploys every push to `master`)
 
@@ -17,9 +18,11 @@ ChatDock is a multi-tenant SaaS. Agencies (web, SEO, lead-gen) launch a branded
 "AI receptionist" chat widget on their own clients' websites. The agency pays;
 the agency's clients get the widget; their visitors do the chatting.
 
-**The platform is built. The marketing site is live. Nobody can use it
-end-to-end**, because no code path publishes an assistant. That is blocker #1
-and it makes everything else theoretical until it is fixed.
+The platform is built, the marketing site is live, and as of **2026-08-05 an
+assistant can be published**, so a widget installed on a client's site now
+answers. What is still missing before this can earn money: billing has never
+processed a transaction (Dodo products not created — owner is doing this
+later), and there is no way to share a prospect demo.
 
 ---
 
@@ -33,22 +36,24 @@ mindmap
         Multi-tenant hierarchy
         Knowledge ingest and pgvector retrieval
         Widget resolve and SSE streaming
+        Publish and pause an assistant
         Entitlements and usage metering
         Agency dashboard
         Landing site and /demo
       Blocked
         ::icon(fa fa-ban)
-        No publish path
         No prospect demo flows
+        No realtime handoff delivery
       Deliberately not built
         Voice
         Client-facing login
         CSV or API export
     Money
-      Dodo configured
-        6 product IDs set
+      Dodo NOT set up
+        Env vars set only
+        No products at Dodo
+        Owner deferring it
         Monthly and yearly coded
-        NEVER tested end to end
       Pricing 19 / 49 / 99
         Competitor at 120 / 300 / 600
         Likely 3x underpriced
@@ -73,41 +78,48 @@ mindmap
 
 ---
 
-## The next five steps, in order
+## The five steps, in order — step 1 is now done
 
-### 1. Make it possible to publish an assistant — **P0, blocks everything**
+Step 2 is waiting on the owner (Dodo). **The next thing to actually build is
+step 4, shareable prospect demo links** — it needs no billing, and part of
+step 3 (collapsing `plans.ts` into the database) is worth doing before the Dodo
+products are created so the new prices are only entered once.
 
-Nothing in the codebase writes `status: 'published'` or `publishedAt`. Verified
-2026-08-05: the only matches in `src/` are reads (`where`, `select`,
-`orderBy`). Meanwhile:
+### 1. ~~Make it possible to publish an assistant~~ — **done 2026-08-05**
 
-- `src/actions/settings/index.ts:131` creates an assistant with **no status**,
-  so it takes the schema default `draft`
-- `src/lib/widget/resolve.ts:148` returns `403 assistant_unpublished` for any
-  `website_widget` deployment whose assistant is not published
+Was the P0 that blocked everything: nothing wrote `status: 'published'`, so
+`src/lib/widget/resolve.ts:148` returned `403 assistant_unpublished` for every
+`website_widget` deployment, forever.
 
-**Every widget an agency installs on a client site fails permanently.**
+Now shipped:
 
-*Do:* add a server action in `src/actions/settings/index.ts` that calls
-`requireWorkspace(workspaceId, 'publishAssistant')` and writes
-`{ status: 'published', publishedAt: new Date() }`. Wire it to the existing
-status badges.
+- `onSetAssistantStatus(workspaceId, 'published' | 'paused' | 'draft')` in
+  `src/actions/settings/index.ts`, gated on
+  `requireWorkspace(workspaceId, 'publishAssistant')`, with
+  `onPublishAssistant` / `onPauseAssistant` wrappers and a read-only
+  `onGetAssistantPublishState`
+- `publishedAt` is stamped on **first** go-live and preserved across a
+  pause/republish — "live since" is a number an agency reports to its client
+- publishing with zero indexed chunks is allowed but returns a `warning`, since
+  that assistant will decline every question
+- UI: a Go live / Take offline control on the client overview
+  (`src/components/clients/publish-toggle.tsx`) and next to the embed snippet in
+  Settings, plus a "not published" banner on the overview and a matching card
+  note on the roster
 
-*Already exists:* the `publishAssistant` permission, the role matrices, the
-dashboard badges, the widget-side gate. Only the write is missing.
-
-*Done when:* a widget key that previously returned `403 assistant_unpublished`
-serves a real answer, and `tests/security/tenant-isolation.test.ts` is still
-green.
-
-*Estimate:* half a day.
+Pause is the same action inverted, so taking a client's widget offline no
+longer means deleting data.
 
 ---
 
-### 2. Prove the money path works — **never been tested**
+### 2. Prove the money path works — **deferred by the owner, 2026-08-05**
 
-Dodo **is** configured, contrary to older notes in this repo. Verified
-2026-08-05 in `.env.local` (pulled from Vercel):
+**Owner's call: Dodo is not set up yet and is being done later.** The
+environment variables below exist, but the products behind them have not been
+created on the provider side, so treat billing as unconfigured until that
+happens. Do not plan work that depends on a working checkout.
+
+Env state verified 2026-08-05 in `.env.local` (pulled from Vercel):
 
 | Var | State |
 |---|---|
@@ -120,10 +132,11 @@ Dodo **is** configured, contrary to older notes in this repo. Verified
 `src/actions/dodo/index.ts:18` already handles `MONTHLY | YEARLY`. So annual
 billing is coded, not just planned.
 
-**But no one has ever run a payment through it.** Configured is not the same as
-working.
+**But no one has ever run a payment through it, and the provider-side products
+do not exist.** Keys in an env file are not a payment system.
 
-*Do:* run one real checkout in Dodo test mode. Confirm the webhook at
+*Do (when the owner sets Dodo up):* create the products, then run one real
+checkout in Dodo test mode. Confirm the webhook at
 `src/app/api/dodo/webhook/route.ts` verifies its Standard Webhooks signature,
 writes a `Subscription` row, and that `src/lib/entitlements.ts` then returns the
 new plan's limits. Set `DODO_API_BASE` explicitly rather than relying on the
@@ -216,8 +229,8 @@ quietly eating the product business; cap it deliberately.
 |---|---|---|
 | Multi-tenancy and isolation | Working | 26 tests incl. a non-vacuity assertion |
 | Knowledge ingest → retrieval | Working | `match_knowledge_chunks_scoped`, tenant arg required |
-| Widget serve | **Blocked** | 403s on unpublished; nothing publishes |
-| Billing | Configured, **unproven** | keys + 6 product IDs set; zero transactions |
+| Widget serve | Working | publish/pause shipped 2026-08-05; `onSetAssistantStatus` |
+| Billing | **Not configured** | env vars set, but no products exist at Dodo; zero transactions. Owner is setting this up later |
 | Landing site | Live | chatdock.io |
 | `/demo` | Live and public | builds an assistant from any URL |
 | Prospect demo links | Schema only | no write path |
@@ -239,15 +252,23 @@ Revenue verified by TrustMRR via Stripe API key (stronger than self-reported).
 | All-time revenue | $547,338 |
 | MRR (normalised) | $39,126 across **214 subscriptions** |
 | ARPU | **$183** |
-| Last 30 days cash | $20,323, **down 14%** vs prior period |
+| Last 30 days cash | $20,323 in the page body, **down 14%** vs prior period. The same page's title said **$23,683** — the two disagree, so treat "roughly $20–24k/month" as the honest read, not a precise figure |
 | Founded | April 2024 |
 | Pricing | **$120 / $300 / $600** per month (3 / 5 / 10 clients) |
+| Users | ~600, B2B, agencies |
 | Domain Rating | 36 — not winning on SEO |
+| Stated value prop | "Everything you need to deliver, manage, and monetize AI **voice agent** services for your clients — all under your brand" |
 
 **Read it carefully.** $547,338 over ~28 months is ~$19.5k/month average, and
 the last 30 days was $20.3k. They are **flat**, not compounding. The gap between
 $39k normalised MRR and $20k monthly cash indicates a heavy **annual prepay**
 mix — worth copying, and already supported in `src/actions/dodo/index.ts`.
+
+Their own positioning has moved: the listing describes the product as a
+Knowledge-Base dashboard with Voiceflow and OpenAI Assistants integrations,
+while the headline value proposition sells **voice agent services**. The
+knowledge-base half is the part ChatDock does natively and better; the voice
+half is the part ChatDock does not do at all.
 
 **What they are:** a white-label ops and billing layer for **voice** agents.
 Their customers bring an agent from Retell, Vapi or ElevenLabs and pay for that
@@ -287,7 +308,7 @@ to be **false**. Recorded so nobody rebuilds on them.
 
 | Claim | Reality | Found |
 |---|---|---|
-| "Dodo Payments is not configured" | All 6 product IDs, API key and webhook secret are set; monthly **and** yearly are coded | 2026-08-05 |
+| "Dodo is configured" (asserted earlier on 2026-08-05 from `.env.local`) | Env vars are set and both billing periods are coded, but the **products were never created at Dodo**. Owner confirmed it is not set up and is deferring it. Env presence is not configuration | 2026-08-05, corrected same day |
 | `STATUS.md`: "32 models, 54 enums" | 32 models, **42** enums — corrected in the file | 2026-08-05 |
 | "ChatDash adds ~$1,400 MRR/month" | Bad arithmetic (all-time ÷ months = average revenue, not growth). They are flat at ~$20k/mo | 2026-08-05 |
 | `outreach-demo-funnel-plan.md` design | Written against the legacy `Domain` schema; `isDemo`/`demoToken` superseded by `workspaceType`/`shareToken` | earlier |

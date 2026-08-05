@@ -6,6 +6,9 @@ disagreed, the code won and the disagreement is recorded here.
 > **New here? Read [`START-HERE.md`](START-HERE.md) first.** It is the dated
 > entry point: where the product actually stands, the mind map, and the next
 > five steps. This file is the depth behind it.
+>
+> Updated 2026-08-05 (later the same day): the publish path shipped — §9.1 is
+> closed — and Dodo is confirmed **not** configured, deferred by the owner.
 
 Companion documents — read them, do not re-derive them:
 
@@ -265,11 +268,12 @@ All of the following were checked against `prisma/schema.prisma` line by line.
 5. **`Conversation.handoffStatus` is an enum that replaced a boolean.**
    ✅ Correct. `HandoffStatus` has six values
    (`none | requested | accepted | active | completed | cancelled`) and replaced
-   the ambiguous `ChatRoom.live`. Watch out: legacy-shaped action responses still
-   project it back down to a boolean, e.g.
-   `src/actions/settings/index.ts:212` (`live: c.handoffStatus === 'active'`),
-   while `src/lib/chat/session.ts:88` treats **both** `accepted` and `active` as
-   live. Those two are inconsistent; the session one is the behavioural truth.
+   the ambiguous `ChatRoom.live`. Legacy-shaped action responses still project it
+   back down to a boolean, but as of 2026-08-05 they agree: both
+   `src/actions/settings/index.ts` and `src/lib/chat/session.ts:88` treat
+   `accepted` **and** `active` as live. The session file is the behavioural
+   truth — a human has taken the conversation from `accepted` onward, and the
+   assistant must stay silent. Any new projection must match it.
 
 Additional invariants worth the same weight:
 
@@ -375,6 +379,19 @@ match_knowledge_chunks_scoped(
   filters *after* the graph walk, so a selective tenant predicate otherwise
   under-returns at the default `ef_search = 40`.
 
+### What the security suites prove
+
+`tests/security/publish-gate.test.ts` covers the publish transition end to end:
+a real `AssistantDeployment` row with a `publicKey`, driven through
+`draft → published → paused` and resolved with the real
+`resolveWidgetRequest` each time. It asserts that a draft 403s with
+`assistant_unpublished`, that publishing makes the *same key* resolve to the
+right assistant/workspace/organization, that pausing takes it offline with the
+client's rows intact, and that an unknown key is a 404 rather than a
+distinguishable error. It also pins the permission side: an owner may publish,
+a scoped `agency_member` may edit but not publish, and a client-side user has
+no organization context at all.
+
 ### What `tests/security/tenant-isolation.test.ts` proves
 
 Vitest against a **real Postgres** (`npm test` loads `.env.local`; the suite
@@ -458,8 +475,9 @@ verifies the Standard Webhooks signature before parsing, claims the event in
 failure so the provider retries safely. Note: `payment.failed` /
 `subscription.on_hold` deliberately keep the customer on the paid plan as
 `past_due` rather than taking client assistants offline over one retryable
-charge. **Dodo is not actually configured** — the products do not exist and the
-`DODO_PRODUCT_ID_*` values are unverified.
+charge. **Dodo is not actually configured** — the env vars are set but no
+products exist on the provider side, so the `DODO_PRODUCT_ID_*` values point at
+nothing. Confirmed with the owner on 2026-08-05; setting it up is deferred.
 
 ### ⚠ Known duplicate source of truth
 
@@ -619,15 +637,17 @@ Derived by grepping `process.env.*` across `src/`, `scripts/`, `prisma/`,
 
 ## 9. Known gaps and half-built features
 
-1. **There is no way to publish an assistant.** `Assistant.status` defaults to
-   `draft`, and grepping all of `src/` finds **no** code path that sets
-   `status: 'published'` or writes `publishedAt` — and the `publishAssistant`
-   permission is defined in `permissions.ts` but never asserted anywhere.
-   Meanwhile `src/lib/widget/resolve.ts:148` rejects a non-published assistant
-   on a `website_widget` deployment with `403 assistant_unpublished`. So a
-   workspace created through `onIntegrateDomain` gets a widget key that cannot
-   serve traffic until someone flips the status by hand in the database. This is
-   the single largest hole in the core flow.
+1. ~~**There is no way to publish an assistant.**~~ **Fixed 2026-08-05.**
+   `onSetAssistantStatus` in `src/actions/settings/index.ts` asserts
+   `publishAssistant` via `requireWorkspace` and writes `status` +
+   `publishedAt`; `onPublishAssistant` / `onPauseAssistant` wrap it and
+   `onGetAssistantPublishState` reads it back for surfaces that hold only a
+   workspace id. `publishedAt` is first-publish-only, so it survives a
+   pause/republish. UI: `src/components/clients/publish-toggle.tsx`, used on the
+   client overview and beside the embed snippet. A new assistant is still
+   created as `draft` on purpose — `onIntegrateDomain` cannot know the crawl has
+   run, and `src/lib/widget/resolve.ts:148` still returns
+   `403 assistant_unpublished` until someone publishes deliberately.
 2. **Realtime is half-wired.** `src/lib/pusher-client.ts` is imported by
    `src/hooks/chatbot/use-chatbot.ts` and `src/hooks/conversation/use-conversation.ts`,
    which subscribe to channels. `src/lib/pusher-server.ts` is imported by
@@ -671,16 +691,21 @@ Derived by grepping `process.env.*` across `src/`, `scripts/`, `prisma/`,
    entitlements, usage and idempotent webhooks are done; agency/client reporting
    is not. `viewReports` is granted but there is no `/reports` route.
 9. **Dodo Payments is not configured.** No products exist on the provider side;
-   `DODO_PRODUCT_ID_*` values are unverified. Billing is effectively greenfield.
+   the `DODO_PRODUCT_ID_*` values are set in the environment but point at
+   nothing. Billing is effectively greenfield. Owner-deferred as of 2026-08-05 —
+   do not build anything that assumes a working checkout.
 10. **No conversation-retention enforcement.** `conversationHistoryDays` lived
     only in `plans.ts`, nothing ever pruned history, and the pricing claim has
     been removed. Retention would need a real `EntitlementKey` plus a pruning
     job.
-11. **Test coverage is one suite.** `tests/security/tenant-isolation.test.ts`
-    plus `tests/helpers/tenant-fixture.ts`. No unit, integration or E2E tests
-    (STATUS.md deliverables 18, 19, 21). The security suite needs a live remote
-    Postgres and takes ~150s; moving it to a local Postgres is worth doing before
-    it grows.
+11. **Test coverage is two suites.** `tests/security/tenant-isolation.test.ts`
+    (26) and `tests/security/publish-gate.test.ts` (7), sharing
+    `tests/helpers/tenant-fixture.ts`. No unit, integration or E2E tests
+    (STATUS.md deliverables 18, 19, 21). Both need a live remote Postgres —
+    ~150s and ~85s respectively — so moving to a local Postgres is worth doing
+    before they grow. `server-only` is aliased to a stub in `vitest.config.ts`;
+    without it, importing any `import 'server-only'` module fails the whole
+    file.
 12. **Dead / debug surface still shipped.** `src/app/(main)/debug-domains`,
     `/test-auth`, `/test-upload`. (The Gemini File Search experiment under
     `/preview/experiments` and `api/experiments` was deleted on 2026-08-05; the
