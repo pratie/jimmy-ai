@@ -17,6 +17,10 @@ isolation + 7 publish gate.
 between an installed widget and a working one. An agency can now take a client
 live and take them offline again.
 
+**Prospect demos shipped the same day** (Phase 7): an agency builds a demo from
+a prospect's URL, sends `/d/<shareToken>`, sees whether it was opened, and
+converts it into a client without rebuilding anything.
+
 Verified live against the dev server on the rebuilt production database:
 
 | Check | Result |
@@ -59,7 +63,7 @@ Rollback path if production must be restored:
 | 4 | Knowledge & RAG | ✅ **Complete** — crawl/index jobs, provider seams, tenant-scoped retrieval, citations |
 | 5 | Core product flows | ✅ **Complete** — onboarding, client creation, assistant, widget, conversations, leads, bookings |
 | 6 | Billing & reporting | 🟡 Subscriptions, entitlements, usage and idempotent webhooks done; agency/client reporting outstanding |
-| 7 | Prospect demos | 🟡 Schema seams done; flows outstanding |
+| 7 | Prospect demos | ✅ **Complete** — create/share/expire/revoke/convert, engagement events, prospect page at `/d/[token]`, 13 tests (2026-08-05) |
 | 8 | Frontend redesign | ⬜ Not started |
 | 9 | Reliability & launch | ⬜ Not started |
 

@@ -40,10 +40,11 @@ mindmap
         Entitlements and usage metering
         Agency dashboard
         Landing site and /demo
+        Prospect demo links
       Blocked
         ::icon(fa fa-ban)
-        No prospect demo flows
         No realtime handoff delivery
+        Billing never proven
       Deliberately not built
         Voice
         Client-facing login
@@ -177,7 +178,21 @@ number `entitlements.ts` enforces.
 
 ---
 
-### 4. Ship shareable prospect demo links — **the growth wedge**
+### 4. ~~Ship shareable prospect demo links~~ — **done 2026-08-05**
+
+An agency points ChatDock at a prospect's URL; it crawls that site, builds a
+real assistant on it, and returns a public link at `/d/<shareToken>`. The
+prospect opens it and talks to retrieval over their own content. The agency
+sees whether it was opened, and converts it to a client in one click —
+conversion is a status change, so the knowledge base, conversations and leads
+the demo produced all survive.
+
+`src/actions/demos/index.ts`, `src/app/(main)/d/[token]/page.tsx`, `/demos` in
+the dashboard, 13 tests in `tests/security/prospect-demo.test.ts`. Full detail
+and the decisions behind it are in [`BACKLOG.md`](BACKLOG.md) item 5.
+
+<details>
+<summary>What the seam looked like before it was built</summary>
 
 `/demo` builds a working assistant from any URL in about 30 seconds. That is
 the single strongest sales asset here: an agency can walk into a call with an
@@ -200,6 +215,8 @@ written against the **legacy `Domain` schema** — its `isDemo`/`demoToken` desi
 is superseded by the fields above.
 
 *Estimate:* two to three days.
+
+</details>
 
 ---
 
@@ -232,8 +249,8 @@ quietly eating the product business; cap it deliberately.
 | Widget serve | Working | publish/pause shipped 2026-08-05; `onSetAssistantStatus` |
 | Billing | **Not configured** | env vars set, but no products exist at Dodo; zero transactions. Owner is setting this up later |
 | Landing site | Live | chatdock.io |
-| `/demo` | Live and public | builds an assistant from any URL |
-| Prospect demo links | Schema only | no write path |
+| `/demo` | Live and public | builds an assistant from any URL, stateless |
+| Prospect demo links | Working | `/demos` → `/d/<shareToken>`, 13 tests |
 | Realtime handoff | **Half-wired** | `pusher-client.ts` used by 2 hooks; `pusher-server.ts` imported by nothing — the app subscribes, nothing publishes |
 | Voice | Not built, deliberate | schema accommodates it; do not build without a decision |
 | Client-facing login | Not built | agency walks the client through instead |

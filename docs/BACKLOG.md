@@ -87,27 +87,57 @@ server-side from the database and delete `plans.ts`.
 
 **Size:** one day including Dodo product setup.
 
-### 5. Shareable prospect demo links
+### 5. ~~Shareable prospect demo links~~ — **done 2026-08-05**
 
-**Why:** `/demo` builds a working assistant from any URL in ~30 seconds. That
-is the strongest sales asset here — an agency can open a call with an assistant
-already running on the prospect's own site. Today there is no way to share one.
+Every seam that existed — `workspaceType: prospect_demo`, `shareToken`,
+`expiresAt`, `convertedAt`, `DeploymentEngagementEvent`,
+`maximum_prospect_demos`, the "Demo" badges — now has a writer.
 
-**Schema is fully ready, nothing writes to it:**
+**What shipped**
 
-| Seam | Location | State |
-|---|---|---|
-| `workspaceType: prospect_demo` | `schema.prisma:258` | read-only |
-| `shareToken` unique | `schema.prisma:429` | read at `resolve.ts:83`, never written |
-| `expiresAt` | schema | unused |
-| `maximum_prospect_demos` | `entitlements.ts:153` | enforced, never reached |
-| "Demo" badges | `clients-grid.tsx`, `client-switcher.tsx` | render, never populated |
+| Piece | Where |
+|---|---|
+| Create / list / extend / revoke / convert | `src/actions/demos/index.ts` |
+| Engagement writer (public, token-authenticated) | `src/lib/demos/engagement.ts` |
+| Beacon endpoint | `src/app/api/demo/engagement/route.ts` |
+| Prospect-facing page | `src/app/(main)/d/[token]/page.tsx` + `src/components/demos/demo-stage.tsx` |
+| Agency screen | `/demos` + `src/components/demos/demos-workspace.tsx`, nav item in `src/components/sidebar/index.tsx` |
+| Tests | `tests/security/prospect-demo.test.ts` — 13 |
+
+**Decisions taken, so nobody re-litigates them**
+
+- **Agency-initiated, not visitor-initiated.** `maximum_prospect_demos` is an
+  organization entitlement; an anonymous visitor has no tenant to meter, and an
+  unauthenticated endpoint that writes workspaces and spends Firecrawl and
+  embedding budget is an obvious abuse target. The public `/demo` sandbox is
+  unchanged and still stateless.
+- **A demo is a real workspace**, with the same crawl, chunking and retrieval a
+  paying client gets. That is what makes conversion a status change rather than
+  a migration — the knowledge base, conversations and leads all survive it.
+- **The crawl runs inline** (tens of seconds). The UI narrates it. If this needs
+  a queue later the seam is `IndexingJob`, which already exists.
+- **A failed crawl deletes the workspace.** A demo that answers nothing is worse
+  than no demo, and it would still consume the entitlement.
+- **Demos expire after 14 days**, on both the workspace and the deployment.
+  `resolveWidgetRequest` already honoured both.
+- **Revoke ≠ delete.** Revoking kills the link and keeps the conversations,
+  which are the evidence the demo worked.
+- **The demo assistant is created `published`.** For a client, publishing is a
+  deliberate act because it puts a widget in front of their visitors; for a
+  demo, creating it *is* that act.
+- **`/d/[token]` checks `context.channel === 'shareable_demo'`.**
+  `resolveWidgetRequest` matches `publicKey` OR `shareToken`, so without that
+  check a real client's widget key pasted into `/d/<key>` would render their
+  production widget on a public page, outside every origin check that key is
+  subject to. Pinned by a test.
+
+**Known follow-up:** an organization that exhausts `monthly_messages` makes
+every one of its demo links go dark — the prospect sees "temporarily
+unavailable" and the agency is told nothing. Worth an alert on the agency side.
 
 **Note:** [`outreach-demo-funnel-plan.md`](outreach-demo-funnel-plan.md) was
-written against the **legacy `Domain` schema**. Its `isDemo` / `demoToken`
-design is superseded by the fields above. Read it for intent, not for design.
-
-**Size:** two to three days.
+written against the **legacy `Domain` schema** and its `isDemo` / `demoToken`
+design was superseded. It is now historical.
 
 ### 6. Decide: chat only, or add voice
 
@@ -120,6 +150,27 @@ The schema was built to accommodate it — `Assistant` is separate from
 decision, not a rewrite. **But "chat only" should be a choice, not an omission.**
 
 **Do not build voice without an explicit decision from the owner.**
+
+---
+
+### 5b. A manager who creates a client is locked out of it
+
+Found while building the demo flow, and fixed only in
+`onCreateProspectDemo`. `onIntegrateDomain` has the same gap.
+
+Only `owner`/`admin` have `hasImplicitWorkspaceAccess` (`permissions.ts:189`).
+Everyone else needs an explicit `ClientWorkspaceMembership` row — and
+`onIntegrateDomain` never creates one. So an org **manager**, who has
+`createClientWorkspace`, can add a client and then do nothing to it: crawling,
+the embed key and publishing all call `requireWorkspace` and deny them. The
+client shows in the roster (that path uses `accessibleWorkspaceIds`), which
+makes it look like a broken feature rather than a permission.
+
+**Fix:** in the same transaction, when `!ctx.actor.hasImplicitWorkspaceAccess`,
+create an `agency_manager` membership for the creator — see
+`src/actions/demos/index.ts` for the shape.
+
+**Size:** under an hour.
 
 ---
 

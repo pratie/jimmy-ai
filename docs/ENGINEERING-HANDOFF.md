@@ -83,9 +83,9 @@ business.
 
 | Path | What belongs there |
 |---|---|
-| `src/actions/` | **Server actions** (`'use server'`). One `index.ts` per domain: `appointment`, `auth`, `bot`, `clients`, `conversation`, `dodo`, `firecrawl`, `landing`, `mail`, `payments`, `settings`. Every one calls into `src/lib/tenant.ts` for authorization first. |
-| `src/app/(main)/` | All pages. `(dashboard)` route group = authed app; `auth`, `blogs`, `demo`, `preview`, `portal` are public (see `src/middleware.ts`). |
-| `src/app/api/` | **Route handlers.** Five of them: `bot/stream`, `bot/preview/stream`, `dodo/webhook`, `upload`, `health/rag`. |
+| `src/actions/` | **Server actions** (`'use server'`). One `index.ts` per domain: `appointment`, `auth`, `bot`, `clients`, `conversation`, `demos`, `dodo`, `firecrawl`, `landing`, `mail`, `payments`, `settings`. Every one calls into `src/lib/tenant.ts` for authorization first. |
+| `src/app/(main)/` | All pages. `(dashboard)` route group = authed app; `auth`, `blogs`, `demo`, `d/[token]`, `preview`, `portal` are public (see `src/middleware.ts`). |
+| `src/app/api/` | **Route handlers.** Six: `bot/stream`, `bot/preview/stream`, `dodo/webhook`, `demo/engagement`, `upload`, `health/rag`. |
 | `src/lib/` | Server-side services and shared helpers. The security-critical files are `tenant.ts`, `permissions.ts`, `entitlements.ts`, `widget/resolve.ts`, `vector-search.ts`. Several are `import 'server-only'`. |
 | `src/components/` | React components, 129 files, grouped by feature (`landing/`, `clients/`, `dashboard/`, `settings/`, `forms/`, `sidebar/`, …) plus `ui/` for shadcn primitives. |
 | `src/hooks/` | Client-side hooks per feature (`chatbot`, `conversation`, `firecrawl`, `settings`, `billing`, `portal`, `sign-in`, `sign-up`, `sidebar`). |
@@ -115,6 +115,8 @@ This is the default and covers the great majority of the app.
   returns a `ReadableStream` of `text/event-stream`);
 - a secret proxy — `api/upload` exists purely so `KIE_API_KEY` never reaches a
   browser;
+- a fire-and-forget beacon — `api/demo/engagement`, called with `keepalive`
+  from a public page, which a server action cannot serve;
 - an ops probe — `api/health/rag`.
 
 Route handlers on a public path do **not** get tenant context from Clerk. They
@@ -667,16 +669,28 @@ Derived by grepping `process.env.*` across `src/`, `scripts/`, `prisma/`,
    audio storage, no code. These exist because adding an enum value later is
    cheap and restructuring a table is not. Adding a voice feature now is
    explicitly out of scope.
-4. **The prospect demo funnel has seams but no flows.** Present:
-   `WorkspaceType.prospect_demo`, `ClientWorkspace.expiresAt` / `convertedAt`,
-   `DeploymentType.shareable_demo`, `AssistantDeployment.shareToken` (unique),
-   the `DeploymentEngagementEvent` model, `maximum_prospect_demos` entitlement,
-   and `resolveWidgetRequest` already accepting a `shareToken` and honouring
-   `demo_expired`. Missing: anything that *creates* a prospect demo, issues a
-   share token, sends the link, records a `DeploymentEngagementEvent` (no writer
-   exists), or converts a demo to an active client. `docs/outreach-demo-funnel-plan.md`
-   is the plan but was written against the old `Domain`/`isDemo` schema and its
-   data design no longer applies.
+4. ~~**The prospect demo funnel has seams but no flows.**~~ **Built 2026-08-05.**
+   `src/actions/demos/index.ts` creates a `prospect_demo` workspace, crawls the
+   prospect's site through the same ingest pipeline a client uses, mints a
+   `shareToken` on a `shareable_demo` deployment, and expires both after 14
+   days; `onConvertProspectDemo` flips it to `active_client` and stamps
+   `convertedAt`. `src/lib/demos/engagement.ts` is the first and only writer of
+   `DeploymentEngagementEvent`. The prospect page is
+   `src/app/(main)/d/[token]/page.tsx`; the agency screen is `/demos`.
+
+   Two things to know before touching it. **`resolveWidgetRequest` matches
+   `publicKey` OR `shareToken`**, so any surface that treats a key as a demo
+   must check `context.channel === 'shareable_demo'` — otherwise a live client's
+   widget key pasted into `/d/<key>` renders their production widget on a public
+   page, outside every origin check that key is subject to. And **demos are
+   metered separately**: `maximum_prospect_demos` counts unexpired demos,
+   `maximum_client_workspaces` excludes them entirely, so conversion is the
+   moment a demo starts costing a client slot — which is why the entitlement is
+   asserted there and not at creation. Both are pinned by
+   `tests/security/prospect-demo.test.ts`.
+
+   `docs/outreach-demo-funnel-plan.md` was written against the old
+   `Domain`/`isDemo` schema and is now purely historical.
 5. **Client-facing login does not exist.** `WorkspaceRole` defines
    `client_admin` / `client_member` / `client_viewer` and `permissions.ts` scopes
    them correctly, but there is no invite flow, no client-side sign-up, and no
@@ -698,8 +712,9 @@ Derived by grepping `process.env.*` across `src/`, `scripts/`, `prisma/`,
     only in `plans.ts`, nothing ever pruned history, and the pricing claim has
     been removed. Retention would need a real `EntitlementKey` plus a pruning
     job.
-11. **Test coverage is two suites.** `tests/security/tenant-isolation.test.ts`
-    (26) and `tests/security/publish-gate.test.ts` (7), sharing
+11. **Test coverage is three suites.** `tests/security/tenant-isolation.test.ts`
+    (26), `tests/security/publish-gate.test.ts` (7) and
+    `tests/security/prospect-demo.test.ts` (13), sharing
     `tests/helpers/tenant-fixture.ts`. No unit, integration or E2E tests
     (STATUS.md deliverables 18, 19, 21). Both need a live remote Postgres —
     ~150s and ~85s respectively — so moving to a local Postgres is worth doing
