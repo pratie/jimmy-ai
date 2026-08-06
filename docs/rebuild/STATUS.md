@@ -32,6 +32,15 @@ The problem to fix next is not in the code: **the database answers `SELECT 1` in
 cannot finish. Details in [`../BACKLOG.md`](../BACKLOG.md) step 0 and
 [`../ENGINEERING-HANDOFF.md`](../ENGINEERING-HANDOFF.md) §7b.
 
+**2026-08-06, later** — the assistant's system prompt was rewritten
+(`src/lib/promptBuilder.ts`), because it had been telling the model to announce
+a handoff to a human who does not exist and to ask for contact details on
+nearly every turn. `tests/unit/prompt-builder.test.ts` pins the new rules: 17
+tests, no database, about a second — the first suite here worth running on
+every save. The client configuration screen was rebuilt around a single
+navigation with a live Test & customise panel, and deleting a client now
+actually removes it. Production logs confirm chat and retrieval are healthy.
+
 ⚠ The security suites were **last fully green on 2026-08-05** (46/46). Since
 then they fail on connection drops, not assertions; `publish-gate` (7/7) still
 passes in isolation. Do not read a red run here as a regression without
@@ -104,7 +113,7 @@ Rollback path if production must be restored:
 | 15 | Provider-interface design | ⬜ | outstanding |
 | 16 | Updated backend | ✅ | 0 type errors; build compiles; verified live end to end |
 | 17 | Updated frontend | ⬜ | outstanding |
-| 18 | Unit tests | ⬜ | outstanding |
+| 18 | Unit tests | 🟡 | `tests/unit/prompt-builder.test.ts` — 17 passing, no database. First one; the pattern to follow |
 | 19 | Integration tests | ⬜ | outstanding |
 | 20 | Multi-tenant security tests | ✅ | `tests/security/tenant-isolation.test.ts` — **26/26 passing** |
 | 21 | End-to-end tests | ⬜ | outstanding |

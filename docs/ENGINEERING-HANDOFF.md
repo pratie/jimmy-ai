@@ -7,8 +7,10 @@ disagreed, the code won and the disagreement is recorded here.
 > entry point: where the product actually stands, the mind map, and the next
 > five steps. This file is the depth behind it.
 >
-> Updated 2026-08-05 (later the same day): the publish path shipped — §9.1 is
-> closed — and Dodo is confirmed **not** configured, deferred by the owner.
+> Updated 2026-08-06: the assistant's system prompt was rewritten (§6b — it had
+> been ending its own conversations), the client configuration screen was
+> rebuilt, and delete finally deletes. §9.1 closed 2026-08-05; Dodo is confirmed
+> **not** configured, deferred by the owner.
 
 Companion documents — read them, do not re-derive them:
 
@@ -568,6 +570,64 @@ Derived by grepping `process.env.*` across `src/`, `scripts/`, `prisma/`,
 
 ---
 
+## 6b. The system prompt — read before changing a word of it
+
+`src/lib/promptBuilder.ts` is the product. Retrieval decides what the assistant
+*can* say; this decides what it *does* say, and it is the surface a client's
+customers actually meet.
+
+Rewritten 2026-08-06, because the previous version was ending conversations by
+design. It instructed the model to append a literal `(realtime)` tag whenever
+the knowledge base fell short, and to "reply briefly that a human will take
+over". Nothing stripped the tag, so it printed in the chat; and no human ever
+arrives (§9.2 — the server half of the realtime channel is imported by
+nothing). The assistant was not failing. It was doing what it was told:
+announcing a handoff to nobody and stopping.
+
+It also asked for contact details on nearly every turn, from two causes that
+stacked: the caller passed "What is the best email or phone number to reach you
+on?" as a *qualification question* on every pre-lead turn, and mode was forced
+to `QUALIFIER` until a lead existed — a block whose instructions are "one
+qualification per turn" and "compress time-to-CTA".
+
+### The rules it now encodes, in priority order
+
+**Never invent → be useful → capture the lead.** That order is deliberate and
+load-bearing; if a change makes two of them conflict, the earlier one wins.
+
+- **Grounding is stated above the mode block and cannot be loosened by it.**
+  With no retrieved material the assistant is told it cannot answer at all,
+  because anything it produced would be invented about a real business.
+- **Retrieved text is marked as information, never instructions.** It comes off
+  a page anyone can edit.
+- **Contact details:** never on the first reply (the prompt is told when it is
+  writing that reply, via `turnCount`); after that only on a real signal;
+  **once**; and never again if declined. `hasContactDetails` switches the whole
+  block off.
+- **Gaps become leads, not handoffs:** say plainly it cannot be confirmed from
+  what is published, then offer follow-up.
+- **No control tags, ever.** `api/bot/stream` also strips `(realtime)` and
+  `(complete)` defensively, because a model that has seen them in history will
+  continue the pattern regardless of instructions.
+- **Never confirm a booking.** The data model only records a *request*.
+
+`tests/unit/prompt-builder.test.ts` pins every one of these — 17 tests, no
+database, ~1 second. Reword the prompt freely; that suite is what stops the
+behaviour regressing. **Run it after any edit to this file.**
+
+### Two adjacent traps
+
+- **The system prompt goes in `streamText`'s `system` option, not in the
+  `messages` array.** It was a message until 2026-08-06, which the AI SDK warns
+  about on every request: a system message in the same list as visitor turns is
+  one bug away from being reachable by whatever a visitor types.
+- **`domain` is the *client's* website.** Both callers used to pass
+  `NEXT_PUBLIC_APP_URL`, so every assistant introduced itself as belonging to
+  chatdock.io. The widget context does not carry the client's URL; passing an
+  empty string is correct until it does.
+
+---
+
 ## 7a. Outbound email — two transports, on purpose
 
 | | Gmail via nodemailer | Resend |
@@ -737,7 +797,15 @@ confusion when a "new API key" appears not to work.
    created as `draft` on purpose — `onIntegrateDomain` cannot know the crawl has
    run, and `src/lib/widget/resolve.ts:148` still returns
    `403 assistant_unpublished` until someone publishes deliberately.
-2. **Realtime is half-wired.** `src/lib/pusher-client.ts` is imported by
+2. **Realtime is half-wired — and the prompt used to promise it anyway.**
+   Until 2026-08-06 the system prompt told the model to announce a human
+   takeover and emit `(realtime)` whenever it was stuck, so visitors were
+   routinely handed to a person who does not exist. The prompt no longer
+   mentions handoff at all (§6b). The plumbing below is still half-built, and
+   `onToggleRealtime` has **no caller anywhere in the UI**, so a takeover can
+   only be started by editing the database by hand.
+
+   `src/lib/pusher-client.ts` is imported by
    `src/hooks/chatbot/use-chatbot.ts` and `src/hooks/conversation/use-conversation.ts`,
    which subscribe to channels. `src/lib/pusher-server.ts` is imported by
    **nothing** (the only textual hit is a comment in `src/lib/utils.ts`). Nothing
@@ -819,13 +887,26 @@ confusion when a "new API key" appears not to work.
     only in `plans.ts`, nothing ever pruned history, and the pricing claim has
     been removed. Retention would need a real `EntitlementKey` plus a pruning
     job.
-11. **Test coverage is three suites, and they run against production.**
+11b. **Soft delete and unique slugs disagree, by design of neither.**
+    `@@unique([organizationId, slug])` on `ClientWorkspace` does **not** exclude
+    soft-deleted rows, while every duplicate check filters `deletedAt: null`. So
+    a deleted client kept its slug reserved, and re-adding the same website
+    failed with a raw `P2002` the operator could do nothing about — seen twice
+    in production logs on 2026-08-06. `onDeleteUserDomain` now renames the slug
+    when it deletes, and `onIntegrateDomain` frees any slug still held by a
+    deleted row before inserting, which heals clients deleted before that fix.
+    **Any new uniqueness constraint on a soft-deleted model needs the same
+    treatment.**
+
+12. **Test coverage is four suites, three of which run against production.**
     `tests/security/tenant-isolation.test.ts` (26),
-    `publish-gate.test.ts` (7) and `prospect-demo.test.ts` (13), sharing
-    `tests/helpers/tenant-fixture.ts`. No unit, integration or E2E tests
-    (STATUS.md deliverables 18, 19, 21). `server-only` is aliased to a stub in
-    `vitest.config.ts`; without it, importing any `import 'server-only'` module
-    fails the whole file.
+    `publish-gate.test.ts` (7) and `prospect-demo.test.ts` (13) share
+    `tests/helpers/tenant-fixture.ts` and need a live Postgres.
+    `tests/unit/prompt-builder.test.ts` (17) needs nothing and runs in about a
+    second — the first suite here that is worth running on every save, and the
+    model for where new coverage should go. `server-only` is aliased to a stub
+    in `vitest.config.ts`; without it, importing any `import 'server-only'`
+    module fails the whole file.
 
     **They point at the live database and share its connection pooler with the
     running product.** On 2026-08-06 this produced a full day of false alarms:

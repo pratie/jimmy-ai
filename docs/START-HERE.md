@@ -1,8 +1,9 @@
 # START HERE
 
 **Snapshot taken:** 2026-08-05 · **updated 2026-08-06** (prospect demos, lead
-alerts and the onboarding timeout fix shipped; a database-latency problem
-found that outranks everything else)
+alerts, the onboarding timeout fix, a rewritten system prompt and a rebuilt
+client configuration screen; a database-latency problem still outranks
+everything else)
 **Commit at time of writing:** `05f5f0f` — working tree clean
 **Deployed:** chatdock.io (Vercel, auto-deploys every push to `master`)
 
@@ -251,6 +252,10 @@ quietly eating the product business; cap it deliberately.
 | Area | Status | Evidence |
 |---|---|---|
 | **Database latency** | **Degraded** | `SELECT 1` ≈ 1.3s on the pooled connection (measured 2026-08-06). Explains the hangs, the 49s ingest and the red test runs |
+| Widget chat + retrieval | Working | Verified in production logs 2026-08-06: `POST /api/bot/stream` 200s, query expansion, real visitor questions, a lead captured |
+| System prompt | Rewritten 2026-08-06 | It had been instructing the assistant to announce a handoff to a human who does not exist, and to ask for an email nearly every turn. 17 unit tests pin the new rules |
+| Client configuration screen | Rebuilt 2026-08-06 | One navigation instead of two, live Test & customise panel, behaviour saves as you edit |
+| Deleting a client | Fixed 2026-08-06 | Never removed anything before — it set `archived` but not `deletedAt`, which is what every listing filters on |
 | Lead / booking alerts | Working, unproven | Resend via `lib/notifications/lead-alert.ts`; `mail.chatdock.io` verified. **No real email has been sent yet**, and `RESEND_API_KEY` in Vercel is a 310-day-old leftover that needs replacing |
 | First-client onboarding | Fixed 2026-08-06 | Hung forever on Vercel's 10–15s function default; `maxDuration = 60` + client-side timeouts |
 | Multi-tenancy and isolation | Working | 26 tests incl. a non-vacuity assertion |
@@ -334,6 +339,10 @@ to be **false**. Recorded so nobody rebuilds on them.
 
 | Claim | Reality | Found |
 |---|---|---|
+| "The chat breaks after a few messages" | It was working exactly as instructed. The system prompt told the model to append `(realtime)` and say a human would take over whenever the knowledge base fell short. Nothing stripped the tag, and no human exists — the assistant announced a handoff to nobody and stopped | 2026-08-06 |
+| "Delete doesn't work" | It ran and reported success. It set `status: 'archived'` but not `deletedAt`, which is what every listing filters on, so the client never disappeared | 2026-08-06 |
+| "Scraping failed" on a healthy client | That panel showed the red banner for **every** client, always. Its condition was `!knowledgeBase && status !== 'pending'`, and `knowledgeBase` is hardcoded `null` under the current schema while `SyncStatus` has no `'pending'` | 2026-08-06 |
+| The AI Behavior tab's mode and brand-voice controls | Had never saved once. Both called their action with the arguments reversed, so the mode string arrived where a workspace id was expected and every attempt returned 400 | 2026-08-06 |
 | "Firecrawl is broken / the API key is wrong" — onboarding hung on *Connecting…* | Firecrawl returned **HTTP 200 in 3.7s** with 8,912 chars of real markdown, and the full crawl→embed→index chain produced 11 chunks. The hang was Vercel killing the function at its 10–15s default, which sends **no response at all**, so the browser waited on a promise that never settled | 2026-08-06 |
 | "Three tests are failing, something regressed" | Six runs, **zero assertion failures**. All `Server has closed the connection` / `Hook timed out`, and a different test each time. A wandering failure is an infrastructure failure | 2026-08-06 |
 | "Dodo is configured" (asserted earlier on 2026-08-05 from `.env.local`) | Env vars are set and both billing periods are coded, but the **products were never created at Dodo**. Owner confirmed it is not set up and is deferring it. Env presence is not configuration | 2026-08-05, corrected same day |
