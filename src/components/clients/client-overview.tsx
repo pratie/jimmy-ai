@@ -13,6 +13,7 @@ import {
 } from 'lucide-react'
 
 import PublishToggle from '@/components/clients/publish-toggle'
+import DeleteClientDialog from '@/components/clients/delete-client-dialog'
 
 type Overview = Extract<
   Awaited<ReturnType<typeof import('@/actions/clients').onGetClientOverview>>,
@@ -109,6 +110,19 @@ export default function ClientOverview({ data }: { data: Overview }) {
               >
                 Configure
               </Link>
+              {/* Reachable in one click, but gated behind typing the client's
+                  name. It used to sit at the foot of a settings tab, which made
+                  it both hard to find and easy to hit by accident. */}
+              <DeleteClientDialog
+                workspaceId={workspace.id}
+                clientName={workspace.businessName || workspace.name}
+                counts={{
+                  conversations: workspace._count.conversations,
+                  leads: workspace._count.leads,
+                  bookings: workspace._count.bookingRequests,
+                  passages: workspace._count.knowledgeChunks,
+                }}
+              />
             </>
           )}
         </div>

@@ -268,7 +268,18 @@ export const onGetClientOverview = async (workspaceId: string) => {
               where: { deletedAt: null },
               select: { id: true, name: true, sourceType: true, syncStatus: true, lastSyncedAt: true },
             },
-            _count: { select: { knowledgeChunks: true, knowledgeDocuments: true } },
+            // Totals, not the 30-day metrics below: the delete confirmation has
+            // to say what is actually being removed, and "3 conversations" when
+            // there are 300 older ones would be a dangerous kind of accurate.
+            _count: {
+              select: {
+                knowledgeChunks: true,
+                knowledgeDocuments: true,
+                conversations: true,
+                leads: true,
+                bookingRequests: true,
+              },
+            },
           },
         }),
         client.conversation.count({ where: { clientWorkspaceId: id, startedAt: { gte: since } } }),

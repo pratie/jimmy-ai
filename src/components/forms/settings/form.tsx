@@ -48,8 +48,6 @@ const SettingsForm = ({ id, name, chatBot, plan, knowledge, trainingSourcesUsed,
     register,
     onUpdateSettings,
     errors,
-    onDeleteDomain,
-    deleting,
     loading,
   } = useSettings(id)
 
@@ -282,15 +280,16 @@ const SettingsForm = ({ id, name, chatBot, plan, knowledge, trainingSourcesUsed,
           >
             <h2 className="font-black text-xl text-slate-950 tracking-tight border-b border-slate-100 pb-5">Domain Settings</h2>
             <DomainUpdate name={name} register={register} errors={errors} />
-            <div className="flex justify-end gap-3 border-t border-slate-100 pt-5">
-              <Button
-                onClick={onDeleteDomain}
-                variant="destructive"
-                type="button"
-                className="h-10 rounded-lg px-5 text-[13px] font-bold"
+            <div className="flex items-center justify-between gap-3 border-t border-slate-100 pt-5">
+              {/* Deleting lives on the client page now, one click from anywhere.
+                  The link keeps this a dead end rather than a second, differently
+                  guarded way to do the same destructive thing. */}
+              <a
+                href={`/clients/${id}`}
+                className="text-[12.5px] font-semibold text-slate-400 underline underline-offset-2 hover:text-rose-600"
               >
-                <Loader loading={deleting}>Delete client</Loader>
-              </Button>
+                Delete this client
+              </a>
               <Button
                 type="submit"
                 className="h-10 rounded-lg bg-[#5b5ce2] px-5 text-[13px] font-bold text-white hover:bg-[#4c4dd6]"

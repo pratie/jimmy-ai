@@ -353,18 +353,47 @@ export const onUpdateDomain = async (id: string, name: string) => {
 }
 
 /** Soft archive. Client data is preserved; only access to it stops. */
+/**
+ * Removes a client from the agency's roster.
+ *
+ * Soft delete: `deletedAt` is what every listing filters on
+ * (`accessibleWorkspaceIds`, `onGetClients`, `onGetCurrentDomainInfo`), so it
+ * is what actually makes a client disappear. This previously set only
+ * `status: 'archived'` and `archivedAt` — which stopped the widget serving, but
+ * left the row in every list. Deleting a client returned a success toast and
+ * changed nothing visible, so it read as broken.
+ *
+ * The rows survive. `deletedAt` is the schema's convention for tenant roots
+ * precisely so that conversations, leads and billing history outlive the
+ * client's presence in the UI — a deleted client must not silently erase the
+ * usage it was billed for.
+ */
 export const onDeleteUserDomain = async (id: string) => {
   try {
-    await requireWorkspace(id, 'archiveClientWorkspace')
-    await client.clientWorkspace.update({
-      where: { id },
-      data: { status: 'archived', archivedAt: new Date() },
+    const { access } = await requireWorkspace(id, 'archiveClientWorkspace')
+
+    const now = new Date()
+    await client.$transaction(async (tx) => {
+      await tx.clientWorkspace.update({
+        where: { id: access.clientWorkspaceId },
+        data: { status: 'archived', archivedAt: now, deletedAt: now },
+      })
+
+      // Revoke every way in. Without this an embed script left on the client's
+      // website keeps resolving until someone notices — the workspace check
+      // would catch it today, but a deployment that outlives its workspace is
+      // a loose credential and should not depend on a downstream guard.
+      await tx.assistantDeployment.updateMany({
+        where: { assistant: { clientWorkspaceId: access.clientWorkspaceId } },
+        data: { status: 'revoked', revokedAt: now },
+      })
     })
-    return { status: 200, message: 'Client archived' }
+
+    return { status: 200, message: 'Client deleted' }
   } catch (error) {
     if (error instanceof AuthorizationError) return { status: 403, message: error.message }
     console.error('[Settings] onDeleteUserDomain failed:', error)
-    return { status: 400, message: 'Could not archive the client' }
+    return { status: 400, message: 'Could not delete the client' }
   }
 }
 
