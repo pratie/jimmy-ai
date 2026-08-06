@@ -358,7 +358,12 @@ function DashboardStrip({ beat }: { beat: Beat }) {
                 className="text-[15px] font-bold tabular-nums transition-colors duration-200 sm:text-base"
                 style={{ color: on ? '#101828' : '#667085' }}
               >
-                {on ? '+1' : '—'}
+                {/* `0`, not an em-dash. The loop restarts, so a visitor
+                    glancing during an early beat sees this state — and three
+                    dashes in a row reads as data that failed to load rather
+                    than a counter waiting to tick. A zero is a real value, in
+                    the same tabular slot, and 0 → +1 still lands. */}
+                {on ? '+1' : '0'}
               </span>
             </span>
             <span className="text-[10px] font-medium leading-tight text-[#667085]">{row.label}</span>

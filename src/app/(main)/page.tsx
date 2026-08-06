@@ -177,7 +177,7 @@ export default function Home() {
                   href="/auth/sign-up"
                   className="press inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-[#5B5CE2] px-6 text-[15px] font-semibold text-white transition-colors hover:bg-[#4A4BD0] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5B5CE2] focus-visible:ring-offset-2"
                 >
-                  Build a demo for a client <ArrowRight className="h-4 w-4" />
+                  Build a client demo <ArrowRight className="h-4 w-4" />
                 </Link>
                 <a
                   href="#demo"
