@@ -91,12 +91,25 @@ export default function ClientOverview({ data }: { data: Overview }) {
             />
           )}
           {canManage && assistant && (
-            <Link
-              href={`/settings/${workspace.id}`}
-              className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-4 text-[13px] font-bold text-slate-900 hover:bg-slate-50"
-            >
-              Configure
-            </Link>
+            <>
+              {/* Testing is the thing an agency does most often on this screen —
+                  before a call, after a content change, when a client asks
+                  "what does it say if…". It should not be three clicks deep in
+                  a settings tab. */}
+              <Link
+                href={`/settings/${workspace.id}?tab=appearance`}
+                className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-4 text-[13px] font-bold text-slate-900 hover:bg-slate-50"
+              >
+                <MessagesSquare className="h-3.5 w-3.5" />
+                Test &amp; customise
+              </Link>
+              <Link
+                href={`/settings/${workspace.id}`}
+                className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-4 text-[13px] font-bold text-slate-900 hover:bg-slate-50"
+              >
+                Configure
+              </Link>
+            </>
           )}
         </div>
       </div>

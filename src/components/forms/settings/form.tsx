@@ -8,8 +8,6 @@ import EditChatbotIcon from './edit-chatbot-icon'
 import { Button } from '@/components/ui/button'
 import { Loader } from '@/components/loader'
 import KnowledgeBaseViewer, { type KnowledgeSummary } from '@/components/settings/knowledge-base-viewer'
-import { BotModeSelector } from '@/components/settings/bot-mode-selector'
-import { BrandVoiceSettings } from '@/components/settings/brand-voice-settings'
 import { onGetEmbeddingStatus } from '@/actions/firecrawl'
 import {
   ArrowRight,
@@ -73,6 +71,24 @@ const SettingsForm = ({ id, name, chatBot, plan, knowledge, trainingSourcesUsed,
     }
   }, [])
 
+  /**
+   * Keeps the open tab in the URL.
+   *
+   * `activeTab` is component state defaulting to `'knowledge'`, so any remount
+   * — a `router.refresh()` after a save, a hot reload, a back/forward — used to
+   * silently return the user to the first tab. Writing it to the URL means the
+   * mount effect above restores where they actually were, and the tab becomes
+   * linkable. `replaceState` rather than a router push: this is not a
+   * navigation and should not stack history entries.
+   */
+  const selectTab = React.useCallback((value: TabKey) => {
+    setActiveTab(value)
+    if (typeof window === 'undefined') return
+    const url = new URL(window.location.href)
+    url.searchParams.set('tab', value)
+    window.history.replaceState(window.history.state, '', url)
+  }, [])
+
   useEffect(() => {
     let mounted = true
       ; (async () => {
@@ -108,7 +124,23 @@ const SettingsForm = ({ id, name, chatBot, plan, knowledge, trainingSourcesUsed,
   const progressPercent = Math.round((completedSteps / totalSteps) * 100)
 
   return (
-    <form className="flex flex-col gap-8 pb-10" onSubmit={onUpdateSettings}>
+    /**
+     * A div, not a form — deliberately.
+     *
+     * This used to wrap everything, including the tab panels. The Test &
+     * customise panel contains a real chat whose composer is its own `<form>`,
+     * and a submit from it bubbled up and fired `onUpdateSettings`, which ends
+     * in `reset()` + `router.refresh()`. `activeTab` is component state
+     * defaulting to `'knowledge'`, so the remount that followed threw the user
+     * out of the panel and back to the Knowledge Base tab — mid-conversation,
+     * after a couple of messages.
+     *
+     * Guarding it with `stopPropagation` treated the symptom and still left a
+     * nested form, which is invalid HTML the moment either panel is
+     * server-rendered. Each card that actually has fields to save now owns its
+     * own form instead, so nothing that isn't a settings field can submit one.
+     */
+    <div className="flex flex-col gap-8 pb-10">
       <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_6px_24px_rgba(15,23,42,.035)] md:p-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div><div className="flex items-center gap-2"><h2 className="text-base font-semibold text-slate-950">Launch readiness</h2><span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-500">{completedSteps}/{totalSteps}</span></div><p className="mt-1 text-xs text-slate-500">Complete the essentials, then validate the visitor experience.</p></div>
@@ -116,13 +148,13 @@ const SettingsForm = ({ id, name, chatBot, plan, knowledge, trainingSourcesUsed,
         </div>
         <div className="mt-5 h-1.5 overflow-hidden rounded-full bg-slate-100"><div className="h-full rounded-full bg-indigo-500 transition-all" style={{ width: `${progressPercent}%` }} /></div>
         <div className="mt-4 grid gap-2 md:grid-cols-3">
-          {checklistItems.map((item) => <button key={item.key} type="button" onClick={() => setActiveTab(item.key)} className={cn('flex items-center gap-3 rounded-xl border px-3 py-3 text-left transition', activeTab === item.key ? 'border-indigo-200 bg-indigo-50/70' : 'border-slate-200 hover:bg-slate-50')}><span className={cn('grid h-7 w-7 shrink-0 place-items-center rounded-lg', item.completed ? 'bg-emerald-100 text-emerald-600' : 'bg-slate-100 text-slate-400')}><CheckCircle2 className="h-3.5 w-3.5" /></span><span><span className="block text-xs font-semibold text-slate-800">{item.label.replace(/^\d\)\s*/, '')}</span><span className="mt-0.5 block text-[10px] text-slate-400">{item.completed ? 'Ready' : item.description}</span></span></button>)}
+          {checklistItems.map((item) => <button key={item.key} type="button" onClick={() => selectTab(item.key)} className={cn('flex items-center gap-3 rounded-xl border px-3 py-3 text-left transition', activeTab === item.key ? 'border-indigo-200 bg-indigo-50/70' : 'border-slate-200 hover:bg-slate-50')}><span className={cn('grid h-7 w-7 shrink-0 place-items-center rounded-lg', item.completed ? 'bg-emerald-100 text-emerald-600' : 'bg-slate-100 text-slate-400')}><CheckCircle2 className="h-3.5 w-3.5" /></span><span><span className="block text-xs font-semibold text-slate-800">{item.label.replace(/^\d\)\s*/, '')}</span><span className="mt-0.5 block text-[10px] text-slate-400">{item.completed ? 'Ready' : item.description}</span></span></button>)}
         </div>
       </div>
 
       <Tabs
         value={activeTab}
-        onValueChange={(value) => setActiveTab(value as TabKey)}
+        onValueChange={(value) => selectTab(value as TabKey)}
         className="flex flex-col gap-6"
       >
         <TabsList className="inline-flex h-auto w-full gap-1 overflow-x-auto rounded-xl border border-slate-200 bg-white p-1 shadow-sm md:w-auto">
@@ -178,21 +210,25 @@ const SettingsForm = ({ id, name, chatBot, plan, knowledge, trainingSourcesUsed,
                 <a href={`/settings/${name}/advanced`}>Advanced Settings <ArrowRight className="ml-2 w-3.5 h-3.5" /></a>
               </Button>
             </div>
-            <div className="grid gap-8 md:grid-cols-2">
-              <div className="col-span-1">
-                <BotModeSelector
-                  domainId={id}
-                  currentMode={chatBot?.mode || null}
-                />
-              </div>
-              <div className="col-span-1">
-                <BrandVoiceSettings
-                  domainId={id}
-                  currentBrandTone={chatBot?.brandTone || null}
-                  currentLanguage={chatBot?.language || null}
-                />
-              </div>
-            </div>
+            {/* Mode and brand voice used to live here in their own widgets, and
+                neither ever saved: both called their action with the arguments
+                reversed — `onUpdateBotMode(mode, domainId)` against a signature
+                of `(workspaceId, mode)` — so the mode string arrived as the
+                workspace id, resolved to nothing, and every attempt returned
+                400. They now live in Test & customise, called correctly and
+                next to a chat that shows what they do. */}
+            <p className="text-[13px] leading-6 text-slate-500">
+              How the assistant speaks and what it is trying to achieve are set in{' '}
+              <button
+                type="button"
+                onClick={() => selectTab('appearance')}
+                className="font-bold text-[#5b5ce2] underline underline-offset-2"
+              >
+                Test &amp; customise
+              </button>
+              , where you can hear the difference straight away. This tab holds the deeper
+              controls: qualifying questions and curated answers.
+            </p>
           </div>
 
           <div className="flex flex-col gap-6 rounded-3xl border border-slate-200/80 bg-white p-6 shadow-[0_8px_30px_rgba(15,23,42,0.05)] md:p-8">
@@ -215,48 +251,61 @@ const SettingsForm = ({ id, name, chatBot, plan, knowledge, trainingSourcesUsed,
               assistantName={name}
               currentTheme={chatBot?.theme as any}
               currentWelcomeMessage={chatBot?.welcomeMessage ?? null}
+              currentMode={chatBot?.mode ?? null}
+              currentBrandTone={chatBot?.brandTone ?? null}
+              currentLanguage={chatBot?.language ?? null}
               knowledgeChunks={knowledge.chunks}
             />
 
-            {/* The icon is still part of the outer settings form: it uploads on
-                the form's own Save, unlike the theme, which the panel persists
-                itself. Keeping it in its own card avoids implying that the
-                panel's Save button covers it. */}
-            <div className="border-t border-slate-100 pt-6">
+            {/* The icon uploads through the settings form rather than the
+                panel, so it carries its own form and its own Save. One button
+                per thing it saves — the previous single Save at the foot of the
+                page gave no clue which of four tabs it was acting on. */}
+            <form onSubmit={onUpdateSettings} className="border-t border-slate-100 pt-6">
               <EditChatbotIcon chatBot={chatBot} register={register} errors={errors} />
-            </div>
+              <div className="mt-4 flex justify-end">
+                <Button
+                  type="submit"
+                  className="h-10 rounded-lg bg-[#5b5ce2] px-5 text-[13px] font-bold text-white hover:bg-[#4c4dd6]"
+                >
+                  <Loader loading={loading}>Save icon</Loader>
+                </Button>
+              </div>
+            </form>
           </div>
         </TabsContent>
 
         <TabsContent value="domain" className="mt-0 space-y-6">
-          <div className="flex flex-col gap-6 rounded-3xl border border-slate-200/80 bg-white p-6 shadow-[0_8px_30px_rgba(15,23,42,0.05)] md:p-8">
+          <form
+            onSubmit={onUpdateSettings}
+            className="flex flex-col gap-6 rounded-3xl border border-slate-200/80 bg-white p-6 shadow-[0_8px_30px_rgba(15,23,42,0.05)] md:p-8"
+          >
             <h2 className="font-black text-xl text-slate-950 tracking-tight border-b border-slate-100 pb-5">Domain Settings</h2>
             <DomainUpdate name={name} register={register} errors={errors} />
-          </div>
+            <div className="flex justify-end gap-3 border-t border-slate-100 pt-5">
+              <Button
+                onClick={onDeleteDomain}
+                variant="destructive"
+                type="button"
+                className="h-10 rounded-lg px-5 text-[13px] font-bold"
+              >
+                <Loader loading={deleting}>Delete client</Loader>
+              </Button>
+              <Button
+                type="submit"
+                className="h-10 rounded-lg bg-[#5b5ce2] px-5 text-[13px] font-bold text-white hover:bg-[#4c4dd6]"
+              >
+                <Loader loading={loading}>Save</Loader>
+              </Button>
+            </div>
+          </form>
           <div className="flex flex-col gap-6 rounded-3xl border border-slate-200/80 bg-white p-6 shadow-[0_8px_30px_rgba(15,23,42,0.05)] md:p-8">
             <h2 className="font-black text-xl text-slate-950 tracking-tight border-b border-slate-100 pb-5">Embed & Launch</h2>
             <CodeSnippet id={id} />
           </div>
         </TabsContent>
       </Tabs>
-
-      <div className="flex gap-5 justify-end">
-        <Button
-          onClick={onDeleteDomain}
-          variant="destructive"
-          type="button"
-          className="px-10 h-[50px]"
-        >
-          <Loader loading={deleting}>Delete Domain</Loader>
-        </Button>
-        <Button
-          type="submit"
-          className="w-[100px] h-[50px] bg-[#5b5ce2] hover:bg-[#4f50d8] text-white font-semibold shadow-[0_4px_12px_rgba(91,92,226,0.3)]"
-        >
-          <Loader loading={loading}>Save</Loader>
-        </Button>
-      </div>
-    </form>
+    </div>
   )
 }
 

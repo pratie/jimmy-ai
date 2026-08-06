@@ -1,9 +1,15 @@
 'use client'
 
 import * as React from 'react'
-import { ChevronDown, Loader2, RotateCcw, Sparkles, TriangleAlert } from 'lucide-react'
+import { Check, ChevronDown, Loader2, RotateCcw, Sparkles, TriangleAlert } from 'lucide-react'
 
-import { onGetPreviewKey, onUpdateTheme, onUpdateWelcomeMessage } from '@/actions/settings'
+import {
+  onGetPreviewKey,
+  onUpdateBotMode,
+  onUpdateBrandVoice,
+  onUpdateTheme,
+  onUpdateWelcomeMessage,
+} from '@/actions/settings'
 import { BotWindow } from '@/components/chatbot/window'
 import { useToast } from '@/components/ui/use-toast'
 import { useChatBot } from '@/hooks/chatbot/use-chatbot'
@@ -26,6 +32,15 @@ import { useChatBot } from '@/hooks/chatbot/use-chatbot'
  * That means a preview answer is the answer a visitor gets. If the assistant
  * has nothing indexed it will decline everything; the panel says so rather than
  * letting the agency read correct behaviour as a broken product.
+ *
+ * The controls are grouped by what they change: how the assistant *responds*
+ * first, then how it *looks*. Mode, tone and language used to live on a separate
+ * tab, which meant tuning the thing the product is sold on — a lead-generating
+ * assistant — without hearing a single answer. They belong next to the chat.
+ * Unlike a colour, they cannot be previewed from draft state: the system prompt
+ * is built server-side per request, so they only apply once saved, and only to
+ * the *next* message. The panel says exactly that and offers a fresh transcript
+ * rather than pretending the bubbles already on screen changed.
  */
 
 export type Theme = {
@@ -67,11 +82,61 @@ const BTN_PRIMARY =
 const BTN_SECONDARY =
   'inline-flex h-9 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 text-[13px] font-bold text-slate-900 transition-colors hover:bg-slate-50 disabled:opacity-60'
 
+/** What a prospective customer actually opens with — price, fit and next step —
+ *  so a test conversation exercises the path a real lead takes. */
 const STARTERS = [
-  'What services do you offer?',
   'How much does it cost?',
-  'What are your opening hours?',
-  'Can I book a call?',
+  'Do you work with businesses like mine?',
+  'What makes you different?',
+  'Can I speak to someone this week?',
+]
+
+/* ── how it responds ────────────────────────────────────────────────────── */
+
+/** Matches the `AssistantMode` enum. `onUpdateBotMode` lowercases whatever it is
+ *  given and falls back to `sales`, so these are the only values worth sending. */
+export type AssistantMode = 'sales' | 'support' | 'faq'
+
+const MODES: { key: AssistantMode; label: string; recommended?: boolean; description: string }[] = [
+  {
+    key: 'sales',
+    label: 'Sales',
+    recommended: true,
+    description:
+      'Answers the question, then works towards a name and an email so the conversation turns into a lead you can follow up.',
+  },
+  {
+    key: 'support',
+    label: 'Support',
+    description:
+      'Walks the visitor through a fix step by step, and hands the conversation to a human when the content does not cover it.',
+  },
+  {
+    key: 'faq',
+    label: 'FAQ only',
+    description:
+      'Answers in a few sentences from the content and nothing more — no pitch, no follow-up questions.',
+  },
+]
+
+const TONES = [
+  'friendly, concise',
+  'professional, helpful',
+  'casual, conversational',
+  'formal, technical',
+  'warm, empathetic',
+  'enthusiastic, high-energy',
+]
+
+const DEFAULT_TONE = 'friendly, concise'
+
+const LANGUAGES = [
+  { value: 'en', label: 'English' },
+  { value: 'es', label: 'Spanish' },
+  { value: 'hi', label: 'Hindi' },
+  { value: 'fr', label: 'French' },
+  { value: 'de', label: 'German' },
+  { value: 'pt', label: 'Portuguese' },
 ]
 
 /* ── colour helpers ─────────────────────────────────────────────────────── */
@@ -179,6 +244,10 @@ type PreviewChatProps = {
   assistantName: string
   theme: Theme
   welcomeMessage: string
+  /** Hands the transcript back up so the panel can offer "start a fresh chat"
+   *  after a behaviour change — the chat state lives in `useChatBot`, which is
+   *  only mounted down here. */
+  registerClear: (clear: () => void) => void
 }
 
 /**
@@ -186,7 +255,13 @@ type PreviewChatProps = {
  * without a key the hook falls back to waiting for a `postMessage` from an
  * embedding page that does not exist here, and would sit loading forever.
  */
-function PreviewChat({ previewKey, assistantName, theme, welcomeMessage }: PreviewChatProps) {
+function PreviewChat({
+  previewKey,
+  assistantName,
+  theme,
+  welcomeMessage,
+  registerClear,
+}: PreviewChatProps) {
   const {
     register,
     setValue,
@@ -211,6 +286,12 @@ function PreviewChat({ previewKey, assistantName, theme, welcomeMessage }: Previ
     },
     [setValue, onStartChatting]
   )
+
+  React.useEffect(() => {
+    // Emptying the transcript is enough: the welcome bubble is re-derived from
+    // the draft below, and the next send opens a new chat session server-side.
+    registerClear(() => setOnChats([]))
+  }, [registerClear, setOnChats])
 
   // The hook seeds the transcript with the *saved* welcome message. The draft is
   // what the agency is editing, so the opening bubble is swapped for it; every
@@ -304,8 +385,30 @@ export type TestAndCustomiseProps = {
   /** Saved theme, as stored on `Assistant.brandingSettings.theme`. */
   currentTheme?: Partial<Theme> | null
   currentWelcomeMessage?: string | null
+  /** Saved `Assistant.mode`. Anything unrecognised is treated as `sales`, which
+   *  is what the action would store anyway. */
+  currentMode?: string | null
+  /** Saved `Assistant.brandTone`, e.g. `friendly, concise`. */
+  currentBrandTone?: string | null
+  /** Saved `Assistant.language` as a two-letter code, e.g. `en`. */
+  currentLanguage?: string | null
   /** Indexed chunks. Zero means the assistant has nothing to answer from yet. */
   knowledgeChunks: number
+}
+
+/** Everything Save has committed. Held in state rather than read from props so
+ *  the unsaved-changes indicator settles after a save, and so a partial failure
+ *  leaves the parts that did save marked as saved. */
+type Saved = {
+  theme: Theme
+  welcome: string
+  mode: AssistantMode
+  tone: string
+  language: string
+}
+
+function normaliseMode(value: string | null | undefined): AssistantMode {
+  return value === 'support' || value === 'faq' ? value : 'sales'
 }
 
 export default function TestAndCustomise({
@@ -313,21 +416,42 @@ export default function TestAndCustomise({
   assistantName,
   currentTheme,
   currentWelcomeMessage,
+  currentMode,
+  currentBrandTone,
+  currentLanguage,
   knowledgeChunks,
 }: TestAndCustomiseProps) {
   const { toast } = useToast()
 
-  const savedTheme = React.useMemo<Theme>(
-    () => ({ ...DEFAULT_THEME, ...(currentTheme || {}) }),
-    [currentTheme]
-  )
-  const savedWelcome = currentWelcomeMessage || ''
+  const [saved, setSaved] = React.useState<Saved>(() => ({
+    theme: { ...DEFAULT_THEME, ...(currentTheme || {}) },
+    welcome: currentWelcomeMessage || '',
+    mode: normaliseMode(currentMode),
+    tone: currentBrandTone || DEFAULT_TONE,
+    language: currentLanguage || 'en',
+  }))
 
-  const [theme, setTheme] = React.useState<Theme>(savedTheme)
-  const [welcome, setWelcome] = React.useState(savedWelcome)
-  const [bubbleStyle, setBubbleStyle] = React.useState<BubbleStyle>(() => detectBubbleStyle(savedTheme))
+  const [theme, setTheme] = React.useState<Theme>(saved.theme)
+  const [welcome, setWelcome] = React.useState(saved.welcome)
+  const [mode, setMode] = React.useState<AssistantMode>(saved.mode)
+  const [tone, setTone] = React.useState(saved.tone)
+  const [language, setLanguage] = React.useState(saved.language)
+  const [bubbleStyle, setBubbleStyle] = React.useState<BubbleStyle>(() => detectBubbleStyle(saved.theme))
   const [showMore, setShowMore] = React.useState(false)
+  const [showCustomTone, setShowCustomTone] = React.useState(() => !TONES.includes(saved.tone))
   const [saving, setSaving] = React.useState(false)
+  /** Set once a behaviour change has actually been written. Drives the nudge to
+   *  send another message — the only way to hear it. */
+  const [behaviourJustSaved, setBehaviourJustSaved] = React.useState(false)
+
+  const clearChatRef = React.useRef<(() => void) | null>(null)
+  const registerClear = React.useCallback((clear: () => void) => {
+    clearChatRef.current = clear
+  }, [])
+  const onClearChat = () => {
+    clearChatRef.current?.()
+    setBehaviourJustSaved(false)
+  }
 
   const [previewKey, setPreviewKey] = React.useState<string | null>(null)
   const [previewError, setPreviewError] = React.useState<string | null>(null)
@@ -352,8 +476,10 @@ export default function TestAndCustomise({
     }
   }, [workspaceId])
 
-  const dirty =
-    JSON.stringify(theme) !== JSON.stringify(savedTheme) || welcome !== savedWelcome
+  const themeDirty = JSON.stringify(theme) !== JSON.stringify(saved.theme)
+  const welcomeDirty = welcome !== saved.welcome
+  const behaviourDirty = mode !== saved.mode || tone !== saved.tone || language !== saved.language
+  const dirty = themeDirty || welcomeDirty || behaviourDirty
 
   const set = <K extends keyof Theme>(key: K, value: Theme[K]) =>
     setTheme((current) => ({ ...current, [key]: value }))
@@ -378,27 +504,39 @@ export default function TestAndCustomise({
   }
 
   const onReset = () => {
-    setTheme(savedTheme)
-    setWelcome(savedWelcome)
-    setBubbleStyle(detectBubbleStyle(savedTheme))
+    setTheme(saved.theme)
+    setWelcome(saved.welcome)
+    setMode(saved.mode)
+    setTone(saved.tone)
+    setLanguage(saved.language)
+    setBubbleStyle(detectBubbleStyle(saved.theme))
+    setShowCustomTone(!TONES.includes(saved.tone))
   }
 
+  /**
+   * Four separate writes, each committed into `saved` on its own. A failure part
+   * way through has to say which half landed — an agency that reads "not saved"
+   * and re-picks colours it already saved is worse off than one told the truth.
+   */
   const onSave = async () => {
     setSaving(true)
     try {
-      const themeResult = await onUpdateTheme(workspaceId, { ...theme })
-      if (themeResult?.status !== 200) {
-        toast({
-          title: 'Not saved',
-          description: themeResult?.message || 'Could not update appearance',
-          variant: 'destructive',
-        })
-        return
+      if (themeDirty) {
+        const themeResult = await onUpdateTheme(workspaceId, { ...theme })
+        if (themeResult?.status !== 200) {
+          toast({
+            title: 'Not saved',
+            description: themeResult?.message || 'Could not update appearance',
+            variant: 'destructive',
+          })
+          return
+        }
+        setSaved((current) => ({ ...current, theme }))
       }
 
       // Only touched when it actually changed — a needless write here would
       // reset the assistant's welcome message on every colour tweak.
-      if (welcome !== savedWelcome) {
+      if (welcomeDirty) {
         const welcomeResult = await onUpdateWelcomeMessage(welcome, workspaceId)
         if (welcomeResult?.status !== 200) {
           toast({
@@ -408,8 +546,36 @@ export default function TestAndCustomise({
           })
           return
         }
+        setSaved((current) => ({ ...current, welcome }))
       }
 
+      if (mode !== saved.mode) {
+        const modeResult = await onUpdateBotMode(workspaceId, mode)
+        if (modeResult?.status !== 200) {
+          toast({
+            title: 'Mode not saved',
+            description: modeResult?.message || 'Could not update the mode',
+            variant: 'destructive',
+          })
+          return
+        }
+        setSaved((current) => ({ ...current, mode }))
+      }
+
+      if (tone !== saved.tone || language !== saved.language) {
+        const voiceResult = await onUpdateBrandVoice(workspaceId, tone.trim() || DEFAULT_TONE, language)
+        if (voiceResult?.status !== 200) {
+          toast({
+            title: 'Tone and language not saved',
+            description: voiceResult?.message || 'Could not update the brand voice',
+            variant: 'destructive',
+          })
+          return
+        }
+        setSaved((current) => ({ ...current, tone, language }))
+      }
+
+      if (behaviourDirty) setBehaviourJustSaved(true)
       toast({ title: 'Saved', description: 'Your client’s visitors will see this.' })
     } finally {
       setSaving(false)
@@ -439,6 +605,7 @@ export default function TestAndCustomise({
                 assistantName={assistantName}
                 theme={theme}
                 welcomeMessage={welcome}
+                registerClear={registerClear}
               />
             ) : (
               <div className="grid h-[560px] place-items-center text-[13px] text-slate-500">
@@ -464,6 +631,174 @@ export default function TestAndCustomise({
       </section>
 
       <section className="order-2 flex flex-col gap-4 lg:order-1">
+        {/* Responds before looks: it is the half that decides whether the
+            assistant brings the client leads. */}
+        <p className="text-[11px] font-black uppercase tracking-wide text-slate-400">
+          How it responds
+        </p>
+
+        <div className="rounded-2xl border border-slate-200 bg-white p-5">
+          <p className="text-[13px] font-black text-slate-900">What it is there to do</p>
+          <p className="mt-1 text-[12px] leading-5 text-slate-500">
+            Sales is the one that turns conversations into leads. Pick another only if the client
+            asked for it.
+          </p>
+
+          <div className="mt-4 space-y-2">
+            {MODES.map((option) => {
+              const selected = mode === option.key
+              return (
+                <button
+                  key={option.key}
+                  type="button"
+                  aria-pressed={selected}
+                  onClick={() => setMode(option.key)}
+                  className={`w-full rounded-xl border p-3 text-left transition ${
+                    selected
+                      ? 'border-[#5b5ce2] bg-[#5b5ce2]/5'
+                      : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+                  }`}
+                >
+                  <span className="flex items-center gap-2">
+                    <span
+                      className={`grid h-4 w-4 shrink-0 place-items-center rounded-full border ${
+                        selected ? 'border-[#5b5ce2] bg-[#5b5ce2] text-white' : 'border-slate-300'
+                      }`}
+                    >
+                      {selected && <Check className="h-2.5 w-2.5" strokeWidth={4} />}
+                    </span>
+                    <span className="text-[13px] font-bold text-slate-900">{option.label}</span>
+                    {option.recommended && (
+                      <span className="rounded-full px-2 py-0.5 text-[10px] font-bold text-[#5b5ce2] ring-1 ring-[#5b5ce2]/30">
+                        Recommended
+                      </span>
+                    )}
+                  </span>
+                  <span className="mt-1 block pl-6 text-[12px] leading-5 text-slate-500">
+                    {option.description}
+                  </span>
+                </button>
+              )
+            })}
+          </div>
+
+          {/* Not a detail we can hide: until a visitor has left contact details
+              every mode still works towards getting them, and the choice only
+              shapes the conversation after that. */}
+          <p className="mt-3 text-[11px] leading-4 text-slate-400">
+            Until a visitor leaves their contact details, the assistant works towards getting them
+            whichever option is picked. The mode shapes the conversation from that point on.
+          </p>
+        </div>
+
+        <div className="rounded-2xl border border-slate-200 bg-white p-5">
+          <p className="text-[13px] font-black text-slate-900">How it speaks</p>
+          <p className="mt-1 text-[12px] leading-5 text-slate-500">
+            The tone it writes in, and the language it defaults to.
+          </p>
+
+          <div className="mt-4 flex flex-wrap gap-2">
+            {TONES.map((preset) => (
+              <button
+                key={preset}
+                type="button"
+                aria-pressed={tone === preset}
+                onClick={() => {
+                  setTone(preset)
+                  setShowCustomTone(false)
+                }}
+                className={`rounded-full px-3 py-1 text-[12px] font-bold ring-1 transition ${
+                  tone === preset
+                    ? 'bg-[#5b5ce2] text-white ring-[#5b5ce2]'
+                    : 'bg-white text-slate-600 ring-slate-200 hover:ring-slate-300'
+                }`}
+              >
+                {preset}
+              </button>
+            ))}
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setShowCustomTone((open) => !open)}
+            className="mt-3 inline-flex items-center gap-1 text-[12px] font-bold text-[#5b5ce2]"
+            aria-expanded={showCustomTone}
+          >
+            Write your own
+            <ChevronDown
+              className={`h-3.5 w-3.5 transition-transform ${showCustomTone ? 'rotate-180' : ''}`}
+            />
+          </button>
+
+          {showCustomTone && (
+            <input
+              value={tone}
+              onChange={(event) => setTone(event.target.value)}
+              placeholder="e.g. direct, no-nonsense"
+              aria-label="Custom tone"
+              className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-[13px] text-slate-800 outline-none transition focus:border-[#5b5ce2] focus:ring-4 focus:ring-[#5b5ce2]/10"
+            />
+          )}
+
+          <label className="mt-4 flex items-center justify-between gap-3 rounded-lg border border-slate-200 px-3 py-2">
+            <span className="text-[12px] font-medium text-slate-600">Language</span>
+            <select
+              value={language}
+              onChange={(event) => setLanguage(event.target.value)}
+              className="rounded-md border border-slate-200 px-2 py-1 text-[12px] text-slate-700 outline-none"
+            >
+              {LANGUAGES.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+
+        {behaviourDirty && (
+          <p className="px-1 text-[11px] leading-4 text-slate-400">
+            Mode, tone and language are decided when a message is answered, so the preview keeps
+            answering the old way until you save.
+          </p>
+        )}
+
+        {behaviourJustSaved && !behaviourDirty && (
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[#5b5ce2]/30 bg-[#5b5ce2]/5 p-4">
+            <p className="text-[12px] leading-5 text-slate-600">
+              Saved. Send another message in the preview to hear it — the replies already on screen
+              were written with the old settings.
+            </p>
+            {previewKey && (
+              <button type="button" onClick={onClearChat} className={BTN_SECONDARY}>
+                <RotateCcw className="h-3.5 w-3.5" />
+                Start a fresh chat
+              </button>
+            )}
+          </div>
+        )}
+
+        <div className="rounded-2xl border border-slate-200 bg-white p-5">
+          <label htmlFor="welcome-message" className="text-[13px] font-black text-slate-900">
+            Welcome message
+          </label>
+          <p className="mt-1 text-[12px] leading-5 text-slate-500">
+            The first thing anyone reads. It shows in the preview as you type.
+          </p>
+          <textarea
+            id="welcome-message"
+            value={welcome}
+            onChange={(event) => setWelcome(event.target.value)}
+            rows={3}
+            placeholder="Hi! Ask me anything about our services."
+            className="mt-3 w-full resize-y rounded-lg border border-slate-200 px-3 py-2 text-[13px] text-slate-800 outline-none transition focus:border-[#5b5ce2] focus:ring-4 focus:ring-[#5b5ce2]/10"
+          />
+        </div>
+
+        <p className="mt-2 text-[11px] font-black uppercase tracking-wide text-slate-400">
+          How it looks
+        </p>
+
         <div className="rounded-2xl border border-slate-200 bg-white p-5">
           <p className="text-[13px] font-black text-slate-900">The basics</p>
           <p className="mt-1 text-[12px] leading-5 text-slate-500">
@@ -520,23 +855,6 @@ export default function TestAndCustomise({
           </div>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-5">
-          <label htmlFor="welcome-message" className="text-[13px] font-black text-slate-900">
-            Welcome message
-          </label>
-          <p className="mt-1 text-[12px] leading-5 text-slate-500">
-            The first thing anyone reads. It shows in the preview as you type.
-          </p>
-          <textarea
-            id="welcome-message"
-            value={welcome}
-            onChange={(event) => setWelcome(event.target.value)}
-            rows={3}
-            placeholder="Hi! Ask me anything about our services."
-            className="mt-3 w-full resize-y rounded-lg border border-slate-200 px-3 py-2 text-[13px] text-slate-800 outline-none transition focus:border-[#5b5ce2] focus:ring-4 focus:ring-[#5b5ce2]/10"
-          />
-        </div>
-
         <div className="rounded-2xl border border-slate-200 bg-white">
           <button
             type="button"
@@ -588,7 +906,11 @@ export default function TestAndCustomise({
             {dirty ? (
               <>
                 <Sparkles className="h-3.5 w-3.5 text-[#5b5ce2]" />
-                Unsaved changes — the preview is already showing them.
+                {/* Colours and the welcome message render from draft state;
+                    behaviour does not, so the claim is narrowed when it is. */}
+                {behaviourDirty
+                  ? 'Unsaved changes — save to hear the new behaviour.'
+                  : 'Unsaved changes — the preview is already showing them.'}
               </>
             ) : (
               'Everything here is saved.'

@@ -166,10 +166,22 @@ export default function FirstClientSetup({ organizationName }: { organizationNam
     }
   }
 
+  /**
+   * Where a finished setup lands.
+   *
+   * Not the client overview: for a client created ten seconds ago that page is
+   * five zeros and a chart of nothing. The first thing anyone wants after a
+   * crawl finishes is to talk to the thing they just built and put their
+   * client's colours on it, so it opens Test & customise directly.
+   */
+  const openTestPanel = React.useCallback(() => {
+    if (createdId) router.push(`/settings/${createdId}?tab=appearance`)
+  }, [createdId, router])
+
   const submit = async (event: React.FormEvent) => {
     event.preventDefault()
     if (phase === 'ready' && createdId) {
-      router.push(`/clients/${createdId}`)
+      openTestPanel()
       return
     }
     setError(null)
@@ -335,7 +347,7 @@ export default function FirstClientSetup({ organizationName }: { organizationNam
               setPhase('idle')
               setError(null)
             }}
-            onTest={() => createdId && router.push(`/clients/${createdId}`)}
+            onTest={openTestPanel}
           />
         </div>
       </div>
