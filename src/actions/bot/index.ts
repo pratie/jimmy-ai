@@ -137,9 +137,12 @@ export const onAiChatBotAssistant = async (
     }
 
     const appBase = process.env.NEXT_PUBLIC_APP_URL ?? ''
-    const mode = !leadId
-      ? 'QUALIFIER'
-      : context.assistant.mode === 'support'
+    // The configured mode, always — see the note in api/bot/stream. Forcing
+    // QUALIFIER before a lead existed meant every visitor was qualified before
+    // they were helped, which is the behaviour that made it ask for an email
+    // almost every turn.
+    const mode =
+      context.assistant.mode === 'support'
         ? 'SUPPORT'
         : context.assistant.mode === 'faq'
           ? 'FAQ_STRICT'
@@ -161,12 +164,16 @@ export const onAiChatBotAssistant = async (
 
     const systemPrompt = buildSystemPrompt({
       businessName: context.assistant.name,
-      domain: appBase,
+      // ChatDock's own URL is not the client's website; naming it here claimed
+      // the assistant belonged to a domain it does not.
+      domain: '',
       knowledgeBase: formatResultsForPrompt(citations),
       mode: mode as never,
       brandTone: context.assistant.brandTone ?? 'friendly, warm, conversational',
       language: context.assistant.language,
       qualificationQuestions: pending.map((q) => q.label),
+      hasContactDetails: Boolean(leadId),
+      turnCount: Array.isArray(chat) ? chat.filter((m) => m.role === 'user').length : 0,
       appointmentUrl:
         context.assistant.bookingEnabled && leadId
           ? `${appBase}/portal/${context.clientWorkspaceId}/appointment/${leadId}`

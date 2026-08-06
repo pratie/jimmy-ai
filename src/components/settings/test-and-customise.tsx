@@ -1,7 +1,7 @@
 'use client'
 
 import * as React from 'react'
-import { Check, ChevronDown, Loader2, RotateCcw, Sparkles, TriangleAlert } from 'lucide-react'
+import { Check, ChevronDown, Loader2, RotateCcw, TriangleAlert } from 'lucide-react'
 
 import {
   onGetPreviewKey,
@@ -20,9 +20,7 @@ import { useChatBot } from '@/hooks/chatbot/use-chatbot'
  *
  * The two halves are the point. Picking `botBubbleBg` out of a column of colour
  * swatches with nothing to look at is guesswork; every competitor puts the chat
- * and the controls together, and this closes that gap. Draft state drives the
- * preview directly, so a colour lands before it is saved and Save is a decision
- * rather than a way to find out what you did.
+ * and the controls together, and this closes that gap.
  *
  * The chat is real, not a mock. It runs through `useChatBot` against a
  * `preview` deployment key, which is the same resolved, rate-limited path an
@@ -33,14 +31,32 @@ import { useChatBot } from '@/hooks/chatbot/use-chatbot'
  * has nothing indexed it will decline everything; the panel says so rather than
  * letting the agency read correct behaviour as a broken product.
  *
- * The controls are grouped by what they change: how the assistant *responds*
- * first, then how it *looks*. Mode, tone and language used to live on a separate
- * tab, which meant tuning the thing the product is sold on — a lead-generating
- * assistant — without hearing a single answer. They belong next to the chat.
- * Unlike a colour, they cannot be previewed from draft state: the system prompt
- * is built server-side per request, so they only apply once saved, and only to
- * the *next* message. The panel says exactly that and offers a fresh transcript
- * rather than pretending the bubbles already on screen changed.
+ * ## Why the controls are split the way they are
+ *
+ * The screen used to answer "can I just ask, or do I have to save first?" three
+ * different ways at once. Colours rendered from draft state, so they were live.
+ * The welcome message rendered from draft state but only persisted on Save. Mode,
+ * tone and language did nothing at all until saved, because the system prompt is
+ * built server-side per request from stored settings. Nothing on screen told you
+ * which control you were touching, and sentences explaining the difference after
+ * the fact did not fix it.
+ *
+ * So the difference is now a property of the control, and there are only two
+ * kinds:
+ *
+ * - **Saves as you edit** — mode, tone, language. Each is a single-field server
+ *   action, so there is no reason to make the agency press anything. Changing
+ *   one writes it immediately and the group's own status chip reports saving,
+ *   saved, or a failure with a retry. The answer to "do I have to save?" is
+ *   visibly no.
+ * - **Draft, saved together** — colours, radius and the welcome message. These
+ *   render from draft state into the preview, so they are already visible and
+ *   Save is what publishes them. The save bar names exactly which of them is
+ *   unsaved rather than describing the rule.
+ *
+ * Behaviour still only applies to the *next* message, because the prompt is
+ * built per request — so a successful behaviour write offers a fresh transcript
+ * instead of pretending the bubbles on screen changed.
  */
 
 export type Theme = {
@@ -81,6 +97,18 @@ const BTN_PRIMARY =
   'inline-flex h-9 items-center gap-1.5 rounded-lg bg-[#5b5ce2] px-4 text-[13px] font-bold text-white transition-colors hover:bg-[#4c4dd6] disabled:opacity-60'
 const BTN_SECONDARY =
   'inline-flex h-9 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 text-[13px] font-bold text-slate-900 transition-colors hover:bg-slate-50 disabled:opacity-60'
+
+const CARD = 'rounded-2xl border border-slate-200 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)]'
+const PILL = 'shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold ring-1'
+const PILL_TONE = {
+  brand: 'bg-[#5b5ce2]/10 text-[#5b5ce2] ring-[#5b5ce2]/25',
+  good: 'bg-emerald-50 text-emerald-700 ring-emerald-600/20',
+  bad: 'bg-rose-50 text-rose-700 ring-rose-600/20',
+  neutral: 'bg-slate-100 text-slate-600 ring-slate-500/20',
+} as const
+
+const FIELD =
+  'w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-[13px] text-slate-800 outline-none transition focus:border-[#5b5ce2] focus:ring-4 focus:ring-[#5b5ce2]/10'
 
 /** What a prospective customer actually opens with — price, fit and next step —
  *  so a test conversation exercises the path a real lead takes. */
@@ -138,6 +166,9 @@ const LANGUAGES = [
   { value: 'de', label: 'German' },
   { value: 'pt', label: 'Portuguese' },
 ]
+
+/** A typed tone is saved once typing stops rather than on every keystroke. */
+const TONE_TYPING_DELAY_MS = 800
 
 /* ── colour helpers ─────────────────────────────────────────────────────── */
 
@@ -221,7 +252,7 @@ function ColorField({
   onChange: (value: string) => void
 }) {
   return (
-    <label className="flex items-center justify-between gap-3 rounded-lg border border-slate-200 px-3 py-2">
+    <label className="flex cursor-pointer items-center justify-between gap-3 rounded-lg border border-slate-200 px-3 py-2 transition hover:border-slate-300">
       <span className="text-[12px] font-medium text-slate-600">{label}</span>
       <span className="flex items-center gap-2">
         <span className="text-[11px] font-medium uppercase tabular-nums text-slate-400">{value}</span>
@@ -248,6 +279,9 @@ type PreviewChatProps = {
    *  after a behaviour change — the chat state lives in `useChatBot`, which is
    *  only mounted down here. */
   registerClear: (clear: () => void) => void
+  /** True once the visitor side of the transcript is non-empty, so the panel
+   *  only offers a fresh chat when there is something stale to clear. */
+  onConversationChange: (hasConversation: boolean) => void
 }
 
 /**
@@ -261,6 +295,7 @@ function PreviewChat({
   theme,
   welcomeMessage,
   registerClear,
+  onConversationChange,
 }: PreviewChatProps) {
   const {
     register,
@@ -305,6 +340,10 @@ function PreviewChat({
   }, [onChats, welcomeMessage])
 
   const hasStarted = onChats.some((chat) => chat.role === 'user')
+
+  React.useEffect(() => {
+    onConversationChange(hasStarted)
+  }, [hasStarted, onConversationChange])
 
   if (loading) {
     return (
@@ -396,9 +435,9 @@ export type TestAndCustomiseProps = {
   knowledgeChunks: number
 }
 
-/** Everything Save has committed. Held in state rather than read from props so
- *  the unsaved-changes indicator settles after a save, and so a partial failure
- *  leaves the parts that did save marked as saved. */
+/** Everything that has been committed to the server. Held in state rather than
+ *  read from props so the draft indicators settle after a save, and so a partial
+ *  failure leaves the parts that did save marked as saved. */
 type Saved = {
   theme: Theme
   welcome: string
@@ -406,6 +445,14 @@ type Saved = {
   tone: string
   language: string
 }
+
+/** The state of the auto-saving half of the panel. `error` carries the server's
+ *  own wording so a failure is never reported as a generic one. */
+type AutoSaveState =
+  | { kind: 'idle' }
+  | { kind: 'saving' }
+  | { kind: 'saved' }
+  | { kind: 'error'; message: string }
 
 function normaliseMode(value: string | null | undefined): AssistantMode {
   return value === 'support' || value === 'faq' ? value : 'sales'
@@ -440,17 +487,23 @@ export default function TestAndCustomise({
   const [showMore, setShowMore] = React.useState(false)
   const [showCustomTone, setShowCustomTone] = React.useState(() => !TONES.includes(saved.tone))
   const [saving, setSaving] = React.useState(false)
+
+  const [behaviour, setBehaviour] = React.useState<AutoSaveState>({ kind: 'idle' })
   /** Set once a behaviour change has actually been written. Drives the nudge to
    *  send another message — the only way to hear it. */
-  const [behaviourJustSaved, setBehaviourJustSaved] = React.useState(false)
+  const [behaviourApplied, setBehaviourApplied] = React.useState(false)
+  const [hasConversation, setHasConversation] = React.useState(false)
 
   const clearChatRef = React.useRef<(() => void) | null>(null)
   const registerClear = React.useCallback((clear: () => void) => {
     clearChatRef.current = clear
   }, [])
+  const onConversationChange = React.useCallback((started: boolean) => {
+    setHasConversation(started)
+  }, [])
   const onClearChat = () => {
     clearChatRef.current?.()
-    setBehaviourJustSaved(false)
+    setBehaviourApplied(false)
   }
 
   const [previewKey, setPreviewKey] = React.useState<string | null>(null)
@@ -476,10 +529,93 @@ export default function TestAndCustomise({
     }
   }, [workspaceId])
 
+  /* ── the auto-saving half ────────────────────────────────────────────── */
+
+  const toneTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null)
+  /** Guards against a slow first write landing after a faster second one and
+   *  reporting a stale result. */
+  const behaviourSeq = React.useRef(0)
+  /** The write to repeat if the last one failed, so "Try again" retries the
+   *  change the agency actually made rather than re-sending current state. */
+  const retryRef = React.useRef<(() => void) | null>(null)
+
+  const runBehaviourWrite = React.useCallback(
+    async (
+      commit: () => Promise<{ status: number; message?: string } | undefined>,
+      apply: () => void,
+      fallbackMessage: string,
+      retry: () => void
+    ) => {
+      const seq = ++behaviourSeq.current
+      setBehaviour({ kind: 'saving' })
+      const result = await commit()
+      if (seq !== behaviourSeq.current) return
+      if (result?.status !== 200) {
+        const message = result?.message || fallbackMessage
+        retryRef.current = retry
+        setBehaviour({ kind: 'error', message })
+        toast({ title: 'Not saved', description: message, variant: 'destructive' })
+        return
+      }
+      retryRef.current = null
+      apply()
+      setBehaviour({ kind: 'saved' })
+      setBehaviourApplied(true)
+    },
+    [toast]
+  )
+
+  // "Saved" is a moment, not a resting state — it settles back to the quiet
+  // "Saved" chip so the group does not permanently shout success.
+  React.useEffect(() => {
+    if (behaviour.kind !== 'saved') return
+    const timer = setTimeout(() => setBehaviour({ kind: 'idle' }), 2200)
+    return () => clearTimeout(timer)
+  }, [behaviour])
+
+  React.useEffect(() => {
+    return () => {
+      if (toneTimer.current) clearTimeout(toneTimer.current)
+    }
+  }, [])
+
+  const commitMode = React.useCallback(
+    (next: AssistantMode) => {
+      setMode(next)
+      void runBehaviourWrite(
+        () => onUpdateBotMode(workspaceId, next),
+        () => setSaved((current) => ({ ...current, mode: next })),
+        'Could not update the mode',
+        () => commitMode(next)
+      )
+    },
+    [runBehaviourWrite, workspaceId]
+  )
+
+  /** Tone and language share one action, so both are always sent together. */
+  const commitVoice = React.useCallback(
+    (nextTone: string, nextLanguage: string, delayMs: number) => {
+      if (toneTimer.current) clearTimeout(toneTimer.current)
+      const fire = () => {
+        const trimmed = nextTone.trim() || DEFAULT_TONE
+        void runBehaviourWrite(
+          () => onUpdateBrandVoice(workspaceId, trimmed, nextLanguage),
+          () => setSaved((current) => ({ ...current, tone: trimmed, language: nextLanguage })),
+          'Could not update the brand voice',
+          () => commitVoice(nextTone, nextLanguage, 0)
+        )
+      }
+      if (delayMs <= 0) fire()
+      else toneTimer.current = setTimeout(fire, delayMs)
+    },
+    [runBehaviourWrite, workspaceId]
+  )
+
+  /* ── the draft half ──────────────────────────────────────────────────── */
+
   const themeDirty = JSON.stringify(theme) !== JSON.stringify(saved.theme)
   const welcomeDirty = welcome !== saved.welcome
-  const behaviourDirty = mode !== saved.mode || tone !== saved.tone || language !== saved.language
-  const dirty = themeDirty || welcomeDirty || behaviourDirty
+  const draftDirty = themeDirty || welcomeDirty
 
   const set = <K extends keyof Theme>(key: K, value: Theme[K]) =>
     setTheme((current) => ({ ...current, [key]: value }))
@@ -503,24 +639,22 @@ export default function TestAndCustomise({
     setTheme((current) => ({ ...current, ...bubbleColors(style, current.primary) }))
   }
 
-  const onReset = () => {
+  const onDiscard = () => {
     setTheme(saved.theme)
     setWelcome(saved.welcome)
-    setMode(saved.mode)
-    setTone(saved.tone)
-    setLanguage(saved.language)
     setBubbleStyle(detectBubbleStyle(saved.theme))
-    setShowCustomTone(!TONES.includes(saved.tone))
   }
 
   /**
-   * Four separate writes, each committed into `saved` on its own. A failure part
-   * way through has to say which half landed — an agency that reads "not saved"
-   * and re-picks colours it already saved is worse off than one told the truth.
+   * Two writes, each committed into `saved` on its own. A failure part way
+   * through has to say which half landed — an agency that reads "not saved" and
+   * re-picks colours it already saved is worse off than one told the truth.
    */
   const onSave = async () => {
     setSaving(true)
     try {
+      let themeSaved = false
+
       if (themeDirty) {
         const themeResult = await onUpdateTheme(workspaceId, { ...theme })
         if (themeResult?.status !== 200) {
@@ -532,6 +666,7 @@ export default function TestAndCustomise({
           return
         }
         setSaved((current) => ({ ...current, theme }))
+        themeSaved = true
       }
 
       // Only touched when it actually changed — a needless write here would
@@ -540,7 +675,8 @@ export default function TestAndCustomise({
         const welcomeResult = await onUpdateWelcomeMessage(welcome, workspaceId)
         if (welcomeResult?.status !== 200) {
           toast({
-            title: 'Colours saved, welcome message not',
+            // Only claim the colours saved when a colour write actually ran.
+            title: themeSaved ? 'Colours saved, welcome message not' : 'Not saved',
             description: welcomeResult?.message || 'Could not update the welcome message',
             variant: 'destructive',
           })
@@ -549,51 +685,68 @@ export default function TestAndCustomise({
         setSaved((current) => ({ ...current, welcome }))
       }
 
-      if (mode !== saved.mode) {
-        const modeResult = await onUpdateBotMode(workspaceId, mode)
-        if (modeResult?.status !== 200) {
-          toast({
-            title: 'Mode not saved',
-            description: modeResult?.message || 'Could not update the mode',
-            variant: 'destructive',
-          })
-          return
-        }
-        setSaved((current) => ({ ...current, mode }))
-      }
-
-      if (tone !== saved.tone || language !== saved.language) {
-        const voiceResult = await onUpdateBrandVoice(workspaceId, tone.trim() || DEFAULT_TONE, language)
-        if (voiceResult?.status !== 200) {
-          toast({
-            title: 'Tone and language not saved',
-            description: voiceResult?.message || 'Could not update the brand voice',
-            variant: 'destructive',
-          })
-          return
-        }
-        setSaved((current) => ({ ...current, tone, language }))
-      }
-
-      if (behaviourDirty) setBehaviourJustSaved(true)
       toast({ title: 'Saved', description: 'Your client’s visitors will see this.' })
     } finally {
       setSaving(false)
     }
   }
 
+  /* ── chrome ──────────────────────────────────────────────────────────── */
+
+  const behaviourChip = (() => {
+    if (behaviour.kind === 'saving')
+      return (
+        <span className={`${PILL} ${PILL_TONE.neutral} inline-flex items-center gap-1`}>
+          <Loader2 className="h-2.5 w-2.5 animate-spin" />
+          Saving
+        </span>
+      )
+    if (behaviour.kind === 'saved')
+      return (
+        <span className={`${PILL} ${PILL_TONE.good} inline-flex items-center gap-1`}>
+          <Check className="h-2.5 w-2.5" strokeWidth={4} />
+          Saved
+        </span>
+      )
+    if (behaviour.kind === 'error')
+      return <span className={`${PILL} ${PILL_TONE.bad}`}>Not saved</span>
+    return <span className={`${PILL} ${PILL_TONE.neutral}`}>Saves as you edit</span>
+  })()
+
   return (
-    <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,420px)] lg:items-start">
+    <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,430px)] lg:items-start">
       {/* Preview is first in the DOM order on mobile: seeing it matters more
           than tweaking it, and a phone shows one column at a time. */}
       <section className="order-1 flex flex-col gap-4 lg:order-2">
-        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
-          <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
+        <div className={`overflow-hidden ${CARD}`}>
+          <div className="flex items-center justify-between gap-3 border-b border-slate-100 px-4 py-3">
             <p className="text-[13px] font-black text-slate-900">What a visitor sees</p>
-            <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-500">
-              Live
+            {/* The one honest statement of preview state: the look is whatever is
+                in the draft, and the answers always come from what is stored. */}
+            <span
+              className={`${PILL} ${draftDirty ? PILL_TONE.brand : PILL_TONE.neutral}`}
+              aria-live="polite"
+            >
+              {draftDirty ? 'Draft look · not saved' : 'Matches what’s live'}
             </span>
           </div>
+
+          {behaviourApplied && hasConversation && (
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 bg-[#5b5ce2]/5 px-4 py-2.5">
+              <p className="text-[12px] leading-5 text-slate-600">
+                New behaviour starts from the next message.
+              </p>
+              <button
+                type="button"
+                onClick={onClearChat}
+                className="inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-[12px] font-bold text-[#5b5ce2] transition-colors hover:bg-[#5b5ce2]/10"
+              >
+                <RotateCcw className="h-3 w-3" />
+                Start a fresh chat
+              </button>
+            </div>
+          )}
+
           <div className="bg-[linear-gradient(135deg,#f8f9fc_0%,#eef0f6_100%)] p-4">
             {previewError ? (
               <div className="grid h-[560px] place-items-center px-6 text-center text-[13px] leading-5 text-slate-500">
@@ -606,6 +759,7 @@ export default function TestAndCustomise({
                 theme={theme}
                 welcomeMessage={welcome}
                 registerClear={registerClear}
+                onConversationChange={onConversationChange}
               />
             ) : (
               <div className="grid h-[560px] place-items-center text-[13px] text-slate-500">
@@ -630,14 +784,32 @@ export default function TestAndCustomise({
         )}
       </section>
 
-      <section className="order-2 flex flex-col gap-4 lg:order-1">
+      <section className="order-2 flex flex-col gap-3 lg:order-1">
         {/* Responds before looks: it is the half that decides whether the
             assistant brings the client leads. */}
-        <p className="text-[11px] font-black uppercase tracking-wide text-slate-400">
-          How it responds
-        </p>
+        <div className="flex items-center justify-between gap-3 px-1">
+          <p className="text-[11px] font-black uppercase tracking-wide text-slate-400">
+            How it responds
+          </p>
+          <span className="flex items-center gap-2">
+            {behaviour.kind === 'error' && (
+              <button
+                type="button"
+                onClick={() => retryRef.current?.()}
+                className="text-[11px] font-bold text-[#5b5ce2] hover:underline"
+              >
+                Try again
+              </button>
+            )}
+            {behaviourChip}
+          </span>
+        </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-5">
+        {behaviour.kind === 'error' && (
+          <p className="px-1 text-[12px] leading-5 text-rose-700">{behaviour.message}</p>
+        )}
+
+        <div className={`${CARD} p-5`}>
           <p className="text-[13px] font-black text-slate-900">What it is there to do</p>
           <p className="mt-1 text-[12px] leading-5 text-slate-500">
             Sales is the one that turns conversations into leads. Pick another only if the client
@@ -652,7 +824,7 @@ export default function TestAndCustomise({
                   key={option.key}
                   type="button"
                   aria-pressed={selected}
-                  onClick={() => setMode(option.key)}
+                  onClick={() => commitMode(option.key)}
                   className={`w-full rounded-xl border p-3 text-left transition ${
                     selected
                       ? 'border-[#5b5ce2] bg-[#5b5ce2]/5'
@@ -669,9 +841,7 @@ export default function TestAndCustomise({
                     </span>
                     <span className="text-[13px] font-bold text-slate-900">{option.label}</span>
                     {option.recommended && (
-                      <span className="rounded-full px-2 py-0.5 text-[10px] font-bold text-[#5b5ce2] ring-1 ring-[#5b5ce2]/30">
-                        Recommended
-                      </span>
+                      <span className={`${PILL} ${PILL_TONE.brand}`}>Recommended</span>
                     )}
                   </span>
                   <span className="mt-1 block pl-6 text-[12px] leading-5 text-slate-500">
@@ -691,7 +861,7 @@ export default function TestAndCustomise({
           </p>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-5">
+        <div className={`${CARD} p-5`}>
           <p className="text-[13px] font-black text-slate-900">How it speaks</p>
           <p className="mt-1 text-[12px] leading-5 text-slate-500">
             The tone it writes in, and the language it defaults to.
@@ -706,12 +876,13 @@ export default function TestAndCustomise({
                 onClick={() => {
                   setTone(preset)
                   setShowCustomTone(false)
+                  commitVoice(preset, language, 0)
                 }}
-                className={`rounded-full px-3 py-1 text-[12px] font-bold ring-1 transition ${
+                className={`${
                   tone === preset
                     ? 'bg-[#5b5ce2] text-white ring-[#5b5ce2]'
                     : 'bg-white text-slate-600 ring-slate-200 hover:ring-slate-300'
-                }`}
+                } rounded-full px-3 py-1 text-[12px] font-bold ring-1 transition`}
               >
                 {preset}
               </button>
@@ -733,10 +904,14 @@ export default function TestAndCustomise({
           {showCustomTone && (
             <input
               value={tone}
-              onChange={(event) => setTone(event.target.value)}
+              onChange={(event) => {
+                setTone(event.target.value)
+                commitVoice(event.target.value, language, TONE_TYPING_DELAY_MS)
+              }}
+              onBlur={(event) => commitVoice(event.target.value, language, 0)}
               placeholder="e.g. direct, no-nonsense"
               aria-label="Custom tone"
-              className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-[13px] text-slate-800 outline-none transition focus:border-[#5b5ce2] focus:ring-4 focus:ring-[#5b5ce2]/10"
+              className={`mt-2 ${FIELD}`}
             />
           )}
 
@@ -744,8 +919,11 @@ export default function TestAndCustomise({
             <span className="text-[12px] font-medium text-slate-600">Language</span>
             <select
               value={language}
-              onChange={(event) => setLanguage(event.target.value)}
-              className="rounded-md border border-slate-200 px-2 py-1 text-[12px] text-slate-700 outline-none"
+              onChange={(event) => {
+                setLanguage(event.target.value)
+                commitVoice(tone, event.target.value, 0)
+              }}
+              className="rounded-md border border-slate-200 px-2 py-1 text-[12px] font-medium text-slate-700 outline-none"
             >
               {LANGUAGES.map((option) => (
                 <option key={option.value} value={option.value}>
@@ -756,50 +934,31 @@ export default function TestAndCustomise({
           </label>
         </div>
 
-        {behaviourDirty && (
-          <p className="px-1 text-[11px] leading-4 text-slate-400">
-            Mode, tone and language are decided when a message is answered, so the preview keeps
-            answering the old way until you save.
+        <div className="mt-3 flex items-center justify-between gap-3 px-1">
+          <p className="text-[11px] font-black uppercase tracking-wide text-slate-400">
+            How it looks
           </p>
-        )}
+          <span className={`${PILL} ${draftDirty ? PILL_TONE.brand : PILL_TONE.neutral}`}>
+            {draftDirty ? 'In the preview · unsaved' : 'In the preview'}
+          </span>
+        </div>
 
-        {behaviourJustSaved && !behaviourDirty && (
-          <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[#5b5ce2]/30 bg-[#5b5ce2]/5 p-4">
-            <p className="text-[12px] leading-5 text-slate-600">
-              Saved. Send another message in the preview to hear it — the replies already on screen
-              were written with the old settings.
-            </p>
-            {previewKey && (
-              <button type="button" onClick={onClearChat} className={BTN_SECONDARY}>
-                <RotateCcw className="h-3.5 w-3.5" />
-                Start a fresh chat
-              </button>
-            )}
-          </div>
-        )}
-
-        <div className="rounded-2xl border border-slate-200 bg-white p-5">
+        <div className={`${CARD} p-5`}>
           <label htmlFor="welcome-message" className="text-[13px] font-black text-slate-900">
             Welcome message
           </label>
-          <p className="mt-1 text-[12px] leading-5 text-slate-500">
-            The first thing anyone reads. It shows in the preview as you type.
-          </p>
+          <p className="mt-1 text-[12px] leading-5 text-slate-500">The first thing anyone reads.</p>
           <textarea
             id="welcome-message"
             value={welcome}
             onChange={(event) => setWelcome(event.target.value)}
             rows={3}
             placeholder="Hi! Ask me anything about our services."
-            className="mt-3 w-full resize-y rounded-lg border border-slate-200 px-3 py-2 text-[13px] text-slate-800 outline-none transition focus:border-[#5b5ce2] focus:ring-4 focus:ring-[#5b5ce2]/10"
+            className={`mt-3 resize-y ${FIELD}`}
           />
         </div>
 
-        <p className="mt-2 text-[11px] font-black uppercase tracking-wide text-slate-400">
-          How it looks
-        </p>
-
-        <div className="rounded-2xl border border-slate-200 bg-white p-5">
+        <div className={`${CARD} p-5`}>
           <p className="text-[13px] font-black text-slate-900">The basics</p>
           <p className="mt-1 text-[12px] leading-5 text-slate-500">
             Most agencies change one colour. Everything else has a sensible default.
@@ -855,7 +1014,7 @@ export default function TestAndCustomise({
           </div>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-white">
+        <div className={CARD}>
           <button
             type="button"
             onClick={() => setShowMore((open) => !open)}
@@ -891,7 +1050,7 @@ export default function TestAndCustomise({
                 <select
                   value={theme.shadow}
                   onChange={(event) => set('shadow', event.target.value === 'none' ? 'none' : 'sm')}
-                  className="rounded-md border border-slate-200 px-2 py-1 text-[12px] text-slate-700 outline-none"
+                  className="rounded-md border border-slate-200 px-2 py-1 text-[12px] font-medium text-slate-700 outline-none"
                 >
                   <option value="none">None</option>
                   <option value="sm">Small</option>
@@ -901,27 +1060,39 @@ export default function TestAndCustomise({
           )}
         </div>
 
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-4">
-          <p className="inline-flex items-center gap-1.5 text-[12px] font-medium text-slate-500">
-            {dirty ? (
+        {/* Sticky so the state of the draft half is never scrolled off: what is
+            unsaved is named, not described. */}
+        <div className="sticky bottom-4 mt-1 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white/95 p-3 shadow-[0_8px_24px_rgba(15,23,42,0.08)] backdrop-blur">
+          <span className="flex flex-wrap items-center gap-1.5 pl-1">
+            {draftDirty ? (
               <>
-                <Sparkles className="h-3.5 w-3.5 text-[#5b5ce2]" />
-                {/* Colours and the welcome message render from draft state;
-                    behaviour does not, so the claim is narrowed when it is. */}
-                {behaviourDirty
-                  ? 'Unsaved changes — save to hear the new behaviour.'
-                  : 'Unsaved changes — the preview is already showing them.'}
+                <span className="text-[12px] font-medium text-slate-500">Not saved yet:</span>
+                {themeDirty && <span className={`${PILL} ${PILL_TONE.brand}`}>Colours</span>}
+                {welcomeDirty && <span className={`${PILL} ${PILL_TONE.brand}`}>Welcome message</span>}
               </>
             ) : (
-              'Everything here is saved.'
+              <span className="inline-flex items-center gap-1.5 text-[12px] font-medium text-slate-500">
+                <Check className="h-3.5 w-3.5 text-emerald-600" strokeWidth={3} />
+                Everything is saved
+              </span>
             )}
-          </p>
+          </span>
           <div className="flex items-center gap-2">
-            <button type="button" onClick={onReset} disabled={!dirty || saving} className={BTN_SECONDARY}>
+            <button
+              type="button"
+              onClick={onDiscard}
+              disabled={!draftDirty || saving}
+              className={BTN_SECONDARY}
+            >
               <RotateCcw className="h-3.5 w-3.5" />
-              Reset
+              Discard
             </button>
-            <button type="button" onClick={onSave} disabled={!dirty || saving} className={BTN_PRIMARY}>
+            <button
+              type="button"
+              onClick={onSave}
+              disabled={!draftDirty || saving}
+              className={BTN_PRIMARY}
+            >
               {saving && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
               {saving ? 'Saving…' : 'Save'}
             </button>

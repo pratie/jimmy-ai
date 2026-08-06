@@ -3,6 +3,7 @@
 
 import { streamText } from 'ai'
 
+import { client } from '@/lib/prisma'
 import { getModel } from '@/lib/ai-models'
 import { buildSystemPrompt } from '@/lib/promptBuilder'
 import { devError, devLog, extractEmailsFromString } from '@/lib/utils'
@@ -46,6 +47,19 @@ export const maxDuration = 60
 /* ── Response formatting ────────────────────────────────────────────────── */
 
 const removeMarkdownBold = (text: string) => text.replace(/\*\*(.*?)\*\*/g, '$1')
+
+/**
+ * Strips legacy control tags from anything the model produces.
+ *
+ * The old system prompt told the model to append `(realtime)` when the
+ * knowledge base fell short and `(complete)` after a qualification question.
+ * Nothing removed them, so visitors saw the markers in the chat. The prompt no
+ * longer asks for either, but a model that has seen them in conversation
+ * history will happily continue the pattern, and a stray marker in front of a
+ * client's customer is not worth the risk of trusting the prompt alone.
+ */
+const stripControlTags = (text: string) =>
+  text.replace(/\s*\((?:realtime|complete)\)\s*/gi, ' ').replace(/[ \t]{2,}/g, ' ').trimEnd()
 
 const convertMarkdownLinksToHtml = (text: string) =>
   text.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
@@ -155,9 +169,29 @@ export async function POST(req: Request) {
 
     /* ── Prompt ── */
     const appBase = process.env.NEXT_PUBLIC_APP_URL ?? ''
-    const mode = !leadId
-      ? 'QUALIFIER'
-      : context.assistant.mode === 'support'
+
+    // The operator's own qualifying questions, and how far into the
+    // conversation we are. Both feed the prompt's contact-detail rules: it must
+    // never ask on the first reply, and must not ask at all once details exist.
+    const [leadFields, priorVisitorTurns] = await Promise.all([
+      client.leadFieldDefinition.findMany({
+        where: { clientWorkspaceId: context.clientWorkspaceId, enabled: true },
+        orderBy: { displayOrder: 'asc' },
+        select: { label: true },
+        take: 5,
+      }),
+      client.message.count({
+        where: { conversationId: session.conversationId, role: 'visitor' },
+      }),
+    ])
+    const leadFieldQuestions = leadFields.map((field) => field.label)
+    // The assistant's configured mode, always. This used to force QUALIFIER
+    // until a lead existed, so the mode an operator picked did nothing for the
+    // entire part of the conversation that decides whether there is a lead at
+    // all — and every visitor met a qualifier before they met an answer.
+    // Whether contact details are still needed is now a separate input.
+    const mode =
+      context.assistant.mode === 'support'
         ? 'SUPPORT'
         : context.assistant.mode === 'faq'
           ? 'FAQ_STRICT'
@@ -167,14 +201,25 @@ export async function POST(req: Request) {
 
     const systemPrompt = buildSystemPrompt({
       businessName: context.assistant.name,
-      domain: appBase,
+      // Not `appBase` — that is ChatDock's own URL, and naming it here told the
+      // model it was the assistant for the client "at chatdock.io". The client's
+      // website is not carried on the widget context, so say nothing rather
+      // than something false.
+      domain: '',
       knowledgeBase,
       mode: mode as never,
       brandTone: context.assistant.brandTone ?? 'friendly, warm, conversational',
       language: context.assistant.language,
-      qualificationQuestions: !leadId
-        ? ['What is the best email or phone number to reach you on?']
-        : [],
+      // The operator's own questions only. Asking for contact details is
+      // handled by the prompt's own rules, which know not to ask on the first
+      // reply and not to ask twice — passing it here as a per-turn
+      // "qualification question" is what made it ask on nearly every turn.
+      qualificationQuestions: leadFieldQuestions,
+      hasContactDetails: Boolean(leadId),
+      // `appendVisitorMessage` has already stored the current turn, so subtract
+      // it: what the prompt needs is how many times this visitor was answered
+      // before now, and zero means "you are writing the first reply".
+      turnCount: Math.max(0, priorVisitorTurns - 1),
       appointmentUrl:
         context.assistant.bookingEnabled && leadId
           ? `${appBase}/portal/${context.clientWorkspaceId}/appointment/${leadId}`
@@ -215,7 +260,7 @@ export async function POST(req: Request) {
             if (firstTokenAt === null) firstTokenAt = Date.now()
             fullResponse += chunk
             controller.enqueue(
-              encoder.encode(`data: ${JSON.stringify({ content: removeMarkdownBold(chunk) })}\n\n`)
+              encoder.encode(`data: ${JSON.stringify({ content: stripControlTags(removeMarkdownBold(chunk)) })}\n\n`)
             )
           }
         } catch (error) {
@@ -234,7 +279,7 @@ export async function POST(req: Request) {
               await appendAssistantMessage({
                 session,
                 context,
-                content: convertMarkdownLinksToHtml(removeMarkdownBold(fullResponse)),
+                content: convertMarkdownLinksToHtml(stripControlTags(removeMarkdownBold(fullResponse))),
                 citations,
                 latencyMs: firstTokenAt ? firstTokenAt - llmStart : undefined,
               })
