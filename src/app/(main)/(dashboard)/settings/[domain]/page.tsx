@@ -4,6 +4,14 @@ import InfoBar from '@/components/infobar'
 import { redirect } from 'next/navigation'
 import React from 'react'
 
+/**
+ * Same ceiling as the dashboard, for the same reason: the knowledge panel on
+ * this page triggers crawl and re-index actions that take far longer than
+ * Vercel's 10–15s default. Without it those actions are killed mid-run and the
+ * UI is left waiting on a promise nothing will ever settle.
+ */
+export const maxDuration = 60
+
 const DomainSettingsPage = async (
   { params }: { params: Promise<{ domain: string }> }
 ) => {

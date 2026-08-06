@@ -15,6 +15,17 @@ export const metadata: Metadata = {
 }
 
 /**
+ * Server Actions invoked from this page inherit this ceiling, and first-run
+ * onboarding needs it: `onIntegrateDomain` alone makes a dozen sequential
+ * round trips to a remote Postgres, and `onScrapeWebsiteForDomain` then adds a
+ * Firecrawl call plus embedding and chunk inserts. Vercel's default is 10s on
+ * Hobby and 15s on Pro — comfortably less than that work takes, so the function
+ * was being killed mid-flight and the browser sat on a promise that would never
+ * settle. 60 is the Hobby maximum.
+ */
+export const maxDuration = 60
+
+/**
  * The agency command center.
  *
  * Two genuinely different screens rather than one that degrades: with no

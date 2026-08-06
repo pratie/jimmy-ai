@@ -140,6 +140,32 @@ export default function FirstClientSetup({ organizationName }: { organizationNam
     return parsed.ok ? parsed.domain : null
   }, [value])
 
+  /**
+   * A server action that never returns must not become a spinner that never
+   * stops.
+   *
+   * When a Vercel function exceeds its limit it is killed without a response,
+   * so the promise here simply never settles — the panel sat on "Connecting…"
+   * indefinitely, which reads as a broken product rather than a slow one. This
+   * bounds every call so the worst case is an honest error someone can act on.
+   */
+  const withTimeout = async <T,>(work: Promise<T>, seconds: number, step: string): Promise<T> => {
+    let timer: ReturnType<typeof setTimeout> | undefined
+    try {
+      return await Promise.race([
+        work,
+        new Promise<never>((_, reject) => {
+          timer = setTimeout(
+            () => reject(new Error(`Timed out while ${step}. The site may be slow or unreachable.`)),
+            seconds * 1000
+          )
+        }),
+      ])
+    } finally {
+      if (timer) clearTimeout(timer)
+    }
+  }
+
   const submit = async (event: React.FormEvent) => {
     event.preventDefault()
     if (phase === 'ready' && createdId) {
@@ -160,7 +186,14 @@ export default function FirstClientSetup({ organizationName }: { organizationNam
     // onIntegrateDomain only creates the workspace — which made the panel a
     // more convincing lie than a plain progress bar would have been.
     setPhase('connecting')
-    const created = await onIntegrateDomain(parsed.domain, '')
+    let created: Awaited<ReturnType<typeof onIntegrateDomain>> | null = null
+    try {
+      created = await withTimeout(onIntegrateDomain(parsed.domain, ''), 45, 'creating the client')
+    } catch (timeoutError) {
+      setPhase('failed')
+      setError(timeoutError instanceof Error ? timeoutError.message : 'That took too long. Try again.')
+      return
+    }
 
     if (created?.status !== 200 || !created.id) {
       setPhase('failed')
@@ -172,7 +205,21 @@ export default function FirstClientSetup({ organizationName }: { organizationNam
     // Real crawl + embed. This is the slow part, and the two labels either side
     // of it bracket a single call rather than reporting sub-steps we cannot see.
     setPhase('discovering')
-    const ingest = await onScrapeWebsiteForDomain(created.id)
+    let ingest: Awaited<ReturnType<typeof onScrapeWebsiteForDomain>> | null = null
+    try {
+      ingest = await withTimeout(onScrapeWebsiteForDomain(created.id), 90, 'reading the website')
+    } catch (timeoutError) {
+      // The client exists either way, so this is the partial-success path: send
+      // them onward rather than stranding them on a dead screen.
+      setPhase('ready')
+      setPagesFound(0)
+      setError(
+        `Client created, but reading the website took too long. Open the client and import the content manually. ${
+          timeoutError instanceof Error ? timeoutError.message : ''
+        }`
+      )
+      return
+    }
 
     if (ingest?.status !== 200) {
       // The client exists and is usable — only the automatic import failed, so
