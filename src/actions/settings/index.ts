@@ -267,10 +267,16 @@ export const onGetCurrentDomainInfo = async (domain: string) => {
     // `trainingSourcesUsed` as denormalised counters on Domain, which drifted
     // from reality whenever an ingest failed midway. Counting the live rows
     // costs one query and cannot be wrong.
-    const storageBytes = await client.knowledgeChunk.aggregate({
-      where: { clientWorkspaceId: workspace.id },
-      _sum: { tokenCount: true },
-    })
+    const [storageBytes, chunkCount, documentCount] = await Promise.all([
+      client.knowledgeChunk.aggregate({
+        where: { clientWorkspaceId: workspace.id },
+        _sum: { tokenCount: true },
+      }),
+      client.knowledgeChunk.count({ where: { clientWorkspaceId: workspace.id } }),
+      client.knowledgeDocument.count({
+        where: { clientWorkspaceId: workspace.id, deletedAt: null, status: 'active' },
+      }),
+    ])
 
     const subscription = await client.subscription.findUnique({
       where: { organizationId: ctx.organizationId },
@@ -291,6 +297,31 @@ export const onGetCurrentDomainInfo = async (domain: string) => {
           // usage read-out, and honest about being an estimate.
           knowledgeBaseSizeMB:
             Math.round((((storageBytes._sum.tokenCount ?? 0) * 4) / (1024 * 1024)) * 100) / 100,
+          // What the knowledge panel actually needs to tell the truth.
+          //
+          // `knowledgeBase` used to be one markdown blob on Domain; the rebuild
+          // stores KnowledgeChunk rows instead, so it is permanently null and
+          // any UI branching on it is branching on nothing. Indexed chunks are
+          // the real answer to "does this assistant have anything to say", and
+          // they are counted rather than remembered.
+          knowledge: {
+            documents: documentCount,
+            chunks: chunkCount,
+            // A source that failed while others succeeded is a partial
+            // problem, not a dead client — the panel needs both numbers to say
+            // so instead of choosing one and being wrong.
+            sources: workspace.knowledgeSources.map((source) => ({
+              id: source.id,
+              name: source.name,
+              status: source.syncStatus,
+              lastSyncedAt: source.lastSyncedAt,
+            })),
+            failedSources: workspace.knowledgeSources.filter((s) => s.syncStatus === 'failed')
+              .length,
+            syncingSources: workspace.knowledgeSources.filter(
+              (s) => s.syncStatus === 'syncing' || s.syncStatus === 'queued'
+            ).length,
+          },
           chatBot: {
             ...toLegacyChatBot(workspace.assistants[0]),
             knowledgeBase: null,
@@ -702,6 +733,58 @@ export const onGetEmbedKey = async (workspaceId: string) => {
     if (error instanceof AuthorizationError) return { status: 403, message: error.message }
     console.error('[Settings] onGetEmbedKey failed:', error)
     return { status: 400, message: 'Could not issue an embed key' }
+  }
+}
+
+/**
+ * The key an in-dashboard live preview talks to.
+ *
+ * Deliberately a `preview` deployment rather than the website widget's key.
+ * Two reasons, both in `resolveWidgetRequest`: the origin allow-list is
+ * enforced only for `website_widget`, and the dashboard's origin is the agency's
+ * domain, not the client's — the real key would be rejected. And a `preview`
+ * deployment serves a *draft* assistant, which is what makes "look at it before
+ * you put it on their site" possible at all.
+ *
+ * Conversations through it are marked `preview` channel, so testing your own
+ * assistant never pollutes a client's reporting.
+ */
+export const onGetPreviewKey = async (workspaceId: string) => {
+  try {
+    const { ctx, access } = await requireWorkspace(workspaceId, 'viewClientWorkspace')
+
+    const assistant = await client.assistant.findFirst({
+      where: { clientWorkspaceId: access.clientWorkspaceId, deletedAt: null },
+      orderBy: { createdAt: 'asc' },
+      select: { id: true },
+    })
+    if (!assistant) return { status: 404, message: 'No assistant for this client' }
+
+    const existing = await client.assistantDeployment.findFirst({
+      where: { assistantId: assistant.id, deploymentType: 'preview', status: 'active' },
+      select: { publicKey: true },
+    })
+    if (existing) return { status: 200, publicKey: existing.publicKey }
+
+    const created = await client.assistantDeployment.create({
+      data: {
+        assistantId: assistant.id,
+        deploymentType: 'preview',
+        publicKey: randomBytes(24).toString('base64url'),
+        status: 'active',
+        // Empty on purpose: previews are opened from the dashboard, and the
+        // allow-list is not applied to this deployment type anyway.
+        allowedDomains: [],
+        createdByUserId: ctx.userId,
+      },
+      select: { publicKey: true },
+    })
+
+    return { status: 200, publicKey: created.publicKey }
+  } catch (error) {
+    if (error instanceof AuthorizationError) return { status: 403, message: error.message }
+    console.error('[Settings] onGetPreviewKey failed:', error)
+    return { status: 400, message: 'Could not open a preview' }
   }
 }
 

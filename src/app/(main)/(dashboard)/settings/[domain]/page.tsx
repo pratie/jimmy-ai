@@ -33,6 +33,7 @@ const DomainSettingsPage = async (
             chatBot={activeDomain.chatBot as never}
             id={activeDomain.id}
             name={activeDomain.name}
+            knowledge={activeDomain.knowledge}
             trainingSourcesUsed={activeDomain.trainingSourcesUsed}
             knowledgeBaseSizeMB={activeDomain.knowledgeBaseSizeMB}
           />

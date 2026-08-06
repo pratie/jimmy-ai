@@ -2,56 +2,91 @@
 
 import React, { useState } from 'react'
 import { cn } from '@/lib/utils'
-import ReactMarkdown from 'react-markdown'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Textarea } from '@/components/ui/textarea'
 import { Input } from '@/components/ui/input'
-import { Progress } from '@/components/ui/progress'
 import { Badge } from '@/components/ui/badge'
 import {
-  RefreshCw, FileText, AlertCircle, Loader2, Edit, Save, X, Brain,
-  Upload, CheckCircle2, CircleDashed, Link2, FileUp,
-  HelpCircle, ArrowRight, Database, Eye, ChevronDown, ChevronUp, Globe
+  RefreshCw, FileText, AlertCircle, Loader2, Save, Brain,
+  Upload, CheckCircle2, FileUp, Database, Globe, AlertTriangle,
 } from 'lucide-react'
-import { useScrapeWebsite, useUpdateKnowledgeBase, useTrainChatbot, useUploadText, useScrapeSelected, useUploadPdf } from '@/hooks/firecrawl/use-scrape'
+import { useScrapeWebsite, useTrainChatbot, useUploadText, useScrapeSelected, useUploadPdf } from '@/hooks/firecrawl/use-scrape'
 import { TrainingSourcesSelector } from './training-sources-selector'
 import { formatDistanceToNow } from 'date-fns'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-// Dialog imports removed (no longer used in simplified KB UI)
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+
+/** Mirrors `SyncStatus` in the schema. Every value here exists in the database. */
+export type KnowledgeSyncStatus =
+  | 'never_synced'
+  | 'queued'
+  | 'syncing'
+  | 'synced'
+  | 'partially_synced'
+  | 'failed'
+
+export type KnowledgeSummary = {
+  documents: number
+  chunks: number
+  sources: { id: string; name: string; status: KnowledgeSyncStatus; lastSyncedAt: Date | null }[]
+  failedSources: number
+  syncingSources: number
+}
 
 type Props = {
   domainId: string
   domainName: string
-  knowledgeBase: string | null
-  status: string | null
-  updatedAt: Date | null
-  plan?: string
+  knowledge: KnowledgeSummary
   trainingSourcesUsed?: number
   trainingSourcesLimit?: number
   kbSizeMB?: number
   kbSizeLimit?: number
 }
 
-const KnowledgeBaseViewerV2 = ({
+const PILL = 'shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold ring-1'
+const TONE = {
+  good: 'bg-emerald-50 text-emerald-700 ring-emerald-600/20',
+  warn: 'bg-amber-50 text-amber-700 ring-amber-600/20',
+  neutral: 'bg-slate-100 text-slate-600 ring-slate-500/20',
+  error: 'bg-rose-50 text-rose-700 ring-rose-600/20',
+} as const
+
+const SOURCE_STATUS: Record<KnowledgeSyncStatus, { label: string; tone: keyof typeof TONE }> = {
+  never_synced: { label: 'Not synced', tone: 'neutral' },
+  queued: { label: 'Queued', tone: 'warn' },
+  syncing: { label: 'Syncing', tone: 'warn' },
+  synced: { label: 'Synced', tone: 'good' },
+  partially_synced: { label: 'Partly synced', tone: 'warn' },
+  failed: { label: 'Failed', tone: 'error' },
+}
+
+/**
+ * The knowledge panel for one client.
+ *
+ * It used to decide what to say from `chatBot.knowledgeBase` — a markdown blob
+ * the pre-rebuild schema stored on Domain. The rebuild replaced that blob with
+ * `KnowledgeChunk` rows, so the field is permanently null and every client got
+ * a red "Scraping Failed" no matter how well their crawl went. The status
+ * vocabulary was stale too: it tested for `scraped` and `pending`, neither of
+ * which `SyncStatus` has ever contained.
+ *
+ * So the panel now reports what is actually in the database. Indexed chunks
+ * come first, because chunks are the only honest answer to "does this
+ * assistant have anything to say" — a client with chunks is working, and is
+ * never shown an error, even if one of several sources failed. The red failure
+ * treatment is reserved for the one case that earns it: nothing indexed and a
+ * source that failed trying.
+ */
+const KnowledgeBaseViewer = ({
   domainId,
   domainName,
-  knowledgeBase,
-  status,
-  updatedAt,
-  plan = 'FREE',
+  knowledge,
   trainingSourcesUsed = 0,
   trainingSourcesLimit = 5,
   kbSizeMB = 0,
   kbSizeLimit = 1,
 }: Props) => {
-  const [showFull, setShowFull] = useState(false)
-  const [showContent, setShowContent] = useState(false)
-  const [isEditing, setIsEditing] = useState(false)
-  const [editedMarkdown, setEditedMarkdown] = useState(knowledgeBase || '')
   const [uploadText, setUploadText] = useState('')
   const [singleUrl, setSingleUrl] = useState('')
   const [appendMode, setAppendMode] = useState(true)
@@ -61,25 +96,9 @@ const KnowledgeBaseViewerV2 = ({
 
   const { onScrape, loading: scraping } = useScrapeWebsite()
   const { onScrapeSelected, loading: scrapingSelected } = useScrapeSelected()
-  const { onUpdate, loading: updating } = useUpdateKnowledgeBase()
-  const { onTrain, loading: training, progress, status: trainingStatus, hasEmbeddings, completedAt } = useTrainChatbot()
+  const { onTrain, loading: training, progress } = useTrainChatbot()
   const { onUpload, loading: uploading } = useUploadText()
   const { onUploadPdf, loading: uploadingPdf } = useUploadPdf()
-
-  // Update edited markdown when knowledge base changes
-  React.useEffect(() => {
-    setEditedMarkdown(knowledgeBase || '')
-  }, [knowledgeBase])
-
-  const handleSave = async () => {
-    await onUpdate(domainId, editedMarkdown)
-    setIsEditing(false)
-  }
-
-  const handleCancel = () => {
-    setEditedMarkdown(knowledgeBase || '')
-    setIsEditing(false)
-  }
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     setFileError(null)
@@ -177,698 +196,424 @@ const KnowledgeBaseViewerV2 = ({
     ? selectedFile.type === 'application/pdf' || selectedFile.name.toLowerCase().endsWith('.pdf')
     : false
 
-  // Check completion status
-  const hasKB = !!knowledgeBase && knowledgeBase.length >= 50
-  const isUpToDate = hasEmbeddings && !!completedAt && !!updatedAt && new Date(completedAt) >= new Date(updatedAt)
-  const step1Complete = status === 'scraped' || hasKB
-  const step3Complete = isUpToDate || trainingStatus === 'completed'
+  const { chunks, documents, sources, failedSources, syncingSources } = knowledge
+  const failedNames = sources.filter((s) => s.status === 'failed').map((s) => s.name)
+  // A crawl the operator just started is not yet reflected in the server data
+  // this component was rendered with, so treat an in-flight request as work in
+  // progress rather than leaving the previous state on screen.
+  const inFlight = scraping || scrapingSelected
+  const lastSyncedAt = sources.reduce<Date | null>((latest, source) => {
+    if (!source.lastSyncedAt) return latest
+    const at = new Date(source.lastSyncedAt)
+    return !latest || at > latest ? at : latest
+  }, null)
 
-  // Loading states
-  if (status === 'scraping' || scraping) {
-    return (
-      <Card className="w-full">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Loader2 className="w-5 h-5 animate-spin text-primary" />
-            Scraping Website...
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground">
-            Extracting content from <span className="font-semibold">{domainName}</span>. This usually takes 10-30 seconds.
-          </p>
-        </CardContent>
-      </Card>
-    )
-  }
+  const state: 'healthy' | 'partial' | 'indexing' | 'failed' | 'empty' =
+    chunks > 0
+      ? failedSources > 0 ? 'partial' : 'healthy'
+      : inFlight || syncingSources > 0
+        ? 'indexing'
+        : failedSources > 0
+          ? 'failed'
+          : 'empty'
 
-  // Failed state
-  if (status === 'failed' || (!knowledgeBase && status !== 'pending')) {
-    return (
-      <Card className="w-full border-destructive">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-destructive">
-            <AlertCircle className="w-5 h-5" />
-            Scraping Failed
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <p className="text-muted-foreground">
-            We couldn&apos;t scrape <span className="font-semibold">{domainName}</span>. This might be due to:
-          </p>
-          <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground ml-2">
-            <li>Website blocking automated access</li>
-            <li>Invalid SSL certificate</li>
-            <li>Rate limiting or website temporarily down</li>
-          </ul>
-          <Button onClick={() => onScrape(domainId)} disabled={scraping}>
-            <RefreshCw className="w-4 h-4 mr-2" />
-            Retry Scrape
-          </Button>
-        </CardContent>
-      </Card>
-    )
-  }
-
-  // Empty state with onboarding
-  if (!knowledgeBase) {
-    return (
-      <Card className="w-full">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Database className="w-5 h-5" />
-            Build Your Knowledge Base
-          </CardTitle>
-          <CardDescription>
-            Train your AI chatbot with content from your website or custom documents
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {/* Plan Limits Display - Reimagined for High-Ticket */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 bg-gradient-to-br from-primary to-primary/80 rounded-2xl text-primary-foreground shadow-glow relative overflow-hidden group">
-            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-              <Brain className="w-24 h-24" />
-            </div>
-
-            <div className="relative z-10 space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-bold uppercase tracking-widest text-primary-foreground/75">Agent Knowledge Base</span>
-                <Badge className="bg-primary-foreground/20 hover:bg-primary-foreground/30 text-primary-foreground border-0 text-[10px]">Active</Badge>
-              </div>
-              <div className="flex items-center justify-between text-sm">
-                <span className="font-medium">Training Sources</span>
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger>
-                      <HelpCircle className="w-3.5 h-3.5 text-primary-foreground/60" />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p className="max-w-xs text-xs">
-                        Number of pages, PDFs, or text files you can use to train your autonomous agent
-                      </p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </div>
-              <div className="flex items-baseline gap-2">
-                <span className="text-3xl font-bold font-heading">
-                  {trainingSourcesUsed}
-                </span>
-                <span className="text-primary-foreground/60 text-sm">
-                  / {trainingSourcesLimit === Infinity ? '∞' : trainingSourcesLimit}
-                </span>
-              </div>
-              <div className="h-1.5 bg-primary-foreground/15 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-primary-foreground transition-all duration-1000 ease-out"
-                  style={{ width: `${sourcesPercent}%` }}
-                />
-              </div>
-            </div>
-
-            <div className="relative z-10 space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-bold uppercase tracking-widest text-primary-foreground/75">Memory Capacity</span>
-                <Eye className="w-3.5 h-3.5 text-primary-foreground/40" />
-              </div>
-              <div className="flex items-center justify-between text-sm">
-                <span className="font-medium">Digital Brain Size</span>
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger>
-                      <HelpCircle className="w-3.5 h-3.5 text-primary-foreground/60" />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p className="max-w-xs text-xs">
-                        Total size of all extracted knowledge currently stored in your agent&apos;s brain
-                      </p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </div>
-              <div className="flex items-baseline gap-2">
-                <span className="text-3xl font-bold font-heading">
-                  {kbSizeMB.toFixed(2)}
-                </span>
-                <span className="text-primary-foreground/60 text-sm">
-                  / {kbSizeLimit} MB
-                </span>
-              </div>
-              <div className="h-1.5 bg-primary-foreground/15 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-primary-foreground transition-all duration-1000 ease-out"
-                  style={{ width: `${kbPercent}%` }}
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Tab-based Training Methods */}
-          <Tabs defaultValue="websites" className="w-full">
-            <TabsList className="inline-flex w-auto self-start gap-1 rounded-xl bg-muted/50 p-1 border border-border h-auto">
-              <TabsTrigger value="websites" className="rounded-lg px-4 py-2 text-xs font-bold transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm flex items-center gap-2">
-                <Globe className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Websites</span>
-                <span className="sm:hidden">Web</span>
-              </TabsTrigger>
-              <TabsTrigger value="text" className="rounded-lg px-4 py-2 text-xs font-bold transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm flex items-center gap-2">
-                <FileText className="w-3.5 h-3.5" />
-                Text
-              </TabsTrigger>
-              <TabsTrigger value="file" className="rounded-lg px-4 py-2 text-xs font-bold transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm flex items-center gap-2">
-                <FileUp className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">File Upload</span>
-                <span className="sm:hidden">File</span>
-              </TabsTrigger>
-            </TabsList>
-
-            {/* Websites Tab */}
-            <TabsContent value="websites" className="space-y-4 mt-4">
-              <div className="flex items-center justify-between">
-                <p className="text-sm text-muted-foreground">Add content from websites</p>
-                <Badge variant="secondary">
-                  {sourcesRemaining === Infinity ? 'Unlimited' : `${sourcesRemaining} left`}
-                </Badge>
-              </div>
-
-              <div className="space-y-4 p-6 rounded-lg border bg-card backdrop-blur-sm">
-                {/* Default Domain Display */}
-                <div className="space-y-2 pb-4 border-b border-border">
-                  <Label className="text-sm font-semibold">Primary Website</Label>
-                  <div className="flex items-center gap-3 p-3 bg-primary/5 border border-primary/20 rounded-lg">
-                    <div className="p-2 bg-background rounded-full border border-border shadow-sm">
-                      <Globe className="w-4 h-4 text-primary" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-foreground truncate">{domainName}</p>
-                      <p className="text-xs text-muted-foreground">Default source for crawling</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-2 pt-2">
-                  <Label className="text-sm font-semibold">Website Pages</Label>
-                  <p className="text-xs text-muted-foreground mb-2">Discover and select specific pages to train on</p>
-                  <TrainingSourcesSelector domainId={domainId} />
-                </div>
-
-                <div className="relative">
-                  <div className="absolute inset-0 flex items-center">
-                    <span className="w-full border-t" />
-                  </div>
-                  <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-background px-2 text-muted-foreground">Or</span>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label className="text-sm font-semibold">Scrape Single URL</Label>
-                  <p className="text-xs text-muted-foreground mb-2">Add content from a specific page</p>
-                  <div className="flex gap-2">
-                    <Input
-                      type="url"
-                      placeholder="https://example.com/page"
-                      value={singleUrl}
-                      onChange={(e) => setSingleUrl(e.target.value)}
-                      className="flex-1"
-                    />
-                    <Button onClick={handleScrapeSingle} disabled={!singleUrl || scrapingSelected}>
-                      {scrapingSelected ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <RefreshCw className="w-4 h-4 mr-2" />}
-                      Scrape
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </TabsContent>
-
-            {/* Text Tab */}
-            <TabsContent value="text" className="space-y-4 mt-4">
-              <p className="text-sm text-muted-foreground">Paste or type text directly</p>
-
-              <div className="space-y-4 p-6 rounded-lg border bg-card backdrop-blur-sm">
-                <Textarea
-                  placeholder="Paste your content here... (minimum 50 characters)"
-                  value={uploadText}
-                  onChange={(e) => setUploadText(e.target.value)}
-                  className="min-h-[300px] font-mono text-sm"
-                />
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Switch id="append-mode-text-empty" checked={appendMode} onCheckedChange={setAppendMode} />
-                    <Label htmlFor="append-mode-text-empty" className="text-sm">Append to existing content</Label>
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    {uploadText.length} / 50 minimum characters
-                  </p>
-                </div>
-                <div className="flex justify-end">
-                  <Button onClick={handleTextUpload} disabled={uploading || uploadText.trim().length < 50} size="lg">
-                    {uploading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
-                    Save Text
-                  </Button>
-                </div>
-              </div>
-            </TabsContent>
-
-            {/* File Upload Tab */}
-            <TabsContent value="file" className="space-y-4 mt-4">
-              <div className="flex items-center justify-between">
-                <p className="text-sm text-muted-foreground">Upload .txt or .pdf files (scanned PDFs not yet supported)</p>
-                <Badge variant="outline" className="text-xs">50MB max</Badge>
-              </div>
-
-              <div className="space-y-4 p-6 rounded-lg border bg-card backdrop-blur-sm">
-                <div className="space-y-2">
-                  <Label className="text-sm font-semibold">Select File</Label>
-                  <input
-                    id="file-upload-empty"
-                    type="file"
-                    accept=".txt,.pdf,text/plain,application/pdf"
-                    onChange={handleFileChange}
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-                  />
-                  {selectedFile && (
-                    <div className="flex items-center gap-2 text-sm mt-2 p-2 bg-green-50 dark:bg-green-950/20 rounded border border-green-200">
-                      <FileUp className="w-4 h-4 text-green-600" />
-                      <span className="font-medium">{selectedFile.name}</span>
-                      <span className="text-muted-foreground">({(selectedFile.size / 1024).toFixed(0)} KB)</span>
-                    </div>
-                  )}
-                  {fileError && (
-                    <p className="text-sm text-destructive mt-2 p-2 bg-destructive/10 rounded">{fileError}</p>
-                  )}
-                </div>
-
-                {isSelectedTextFile && (
-                  <>
-                    <div className="space-y-2">
-                      <Label className="text-sm font-semibold">Preview & Edit</Label>
-                      <Textarea
-                        value={uploadText}
-                        onChange={(e) => setUploadText(e.target.value)}
-                        className="min-h-[200px] font-mono text-sm"
-                      />
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Switch id="append-mode-file-empty" checked={appendMode} onCheckedChange={setAppendMode} />
-                      <Label htmlFor="append-mode-file-empty" className="text-sm">Append to existing content</Label>
-                    </div>
-                    <div className="flex justify-end gap-2">
-                      <Button
-                        variant="outline"
-                        onClick={() => {
-                          setUploadText('')
-                          setSelectedFile(null)
-                          setFileError(null)
-                        }}
-                        disabled={uploading}
-                      >
-                        Clear
-                      </Button>
-                      <Button onClick={handleTextUpload} disabled={uploading || !selectedFile} size="lg">
-                        {uploading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Upload className="w-4 h-4 mr-2" />}
-                        Upload File
-                      </Button>
-                    </div>
-                  </>
-                )}
-
-                {isSelectedPdfFile && (
-                  <>
-                    <div className="flex items-center gap-2">
-                      <Switch id="append-mode-file-pdf" checked={appendMode} onCheckedChange={setAppendMode} />
-                      <Label htmlFor="append-mode-file-pdf" className="text-sm">Append to existing content</Label>
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      We extract text from this PDF. Image-only/scanned PDFs will fail until OCR is added.
-                    </p>
-                    <div className="flex justify-end gap-2">
-                      <Button
-                        variant="outline"
-                        onClick={() => {
-                          setPdfBase64(null)
-                          setSelectedFile(null)
-                          setFileError(null)
-                        }}
-                        disabled={uploadingPdf}
-                      >
-                        Clear
-                      </Button>
-                      <Button onClick={handlePdfUpload} disabled={uploadingPdf || !pdfBase64} size="lg">
-                        {uploadingPdf ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Upload className="w-4 h-4 mr-2" />}
-                        Upload PDF
-                      </Button>
-                    </div>
-                  </>
-                )}
-              </div>
-            </TabsContent>
-          </Tabs>
-        </CardContent>
-      </Card>
-    )
-  }
-
-  // Edit mode
-  if (isEditing) {
-    return (
-      <Card className="w-full">
-        <CardHeader>
-          <div className="flex justify-between items-start">
-            <CardTitle className="flex items-center gap-2">
-              <Edit className="w-5 h-5" />
-              Edit Knowledge Base
-            </CardTitle>
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm" onClick={handleCancel} disabled={updating}>
-                <X className="w-4 h-4 mr-2" />
-                Cancel
-              </Button>
-              <Button size="sm" onClick={handleSave} disabled={updating}>
-                {updating ? (
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                ) : (
-                  <Save className="w-4 h-4 mr-2" />
-                )}
-                Save
-              </Button>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <Textarea
-            value={editedMarkdown}
-            onChange={(e) => setEditedMarkdown(e.target.value)}
-            className="min-h-[500px] font-mono text-sm"
-          />
-          <p className="text-xs text-muted-foreground mt-2">
-            {editedMarkdown.length.toLocaleString()} characters
-          </p>
-        </CardContent>
-      </Card>
-    )
-  }
-
-  // View mode with knowledge base
-  const preview = knowledgeBase.slice(0, 1000)
-  const displayText = showFull ? knowledgeBase : preview
+  const statusCard = {
+    healthy: {
+      tone: 'border-emerald-200 bg-emerald-50/60',
+      icon: <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />,
+      title: 'Knowledge base is live',
+      body: (
+        <>
+          <span className="font-bold tabular-nums">{chunks.toLocaleString()}</span> passages indexed
+          from <span className="font-bold tabular-nums">{documents.toLocaleString()}</span>{' '}
+          {documents === 1 ? 'document' : 'documents'}. The assistant answers from this content.
+        </>
+      ),
+    },
+    partial: {
+      tone: 'border-amber-200 bg-amber-50/70',
+      icon: <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-700" />,
+      title: 'Working, but some sources did not sync',
+      body: (
+        <>
+          <span className="font-bold tabular-nums">{chunks.toLocaleString()}</span> passages indexed
+          from <span className="font-bold tabular-nums">{documents.toLocaleString()}</span>{' '}
+          {documents === 1 ? 'document' : 'documents'} — the assistant works. But{' '}
+          <span className="font-bold tabular-nums">{failedSources}</span>{' '}
+          {failedSources === 1 ? 'source' : 'sources'} failed to sync
+          {failedNames.length > 0 && <> ({failedNames.join(', ')})</>}, so anything only they covered
+          is missing.
+        </>
+      ),
+    },
+    indexing: {
+      tone: 'border-slate-200 bg-slate-50',
+      icon: <Loader2 className="mt-0.5 h-4 w-4 shrink-0 animate-spin text-[#5b5ce2]" />,
+      title: 'Indexing in progress',
+      body: (
+        <>
+          Reading {domainName} and turning it into passages the assistant can search. This usually
+          takes under a minute — refresh to see the result.
+        </>
+      ),
+    },
+    failed: {
+      tone: 'border-rose-200 bg-rose-50/70',
+      icon: <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-rose-600" />,
+      title: 'Scraping failed',
+      body: (
+        <>
+          Nothing has been indexed for <span className="font-bold">{domainName}</span>
+          {failedNames.length > 0 && <> — {failedNames.join(', ')} could not be read</>}. Common
+          causes: the site blocks automated access, an invalid SSL certificate, or rate limiting
+          while the site was busy.
+        </>
+      ),
+    },
+    empty: {
+      tone: 'border-slate-200 bg-slate-50',
+      icon: <Database className="mt-0.5 h-4 w-4 shrink-0 text-slate-400" />,
+      title: 'Nothing added yet',
+      body: (
+        <>
+          The assistant has no content to answer from. Add {domainName}&apos;s pages below, paste
+          text, or upload a PDF — the first source takes about a minute to index.
+        </>
+      ),
+    },
+  }[state]
 
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4">
-          <div className="flex-1">
-            <CardTitle className="flex items-center gap-2 text-base md:text-lg">
-              <CheckCircle2 className="w-4 h-4 md:w-5 md:h-5 text-green-600" />
-              Knowledge Base Active
-            </CardTitle>
-            <CardDescription className="mt-1 text-xs md:text-sm">
-              {kbSizeMB.toFixed(2)} MB • {knowledgeBase.length.toLocaleString()} chars •{' '}
-              {updatedAt && `Updated ${formatDistanceToNow(new Date(updatedAt), { addSuffix: true })}`}
-            </CardDescription>
-          </div>
-
-          <div className="flex gap-2 flex-wrap">
-            <Button variant="outline" size="sm" onClick={() => setIsEditing(true)} className="text-xs md:text-sm">
-              <Edit className="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2" />
-              Edit
-            </Button>
-            <Button size="sm" onClick={() => onTrain(domainId, false)} disabled={training || step3Complete} className="text-xs md:text-sm">
-              {training ? (
-                <>
-                  <Loader2 className="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2 animate-spin" />
-                  <span className="hidden sm:inline">Training... {progress}%</span>
-                  <span className="sm:hidden">{progress}%</span>
-                </>
-              ) : (
-                <>
-                  <Brain className="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2" />
-                  {step3Complete ? '✓' : 'Train AI'}
-                </>
+    <div className="flex flex-col gap-6">
+      {/* Status — the one place the panel says what is actually true */}
+      <div className={cn('rounded-2xl border p-5', statusCard.tone)}>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div className="flex items-start gap-2.5">
+            {statusCard.icon}
+            <div className="min-w-0">
+              <p className="text-[13px] font-black tracking-tight text-slate-900">
+                {statusCard.title}
+              </p>
+              <p className="mt-1 text-[13px] leading-6 text-slate-600">{statusCard.body}</p>
+              {lastSyncedAt && (
+                <p className="mt-1 text-[11px] text-slate-400">
+                  Last synced {formatDistanceToNow(lastSyncedAt, { addSuffix: true })}
+                </p>
               )}
-            </Button>
-          </div>
-        </div>
-      </CardHeader>
-
-      <CardContent className="space-y-4">
-        {/* Usage Stats (Glassmorphism look) */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 rounded-xl border border-border bg-muted/25">
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Sources Used</span>
-              <div className="flex items-center gap-1.5">
-                <span className="text-xs font-bold text-foreground">{trainingSourcesUsed}</span>
-                <span className="text-[10px] font-medium text-muted-foreground/50">/ {trainingSourcesLimit === Infinity ? '∞' : trainingSourcesLimit}</span>
-              </div>
             </div>
-            {trainingSourcesLimit !== Infinity && (
-              <div className="h-1 bg-muted rounded-full overflow-hidden">
-                <div
-                  className={cn("h-full transition-all duration-500", sourcesPercent > 80 ? 'bg-destructive' : 'bg-primary')}
-                  style={{ width: `${sourcesPercent}%` }}
-                />
-              </div>
+          </div>
+
+          <div className="flex shrink-0 flex-wrap gap-2">
+            {(state === 'failed' || state === 'partial') && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onScrape(domainId)}
+                disabled={scraping}
+                className="rounded-lg border-slate-200 bg-white text-xs font-bold text-slate-900 hover:bg-slate-50"
+              >
+                {scraping
+                  ? <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
+                  : <RefreshCw className="mr-2 h-3.5 w-3.5" />}
+                Retry crawl
+              </Button>
+            )}
+            {chunks > 0 && (
+              <Button
+                size="sm"
+                onClick={() => onTrain(domainId, false)}
+                disabled={training}
+                className="rounded-lg bg-[#5b5ce2] text-xs font-bold text-white hover:bg-[#4c4dd6]"
+              >
+                {training ? (
+                  <>
+                    <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
+                    Retraining {progress}%
+                  </>
+                ) : (
+                  <>
+                    <Brain className="mr-2 h-3.5 w-3.5" />
+                    Retrain
+                  </>
+                )}
+              </Button>
             )}
           </div>
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Total Storage</span>
-              <div className="flex items-center gap-1.5">
-                <span className="text-xs font-bold text-foreground">{kbSizeMB.toFixed(2)}</span>
-                <span className="text-[10px] font-medium text-muted-foreground/50">/ {kbSizeLimit} MB</span>
-              </div>
-            </div>
-            <div className="h-1 bg-muted rounded-full overflow-hidden">
-              <div
-                className={cn("h-full transition-all duration-500", kbPercent > 80 ? 'bg-destructive' : 'bg-primary')}
-                style={{ width: `${kbPercent}%` }}
-              />
+        </div>
+      </div>
+
+      {/* Per-source truth. One failed source among many is a line item here,
+          not a verdict on the whole knowledge base. */}
+      {sources.length > 0 && (
+        <div className="rounded-2xl border border-slate-200 bg-white">
+          <div className="flex items-center justify-between border-b border-slate-100 px-5 py-3">
+            <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Sources</p>
+            <span className="text-[11px] tabular-nums text-slate-400">
+              {sources.length} {sources.length === 1 ? 'source' : 'sources'}
+            </span>
+          </div>
+          <ul className="divide-y divide-slate-100">
+            {sources.map((source) => {
+              const meta = SOURCE_STATUS[source.status]
+              return (
+                <li key={source.id} className="flex items-center gap-3 px-5 py-3">
+                  <FileText className="h-3.5 w-3.5 shrink-0 text-slate-300" />
+                  <span className="min-w-0 flex-1 truncate text-[13px] font-medium text-slate-800">
+                    {source.name}
+                  </span>
+                  {source.lastSyncedAt && (
+                    <span className="hidden shrink-0 text-[11px] text-slate-400 sm:inline">
+                      {formatDistanceToNow(new Date(source.lastSyncedAt), { addSuffix: true })}
+                    </span>
+                  )}
+                  <span className={cn(PILL, TONE[meta.tone])}>{meta.label}</span>
+                </li>
+              )
+            })}
+          </ul>
+        </div>
+      )}
+
+      {/* Quota read-outs */}
+      <div className="grid grid-cols-1 gap-4 rounded-2xl border border-slate-200 bg-white p-5 md:grid-cols-2">
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Training sources</span>
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-xs font-black tabular-nums text-slate-900">{trainingSourcesUsed}</span>
+              <span className="text-[10px] font-medium tabular-nums text-slate-400">
+                / {trainingSourcesLimit === Infinity ? '∞' : trainingSourcesLimit}
+              </span>
             </div>
           </div>
-        </div>
-
-        {/* Tab-based Training Methods */}
-        <Tabs defaultValue="websites" className="w-full">
-          <TabsList className="inline-flex w-auto self-start gap-1 rounded-xl bg-muted/50 p-1 border border-border h-auto">
-            <TabsTrigger value="websites" className="rounded-lg px-4 py-2 text-xs font-bold transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm flex items-center gap-2">
-              <Globe className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Websites</span>
-              <span className="sm:hidden">Web</span>
-            </TabsTrigger>
-            <TabsTrigger value="text" className="rounded-lg px-4 py-2 text-xs font-bold transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm flex items-center gap-2">
-              <FileText className="w-3.5 h-3.5" />
-              Text
-            </TabsTrigger>
-            <TabsTrigger value="file" className="rounded-lg px-4 py-2 text-xs font-bold transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm flex items-center gap-2">
-              <FileUp className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">File Upload</span>
-              <span className="sm:hidden">File</span>
-            </TabsTrigger>
-          </TabsList>
-
-          {/* Websites Tab */}
-          <TabsContent value="websites" className="space-y-4 mt-4">
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-muted-foreground">Add more content from websites</p>
-              <Badge variant="secondary">
-                {sourcesRemaining === Infinity ? 'Unlimited' : `${sourcesRemaining} left`}
-              </Badge>
-            </div>
-
-            <div className="space-y-4 p-6 rounded-lg border bg-card backdrop-blur-sm">
-              <div className="space-y-2">
-                <Label className="text-sm font-semibold">Collect Multiple Links</Label>
-                <p className="text-xs text-muted-foreground mb-2">Discover and select multiple pages from your website</p>
-                <TrainingSourcesSelector domainId={domainId} />
-              </div>
-
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-background px-2 text-muted-foreground">Or</span>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label className="text-sm font-semibold">Scrape Single URL</Label>
-                <p className="text-xs text-muted-foreground mb-2">Add content from a specific page</p>
-                <div className="flex gap-2">
-                  <Input
-                    type="url"
-                    placeholder="https://example.com/page"
-                    value={singleUrl}
-                    onChange={(e) => setSingleUrl(e.target.value)}
-                    className="flex-1"
-                  />
-                  <Button onClick={handleScrapeSingle} disabled={!singleUrl || scrapingSelected}>
-                    {scrapingSelected ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <RefreshCw className="w-4 h-4 mr-2" />}
-                    Scrape
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </TabsContent>
-
-          {/* Text Tab */}
-          <TabsContent value="text" className="space-y-4 mt-4">
-            <p className="text-sm text-muted-foreground">Paste or type additional text</p>
-
-            <div className="space-y-4 p-6 rounded-lg border bg-card backdrop-blur-sm">
-              <Textarea
-                placeholder="Paste your content here... (minimum 50 characters)"
-                value={uploadText}
-                onChange={(e) => setUploadText(e.target.value)}
-                className="min-h-[300px] font-mono text-sm"
+          {trainingSourcesLimit !== Infinity && (
+            <div className="h-1 overflow-hidden rounded-full bg-slate-100">
+              <div
+                className={cn('h-full transition-all duration-500', sourcesPercent > 80 ? 'bg-rose-500' : 'bg-[#5b5ce2]')}
+                style={{ width: `${sourcesPercent}%` }}
               />
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Switch id="append-mode-text-active" checked={appendMode} onCheckedChange={setAppendMode} />
-                  <Label htmlFor="append-mode-text-active" className="text-sm">Append to existing content</Label>
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  {uploadText.length} / 50 minimum characters
-                </p>
-              </div>
-              <div className="flex justify-end">
-                <Button onClick={handleTextUpload} disabled={uploading || uploadText.trim().length < 50} size="lg">
-                  {uploading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
-                  Save Text
-                </Button>
-              </div>
-            </div>
-          </TabsContent>
-
-          {/* File Upload Tab */}
-          <TabsContent value="file" className="space-y-4 mt-4">
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-muted-foreground">Upload .txt or .pdf files (scanned PDFs not yet supported)</p>
-              <Badge variant="outline" className="text-xs">50MB max</Badge>
-            </div>
-
-            <div className="space-y-4 p-6 rounded-lg border bg-card backdrop-blur-sm">
-              <div className="space-y-2">
-                <Label className="text-sm font-semibold">Select File</Label>
-                <input
-                  id="file-upload-active"
-                  type="file"
-                  accept=".txt,.pdf,text/plain,application/pdf"
-                  onChange={handleFileChange}
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-                />
-                {selectedFile && (
-                  <div className="flex items-center gap-2 text-sm mt-2 p-2 bg-green-50 dark:bg-green-950/20 rounded border border-green-200">
-                    <FileUp className="w-4 h-4 text-green-600" />
-                    <span className="font-medium">{selectedFile.name}</span>
-                    <span className="text-muted-foreground">({(selectedFile.size / 1024).toFixed(0)} KB)</span>
-                  </div>
-                )}
-                {fileError && (
-                  <p className="text-sm text-destructive mt-2 p-2 bg-destructive/10 rounded">{fileError}</p>
-                )}
-              </div>
-
-              {isSelectedTextFile && (
-                <>
-                  <div className="space-y-2">
-                    <Label className="text-sm font-semibold">Preview & Edit</Label>
-                    <Textarea
-                      value={uploadText}
-                      onChange={(e) => setUploadText(e.target.value)}
-                      className="min-h-[200px] font-mono text-sm"
-                    />
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Switch id="append-mode-file-active" checked={appendMode} onCheckedChange={setAppendMode} />
-                    <Label htmlFor="append-mode-file-active" className="text-sm">Append to existing content</Label>
-                  </div>
-                  <div className="flex justify-end gap-2">
-                    <Button
-                      variant="outline"
-                      onClick={() => {
-                        setUploadText('')
-                        setSelectedFile(null)
-                        setFileError(null)
-                      }}
-                      disabled={uploading}
-                    >
-                      Clear
-                    </Button>
-                    <Button onClick={handleTextUpload} disabled={uploading || !selectedFile} size="lg">
-                      {uploading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Upload className="w-4 h-4 mr-2" />}
-                      Upload File
-                    </Button>
-                  </div>
-                </>
-              )}
-
-              {isSelectedPdfFile && (
-                <>
-                  <div className="flex items-center gap-2">
-                    <Switch id="append-mode-file-active-pdf" checked={appendMode} onCheckedChange={setAppendMode} />
-                    <Label htmlFor="append-mode-file-active-pdf" className="text-sm">Append to existing content</Label>
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    We extract text from this PDF. Image-only/scanned PDFs will fail until OCR is added.
-                  </p>
-                  <div className="flex justify-end gap-2">
-                    <Button
-                      variant="outline"
-                      onClick={() => {
-                        setPdfBase64(null)
-                        setSelectedFile(null)
-                        setFileError(null)
-                      }}
-                      disabled={uploadingPdf}
-                    >
-                      Clear
-                    </Button>
-                    <Button onClick={handlePdfUpload} disabled={uploadingPdf || !pdfBase64} size="lg">
-                      {uploadingPdf ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Upload className="w-4 h-4 mr-2" />}
-                      Upload PDF
-                    </Button>
-                  </div>
-                </>
-              )}
-            </div>
-          </TabsContent>
-        </Tabs>
-
-        {/* Content Preview - Collapsible */}
-        <div className="space-y-2">
-          <Button
-            variant="outline"
-            onClick={() => setShowContent(!showContent)}
-            className="w-full justify-between"
-          >
-            <span className="flex items-center gap-2">
-              <Eye className="w-4 h-4" />
-              {showContent ? 'Hide' : 'View'} Knowledge Base Content
-            </span>
-            {showContent ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-          </Button>
-
-          {showContent && (
-            <div className="prose prose-sm dark:prose-invert max-w-none p-4 bg-muted/20 rounded-lg border max-h-[400px] overflow-y-auto">
-              <ReactMarkdown>{displayText}</ReactMarkdown>
-              {!showFull && knowledgeBase.length > 1000 && (
-                <Button variant="link" onClick={() => setShowFull(true)} className="mt-2">
-                  Show More <ArrowRight className="w-4 h-4 ml-1" />
-                </Button>
-              )}
-              {showFull && (
-                <Button variant="link" onClick={() => setShowFull(false)} className="mt-2">
-                  Show Less
-                </Button>
-              )}
             </div>
           )}
         </div>
-      </CardContent>
-    </Card>
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Storage used</span>
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-xs font-black tabular-nums text-slate-900">{kbSizeMB.toFixed(2)}</span>
+              <span className="text-[10px] font-medium tabular-nums text-slate-400">/ {kbSizeLimit} MB</span>
+            </div>
+          </div>
+          <div className="h-1 overflow-hidden rounded-full bg-slate-100">
+            <div
+              className={cn('h-full transition-all duration-500', kbPercent > 80 ? 'bg-rose-500' : 'bg-[#5b5ce2]')}
+              style={{ width: `${kbPercent}%` }}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Add content */}
+      <Tabs defaultValue="websites" className="w-full">
+        <TabsList className="inline-flex h-auto w-auto gap-1 self-start rounded-xl border border-slate-200 bg-white p-1">
+          <TabsTrigger value="websites" className="flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-bold text-slate-500 data-[state=active]:bg-[#111827] data-[state=active]:text-white">
+            <Globe className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Websites</span>
+            <span className="sm:hidden">Web</span>
+          </TabsTrigger>
+          <TabsTrigger value="text" className="flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-bold text-slate-500 data-[state=active]:bg-[#111827] data-[state=active]:text-white">
+            <FileText className="h-3.5 w-3.5" />
+            Text
+          </TabsTrigger>
+          <TabsTrigger value="file" className="flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-bold text-slate-500 data-[state=active]:bg-[#111827] data-[state=active]:text-white">
+            <FileUp className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">File upload</span>
+            <span className="sm:hidden">File</span>
+          </TabsTrigger>
+        </TabsList>
+
+        {/* Websites Tab */}
+        <TabsContent value="websites" className="mt-4 space-y-4">
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-slate-500">Add content from websites</p>
+            <Badge variant="secondary">
+              {sourcesRemaining === Infinity ? 'Unlimited' : `${sourcesRemaining} left`}
+            </Badge>
+          </div>
+
+          <div className="space-y-4 rounded-2xl border border-slate-200 bg-white p-6">
+            <div className="space-y-2 border-b border-slate-100 pb-4">
+              <Label className="text-sm font-semibold">Primary website</Label>
+              <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 p-3">
+                <div className="rounded-full border border-slate-200 bg-white p-2">
+                  <Globe className="h-4 w-4 text-[#5b5ce2]" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-medium text-slate-900">{domainName}</p>
+                  <p className="text-xs text-slate-400">Default source for crawling</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-2 pt-2">
+              <Label className="text-sm font-semibold">Website pages</Label>
+              <p className="mb-2 text-xs text-slate-400">Discover and select specific pages to train on</p>
+              <TrainingSourcesSelector domainId={domainId} />
+            </div>
+
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t border-slate-200" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-white px-2 text-slate-400">Or</span>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-sm font-semibold">Scrape a single URL</Label>
+              <p className="mb-2 text-xs text-slate-400">Add content from a specific page</p>
+              <div className="flex gap-2">
+                <Input
+                  type="url"
+                  placeholder="https://example.com/page"
+                  value={singleUrl}
+                  onChange={(e) => setSingleUrl(e.target.value)}
+                  className="flex-1"
+                />
+                <Button onClick={handleScrapeSingle} disabled={!singleUrl || scrapingSelected}>
+                  {scrapingSelected ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}
+                  Scrape
+                </Button>
+              </div>
+            </div>
+          </div>
+        </TabsContent>
+
+        {/* Text Tab */}
+        <TabsContent value="text" className="mt-4 space-y-4">
+          <p className="text-sm text-slate-500">Paste or type text directly</p>
+
+          <div className="space-y-4 rounded-2xl border border-slate-200 bg-white p-6">
+            <Textarea
+              placeholder="Paste your content here... (minimum 50 characters)"
+              value={uploadText}
+              onChange={(e) => setUploadText(e.target.value)}
+              className="min-h-[300px] font-mono text-sm"
+            />
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Switch id="append-mode-text" checked={appendMode} onCheckedChange={setAppendMode} />
+                <Label htmlFor="append-mode-text" className="text-sm">Append to existing content</Label>
+              </div>
+              <p className="text-xs tabular-nums text-slate-400">
+                {uploadText.length} / 50 minimum characters
+              </p>
+            </div>
+            <div className="flex justify-end">
+              <Button onClick={handleTextUpload} disabled={uploading || uploadText.trim().length < 50} size="lg">
+                {uploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                Save text
+              </Button>
+            </div>
+          </div>
+        </TabsContent>
+
+        {/* File Upload Tab */}
+        <TabsContent value="file" className="mt-4 space-y-4">
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-slate-500">Upload .txt or .pdf files (scanned PDFs not yet supported)</p>
+            <Badge variant="outline" className="text-xs">50MB max</Badge>
+          </div>
+
+          <div className="space-y-4 rounded-2xl border border-slate-200 bg-white p-6">
+            <div className="space-y-2">
+              <Label className="text-sm font-semibold">Select file</Label>
+              <input
+                id="file-upload"
+                type="file"
+                accept=".txt,.pdf,text/plain,application/pdf"
+                onChange={handleFileChange}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+              />
+              {selectedFile && (
+                <div className="mt-2 flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 p-2 text-sm">
+                  <FileUp className="h-4 w-4 text-emerald-600" />
+                  <span className="font-medium text-slate-900">{selectedFile.name}</span>
+                  <span className="tabular-nums text-slate-400">({(selectedFile.size / 1024).toFixed(0)} KB)</span>
+                </div>
+              )}
+              {fileError && (
+                <p className="mt-2 rounded-lg bg-rose-50 p-2 text-sm text-rose-700">{fileError}</p>
+              )}
+            </div>
+
+            {isSelectedTextFile && (
+              <>
+                <div className="space-y-2">
+                  <Label className="text-sm font-semibold">Preview & edit</Label>
+                  <Textarea
+                    value={uploadText}
+                    onChange={(e) => setUploadText(e.target.value)}
+                    className="min-h-[200px] font-mono text-sm"
+                  />
+                </div>
+                <div className="flex items-center gap-2">
+                  <Switch id="append-mode-file" checked={appendMode} onCheckedChange={setAppendMode} />
+                  <Label htmlFor="append-mode-file" className="text-sm">Append to existing content</Label>
+                </div>
+                <div className="flex justify-end gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setUploadText('')
+                      setSelectedFile(null)
+                      setFileError(null)
+                    }}
+                    disabled={uploading}
+                  >
+                    Clear
+                  </Button>
+                  <Button onClick={handleTextUpload} disabled={uploading || !selectedFile} size="lg">
+                    {uploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
+                    Upload file
+                  </Button>
+                </div>
+              </>
+            )}
+
+            {isSelectedPdfFile && (
+              <>
+                <div className="flex items-center gap-2">
+                  <Switch id="append-mode-file-pdf" checked={appendMode} onCheckedChange={setAppendMode} />
+                  <Label htmlFor="append-mode-file-pdf" className="text-sm">Append to existing content</Label>
+                </div>
+                <p className="text-xs text-slate-400">
+                  We extract text from this PDF. Image-only/scanned PDFs will fail until OCR is added.
+                </p>
+                <div className="flex justify-end gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setPdfBase64(null)
+                      setSelectedFile(null)
+                      setFileError(null)
+                    }}
+                    disabled={uploadingPdf}
+                  >
+                    Clear
+                  </Button>
+                  <Button onClick={handlePdfUpload} disabled={uploadingPdf || !pdfBase64} size="lg">
+                    {uploadingPdf ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
+                    Upload PDF
+                  </Button>
+                </div>
+              </>
+            )}
+          </div>
+        </TabsContent>
+      </Tabs>
+    </div>
   )
 }
 
-export default KnowledgeBaseViewerV2
+export default KnowledgeBaseViewer

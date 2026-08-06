@@ -63,6 +63,31 @@ export async function createSource(input: {
   mimeType?: string | null
   userId?: string | null
 }) {
+  // Re-crawling the same URL must reuse its source, not add another. Without
+  // this every retry created a duplicate row: the client screen showed one page
+  // as "2 documents", the source list filled with identical entries, and each
+  // attempt spent another slot from `maximum_training_sources` — so a user
+  // retrying a failure could exhaust their plan by fixing nothing.
+  if (input.originalUrl) {
+    const existing = await client.knowledgeSource.findFirst({
+      where: {
+        clientWorkspaceId: input.clientWorkspaceId,
+        sourceType: input.sourceType,
+        originalUrl: input.originalUrl,
+        deletedAt: null,
+      },
+    })
+    if (existing) {
+      return client.knowledgeSource.update({
+        where: { id: existing.id },
+        // Back to `queued`: the caller is about to re-crawl it, and leaving a
+        // stale `failed` on a source now being retried is how the UI ends up
+        // contradicting itself.
+        data: { syncStatus: 'queued', status: 'active', name: input.name },
+      })
+    }
+  }
+
   await assertEntitlement(input.organizationId, 'maximum_training_sources')
 
   return client.knowledgeSource.create({

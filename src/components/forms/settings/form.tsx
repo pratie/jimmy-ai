@@ -5,10 +5,9 @@ import React, { useEffect, useState } from 'react'
 import { DomainUpdate } from './domain-update'
 import CodeSnippet from './code-snippet'
 import EditChatbotIcon from './edit-chatbot-icon'
-import dynamic from 'next/dynamic'
 import { Button } from '@/components/ui/button'
 import { Loader } from '@/components/loader'
-import KnowledgeBaseViewer from '@/components/settings/knowledge-base-viewer'
+import KnowledgeBaseViewer, { type KnowledgeSummary } from '@/components/settings/knowledge-base-viewer'
 import { BotModeSelector } from '@/components/settings/bot-mode-selector'
 import { BrandVoiceSettings } from '@/components/settings/brand-voice-settings'
 import { onGetEmbeddingStatus } from '@/actions/firecrawl'
@@ -19,15 +18,8 @@ import {
 import { cn } from '@/lib/utils'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import HelpDesk from './help-desk'
-import AppearanceSettings from './appearance'
+import TestAndCustomise from '@/components/settings/test-and-customise'
 import { getPlanLimits } from '@/lib/plans'
-
-const WelcomeMessage = dynamic(
-  () => import('./greetings-message').then((props) => props.default),
-  {
-    ssr: false,
-  }
-)
 
 type Props = {
   id: string
@@ -45,13 +37,15 @@ type Props = {
     language: string | null
     theme?: any | null
   } | null
+  /** Live counts from the knowledge tables — the only honest source of KB state. */
+  knowledge: KnowledgeSummary
   trainingSourcesUsed?: number
   knowledgeBaseSizeMB?: number
 }
 
 type TabKey = 'knowledge' | 'behavior' | 'appearance' | 'domain'
 
-const SettingsForm = ({ id, name, chatBot, plan, trainingSourcesUsed, knowledgeBaseSizeMB }: Props) => {
+const SettingsForm = ({ id, name, chatBot, plan, knowledge, trainingSourcesUsed, knowledgeBaseSizeMB }: Props) => {
   const {
     register,
     onUpdateSettings,
@@ -96,8 +90,10 @@ const SettingsForm = ({ id, name, chatBot, plan, trainingSourcesUsed, knowledgeB
     return () => { mounted = false }
   }, [id])
 
-  const hasKB = !!chatBot?.knowledgeBase && chatBot.knowledgeBase.length >= 50
-  const kbDone = hasKB
+  // Indexed chunks, not the dead `chatBot.knowledgeBase` blob: that field is
+  // permanently null under the current schema, so this step could never be
+  // ticked no matter how much content the client actually had.
+  const kbDone = knowledge.chunks > 0
   const trainDone = hasEmbeddings || embedStatus === 'completed'
   const behaviorDone = !!(chatBot?.mode) && !!(chatBot?.brandTone) && !!(chatBot?.language)
 
@@ -146,7 +142,7 @@ const SettingsForm = ({ id, name, chatBot, plan, trainingSourcesUsed, knowledgeB
             value="appearance"
             className="rounded-lg px-4 py-2 text-xs font-semibold text-slate-500 hover:text-slate-800 data-[state=active]:bg-[#111827] data-[state=active]:text-white"
           >
-            Appearance
+            Test &amp; customise
           </TabsTrigger>
           <TabsTrigger
             value="domain"
@@ -162,10 +158,7 @@ const SettingsForm = ({ id, name, chatBot, plan, trainingSourcesUsed, knowledgeB
             <KnowledgeBaseViewer
               domainId={id}
               domainName={name}
-              knowledgeBase={chatBot?.knowledgeBase || null}
-              status={chatBot?.knowledgeBaseStatus || null}
-              updatedAt={chatBot?.knowledgeBaseUpdatedAt || null}
-              plan={plan}
+              knowledge={knowledge}
               trainingSourcesUsed={trainingSourcesUsed || 0}
               trainingSourcesLimit={planLimits.trainingSources}
               kbSizeMB={knowledgeBaseSizeMB || 0}
@@ -212,18 +205,25 @@ const SettingsForm = ({ id, name, chatBot, plan, trainingSourcesUsed, knowledgeB
           <div className="flex flex-col gap-6 rounded-3xl border border-slate-200/80 bg-white p-6 shadow-[0_8px_30px_rgba(15,23,42,0.05)] md:p-8">
             <div className="flex items-center justify-between border-b border-slate-100 pb-5">
               <div className="space-y-1">
-                <h2 className="font-black text-xl text-slate-950 tracking-tight">Appearance</h2>
-                <p className="text-xs text-slate-400 font-medium">Customize your agent&apos;s visual identity</p>
+                <h2 className="font-black text-xl text-slate-950 tracking-tight">Test &amp; customise</h2>
+                <p className="text-xs text-slate-400 font-medium">Talk to the assistant and change how it looks, side by side</p>
               </div>
             </div>
-            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-              <div className="col-span-1 lg:col-span-1 flex flex-col gap-6">
-                <EditChatbotIcon chatBot={chatBot} register={register} errors={errors} />
-                <WelcomeMessage message={chatBot?.welcomeMessage!} register={register} errors={errors} />
-              </div>
-              <div className="col-span-1 lg:col-span-2">
-                <AppearanceSettings domainId={id} current={chatBot?.theme as any} />
-              </div>
+
+            <TestAndCustomise
+              workspaceId={id}
+              assistantName={name}
+              currentTheme={chatBot?.theme as any}
+              currentWelcomeMessage={chatBot?.welcomeMessage ?? null}
+              knowledgeChunks={knowledge.chunks}
+            />
+
+            {/* The icon is still part of the outer settings form: it uploads on
+                the form's own Save, unlike the theme, which the panel persists
+                itself. Keeping it in its own card avoids implying that the
+                panel's Save button covers it. */}
+            <div className="border-t border-slate-100 pt-6">
+              <EditChatbotIcon chatBot={chatBot} register={register} errors={errors} />
             </div>
           </div>
         </TabsContent>
