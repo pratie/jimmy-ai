@@ -15,6 +15,43 @@ Companion docs: [`START-HERE.md`](START-HERE.md) ·
 
 ## P0 — the product does not work without these
 
+### 0. The database answers `SELECT 1` in ~1.3 seconds — **added 2026-08-06**
+
+**Why it is first:** it is the single cause behind most of what looked like
+separate bugs on 2026-08-06. Five samples on the pooled connection: 3559, 1349,
+1309, 1331, 1213 ms. Healthy Postgres does this in single-digit milliseconds.
+
+Everything downstream of it:
+
+- first-client setup hung forever — `onIntegrateDomain` is ~12–15 sequential
+  queries ≈ 18s before the crawl even starts
+- one-page ingest takes ~49s (scrape 4.0s, `upsertDocument` 1.4s,
+  `indexSource` 31.1s)
+- six test runs failed with zero assertion failures, only connection drops and
+  60s hook timeouts
+
+**Do, in order:**
+
+1. **Check whether it is the infrastructure.** Is the Supabase project
+   throttled, on a burst-exhausted tier, or in a region far from the
+   `us-east-1` Vercel functions? No code change fixes a cross-region round trip
+   paid 15 times per request.
+2. **Batch the chunk inserts.** `src/lib/knowledge/ingest.ts:188` issues one
+   `INSERT` per chunk in a sequential loop — roughly 14 of those 31 seconds.
+   One multi-row insert turns a 5-page crawl from "exceeds 60s and fails" into
+   something comfortable.
+3. **Reduce round trips in `onIntegrateDomain`** — the duplicate check and both
+   entitlement assertions can run concurrently.
+
+**Done when:** a single-page onboarding completes in under 15s and a five-page
+site completes at all.
+
+**Note:** `maxDuration = 60` now covers the dashboard and settings pages, which
+raises the ceiling but does not make the work fast. At current latency a
+five-page site still will not fit.
+
+---
+
 ### 1. ~~Publish an assistant~~ · 2. ~~Unpublish / pause~~ — **done 2026-08-05**
 
 Both shipped in one change. `onSetAssistantStatus(workspaceId, status)` in
@@ -224,6 +261,23 @@ plainly. It is a common procurement question.
 
 `widget/resolve.ts` keeps its limiter in process memory. On serverless it does
 not hold across instances. Move to Redis or the database.
+
+### 11b. Move the test suite off the production database — **raised to the top of testing, 2026-08-06**
+
+The three security suites point at the live database and share its connection
+pooler with the running product. On 2026-08-06 that produced:
+
+- six consecutive red runs with **zero assertion failures** — all
+  `Server has closed the connection` or `Hook timed out in 60000ms`, with a
+  different test failing each time
+- **ten orphaned test organizations and fifty test users** sitting beside four
+  real ones, because Vitest skips `afterAll` when `beforeAll` throws (the
+  fixture now purges on setup failure, but the exposure remains)
+- an afternoon spent proving the failures were not in the code
+
+A local Postgres with pgvector removes all of it, and makes the suite fast
+enough to run often. Roughly an hour. Do it before a paying client exists —
+"my test run took the customer's widget offline" is not a story you want.
 
 ### 12. Test coverage beyond tenancy
 

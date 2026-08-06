@@ -542,6 +542,7 @@ Derived by grepping `process.env.*` across `src/`, `scripts/`, `prisma/`,
 | `DODO_API_KEY`, `NEXT_PUBLIC_DODO_API_URL`, `DODO_PRODUCT_ID_{STARTER,PRO,BUSINESS}[_YEARLY]` | Checkout link creation. |
 | `KIE_API_KEY` | `/api/upload` throws — chatbot image uploads. |
 | `NODE_MAILER_EMAIL`, `NODE_MAILER_GMAIL_APP_PASSWORD` | Manual one-off lead follow-ups (`src/actions/mail`, `src/actions/mailer`). |
+| `RESEND_API_KEY`, `LEAD_ALERT_FROM` | Automated new-lead and booking alerts (`src/lib/notifications/lead-alert.ts`). **Both must be set or the alerts silently no-op** — leads are still captured, nobody is told. `LEAD_ALERT_FROM` must be on a domain verified in Resend (`mail.chatdock.io`, added 2026-08-06) or every send is rejected. |
 | `RESEND_API_KEY`, `LEAD_ALERT_FROM` | New-lead and booking-request alerts. Unset ⇒ **silent no-op**: leads are still captured, nobody is told. `LEAD_ALERT_FROM` must be on a Resend-verified domain or every send is rejected. |
 | `NEXT_PUBLIC_CHATDOCK_WIDGET_KEY` | The marketing site renders **no widget of its own** — deliberate: better than a broken one. |
 
@@ -564,6 +565,91 @@ Derived by grepping `process.env.*` across `src/`, `scripts/`, `prisma/`,
 `NEXT_PUBLIC_RETURN_URL`, `FIRECRAWL_SPEED_MODE`,
 `FIRECRAWL_INTER_URL_DELAY_MS`. Note `.env.example` lists
 `GOOGLE_GENERATIVE_AI_API_KEY` twice.
+
+---
+
+## 7a. Outbound email — two transports, on purpose
+
+| | Gmail via nodemailer | Resend |
+|---|---|---|
+| Where | `src/actions/mail`, `src/actions/mailer` | `src/lib/notifications/lead-alert.ts` |
+| For | A human typing a one-off follow-up to a single lead | Automated "you have a new lead / booking request" alerts |
+| Why | Already there, fine for hand-sent mail | ~500/day and no SPF/DKIM alignment on the Gmail path; an operational alert that lands in spam is the same as no alert |
+
+`lead-alert.ts` calls the Resend REST API with plain `fetch` — one endpoint,
+one POST, no SDK dependency. Rules it follows, which any new alert should too:
+
+- **Fires only on a lead's creation**, never on later edits. A returning
+  visitor repeating their email must not re-alert; alerts that arrive for
+  non-events get filtered, and a filtered alert is no alert.
+- **Fire-and-forget, swallows its own failures.** It runs while a visitor is
+  mid-stream; an email provider having a bad minute must not be something they
+  experience.
+- **Missing config is a no-op, not a crash**, so the app runs on a laptop.
+- **Prospect-demo leads go only to the agency owner**, never to
+  `contactEmail` — on a demo that address is the *prospect's*, and mailing them
+  to say they filled in a form would be absurd. The wording differs too: a
+  prospect raising their hand at you is not a lead for a client.
+- **Booking alerts say a request is not a confirmation**, because nothing in
+  ChatDock confirms one and implying otherwise makes somebody miss an
+  appointment.
+
+⚠ A `RESEND_API_KEY` from a previous iteration of this project has been in
+Vercel since ~310 days ago, stored as *Non-sensitive* (so its value is readable
+via `vercel env pull`). It should be replaced with a current key stored as
+Sensitive. `RESEND_FROM_EMAIL`, also from that era, is read by nothing.
+
+---
+
+## 7b. Performance: the number that explains most bugs
+
+**Measured 2026-08-06. Read this before debugging anything that "hangs".**
+
+A trivial `SELECT 1` on the pooled connection (`DATABASE_URL`) takes **~1.3
+seconds**. Five consecutive samples: 3559, 1349, 1309, 1331, 1213 ms. Healthy
+Postgres answers that in single-digit milliseconds, so treat every query in a
+request as costing roughly a second and a third.
+
+That single number explains a day's worth of apparently unrelated failures:
+
+| Symptom | Actually |
+|---|---|
+| First-client setup hangs forever | `onIntegrateDomain` makes ~12–15 sequential queries ≈ 18s, then the crawl; the Vercel function was killed before responding |
+| Ingest takes ~49s for **one** page | scrape 4.0s + `upsertDocument` 1.4s + `indexSource` 31.1s |
+| `indexSource` is 31s for 11 chunks | `ingest.ts:188` inserts **one chunk per round trip**, sequentially — ~14s is pure latency |
+| Test hooks time out at 60s | The fixture's setup writes cannot finish in a minute |
+| `Server has closed the connection` | The pooler gives up under sustained load |
+
+**Consequences for anyone writing code here.** Sequential queries are the
+expensive thing, not query complexity — batch them, `Promise.all` them, or move
+the work off the request. A loop that does one round trip per item is a
+performance bug at this latency regardless of how small each query is.
+
+Before optimising code, check whether the database itself is throttled or
+simply far from `us-east-1` where the Vercel functions run. Two round trips per
+query across regions is a plausible whole explanation, and no amount of code
+tuning fixes it.
+
+### Vercel function limits — Server Actions inherit them
+
+A Server Action runs in the function of **the page it was invoked from**, so it
+inherits that page's route-segment `maxDuration`. Vercel's default is **10s on
+Hobby, 15s on Pro**. When a function exceeds it, it is killed *without sending a
+response* — the browser is left awaiting a promise that never settles, which
+looks exactly like an infinite spinner and nothing like an error.
+
+Set today: `maxDuration = 60` on `(dashboard)/dashboard/page.tsx` and
+`(dashboard)/settings/[domain]/page.tsx` (60 is the Hobby maximum), plus
+`api/bot/stream` at 60 and `api/bot/preview/stream` at 30, which were already
+there. **Any new page that triggers a crawl, an index or a batch action needs
+its own `maxDuration`**, and any client calling a long action should bound it —
+see the `withTimeout` helper in `first-client-setup.tsx`.
+
+### Environment changes require a redeploy
+
+Vercel applies environment variables at deploy time. Editing one in the
+dashboard does **not** affect the running deployment — a common half-hour of
+confusion when a "new API key" appears not to work.
 
 ---
 
@@ -733,15 +819,32 @@ Derived by grepping `process.env.*` across `src/`, `scripts/`, `prisma/`,
     only in `plans.ts`, nothing ever pruned history, and the pricing claim has
     been removed. Retention would need a real `EntitlementKey` plus a pruning
     job.
-11. **Test coverage is three suites.** `tests/security/tenant-isolation.test.ts`
-    (26), `tests/security/publish-gate.test.ts` (7) and
-    `tests/security/prospect-demo.test.ts` (13), sharing
+11. **Test coverage is three suites, and they run against production.**
+    `tests/security/tenant-isolation.test.ts` (26),
+    `publish-gate.test.ts` (7) and `prospect-demo.test.ts` (13), sharing
     `tests/helpers/tenant-fixture.ts`. No unit, integration or E2E tests
-    (STATUS.md deliverables 18, 19, 21). Both need a live remote Postgres —
-    ~150s and ~85s respectively — so moving to a local Postgres is worth doing
-    before they grow. `server-only` is aliased to a stub in `vitest.config.ts`;
-    without it, importing any `import 'server-only'` module fails the whole
-    file.
+    (STATUS.md deliverables 18, 19, 21). `server-only` is aliased to a stub in
+    `vitest.config.ts`; without it, importing any `import 'server-only'` module
+    fails the whole file.
+
+    **They point at the live database and share its connection pooler with the
+    running product.** On 2026-08-06 this produced a full day of false alarms:
+    six consecutive runs failed with **zero assertion failures** — every
+    failure was `Server has closed the connection` or `Hook timed out in
+    60000ms`, and *which* test failed moved every run. A wandering failure is
+    an infrastructure failure. Before debugging a red suite here, check
+    `pg_stat_activity` and time a `SELECT 1` (see §7b); if it is over a second,
+    the suite is not the problem.
+
+    The same runs leaked **ten orphaned test organizations and fifty test
+    users** into production, because Vitest skips `afterAll` when `beforeAll`
+    throws. `createTenantFixture` now purges by tag on setup failure, but the
+    arrangement is still wrong: **moving to a local Postgres is the top testing
+    item in the backlog**, and it is worth doing before a paying client exists.
+
+    Test data is identifiable by organization names beginning `Alpha Agency ` /
+    `Beta Agency ` and users on `@test.invalid`, a reserved TLD that can never
+    be a real address.
 12. **Dead / debug surface still shipped.** `src/app/(main)/debug-domains`,
     `/test-auth`, `/test-upload`. (The Gemini File Search experiment under
     `/preview/experiments` and `api/experiments` was deleted on 2026-08-05; the

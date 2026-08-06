@@ -1,7 +1,8 @@
 # START HERE
 
-**Snapshot taken:** 2026-08-05, 12:43 PDT · **updated 13:25 PDT** (publish path
-shipped; Dodo corrected to *not configured* on the owner's word)
+**Snapshot taken:** 2026-08-05 · **updated 2026-08-06** (prospect demos, lead
+alerts and the onboarding timeout fix shipped; a database-latency problem
+found that outranks everything else)
 **Commit at time of writing:** `05f5f0f` — working tree clean
 **Deployed:** chatdock.io (Vercel, auto-deploys every push to `master`)
 
@@ -18,11 +19,16 @@ ChatDock is a multi-tenant SaaS. Agencies (web, SEO, lead-gen) launch a branded
 "AI receptionist" chat widget on their own clients' websites. The agency pays;
 the agency's clients get the widget; their visitors do the chatting.
 
-The platform is built, the marketing site is live, and as of **2026-08-05 an
-assistant can be published**, so a widget installed on a client's site now
-answers. What is still missing before this can earn money: billing has never
-processed a transaction (Dodo products not created — owner is doing this
-later), and there is no way to share a prospect demo.
+The platform is built and the marketing site is live. An agency can publish an
+assistant, send a prospect a working demo of their own website, and get an
+email the moment a lead appears. Two things stand between that and revenue:
+
+1. **The database answers a trivial query in ~1.3 seconds.** This is the top
+   engineering problem and it is not subtle — it is why onboarding hung, why a
+   single-page ingest takes 49 seconds, and why six test runs went red without
+   a single assertion failing. See step 0 in [`BACKLOG.md`](BACKLOG.md).
+2. **Billing has never processed a transaction** — the Dodo products do not
+   exist. Owner-deferred.
 
 ---
 
@@ -244,6 +250,9 @@ quietly eating the product business; cap it deliberately.
 
 | Area | Status | Evidence |
 |---|---|---|
+| **Database latency** | **Degraded** | `SELECT 1` ≈ 1.3s on the pooled connection (measured 2026-08-06). Explains the hangs, the 49s ingest and the red test runs |
+| Lead / booking alerts | Working, unproven | Resend via `lib/notifications/lead-alert.ts`; `mail.chatdock.io` verified. **No real email has been sent yet**, and `RESEND_API_KEY` in Vercel is a 310-day-old leftover that needs replacing |
+| First-client onboarding | Fixed 2026-08-06 | Hung forever on Vercel's 10–15s function default; `maxDuration = 60` + client-side timeouts |
 | Multi-tenancy and isolation | Working | 26 tests incl. a non-vacuity assertion |
 | Knowledge ingest → retrieval | Working | `match_knowledge_chunks_scoped`, tenant arg required |
 | Widget serve | Working | publish/pause shipped 2026-08-05; `onSetAssistantStatus` |
@@ -325,6 +334,8 @@ to be **false**. Recorded so nobody rebuilds on them.
 
 | Claim | Reality | Found |
 |---|---|---|
+| "Firecrawl is broken / the API key is wrong" — onboarding hung on *Connecting…* | Firecrawl returned **HTTP 200 in 3.7s** with 8,912 chars of real markdown, and the full crawl→embed→index chain produced 11 chunks. The hang was Vercel killing the function at its 10–15s default, which sends **no response at all**, so the browser waited on a promise that never settled | 2026-08-06 |
+| "Three tests are failing, something regressed" | Six runs, **zero assertion failures**. All `Server has closed the connection` / `Hook timed out`, and a different test each time. A wandering failure is an infrastructure failure | 2026-08-06 |
 | "Dodo is configured" (asserted earlier on 2026-08-05 from `.env.local`) | Env vars are set and both billing periods are coded, but the **products were never created at Dodo**. Owner confirmed it is not set up and is deferring it. Env presence is not configuration | 2026-08-05, corrected same day |
 | `STATUS.md`: "32 models, 54 enums" | 32 models, **42** enums — corrected in the file | 2026-08-05 |
 | "ChatDash adds ~$1,400 MRR/month" | Bad arithmetic (all-time ÷ months = average revenue, not growth). They are flat at ~$20k/mo | 2026-08-05 |

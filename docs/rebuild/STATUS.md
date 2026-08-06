@@ -21,6 +21,22 @@ live and take them offline again.
 a prospect's URL, sends `/d/<shareToken>`, sees whether it was opened, and
 converts it into a client without rebuilding anything.
 
+**2026-08-06 — lead alerts, an onboarding fix, and one problem that outranks
+both.** New-lead and booking-request emails go out through Resend
+(`src/lib/notifications/lead-alert.ts`, domain `mail.chatdock.io`). First-client
+setup no longer hangs: Server Actions inherit `maxDuration` from their page and
+none was set, so Vercel killed the function at 10–15s without a response.
+
+The problem to fix next is not in the code: **the database answers `SELECT 1` in
+~1.3 seconds**, which is why a one-page ingest takes 49s and why the test suite
+cannot finish. Details in [`../BACKLOG.md`](../BACKLOG.md) step 0 and
+[`../ENGINEERING-HANDOFF.md`](../ENGINEERING-HANDOFF.md) §7b.
+
+⚠ The security suites were **last fully green on 2026-08-05** (46/46). Since
+then they fail on connection drops, not assertions; `publish-gate` (7/7) still
+passes in isolation. Do not read a red run here as a regression without
+checking query latency first.
+
 Verified live against the dev server on the rebuilt production database:
 
 | Check | Result |
