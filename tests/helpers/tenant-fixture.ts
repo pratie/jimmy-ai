@@ -115,8 +115,39 @@ async function buildWorkspace(
   return { workspace, assistant, source, document, lead }
 }
 
+/**
+ * Removes everything a fixture run created, by tag.
+ *
+ * Split out of `teardown` so it can also run when *setup* fails. Vitest skips
+ * `afterAll` when `beforeAll` throws, so a half-built fixture used to leak a
+ * whole agency — organizations, workspaces, assistants, embedded chunks — into
+ * whatever database the suite was pointed at. Ten of those had accumulated
+ * before anyone noticed, and each one made the next run heavier.
+ */
+async function purgeByTag(tag: string) {
+  await client.organization.deleteMany({
+    where: { OR: [{ slug: `alpha-${tag}` }, { slug: `beta-${tag}` }] },
+  })
+  await client.user.deleteMany({ where: { email: { endsWith: `.${tag}@test.invalid` } } })
+}
+
 export async function createTenantFixture() {
+  try {
+    return await buildTenantFixture()
+  } catch (error) {
+    // Best-effort: the setup failure is the interesting one, so it is what
+    // gets rethrown. A cleanup that also fails must not mask it.
+    await purgeByTag(CURRENT_TAG).catch(() => {})
+    throw error
+  }
+}
+
+/** Set before any row is written, so a failed build is still cleanable. */
+let CURRENT_TAG = ''
+
+async function buildTenantFixture() {
   const tag = randomUUID().slice(0, 8)
+  CURRENT_TAG = tag
   const mkUser = (name: string) =>
     client.user.create({
       data: {
@@ -191,6 +222,9 @@ export async function createTenantFixture() {
     async teardown() {
       await client.organization.deleteMany({ where: { id: { in: [orgA.id, orgB.id] } } })
       await client.user.deleteMany({ where: { email: { endsWith: `.${tag}@test.invalid` } } })
+      // Also sweep by tag, so a workspace created by a test rather than by the
+      // fixture (a prospect demo, say) cannot outlive the run that made it.
+      await purgeByTag(tag)
     },
   }
 }

@@ -176,6 +176,20 @@ create an `agency_manager` membership for the creator — see
 
 ## P2 — real value, not blocking
 
+### 6b. `humanHandoffEnabled` is an inert flag
+
+Verified 2026-08-05: `Assistant.humanHandoffEnabled` defaults to `true`, is
+selected in `widget/resolve.ts` and put on the widget context — and **nothing
+reads it**. Not the prompt builder, not the widget UI. Separately,
+`onToggleRealtime` (`actions/conversation/index.ts:44`), the only way a
+conversation becomes `active`, has **no callers**: there is no takeover button
+anywhere in the app.
+
+So human takeover is currently unreachable rather than broken, and the danger
+of an agent's replies vanishing (see #7) cannot be triggered through the UI
+today. Worth knowing before anyone "fixes" the flag: the flag is not the
+problem, the missing delivery half is. Either finish #7 or delete both.
+
 ### 7. Finish or remove realtime handoff
 
 `pusher-client.ts` is live in `hooks/chatbot/use-chatbot.ts` and

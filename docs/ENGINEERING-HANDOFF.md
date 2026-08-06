@@ -541,7 +541,8 @@ Derived by grepping `process.env.*` across `src/`, `scripts/`, `prisma/`,
 | `DODO_WEBHOOK_SECRET` | Webhook signature verification. Falls back to a dummy string, so every real delivery fails verification. |
 | `DODO_API_KEY`, `NEXT_PUBLIC_DODO_API_URL`, `DODO_PRODUCT_ID_{STARTER,PRO,BUSINESS}[_YEARLY]` | Checkout link creation. |
 | `KIE_API_KEY` | `/api/upload` throws — chatbot image uploads. |
-| `NODE_MAILER_EMAIL`, `NODE_MAILER_GMAIL_APP_PASSWORD` | Outbound email (`src/actions/mail`, `src/actions/mailer`). |
+| `NODE_MAILER_EMAIL`, `NODE_MAILER_GMAIL_APP_PASSWORD` | Manual one-off lead follow-ups (`src/actions/mail`, `src/actions/mailer`). |
+| `RESEND_API_KEY`, `LEAD_ALERT_FROM` | New-lead and booking-request alerts. Unset ⇒ **silent no-op**: leads are still captured, nobody is told. `LEAD_ALERT_FROM` must be on a Resend-verified domain or every send is rejected. |
 | `NEXT_PUBLIC_CHATDOCK_WIDGET_KEY` | The marketing site renders **no widget of its own** — deliberate: better than a broken one. |
 
 ### Optional / tuning
@@ -696,6 +697,26 @@ Derived by grepping `process.env.*` across `src/`, `scripts/`, `prisma/`,
    them correctly, but there is no invite flow, no client-side sign-up, and no
    client-scoped UI. `/portal/[domainid]` is the *lead*-facing booking/payment
    surface, not a client login. `src/constants/faq.ts:76` says so publicly.
+5b. **Lead and booking alerts go through Resend, not the Gmail transport.**
+   `src/lib/notifications/lead-alert.ts` emails the client's `contactEmail`
+   and the organization owner when a lead is **first** created, and when a
+   booking is requested. Fire-and-forget from `captureLead` and
+   `onBookNewAppointment` — it swallows every failure, because a visitor
+   mid-stream must never see a broken response because an email provider had a
+   bad minute. Unset `RESEND_API_KEY` / `LEAD_ALERT_FROM` makes it a no-op, so
+   the app still runs locally and in any environment that never set them.
+
+   The Gmail/nodemailer transport in `src/actions/mail` stays for what it is
+   good at: manual one-off follow-ups an operator types and sends to a single
+   lead. It is a personal mailbox with an app password — ~500/day, no domain
+   alignment — which is the wrong thing for an automated alert the business
+   must actually receive.
+
+   Prospect demos alert too, with different copy. A prospect who leaves their
+   details inside a demo an agency sent them is the agency's own hottest
+   inbound, not a lead for a client — and only the agency owner is mailed,
+   never the workspace `contactEmail`.
+
 6. **No CSV or API export.** `exportConversations` exists as a permission and is
    tested, but nothing implements an export. There is no `text/csv` response
    anywhere in `src/`. `EntitlementKey.api_access` exists; there is no public
