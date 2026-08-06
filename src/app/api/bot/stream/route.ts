@@ -127,7 +127,7 @@ export async function POST(req: Request) {
     const email = extractEmailsFromString(message)?.[0] ?? null
     const phone = extractPhone(message)
     const leadId = context.assistant.leadCaptureEnabled
-      ? await captureLead({ context, session, email, phone })
+      ? await captureLead({ context, session, email, phone, message })
       : session.leadId
 
     /* ── Retrieval ── */

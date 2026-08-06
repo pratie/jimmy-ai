@@ -3,6 +3,7 @@
 import { client } from '@/lib/prisma'
 import { accessibleWorkspaceIds, requireTenantContext, requireWorkspace } from '@/lib/tenant'
 import { AuthorizationError } from '@/lib/permissions'
+import { notifyBookingRequest } from '@/lib/notifications/lead-alert'
 
 /**
  * Booking requests.
@@ -127,6 +128,17 @@ export const onBookNewAppointment = async (
         phone: lead.phone,
         notes: requestedStartAt ? null : `Unparsed preference: ${date} ${slot}`,
       },
+    })
+
+    // Nothing in ChatDock confirms a booking, so somebody has to. Not awaited:
+    // the visitor has already been told their request was recorded, and that
+    // remains true whether or not the email provider is having a good day.
+    void notifyBookingRequest({
+      clientWorkspaceId: lead.clientWorkspaceId,
+      requestedStartAt,
+      rawPreference: requestedStartAt ? null : `${date} ${slot}`,
+      email: email || null,
+      phone: lead.phone,
     })
 
     return { status: 200, message: 'Booking requested' }

@@ -4,6 +4,7 @@ import { Prisma } from '@prisma/client'
 
 import { client } from '@/lib/prisma'
 import { recordUsage } from '@/lib/entitlements'
+import { notifyNewLead } from '@/lib/notifications/lead-alert'
 import type { WidgetContext } from '@/lib/widget/resolve'
 import type { SearchResult } from '@/lib/vector-search'
 import { devError } from '@/lib/utils'
@@ -120,6 +121,8 @@ export async function captureLead(input: {
   email?: string | null
   phone?: string | null
   name?: string | null
+  /** The visitor turn these details came from, quoted in the alert. */
+  message?: string | null
 }): Promise<string | null> {
   const { context, session } = input
   const email = input.email?.trim().toLowerCase() || null
@@ -177,6 +180,22 @@ export async function captureLead(input: {
     where: { id: session.conversationId },
     data: { leadId: lead.id },
   })
+
+  // Only when the lead is new. Re-alerting every time a returning visitor
+  // mentions their email again would turn a signal the business acts on into
+  // noise it filters, and a filtered alert is the same as no alert.
+  //
+  // Not awaited: the visitor is mid-stream and an email provider having a bad
+  // minute must not be something they experience.
+  if (!existing) {
+    void notifyNewLead({
+      clientWorkspaceId: context.clientWorkspaceId,
+      name: input.name ?? null,
+      email,
+      phone,
+      message: input.message ?? null,
+    })
+  }
 
   return lead.id
 }
