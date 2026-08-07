@@ -199,7 +199,7 @@ export default function AgencyOverview({
                   return (
                     <tr
                       key={c.id}
-                      className="border-b last:border-0 transition-colors hover:bg-[#F6F7F9]"
+                      className="border-b last:border-0 transition-colors hover:bg-background"
                       style={{ borderColor: cd.line }}
                     >
                       <td className="px-4 py-2.5">
@@ -275,7 +275,14 @@ export default function AgencyOverview({
             <h2 className="text-[13.5px] font-semibold" style={{ color: cd.ink }}>
               Usage this period
             </h2>
-            {usage?.messagesLimit === null ? (
+            {/* `usage` is null when the overview query failed. Rendering the bar
+                anyway showed a confident "0 / 0 messages", which is a fabricated
+                number, not a missing one. */}
+            {usage === null ? (
+              <p className="mt-2 text-[13px]" style={{ color: cd.muted }}>
+                Usage is not available right now.
+              </p>
+            ) : usage.messagesLimit === null ? (
               <p className="mt-2 text-[13px]" style={{ color: cd.muted }}>
                 Unlimited messages on this plan.
               </p>
@@ -286,10 +293,10 @@ export default function AgencyOverview({
                     className="text-[22px] font-semibold tabular-nums"
                     style={{ color: cd.ink }}
                   >
-                    {(usage?.messagesUsed ?? 0).toLocaleString()}
+                    {usage.messagesUsed.toLocaleString()}
                   </span>
                   <span className="text-[12.5px]" style={{ color: cd.faint }}>
-                    / {(usage?.messagesLimit ?? 0).toLocaleString()} messages
+                    / {usage.messagesLimit.toLocaleString()} messages
                   </span>
                 </div>
                 <div

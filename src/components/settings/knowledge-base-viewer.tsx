@@ -48,7 +48,7 @@ const PILL = 'shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold ring-1'
 const TONE = {
   good: 'bg-emerald-50 text-emerald-700 ring-emerald-600/20',
   warn: 'bg-amber-50 text-amber-700 ring-amber-600/20',
-  neutral: 'bg-slate-100 text-slate-600 ring-slate-500/20',
+  neutral: 'bg-muted text-muted-foreground ring-border',
   error: 'bg-rose-50 text-rose-700 ring-rose-600/20',
 } as const
 
@@ -247,8 +247,8 @@ const KnowledgeBaseViewer = ({
       ),
     },
     indexing: {
-      tone: 'border-slate-200 bg-slate-50',
-      icon: <Loader2 className="mt-0.5 h-4 w-4 shrink-0 animate-spin text-[#5b5ce2]" />,
+      tone: 'border-border bg-muted',
+      icon: <Loader2 className="mt-0.5 h-4 w-4 shrink-0 animate-spin text-primary" />,
       title: 'Indexing in progress',
       body: (
         <>
@@ -271,8 +271,8 @@ const KnowledgeBaseViewer = ({
       ),
     },
     empty: {
-      tone: 'border-slate-200 bg-slate-50',
-      icon: <Database className="mt-0.5 h-4 w-4 shrink-0 text-slate-400" />,
+      tone: 'border-border bg-muted',
+      icon: <Database className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground/70" />,
       title: 'Nothing added yet',
       body: (
         <>
@@ -286,17 +286,17 @@ const KnowledgeBaseViewer = ({
   return (
     <div className="flex flex-col gap-6">
       {/* Status — the one place the panel says what is actually true */}
-      <div className={cn('rounded-2xl border p-5', statusCard.tone)}>
+      <div className={cn('rounded-xl border p-5', statusCard.tone)}>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex items-start gap-2.5">
             {statusCard.icon}
             <div className="min-w-0">
-              <p className="text-[13px] font-black tracking-tight text-slate-900">
+              <p className="text-[13px] font-semibold tracking-tight text-foreground">
                 {statusCard.title}
               </p>
-              <p className="mt-1 text-[13px] leading-6 text-slate-600">{statusCard.body}</p>
+              <p className="mt-1 text-[13px] leading-6 text-muted-foreground">{statusCard.body}</p>
               {lastSyncedAt && (
-                <p className="mt-1 text-[11px] text-slate-400">
+                <p className="mt-1 text-[11px] text-muted-foreground/70">
                   Last synced {formatDistanceToNow(lastSyncedAt, { addSuffix: true })}
                 </p>
               )}
@@ -310,7 +310,7 @@ const KnowledgeBaseViewer = ({
                 size="sm"
                 onClick={() => onScrape(domainId)}
                 disabled={scraping}
-                className="rounded-lg border-slate-200 bg-white text-xs font-bold text-slate-900 hover:bg-slate-50"
+                className="rounded-lg border-border bg-card text-xs font-bold text-foreground hover:bg-muted"
               >
                 {scraping
                   ? <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
@@ -323,7 +323,7 @@ const KnowledgeBaseViewer = ({
                 size="sm"
                 onClick={() => onTrain(domainId, false)}
                 disabled={training}
-                className="rounded-lg bg-[#5b5ce2] text-xs font-bold text-white hover:bg-[#4c4dd6]"
+                className="rounded-lg bg-primary text-xs font-bold text-primary-foreground hover:bg-primary/90"
               >
                 {training ? (
                   <>
@@ -345,24 +345,24 @@ const KnowledgeBaseViewer = ({
       {/* Per-source truth. One failed source among many is a line item here,
           not a verdict on the whole knowledge base. */}
       {sources.length > 0 && (
-        <div className="rounded-2xl border border-slate-200 bg-white">
-          <div className="flex items-center justify-between border-b border-slate-100 px-5 py-3">
-            <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Sources</p>
-            <span className="text-[11px] tabular-nums text-slate-400">
+        <div className="rounded-xl border border-border bg-card">
+          <div className="flex items-center justify-between border-b border-border px-5 py-3">
+            <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground/70">Sources</p>
+            <span className="text-[11px] tabular-nums text-muted-foreground/70">
               {sources.length} {sources.length === 1 ? 'source' : 'sources'}
             </span>
           </div>
-          <ul className="divide-y divide-slate-100">
+          <ul className="divide-y divide-border">
             {sources.map((source) => {
               const meta = SOURCE_STATUS[source.status]
               return (
                 <li key={source.id} className="flex items-center gap-3 px-5 py-3">
-                  <FileText className="h-3.5 w-3.5 shrink-0 text-slate-300" />
-                  <span className="min-w-0 flex-1 truncate text-[13px] font-medium text-slate-800">
+                  <FileText className="h-3.5 w-3.5 shrink-0 text-muted-foreground/70" />
+                  <span className="min-w-0 flex-1 truncate text-[13px] font-medium text-foreground">
                     {source.name}
                   </span>
                   {source.lastSyncedAt && (
-                    <span className="hidden shrink-0 text-[11px] text-slate-400 sm:inline">
+                    <span className="hidden shrink-0 text-[11px] text-muted-foreground/70 sm:inline">
                       {formatDistanceToNow(new Date(source.lastSyncedAt), { addSuffix: true })}
                     </span>
                   )}
@@ -375,21 +375,21 @@ const KnowledgeBaseViewer = ({
       )}
 
       {/* Quota read-outs */}
-      <div className="grid grid-cols-1 gap-4 rounded-2xl border border-slate-200 bg-white p-5 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 rounded-xl border border-border bg-card p-5 md:grid-cols-2">
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Training sources</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/70">Training sources</span>
             <div className="flex items-baseline gap-1.5">
-              <span className="text-xs font-black tabular-nums text-slate-900">{trainingSourcesUsed}</span>
-              <span className="text-[10px] font-medium tabular-nums text-slate-400">
+              <span className="text-xs font-semibold tabular-nums text-foreground">{trainingSourcesUsed}</span>
+              <span className="text-[10px] font-medium tabular-nums text-muted-foreground/70">
                 / {trainingSourcesLimit === Infinity ? '∞' : trainingSourcesLimit}
               </span>
             </div>
           </div>
           {trainingSourcesLimit !== Infinity && (
-            <div className="h-1 overflow-hidden rounded-full bg-slate-100">
+            <div className="h-1 overflow-hidden rounded-full bg-muted">
               <div
-                className={cn('h-full transition-all duration-500', sourcesPercent > 80 ? 'bg-rose-500' : 'bg-[#5b5ce2]')}
+                className={cn('h-full transition-all duration-500', sourcesPercent > 80 ? 'bg-rose-500' : 'bg-primary')}
                 style={{ width: `${sourcesPercent}%` }}
               />
             </div>
@@ -397,15 +397,15 @@ const KnowledgeBaseViewer = ({
         </div>
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Storage used</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/70">Storage used</span>
             <div className="flex items-baseline gap-1.5">
-              <span className="text-xs font-black tabular-nums text-slate-900">{kbSizeMB.toFixed(2)}</span>
-              <span className="text-[10px] font-medium tabular-nums text-slate-400">/ {kbSizeLimit} MB</span>
+              <span className="text-xs font-semibold tabular-nums text-foreground">{kbSizeMB.toFixed(2)}</span>
+              <span className="text-[10px] font-medium tabular-nums text-muted-foreground/70">/ {kbSizeLimit} MB</span>
             </div>
           </div>
-          <div className="h-1 overflow-hidden rounded-full bg-slate-100">
+          <div className="h-1 overflow-hidden rounded-full bg-muted">
             <div
-              className={cn('h-full transition-all duration-500', kbPercent > 80 ? 'bg-rose-500' : 'bg-[#5b5ce2]')}
+              className={cn('h-full transition-all duration-500', kbPercent > 80 ? 'bg-rose-500' : 'bg-primary')}
               style={{ width: `${kbPercent}%` }}
             />
           </div>
@@ -414,17 +414,17 @@ const KnowledgeBaseViewer = ({
 
       {/* Add content */}
       <Tabs defaultValue="websites" className="w-full">
-        <TabsList className="inline-flex h-auto w-auto gap-1 self-start rounded-xl border border-slate-200 bg-white p-1">
-          <TabsTrigger value="websites" className="flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-bold text-slate-500 data-[state=active]:bg-[#111827] data-[state=active]:text-white">
+        <TabsList className="inline-flex h-auto w-auto gap-1 self-start rounded-xl border border-border bg-card p-1">
+          <TabsTrigger value="websites" className="flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-bold text-muted-foreground data-[state=active]:bg-foreground data-[state=active]:text-background">
             <Globe className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">Websites</span>
             <span className="sm:hidden">Web</span>
           </TabsTrigger>
-          <TabsTrigger value="text" className="flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-bold text-slate-500 data-[state=active]:bg-[#111827] data-[state=active]:text-white">
+          <TabsTrigger value="text" className="flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-bold text-muted-foreground data-[state=active]:bg-foreground data-[state=active]:text-background">
             <FileText className="h-3.5 w-3.5" />
             Text
           </TabsTrigger>
-          <TabsTrigger value="file" className="flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-bold text-slate-500 data-[state=active]:bg-[#111827] data-[state=active]:text-white">
+          <TabsTrigger value="file" className="flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-bold text-muted-foreground data-[state=active]:bg-foreground data-[state=active]:text-background">
             <FileUp className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">File upload</span>
             <span className="sm:hidden">File</span>
@@ -434,44 +434,44 @@ const KnowledgeBaseViewer = ({
         {/* Websites Tab */}
         <TabsContent value="websites" className="mt-4 space-y-4">
           <div className="flex items-center justify-between">
-            <p className="text-sm text-slate-500">Add content from websites</p>
+            <p className="text-sm text-muted-foreground">Add content from websites</p>
             <Badge variant="secondary">
               {sourcesRemaining === Infinity ? 'Unlimited' : `${sourcesRemaining} left`}
             </Badge>
           </div>
 
-          <div className="space-y-4 rounded-2xl border border-slate-200 bg-white p-6">
-            <div className="space-y-2 border-b border-slate-100 pb-4">
+          <div className="space-y-4 rounded-xl border border-border bg-card p-6">
+            <div className="space-y-2 border-b border-border pb-4">
               <Label className="text-sm font-semibold">Primary website</Label>
-              <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 p-3">
-                <div className="rounded-full border border-slate-200 bg-white p-2">
-                  <Globe className="h-4 w-4 text-[#5b5ce2]" />
+              <div className="flex items-center gap-3 rounded-xl border border-border bg-muted p-3">
+                <div className="rounded-full border border-border bg-card p-2">
+                  <Globe className="h-4 w-4 text-primary" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium text-slate-900">{domainName}</p>
-                  <p className="text-xs text-slate-400">Default source for crawling</p>
+                  <p className="truncate text-sm font-medium text-foreground">{domainName}</p>
+                  <p className="text-xs text-muted-foreground/70">Default source for crawling</p>
                 </div>
               </div>
             </div>
 
             <div className="space-y-2 pt-2">
               <Label className="text-sm font-semibold">Website pages</Label>
-              <p className="mb-2 text-xs text-slate-400">Discover and select specific pages to train on</p>
+              <p className="mb-2 text-xs text-muted-foreground/70">Discover and select specific pages to train on</p>
               <TrainingSourcesSelector domainId={domainId} />
             </div>
 
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t border-slate-200" />
+                <span className="w-full border-t border-border" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-white px-2 text-slate-400">Or</span>
+                <span className="bg-card px-2 text-muted-foreground/70">Or</span>
               </div>
             </div>
 
             <div className="space-y-2">
               <Label className="text-sm font-semibold">Scrape a single URL</Label>
-              <p className="mb-2 text-xs text-slate-400">Add content from a specific page</p>
+              <p className="mb-2 text-xs text-muted-foreground/70">Add content from a specific page</p>
               <div className="flex gap-2">
                 <Input
                   type="url"
@@ -491,9 +491,9 @@ const KnowledgeBaseViewer = ({
 
         {/* Text Tab */}
         <TabsContent value="text" className="mt-4 space-y-4">
-          <p className="text-sm text-slate-500">Paste or type text directly</p>
+          <p className="text-sm text-muted-foreground">Paste or type text directly</p>
 
-          <div className="space-y-4 rounded-2xl border border-slate-200 bg-white p-6">
+          <div className="space-y-4 rounded-xl border border-border bg-card p-6">
             <Textarea
               placeholder="Paste your content here... (minimum 50 characters)"
               value={uploadText}
@@ -505,7 +505,7 @@ const KnowledgeBaseViewer = ({
                 <Switch id="append-mode-text" checked={appendMode} onCheckedChange={setAppendMode} />
                 <Label htmlFor="append-mode-text" className="text-sm">Append to existing content</Label>
               </div>
-              <p className="text-xs tabular-nums text-slate-400">
+              <p className="text-xs tabular-nums text-muted-foreground/70">
                 {uploadText.length} / 50 minimum characters
               </p>
             </div>
@@ -521,11 +521,11 @@ const KnowledgeBaseViewer = ({
         {/* File Upload Tab */}
         <TabsContent value="file" className="mt-4 space-y-4">
           <div className="flex items-center justify-between">
-            <p className="text-sm text-slate-500">Upload .txt or .pdf files (scanned PDFs not yet supported)</p>
+            <p className="text-sm text-muted-foreground">Upload .txt or .pdf files (scanned PDFs not yet supported)</p>
             <Badge variant="outline" className="text-xs">50MB max</Badge>
           </div>
 
-          <div className="space-y-4 rounded-2xl border border-slate-200 bg-white p-6">
+          <div className="space-y-4 rounded-xl border border-border bg-card p-6">
             <div className="space-y-2">
               <Label className="text-sm font-semibold">Select file</Label>
               <input
@@ -538,8 +538,8 @@ const KnowledgeBaseViewer = ({
               {selectedFile && (
                 <div className="mt-2 flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 p-2 text-sm">
                   <FileUp className="h-4 w-4 text-emerald-600" />
-                  <span className="font-medium text-slate-900">{selectedFile.name}</span>
-                  <span className="tabular-nums text-slate-400">({(selectedFile.size / 1024).toFixed(0)} KB)</span>
+                  <span className="font-medium text-foreground">{selectedFile.name}</span>
+                  <span className="tabular-nums text-muted-foreground/70">({(selectedFile.size / 1024).toFixed(0)} KB)</span>
                 </div>
               )}
               {fileError && (
@@ -587,7 +587,7 @@ const KnowledgeBaseViewer = ({
                   <Switch id="append-mode-file-pdf" checked={appendMode} onCheckedChange={setAppendMode} />
                   <Label htmlFor="append-mode-file-pdf" className="text-sm">Append to existing content</Label>
                 </div>
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-muted-foreground/70">
                   We extract text from this PDF. Image-only/scanned PDFs will fail until OCR is added.
                 </p>
                 <div className="flex justify-end gap-2">

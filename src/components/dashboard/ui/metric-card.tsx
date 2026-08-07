@@ -53,7 +53,10 @@ export default function MetricCard({
   const style = { borderColor: cd.line, backgroundColor: cd.surface }
 
   return href ? (
-    <Link href={href} className={`${className} hover:border-[${cd.lineStrong}]`} style={style}>
+    // The hover border is a static utility: Tailwind scans source text, so an
+    // interpolated `hover:border-[${cd.lineStrong}]` never generated a class and
+    // the link had no hover affordance at all.
+    <Link href={href} className={`${className} hover:border-[#CBD2DE]`} style={style}>
       {body}
     </Link>
   ) : (

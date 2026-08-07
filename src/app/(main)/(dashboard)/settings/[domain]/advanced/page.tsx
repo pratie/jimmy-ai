@@ -18,7 +18,7 @@ const AdvancedAIPage = async (
     <>
       <InfoBar />
       <div className="h-0 w-full flex-1 overflow-y-auto overflow-x-hidden">
-      <div className="mx-auto max-w-5xl px-5 py-6 md:px-8">
+      <div className="mx-auto max-w-5xl px-5 py-7 md:px-8">
         <AdvancedAISettings
           domainId={active.id}
           domainName={active.name}

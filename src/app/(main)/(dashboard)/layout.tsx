@@ -45,7 +45,7 @@ const OwnerLayout = async ({ children }: Props) => {
 
     return (
       <ChatProvider>
-        <div className="flex h-screen min-h-screen w-full bg-[#f5f6fa] text-foreground">
+        <div className="flex h-screen min-h-screen w-full bg-background text-foreground">
           <DashboardThemeEnforcer />
           <SideBar
             workspaces={switcher.workspaces}

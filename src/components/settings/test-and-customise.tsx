@@ -94,21 +94,21 @@ export const DEFAULT_THEME: Theme = {
 }
 
 const BTN_PRIMARY =
-  'inline-flex h-9 items-center gap-1.5 rounded-lg bg-[#5b5ce2] px-4 text-[13px] font-bold text-white transition-colors hover:bg-[#4c4dd6] disabled:opacity-60'
+  'inline-flex h-9 items-center gap-1.5 rounded-lg bg-primary px-4 text-[13px] font-bold text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-60'
 const BTN_SECONDARY =
-  'inline-flex h-9 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 text-[13px] font-bold text-slate-900 transition-colors hover:bg-slate-50 disabled:opacity-60'
+  'inline-flex h-9 items-center gap-1.5 rounded-lg border border-border bg-card px-3 text-[13px] font-bold text-foreground transition-colors hover:bg-muted disabled:opacity-60'
 
-const CARD = 'rounded-2xl border border-slate-200 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)]'
+const CARD = 'rounded-xl border border-border bg-card shadow-[0_1px_2px_rgba(15,23,42,0.04)]'
 const PILL = 'shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold ring-1'
 const PILL_TONE = {
-  brand: 'bg-[#5b5ce2]/10 text-[#5b5ce2] ring-[#5b5ce2]/25',
+  brand: 'bg-primary/10 text-primary ring-primary/25',
   good: 'bg-emerald-50 text-emerald-700 ring-emerald-600/20',
   bad: 'bg-rose-50 text-rose-700 ring-rose-600/20',
-  neutral: 'bg-slate-100 text-slate-600 ring-slate-500/20',
+  neutral: 'bg-muted text-muted-foreground ring-border',
 } as const
 
 const FIELD =
-  'w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-[13px] text-slate-800 outline-none transition focus:border-[#5b5ce2] focus:ring-4 focus:ring-[#5b5ce2]/10'
+  'w-full rounded-lg border border-border bg-card px-3 py-2 text-[13px] text-foreground outline-none transition focus:border-ring focus:ring-4 focus:ring-ring/20'
 
 /** What a prospective customer actually opens with — price, fit and next step —
  *  so a test conversation exercises the path a real lead takes. */
@@ -252,15 +252,15 @@ function ColorField({
   onChange: (value: string) => void
 }) {
   return (
-    <label className="flex cursor-pointer items-center justify-between gap-3 rounded-lg border border-slate-200 px-3 py-2 transition hover:border-slate-300">
-      <span className="text-[12px] font-medium text-slate-600">{label}</span>
+    <label className="flex cursor-pointer items-center justify-between gap-3 rounded-lg border border-border px-3 py-2 transition hover:border-border">
+      <span className="text-[12px] font-medium text-muted-foreground">{label}</span>
       <span className="flex items-center gap-2">
-        <span className="text-[11px] font-medium uppercase tabular-nums text-slate-400">{value}</span>
+        <span className="text-[11px] font-medium uppercase tabular-nums text-muted-foreground/70">{value}</span>
         <input
           type="color"
           value={value}
           onChange={(event) => onChange(event.target.value)}
-          className="h-6 w-8 cursor-pointer rounded border border-slate-200 bg-white p-0.5"
+          className="h-6 w-8 cursor-pointer rounded border border-border bg-card p-0.5"
           aria-label={label}
         />
       </span>
@@ -306,7 +306,6 @@ function PreviewChat({
     messageWindowRef,
     currentBot,
     loading,
-    onRealTime,
     onChats,
     setOnChats,
     errors,
@@ -347,7 +346,7 @@ function PreviewChat({
 
   if (loading) {
     return (
-      <div className="grid h-[560px] place-items-center text-[13px] text-slate-500">
+      <div className="grid h-[560px] place-items-center text-[13px] text-muted-foreground">
         <span className="inline-flex items-center gap-2">
           <Loader2 className="h-4 w-4 animate-spin" />
           Loading the preview…
@@ -358,7 +357,7 @@ function PreviewChat({
 
   if (!currentBot) {
     return (
-      <div className="grid h-[560px] place-items-center px-6 text-center text-[13px] leading-5 text-slate-500">
+      <div className="grid h-[560px] place-items-center px-6 text-center text-[13px] leading-5 text-muted-foreground">
         The preview could not load this assistant. Check that the client still has an assistant on
         the Knowledge Base tab, then reload this page.
       </div>
@@ -373,8 +372,6 @@ function PreviewChat({
       <div className="h-[560px]">
         <BotWindow
           errors={errors}
-          setChat={setOnChats}
-          realtimeMode={onRealTime}
           helpdesk={currentBot.helpdesk || []}
           domainName={currentBot.name || assistantName}
           ref={messageWindowRef}
@@ -402,7 +399,7 @@ function PreviewChat({
               key={question}
               type="button"
               onClick={() => ask(question)}
-              className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[12px] font-medium text-slate-600 transition hover:border-slate-300 hover:bg-slate-50"
+              className="rounded-full border border-border bg-card px-3 py-1.5 text-[12px] font-medium text-muted-foreground transition hover:border-border hover:bg-muted"
             >
               {question}
             </button>
@@ -719,8 +716,8 @@ export default function TestAndCustomise({
           than tweaking it, and a phone shows one column at a time. */}
       <section className="order-1 flex flex-col gap-4 lg:order-2">
         <div className={`overflow-hidden ${CARD}`}>
-          <div className="flex items-center justify-between gap-3 border-b border-slate-100 px-4 py-3">
-            <p className="text-[13px] font-black text-slate-900">What a visitor sees</p>
+          <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-3">
+            <p className="text-[13px] font-semibold text-foreground">What a visitor sees</p>
             {/* The one honest statement of preview state: the look is whatever is
                 in the draft, and the answers always come from what is stored. */}
             <span
@@ -732,14 +729,14 @@ export default function TestAndCustomise({
           </div>
 
           {behaviourApplied && hasConversation && (
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 bg-[#5b5ce2]/5 px-4 py-2.5">
-              <p className="text-[12px] leading-5 text-slate-600">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border bg-primary/5 px-4 py-2.5">
+              <p className="text-[12px] leading-5 text-muted-foreground">
                 New behaviour starts from the next message.
               </p>
               <button
                 type="button"
                 onClick={onClearChat}
-                className="inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-[12px] font-bold text-[#5b5ce2] transition-colors hover:bg-[#5b5ce2]/10"
+                className="inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-[12px] font-bold text-primary transition-colors hover:bg-primary/10"
               >
                 <RotateCcw className="h-3 w-3" />
                 Start a fresh chat
@@ -749,7 +746,7 @@ export default function TestAndCustomise({
 
           <div className="bg-[linear-gradient(135deg,#f8f9fc_0%,#eef0f6_100%)] p-4">
             {previewError ? (
-              <div className="grid h-[560px] place-items-center px-6 text-center text-[13px] leading-5 text-slate-500">
+              <div className="grid h-[560px] place-items-center px-6 text-center text-[13px] leading-5 text-muted-foreground">
                 {previewError}
               </div>
             ) : previewKey ? (
@@ -762,7 +759,7 @@ export default function TestAndCustomise({
                 onConversationChange={onConversationChange}
               />
             ) : (
-              <div className="grid h-[560px] place-items-center text-[13px] text-slate-500">
+              <div className="grid h-[560px] place-items-center text-[13px] text-muted-foreground">
                 <span className="inline-flex items-center gap-2">
                   <Loader2 className="h-4 w-4 animate-spin" />
                   Opening a preview…
@@ -773,7 +770,7 @@ export default function TestAndCustomise({
         </div>
 
         {knowledgeChunks === 0 && (
-          <div className="flex gap-2.5 rounded-2xl border border-amber-200 bg-amber-50 p-4">
+          <div className="flex gap-2.5 rounded-xl border border-amber-200 bg-amber-50 p-4">
             <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
             <p className="text-[13px] leading-5 text-amber-900">
               This assistant has nothing indexed yet, so it will decline every question here. That
@@ -788,7 +785,7 @@ export default function TestAndCustomise({
         {/* Responds before looks: it is the half that decides whether the
             assistant brings the client leads. */}
         <div className="flex items-center justify-between gap-3 px-1">
-          <p className="text-[11px] font-black uppercase tracking-wide text-slate-400">
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground/70">
             How it responds
           </p>
           <span className="flex items-center gap-2">
@@ -796,7 +793,7 @@ export default function TestAndCustomise({
               <button
                 type="button"
                 onClick={() => retryRef.current?.()}
-                className="text-[11px] font-bold text-[#5b5ce2] hover:underline"
+                className="text-[11px] font-bold text-primary hover:underline"
               >
                 Try again
               </button>
@@ -810,8 +807,8 @@ export default function TestAndCustomise({
         )}
 
         <div className={`${CARD} p-5`}>
-          <p className="text-[13px] font-black text-slate-900">What it is there to do</p>
-          <p className="mt-1 text-[12px] leading-5 text-slate-500">
+          <p className="text-[13px] font-semibold text-foreground">What it is there to do</p>
+          <p className="mt-1 text-[12px] leading-5 text-muted-foreground">
             Sales is the one that turns conversations into leads. Pick another only if the client
             asked for it.
           </p>
@@ -827,24 +824,24 @@ export default function TestAndCustomise({
                   onClick={() => commitMode(option.key)}
                   className={`w-full rounded-xl border p-3 text-left transition ${
                     selected
-                      ? 'border-[#5b5ce2] bg-[#5b5ce2]/5'
-                      : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+                      ? 'border-primary bg-primary/5'
+                      : 'border-border hover:border-border hover:bg-muted'
                   }`}
                 >
                   <span className="flex items-center gap-2">
                     <span
                       className={`grid h-4 w-4 shrink-0 place-items-center rounded-full border ${
-                        selected ? 'border-[#5b5ce2] bg-[#5b5ce2] text-white' : 'border-slate-300'
+                        selected ? 'border-primary bg-primary text-primary-foreground' : 'border-border'
                       }`}
                     >
                       {selected && <Check className="h-2.5 w-2.5" strokeWidth={4} />}
                     </span>
-                    <span className="text-[13px] font-bold text-slate-900">{option.label}</span>
+                    <span className="text-[13px] font-bold text-foreground">{option.label}</span>
                     {option.recommended && (
                       <span className={`${PILL} ${PILL_TONE.brand}`}>Recommended</span>
                     )}
                   </span>
-                  <span className="mt-1 block pl-6 text-[12px] leading-5 text-slate-500">
+                  <span className="mt-1 block pl-6 text-[12px] leading-5 text-muted-foreground">
                     {option.description}
                   </span>
                 </button>
@@ -855,15 +852,15 @@ export default function TestAndCustomise({
           {/* Not a detail we can hide: until a visitor has left contact details
               every mode still works towards getting them, and the choice only
               shapes the conversation after that. */}
-          <p className="mt-3 text-[11px] leading-4 text-slate-400">
+          <p className="mt-3 text-[11px] leading-4 text-muted-foreground/70">
             Until a visitor leaves their contact details, the assistant works towards getting them
             whichever option is picked. The mode shapes the conversation from that point on.
           </p>
         </div>
 
         <div className={`${CARD} p-5`}>
-          <p className="text-[13px] font-black text-slate-900">How it speaks</p>
-          <p className="mt-1 text-[12px] leading-5 text-slate-500">
+          <p className="text-[13px] font-semibold text-foreground">How it speaks</p>
+          <p className="mt-1 text-[12px] leading-5 text-muted-foreground">
             The tone it writes in, and the language it defaults to.
           </p>
 
@@ -880,8 +877,8 @@ export default function TestAndCustomise({
                 }}
                 className={`${
                   tone === preset
-                    ? 'bg-[#5b5ce2] text-white ring-[#5b5ce2]'
-                    : 'bg-white text-slate-600 ring-slate-200 hover:ring-slate-300'
+                    ? 'bg-primary text-primary-foreground ring-primary'
+                    : 'bg-card text-muted-foreground ring-border hover:ring-border'
                 } rounded-full px-3 py-1 text-[12px] font-bold ring-1 transition`}
               >
                 {preset}
@@ -892,7 +889,7 @@ export default function TestAndCustomise({
           <button
             type="button"
             onClick={() => setShowCustomTone((open) => !open)}
-            className="mt-3 inline-flex items-center gap-1 text-[12px] font-bold text-[#5b5ce2]"
+            className="mt-3 inline-flex items-center gap-1 text-[12px] font-bold text-primary"
             aria-expanded={showCustomTone}
           >
             Write your own
@@ -915,15 +912,15 @@ export default function TestAndCustomise({
             />
           )}
 
-          <label className="mt-4 flex items-center justify-between gap-3 rounded-lg border border-slate-200 px-3 py-2">
-            <span className="text-[12px] font-medium text-slate-600">Language</span>
+          <label className="mt-4 flex items-center justify-between gap-3 rounded-lg border border-border px-3 py-2">
+            <span className="text-[12px] font-medium text-muted-foreground">Language</span>
             <select
               value={language}
               onChange={(event) => {
                 setLanguage(event.target.value)
                 commitVoice(tone, event.target.value, 0)
               }}
-              className="rounded-md border border-slate-200 px-2 py-1 text-[12px] font-medium text-slate-700 outline-none"
+              className="rounded-md border border-border px-2 py-1 text-[12px] font-medium text-foreground outline-none"
             >
               {LANGUAGES.map((option) => (
                 <option key={option.value} value={option.value}>
@@ -935,7 +932,7 @@ export default function TestAndCustomise({
         </div>
 
         <div className="mt-3 flex items-center justify-between gap-3 px-1">
-          <p className="text-[11px] font-black uppercase tracking-wide text-slate-400">
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground/70">
             How it looks
           </p>
           <span className={`${PILL} ${draftDirty ? PILL_TONE.brand : PILL_TONE.neutral}`}>
@@ -944,10 +941,10 @@ export default function TestAndCustomise({
         </div>
 
         <div className={`${CARD} p-5`}>
-          <label htmlFor="welcome-message" className="text-[13px] font-black text-slate-900">
+          <label htmlFor="welcome-message" className="text-[13px] font-semibold text-foreground">
             Welcome message
           </label>
-          <p className="mt-1 text-[12px] leading-5 text-slate-500">The first thing anyone reads.</p>
+          <p className="mt-1 text-[12px] leading-5 text-muted-foreground">The first thing anyone reads.</p>
           <textarea
             id="welcome-message"
             value={welcome}
@@ -959,15 +956,15 @@ export default function TestAndCustomise({
         </div>
 
         <div className={`${CARD} p-5`}>
-          <p className="text-[13px] font-black text-slate-900">The basics</p>
-          <p className="mt-1 text-[12px] leading-5 text-slate-500">
+          <p className="text-[13px] font-semibold text-foreground">The basics</p>
+          <p className="mt-1 text-[12px] leading-5 text-muted-foreground">
             Most agencies change one colour. Everything else has a sensible default.
           </p>
 
           <div className="mt-4 space-y-4">
             <div>
-              <p className="text-[12px] font-bold text-slate-700">Brand colour</p>
-              <p className="mt-0.5 text-[11px] text-slate-400">
+              <p className="text-[12px] font-bold text-foreground">Brand colour</p>
+              <p className="mt-0.5 text-[11px] text-muted-foreground/70">
                 Sets the send button and the visitor’s own messages.
               </p>
               <div className="mt-2">
@@ -976,8 +973,8 @@ export default function TestAndCustomise({
             </div>
 
             <div>
-              <p className="text-[12px] font-bold text-slate-700">Assistant bubbles</p>
-              <div className="mt-2 inline-flex rounded-lg border border-slate-200 p-1">
+              <p className="text-[12px] font-bold text-foreground">Assistant bubbles</p>
+              <div className="mt-2 inline-flex rounded-lg border border-border p-1">
                 {BUBBLE_STYLES.map((style) => (
                   <button
                     key={style.key}
@@ -985,8 +982,8 @@ export default function TestAndCustomise({
                     onClick={() => onBubbleStyleChange(style.key)}
                     className={
                       bubbleStyle === style.key
-                        ? 'rounded-md bg-[#5b5ce2] px-3 py-1.5 text-[12px] font-bold text-white'
-                        : 'rounded-md px-3 py-1.5 text-[12px] font-bold text-slate-500 transition hover:text-slate-800'
+                        ? 'rounded-md bg-primary px-3 py-1.5 text-[12px] font-bold text-primary-foreground'
+                        : 'rounded-md px-3 py-1.5 text-[12px] font-bold text-muted-foreground transition hover:text-foreground'
                     }
                   >
                     {style.label}
@@ -997,8 +994,8 @@ export default function TestAndCustomise({
 
             <div>
               <div className="flex items-center justify-between">
-                <p className="text-[12px] font-bold text-slate-700">Corner radius</p>
-                <span className="text-[11px] tabular-nums text-slate-400">{theme.radius}px</span>
+                <p className="text-[12px] font-bold text-foreground">Corner radius</p>
+                <span className="text-[11px] tabular-nums text-muted-foreground/70">{theme.radius}px</span>
               </div>
               <input
                 type="range"
@@ -1007,7 +1004,7 @@ export default function TestAndCustomise({
                 step={1}
                 value={theme.radius}
                 onChange={(event) => set('radius', parseInt(event.target.value, 10))}
-                className="mt-2 w-full accent-[#5b5ce2]"
+                className="mt-2 w-full accent-primary"
                 aria-label="Corner radius"
               />
             </div>
@@ -1022,18 +1019,18 @@ export default function TestAndCustomise({
             aria-expanded={showMore}
           >
             <span>
-              <span className="block text-[13px] font-black text-slate-900">More colours</span>
-              <span className="mt-0.5 block text-[12px] text-slate-500">
+              <span className="block text-[13px] font-semibold text-foreground">More colours</span>
+              <span className="mt-0.5 block text-[12px] text-muted-foreground">
                 Header, surfaces, text and the input field.
               </span>
             </span>
             <ChevronDown
-              className={`h-4 w-4 shrink-0 text-slate-400 transition-transform ${showMore ? 'rotate-180' : ''}`}
+              className={`h-4 w-4 shrink-0 text-muted-foreground/70 transition-transform ${showMore ? 'rotate-180' : ''}`}
             />
           </button>
 
           {showMore && (
-            <div className="grid gap-2 border-t border-slate-100 p-5 sm:grid-cols-2">
+            <div className="grid gap-2 border-t border-border p-5 sm:grid-cols-2">
               <ColorField label="Window background" value={theme.surface} onChange={(v) => set('surface', v)} />
               <ColorField label="Text" value={theme.text} onChange={(v) => set('text', v)} />
               <ColorField label="Header background" value={theme.headerBg} onChange={(v) => set('headerBg', v)} />
@@ -1045,12 +1042,12 @@ export default function TestAndCustomise({
               <ColorField label="Input background" value={theme.inputBg} onChange={(v) => set('inputBg', v)} />
               <ColorField label="Input border" value={theme.inputBorder} onChange={(v) => set('inputBorder', v)} />
               <ColorField label="Accent" value={theme.accent} onChange={(v) => set('accent', v)} />
-              <label className="flex items-center justify-between gap-3 rounded-lg border border-slate-200 px-3 py-2">
-                <span className="text-[12px] font-medium text-slate-600">Shadow</span>
+              <label className="flex items-center justify-between gap-3 rounded-lg border border-border px-3 py-2">
+                <span className="text-[12px] font-medium text-muted-foreground">Shadow</span>
                 <select
                   value={theme.shadow}
                   onChange={(event) => set('shadow', event.target.value === 'none' ? 'none' : 'sm')}
-                  className="rounded-md border border-slate-200 px-2 py-1 text-[12px] font-medium text-slate-700 outline-none"
+                  className="rounded-md border border-border px-2 py-1 text-[12px] font-medium text-foreground outline-none"
                 >
                   <option value="none">None</option>
                   <option value="sm">Small</option>
@@ -1062,16 +1059,16 @@ export default function TestAndCustomise({
 
         {/* Sticky so the state of the draft half is never scrolled off: what is
             unsaved is named, not described. */}
-        <div className="sticky bottom-4 mt-1 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white/95 p-3 shadow-[0_8px_24px_rgba(15,23,42,0.08)] backdrop-blur">
+        <div className="sticky bottom-4 mt-1 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-card/95 p-3 shadow-[0_8px_24px_rgba(15,23,42,0.08)] backdrop-blur">
           <span className="flex flex-wrap items-center gap-1.5 pl-1">
             {draftDirty ? (
               <>
-                <span className="text-[12px] font-medium text-slate-500">Not saved yet:</span>
+                <span className="text-[12px] font-medium text-muted-foreground">Not saved yet:</span>
                 {themeDirty && <span className={`${PILL} ${PILL_TONE.brand}`}>Colours</span>}
                 {welcomeDirty && <span className={`${PILL} ${PILL_TONE.brand}`}>Welcome message</span>}
               </>
             ) : (
-              <span className="inline-flex items-center gap-1.5 text-[12px] font-medium text-slate-500">
+              <span className="inline-flex items-center gap-1.5 text-[12px] font-medium text-muted-foreground">
                 <Check className="h-3.5 w-3.5 text-emerald-600" strokeWidth={3} />
                 Everything is saved
               </span>

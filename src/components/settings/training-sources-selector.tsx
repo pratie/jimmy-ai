@@ -85,7 +85,7 @@ export const TrainingSourcesSelector = ({ domainId }: Props) => {
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="flex flex-col max-w-3xl max-h-[85vh] p-0 gap-0 overflow-hidden bg-background border border-border shadow-large rounded-2xl">
+      <DialogContent className="flex flex-col max-w-3xl max-h-[85vh] p-0 gap-0 overflow-hidden bg-background border border-border shadow-large rounded-xl">
         {/* Header */}
         <div className="p-6 pb-4 border-b border-border bg-background z-20">
           <DialogHeader>
@@ -96,7 +96,7 @@ export const TrainingSourcesSelector = ({ domainId }: Props) => {
           </DialogHeader>
           <div className="flex items-center justify-between mt-4">
             <Badge variant="secondary" className="bg-primary/10 text-primary hover:bg-primary/20 border-primary/20 px-3 py-1">
-              {plan} Plan: {remaining === Infinity ? 'Unlimited' : `${remaining} remaining`} of {limit === Infinity ? 'unlimited' : limit} sources
+              {plan || 'Current'} plan: {remaining === Infinity ? 'Unlimited' : `${remaining} remaining`} of {limit === Infinity ? 'unlimited' : limit} sources
             </Badge>
             {!discovering && urls.length > 0 && (
               <div className="flex items-center gap-3">

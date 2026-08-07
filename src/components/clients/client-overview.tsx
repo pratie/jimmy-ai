@@ -14,6 +14,7 @@ import {
 
 import PublishToggle from '@/components/clients/publish-toggle'
 import DeleteClientDialog from '@/components/clients/delete-client-dialog'
+import { cd } from '@/lib/design-tokens'
 
 type Overview = Extract<
   Awaited<ReturnType<typeof import('@/actions/clients').onGetClientOverview>>,
@@ -48,22 +49,22 @@ export default function ClientOverview({ data }: { data: Overview }) {
       {/* Header */}
       <div className="flex flex-wrap items-start gap-4">
         <span
-          className="grid h-12 w-12 shrink-0 place-items-center rounded-xl text-sm font-black text-white"
-          style={{ backgroundColor: workspace.primaryColor ?? '#5b5ce2' }}
+          className="grid h-12 w-12 shrink-0 place-items-center rounded-xl text-sm font-semibold text-white"
+          style={{ backgroundColor: workspace.primaryColor ?? cd.accent }}
         >
           {(workspace.businessName || workspace.name).slice(0, 2).toUpperCase()}
         </span>
         <div className="min-w-0 flex-1">
-          <h1 className="truncate text-xl font-black tracking-tight text-slate-900">
+          <h1 className="truncate text-xl font-semibold tracking-tight text-foreground">
             {workspace.businessName || workspace.name}
           </h1>
-          <div className="mt-1 flex flex-wrap items-center gap-3 text-[12px] text-slate-500">
+          <div className="mt-1 flex flex-wrap items-center gap-3 text-[12px] text-muted-foreground">
             {workspace.websiteUrl && (
               <a
                 href={workspace.websiteUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 hover:text-slate-900"
+                className="inline-flex items-center gap-1 hover:text-foreground"
               >
                 <Globe className="h-3 w-3" />
                 {workspace.websiteUrl.replace(/^https?:\/\//, '')}
@@ -99,14 +100,14 @@ export default function ClientOverview({ data }: { data: Overview }) {
                   a settings tab. */}
               <Link
                 href={`/settings/${workspace.id}?tab=appearance`}
-                className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-4 text-[13px] font-bold text-slate-900 hover:bg-slate-50"
+                className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-border bg-card px-4 text-[13px] font-bold text-foreground hover:bg-muted"
               >
                 <MessagesSquare className="h-3.5 w-3.5" />
                 Test &amp; customise
               </Link>
               <Link
                 href={`/settings/${workspace.id}`}
-                className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-4 text-[13px] font-bold text-slate-900 hover:bg-slate-50"
+                className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-border bg-card px-4 text-[13px] font-bold text-foreground hover:bg-muted"
               >
                 Configure
               </Link>
@@ -162,29 +163,29 @@ export default function ClientOverview({ data }: { data: Overview }) {
       {/* Metrics */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
         {tiles.map((t) => (
-          <div key={t.label} className="rounded-xl border border-slate-200 bg-white p-4">
-            <t.icon className="h-4 w-4 text-slate-400" />
-            <p className="mt-2.5 text-2xl font-black tabular-nums tracking-tight text-slate-900">
+          <div key={t.label} className="rounded-xl border border-border bg-card p-4">
+            <t.icon className="h-4 w-4 text-muted-foreground/70" />
+            <p className="mt-2.5 text-2xl font-semibold tabular-nums tracking-tight text-foreground">
               {t.value}
             </p>
-            <p className="mt-0.5 text-[11px] leading-tight text-slate-500">{t.label}</p>
+            <p className="mt-0.5 text-[11px] leading-tight text-muted-foreground">{t.label}</p>
           </div>
         ))}
       </div>
-      <p className="-mt-2 text-[11px] text-slate-400">Last 30 days · this client only</p>
+      <p className="-mt-2 text-[11px] text-muted-foreground/70">Last 30 days · this client only</p>
 
       <div className="grid gap-3 lg:grid-cols-2">
         {/* What visitors asked */}
-        <div className="rounded-xl border border-slate-200 bg-white p-5">
-          <h2 className="text-[13px] font-black text-slate-900">What visitors asked most</h2>
+        <div className="rounded-xl border border-border bg-card p-5">
+          <h2 className="text-[13px] font-semibold text-foreground">What visitors asked most</h2>
           {topQuestions.length === 0 ? (
-            <p className="mt-3 text-[13px] text-slate-500">No conversations in the last 30 days.</p>
+            <p className="mt-3 text-[13px] text-muted-foreground">No conversations in the last 30 days.</p>
           ) : (
             <ul className="mt-3 space-y-2">
               {topQuestions.map((q) => (
                 <li key={q.question} className="flex items-start justify-between gap-3">
-                  <span className="line-clamp-2 text-[12.5px] text-slate-700">{q.question}</span>
-                  <span className="shrink-0 text-[11.5px] font-bold tabular-nums text-slate-500">
+                  <span className="line-clamp-2 text-[12.5px] text-foreground">{q.question}</span>
+                  <span className="shrink-0 text-[11.5px] font-bold tabular-nums text-muted-foreground">
                     {q.count}
                   </span>
                 </li>
@@ -194,14 +195,14 @@ export default function ClientOverview({ data }: { data: Overview }) {
         </div>
 
         {/* Where the knowledge base fell short */}
-        <div className="rounded-xl border border-slate-200 bg-white p-5">
-          <h2 className="text-[13px] font-black text-slate-900">Content gaps</h2>
-          <p className="mt-1 text-[11.5px] leading-5 text-slate-500">
+        <div className="rounded-xl border border-border bg-card p-5">
+          <h2 className="text-[13px] font-semibold text-foreground">Content gaps</h2>
+          <p className="mt-1 text-[11.5px] leading-5 text-muted-foreground">
             Questions the assistant answered without citing any approved source — the closest signal
             we have that the knowledge base did not cover it.
           </p>
           {contentGaps.length === 0 ? (
-            <p className="mt-3 text-[13px] text-slate-500">
+            <p className="mt-3 text-[13px] text-muted-foreground">
               Nothing flagged. Every answer cited a source.
             </p>
           ) : (
@@ -212,7 +213,7 @@ export default function ClientOverview({ data }: { data: Overview }) {
                   className="flex items-start gap-2 rounded-lg bg-amber-50 px-2.5 py-2"
                 >
                   <AlertTriangle className="mt-0.5 h-3 w-3 shrink-0 text-amber-700" />
-                  <span className="line-clamp-2 flex-1 text-[12px] text-slate-800">{q.question}</span>
+                  <span className="line-clamp-2 flex-1 text-[12px] text-foreground">{q.question}</span>
                   <span className="shrink-0 text-[11px] font-bold text-amber-800">×{q.count}</span>
                 </li>
               ))}
@@ -223,27 +224,27 @@ export default function ClientOverview({ data }: { data: Overview }) {
 
       {/* Setup */}
       <div className="grid gap-3 lg:grid-cols-2">
-        <div className="rounded-xl border border-slate-200 bg-white p-5">
-          <h2 className="flex items-center gap-1.5 text-[13px] font-black text-slate-900">
-            <Sparkles className="h-3.5 w-3.5 text-slate-400" /> Assistants
+        <div className="rounded-xl border border-border bg-card p-5">
+          <h2 className="flex items-center gap-1.5 text-[13px] font-semibold text-foreground">
+            <Sparkles className="h-3.5 w-3.5 text-muted-foreground/70" /> Assistants
           </h2>
           <ul className="mt-3 space-y-2">
             {workspace.assistants.map((a) => (
               <li
                 key={a.id}
-                className="flex items-center gap-2.5 rounded-lg border border-slate-100 px-3 py-2"
+                className="flex items-center gap-2.5 rounded-lg border border-border px-3 py-2"
               >
-                <span className="min-w-0 flex-1 truncate text-[12.5px] font-semibold text-slate-800">
+                <span className="min-w-0 flex-1 truncate text-[12.5px] font-semibold text-foreground">
                   {a.name}
                 </span>
-                <span className="shrink-0 text-[11px] text-slate-400">
+                <span className="shrink-0 text-[11px] text-muted-foreground/70">
                   {a._count.deployments} deployment{a._count.deployments === 1 ? '' : 's'}
                 </span>
                 <span
                   className={`shrink-0 rounded px-1.5 py-0.5 text-[10px] font-bold ${
                     a.status === 'published'
                       ? 'bg-emerald-50 text-emerald-700'
-                      : 'bg-slate-100 text-slate-600'
+                      : 'bg-muted text-muted-foreground'
                   }`}
                 >
                   {a.status}
@@ -251,16 +252,16 @@ export default function ClientOverview({ data }: { data: Overview }) {
               </li>
             ))}
             {workspace.assistants.length === 0 && (
-              <li className="text-[13px] text-slate-500">No assistant yet.</li>
+              <li className="text-[13px] text-muted-foreground">No assistant yet.</li>
             )}
           </ul>
         </div>
 
-        <div className="rounded-xl border border-slate-200 bg-white p-5">
-          <h2 className="flex items-center gap-1.5 text-[13px] font-black text-slate-900">
-            <FileText className="h-3.5 w-3.5 text-slate-400" /> Knowledge
+        <div className="rounded-xl border border-border bg-card p-5">
+          <h2 className="flex items-center gap-1.5 text-[13px] font-semibold text-foreground">
+            <FileText className="h-3.5 w-3.5 text-muted-foreground/70" /> Knowledge
           </h2>
-          <p className="mt-1 text-[11.5px] text-slate-500">
+          <p className="mt-1 text-[11.5px] text-muted-foreground">
             {workspace._count.knowledgeDocuments} documents ·{' '}
             {workspace._count.knowledgeChunks} indexed passages
           </p>
@@ -268,10 +269,10 @@ export default function ClientOverview({ data }: { data: Overview }) {
             {workspace.knowledgeSources.map((s) => (
               <li
                 key={s.id}
-                className="flex items-center gap-2.5 rounded-lg border border-slate-100 px-3 py-2"
+                className="flex items-center gap-2.5 rounded-lg border border-border px-3 py-2"
               >
-                <span className="min-w-0 flex-1 truncate text-[12.5px] text-slate-800">{s.name}</span>
-                <span className="shrink-0 text-[10px] uppercase tracking-wide text-slate-400">
+                <span className="min-w-0 flex-1 truncate text-[12.5px] text-foreground">{s.name}</span>
+                <span className="shrink-0 text-[10px] uppercase tracking-wide text-muted-foreground/70">
                   {s.sourceType.replace('_', ' ')}
                 </span>
                 <span
@@ -280,7 +281,7 @@ export default function ClientOverview({ data }: { data: Overview }) {
                       ? 'bg-emerald-50 text-emerald-700'
                       : s.syncStatus === 'failed'
                         ? 'bg-rose-50 text-rose-700'
-                        : 'bg-slate-100 text-slate-600'
+                        : 'bg-muted text-muted-foreground'
                   }`}
                 >
                   {s.syncStatus.replace('_', ' ')}
@@ -288,7 +289,7 @@ export default function ClientOverview({ data }: { data: Overview }) {
               </li>
             ))}
             {workspace.knowledgeSources.length === 0 && (
-              <li className="text-[13px] text-slate-500">No sources yet.</li>
+              <li className="text-[13px] text-muted-foreground">No sources yet.</li>
             )}
           </ul>
         </div>

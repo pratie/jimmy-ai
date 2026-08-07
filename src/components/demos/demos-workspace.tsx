@@ -68,13 +68,13 @@ const PILL = 'shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold ring-1'
 const TONE = {
   good: 'bg-emerald-50 text-emerald-700 ring-emerald-600/20',
   warn: 'bg-amber-50 text-amber-700 ring-amber-600/20',
-  neutral: 'bg-slate-100 text-slate-600 ring-slate-500/20',
+  neutral: 'bg-muted text-muted-foreground ring-border',
 } as const
 
 const BTN_PRIMARY =
-  'inline-flex h-9 items-center gap-1.5 rounded-lg bg-[#5b5ce2] px-4 text-[13px] font-bold text-white transition-colors hover:bg-[#4c4dd6] disabled:opacity-60'
+  'inline-flex h-9 items-center gap-1.5 rounded-lg bg-primary px-4 text-[13px] font-bold text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-60'
 const BTN_SECONDARY =
-  'inline-flex h-9 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 text-[13px] font-bold text-slate-900 transition-colors hover:bg-slate-50 disabled:opacity-60'
+  'inline-flex h-9 items-center gap-1.5 rounded-lg border border-border bg-card px-3 text-[13px] font-bold text-foreground transition-colors hover:bg-muted disabled:opacity-60'
 
 function daysUntil(date: Date, now: number) {
   return Math.ceil((new Date(date).getTime() - now) / 86_400_000)
@@ -111,8 +111,10 @@ function CopyLink({ url, label = 'Copy link' }: { url: string; label?: string })
 function Metric({ value, label }: { value: number; label: string }) {
   return (
     <div className="flex-1">
-      <p className="text-[11px] text-slate-400">{label}</p>
-      <p className="mt-0.5 text-lg font-black tabular-nums text-slate-900">{value}</p>
+      <p className="text-[11px] text-muted-foreground/70">{label}</p>
+      <p className="mt-0.5 text-lg font-semibold tabular-nums text-foreground">
+        {Number.isFinite(value) ? value : '—'}
+      </p>
     </div>
   )
 }
@@ -130,6 +132,13 @@ export default function DemosWorkspace({ demos }: { demos: ProspectDemoRow[] }) 
   /** `${workspaceId}:${action}` while a per-demo mutation is in flight. */
   const [busy, setBusy] = React.useState<string | null>(null)
   const [confirmRevoke, setConfirmRevoke] = React.useState<ProspectDemoRow | null>(null)
+
+  /** The empty state's CTA sends people to the one input that starts the loop. */
+  const urlInputRef = React.useRef<HTMLInputElement | null>(null)
+  const focusCreateForm = () => {
+    urlInputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    urlInputRef.current?.focus({ preventScroll: true })
+  }
 
   // Relative expiry is computed after mount only: the server and the browser
   // render this component at different instants, and a day boundary between
@@ -238,11 +247,11 @@ export default function DemosWorkspace({ demos }: { demos: ProspectDemoRow[] }) 
   const notOpened = demos.filter((d) => d.opened === 0 && !d.convertedAt).length
 
   const createForm = (
-    <form onSubmit={create} className="rounded-2xl border border-slate-200 bg-white p-5">
-      <label htmlFor="prospect-url" className="text-sm font-black text-slate-900">
+    <form onSubmit={create} className="rounded-xl border border-border bg-card p-5">
+      <label htmlFor="prospect-url" className="text-sm font-semibold text-foreground">
         Build a demo from a prospect’s website
       </label>
-      <p className="mt-1 text-sm text-slate-500">
+      <p className="mt-1 text-sm text-muted-foreground">
         We read their public pages and put a working assistant on top of them. You get a link to
         send.
       </p>
@@ -250,13 +259,14 @@ export default function DemosWorkspace({ demos }: { demos: ProspectDemoRow[] }) 
       <div className="mt-4 flex flex-col gap-2 sm:flex-row">
         <input
           id="prospect-url"
+          ref={urlInputRef}
           value={url}
           onChange={(e) => setUrl(e.target.value)}
           disabled={creating}
           placeholder="acme.com"
           inputMode="url"
           autoComplete="off"
-          className="h-9 w-full rounded-lg border border-slate-200 px-3 text-sm outline-none focus:border-slate-400 disabled:bg-slate-50 sm:max-w-sm"
+          className="h-9 w-full rounded-lg border border-border bg-card px-3 text-sm text-foreground outline-none transition-colors focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring disabled:bg-muted sm:max-w-sm"
         />
         <button type="submit" disabled={creating || !url.trim()} className={BTN_PRIMARY}>
           {creating ? (
@@ -269,19 +279,19 @@ export default function DemosWorkspace({ demos }: { demos: ProspectDemoRow[] }) 
       </div>
 
       {creating && (
-        <p className="mt-3 flex items-center gap-2 text-[13px] text-slate-500" aria-live="polite">
-          <Loader2 className="h-3.5 w-3.5 shrink-0 animate-spin text-[#5b5ce2]" />
+        <p className="mt-3 flex items-center gap-2 text-[13px] text-muted-foreground" aria-live="polite">
+          <Loader2 className="h-3.5 w-3.5 shrink-0 animate-spin text-primary" />
           {stage} This takes up to a minute — leave this tab open.
         </p>
       )}
 
       {upgrade && (
         <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-4">
-          <p className="text-sm font-black text-amber-900">You’ve hit your plan’s demo limit</p>
+          <p className="text-sm font-semibold text-amber-900">You’ve hit your plan’s demo limit</p>
           <p className="mt-1 text-sm text-amber-800">{upgrade}</p>
           <Link
             href="/settings?tab=billing"
-            className="mt-3 inline-flex h-9 items-center gap-1.5 rounded-lg bg-[#5b5ce2] px-4 text-[13px] font-bold text-white transition-colors hover:bg-[#4c4dd6]"
+            className="mt-3 inline-flex h-9 items-center gap-1.5 rounded-lg bg-primary px-4 text-[13px] font-bold text-primary-foreground transition-colors hover:bg-primary/90"
           >
             See plans <ArrowRight className="h-3.5 w-3.5" />
           </Link>
@@ -290,11 +300,11 @@ export default function DemosWorkspace({ demos }: { demos: ProspectDemoRow[] }) 
 
       {fresh && (
         <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-4">
-          <p className="text-sm font-black text-emerald-900">
-            {fresh.name} is ready — send them this link
+          <p className="text-sm font-semibold text-emerald-900">
+            {fresh.name || 'Your demo'} is ready — send them this link
           </p>
           <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-center">
-            <code className="min-w-0 flex-1 truncate rounded-lg border border-emerald-200 bg-white px-3 py-2 text-[12px] text-slate-700">
+            <code className="min-w-0 flex-1 truncate rounded-lg border border-emerald-200 bg-card px-3 py-2 text-[12px] text-foreground">
               {shareLinkFor(fresh.shareToken)}
             </code>
             <CopyLink url={shareLinkFor(fresh.shareToken)} />
@@ -308,22 +318,30 @@ export default function DemosWorkspace({ demos }: { demos: ProspectDemoRow[] }) 
     return (
       <div className="space-y-5">
         <div>
-          <h1 className="text-xl font-black tracking-tight text-slate-900">Prospect demos</h1>
-          <p className="mt-1 text-sm text-slate-500">
+          <h1 className="text-xl font-semibold tracking-tight text-foreground">Prospect demos</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
             Show a prospect their own assistant before they’ve signed anything.
           </p>
         </div>
 
         {createForm}
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-12 text-center">
-          <Link2 className="mx-auto h-8 w-8 text-slate-300" />
-          <h2 className="mt-4 text-base font-black text-slate-900">No demos yet</h2>
-          <p className="mx-auto mt-2 max-w-sm text-sm text-slate-500">
-            A prospect demo is their website, read and indexed, with a working assistant on top —
-            reachable from one link. Instead of describing what you’d build for them, you send it.
-            You’ll see here when they open it, and one click turns a demo that landed into a client.
+        <div className="rounded-xl border border-border bg-card p-12 text-center">
+          <div className="mx-auto grid h-12 w-12 place-items-center rounded-xl bg-muted">
+            <Link2 className="h-5 w-5 text-muted-foreground/70" />
+          </div>
+          <h2 className="mt-4 text-base font-semibold text-foreground">No demos yet</h2>
+          <p className="mx-auto mt-2 max-w-sm text-sm text-muted-foreground">
+            Paste a prospect’s website and you get a working assistant on one shareable link.
           </p>
+          <button
+            type="button"
+            onClick={focusCreateForm}
+            className={`${BTN_PRIMARY} mx-auto mt-5`}
+          >
+            <Sparkles className="h-3.5 w-3.5" />
+            Build your first demo
+          </button>
         </div>
       </div>
     )
@@ -333,8 +351,8 @@ export default function DemosWorkspace({ demos }: { demos: ProspectDemoRow[] }) 
     <div className="space-y-5">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-xl font-black tracking-tight text-slate-900">Prospect demos</h1>
-          <p className="mt-1 text-sm text-slate-500">
+          <h1 className="text-xl font-semibold tracking-tight text-foreground">Prospect demos</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
             {demos.length} total
             {notOpened > 0 && ` · ${notOpened} not opened yet`}
           </p>
@@ -359,25 +377,29 @@ export default function DemosWorkspace({ demos }: { demos: ProspectDemoRow[] }) 
                 : { label: 'Not opened yet', tone: TONE.warn }
 
           return (
-            <div key={demo.workspaceId} className="rounded-2xl border border-slate-200 bg-white p-5">
+            <div key={demo.workspaceId} className="rounded-xl border border-border bg-card p-5">
               <div className="flex items-start gap-3">
-                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-[#5b5ce2] text-[11px] font-black text-white">
-                  {demo.name.slice(0, 2).toUpperCase()}
+                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-primary text-[11px] font-semibold text-primary-foreground">
+                  {demo.name?.slice(0, 2).toUpperCase() || '—'}
                 </span>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-black text-slate-900">{demo.name}</p>
+                  <p className="truncate text-sm font-semibold text-foreground">
+                    {demo.name || 'Untitled demo'}
+                  </p>
                   {demo.websiteUrl ? (
                     <a
                       href={demo.websiteUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex max-w-full items-center gap-1 truncate text-[11px] text-slate-400 hover:text-slate-900"
+                      className="inline-flex max-w-full items-center gap-1 truncate text-[11px] text-muted-foreground/70 hover:text-foreground"
                     >
                       <span className="truncate">{demo.websiteUrl.replace(/^https?:\/\//, '')}</span>
                       <ExternalLink className="h-2.5 w-2.5 shrink-0" />
                     </a>
                   ) : (
-                    <p className="truncate text-[11px] text-slate-400">{demo.name}</p>
+                    <p className="truncate text-[11px] text-muted-foreground/70">
+                      {demo.name || '—'}
+                    </p>
                   )}
                 </div>
                 <span className={`${PILL} ${status.tone}`}>{status.label}</span>
@@ -387,18 +409,18 @@ export default function DemosWorkspace({ demos }: { demos: ProspectDemoRow[] }) 
                   the numbers rather than behind a menu. */}
               {link ? (
                 <div className="mt-4 flex items-center gap-2">
-                  <code className="min-w-0 flex-1 truncate rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-[12px] text-slate-600">
+                  <code className="min-w-0 flex-1 truncate rounded-lg border border-border bg-muted px-3 py-2 text-[12px] text-muted-foreground">
                     {link.replace(/^https?:\/\//, '')}
                   </code>
                   <CopyLink url={link} label="Copy" />
                 </div>
               ) : (
-                <p className="mt-4 rounded-lg bg-slate-50 px-3 py-2 text-[12px] text-slate-500">
+                <p className="mt-4 rounded-lg bg-muted px-3 py-2 text-[12px] text-muted-foreground">
                   This demo has no share link — it was revoked or never issued one.
                 </p>
               )}
 
-              <p className="mt-2 text-[11px] text-slate-400">
+              <p className="mt-2 text-[11px] text-muted-foreground/70">
                 {converted
                   ? 'Converted — no longer expires'
                   : demo.isExpired
@@ -408,18 +430,18 @@ export default function DemosWorkspace({ demos }: { demos: ProspectDemoRow[] }) 
                       : 'No expiry set'}
               </p>
 
-              <div className="mt-4 flex gap-3 border-t border-slate-100 pt-3">
+              <div className="mt-4 flex gap-3 border-t border-border pt-3">
                 <Metric value={demo.opened} label="Opened" />
                 <Metric value={demo.started} label="Conversations" />
                 <Metric value={demo.leads} label="Leads" />
               </div>
-              <p className="mt-2 text-[11px] text-slate-400">
+              <p className="mt-2 text-[11px] text-muted-foreground/70">
                 {demo.opened === 0
                   ? 'Not opened yet — worth a nudge'
                   : `Opened ${demo.opened}× · ${demo.started} conversation${demo.started === 1 ? '' : 's'}`}
               </p>
 
-              <div className="mt-4 flex flex-wrap gap-2 border-t border-slate-100 pt-3">
+              <div className="mt-4 flex flex-wrap gap-2 border-t border-border pt-3">
                 {!converted && (
                   <button
                     type="button"
@@ -478,7 +500,7 @@ export default function DemosWorkspace({ demos }: { demos: ProspectDemoRow[] }) 
             <AlertDialogTitle>Revoke this share link?</AlertDialogTitle>
             <AlertDialogDescription>
               {confirmRevoke
-                ? `The link you sent for ${confirmRevoke.name} stops working straight away. The conversations the prospect already had are kept, and you can build a new demo for the same site later.`
+                ? `The link you sent for ${confirmRevoke.name || 'this demo'} stops working straight away. The conversations the prospect already had are kept, and you can build a new demo for the same site later.`
                 : ''}
             </AlertDialogDescription>
           </AlertDialogHeader>

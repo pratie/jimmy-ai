@@ -101,7 +101,7 @@ export default function DeleteClientDialog({
           setTyped('')
           setOpen(true)
         }}
-        className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 text-[13px] font-bold text-slate-500 transition-colors hover:border-rose-200 hover:bg-rose-50 hover:text-rose-700"
+        className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-border bg-card px-3 text-[13px] font-bold text-muted-foreground transition-colors hover:border-rose-200 hover:bg-rose-50 hover:text-rose-700"
       >
         <Trash2 className="h-3.5 w-3.5" />
         Delete
@@ -110,14 +110,14 @@ export default function DeleteClientDialog({
       <AlertDialog open={open} onOpenChange={(next) => !deleting && setOpen(next)}>
         <AlertDialogContent className="sm:max-w-lg">
           <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-2 text-slate-900">
+            <AlertDialogTitle className="flex items-center gap-2 text-foreground">
               <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-rose-50">
                 <AlertTriangle className="h-4 w-4 text-rose-600" />
               </span>
               Delete {clientName}?
             </AlertDialogTitle>
             <AlertDialogDescription asChild>
-              <div className="space-y-3 text-[13px] leading-6 text-slate-600">
+              <div className="space-y-3 text-[13px] leading-6 text-muted-foreground">
                 <p>
                   Their assistant stops answering immediately. If the embed script is still on{' '}
                   {clientName}, the chat widget disappears from their website.
@@ -125,7 +125,7 @@ export default function DeleteClientDialog({
 
                 {lines.length > 0 ? (
                   <p>
-                    <span className="font-bold text-slate-900">{lines.join(', ')}</span> will be
+                    <span className="font-bold text-foreground">{lines.join(', ')}</span> will be
                     removed from your dashboard along with it.
                   </p>
                 ) : (
@@ -140,9 +140,9 @@ export default function DeleteClientDialog({
           <div className="mt-1">
             <label
               htmlFor="confirm-client-name"
-              className="text-[12px] font-bold text-slate-700"
+              className="text-[12px] font-bold text-foreground"
             >
-              Type <span className="font-black text-slate-900">{clientName}</span> to confirm
+              Type <span className="font-semibold text-foreground">{clientName}</span> to confirm
             </label>
             <input
               id="confirm-client-name"
@@ -150,14 +150,14 @@ export default function DeleteClientDialog({
               onChange={(event) => setTyped(event.target.value)}
               autoComplete="off"
               disabled={deleting}
-              className="mt-1.5 h-10 w-full rounded-lg border border-slate-200 px-3 text-sm outline-none focus:border-slate-400 disabled:bg-slate-50"
+              className="mt-1.5 h-10 w-full rounded-lg border border-border px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring disabled:bg-muted"
             />
           </div>
 
           <AlertDialogFooter className="mt-2">
             <AlertDialogCancel
               disabled={deleting}
-              className="h-9 rounded-lg border-slate-200 text-[13px] font-bold"
+              className="h-9 rounded-lg border-border text-[13px] font-bold"
             >
               Keep this client
             </AlertDialogCancel>

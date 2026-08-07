@@ -53,11 +53,11 @@ const Section = ({
   action?: React.ReactNode
   children: React.ReactNode
 }) => (
-  <section className="rounded-2xl border border-slate-200 bg-white p-5">
+  <section className="rounded-xl border border-border bg-card p-5">
     <div className="flex flex-wrap items-start justify-between gap-3">
       <div className="min-w-0">
-        <h2 className="text-sm font-black tracking-tight text-slate-900">{title}</h2>
-        {description && <p className="mt-1 text-[12.5px] leading-5 text-slate-500">{description}</p>}
+        <h2 className="text-sm font-semibold tracking-tight text-foreground">{title}</h2>
+        {description && <p className="mt-1 text-[12.5px] leading-5 text-muted-foreground">{description}</p>}
       </div>
       {action}
     </div>
@@ -172,8 +172,8 @@ const SettingsForm = ({
     <div className="space-y-5 pb-10">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div className="min-w-0">
-          <h1 className="truncate text-xl font-black tracking-tight text-slate-900">{name}</h1>
-          <p className="mt-1 text-sm text-slate-500">
+          <h1 className="truncate text-xl font-semibold tracking-tight text-foreground">{name}</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
             Configuration — what the assistant knows, how it speaks, and where it lives.
           </p>
         </div>
@@ -181,7 +181,7 @@ const SettingsForm = ({
           href={`/preview/${id}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-4 text-[13px] font-bold text-slate-900 transition-colors hover:bg-slate-50"
+          className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-border bg-card px-4 text-[13px] font-bold text-foreground transition-colors hover:bg-muted"
         >
           Open test workspace
           <ExternalLink className="h-3.5 w-3.5" />
@@ -191,15 +191,15 @@ const SettingsForm = ({
       <Tabs value={activeTab} onValueChange={(value) => selectTab(value as TabKey)} className="space-y-5">
         {/* Two columns on a phone, one row from `sm` up. A scrolling strip hid
             the last destination behind an edge nobody knew to swipe. */}
-        <TabsList className="grid h-auto w-full grid-cols-2 gap-1 rounded-2xl border border-slate-200 bg-white p-1 sm:flex sm:w-auto sm:justify-start">
+        <TabsList className="grid h-auto w-full grid-cols-2 gap-1 rounded-xl border border-border bg-card p-1 sm:flex sm:w-auto sm:justify-start">
           {tabs.map((tab) => (
             <TabsTrigger
               key={tab.key}
               value={tab.key}
               title={tab.done === false ? tab.todo : undefined}
               className={cn(
-                'flex items-center justify-center gap-2 rounded-xl px-3.5 py-2 text-[13px] font-bold text-slate-500 transition-colors',
-                'hover:text-slate-900 data-[state=active]:bg-slate-100 data-[state=active]:text-slate-900 data-[state=active]:shadow-none'
+                'flex items-center justify-center gap-2 rounded-xl px-3.5 py-2 text-[13px] font-bold text-muted-foreground transition-colors',
+                'hover:text-foreground data-[state=active]:bg-muted data-[state=active]:text-foreground data-[state=active]:shadow-none'
               )}
             >
               {tab.done !== null && (
@@ -241,7 +241,7 @@ const SettingsForm = ({
             action={
               <a
                 href={`/settings/${name}/advanced`}
-                className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 text-[13px] font-bold text-slate-900 transition-colors hover:bg-slate-50"
+                className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-border bg-card px-3 text-[13px] font-bold text-foreground transition-colors hover:bg-muted"
               >
                 Advanced settings
                 <ArrowRight className="h-3.5 w-3.5" />
@@ -255,12 +255,12 @@ const SettingsForm = ({
                 workspace id, resolved to nothing, and every attempt returned
                 400. They now live in Test & customise, called correctly and
                 next to a chat that shows what they do. */}
-            <p className="text-[13px] leading-6 text-slate-500">
+            <p className="text-[13px] leading-6 text-muted-foreground">
               How the assistant speaks and what it is trying to achieve are set in{' '}
               <button
                 type="button"
                 onClick={() => selectTab('appearance')}
-                className="font-bold text-[#5b5ce2] underline underline-offset-2"
+                className="font-bold text-primary underline underline-offset-2"
               >
                 Test &amp; customise
               </button>
@@ -304,10 +304,10 @@ const SettingsForm = ({
           >
             <form onSubmit={onUpdateSettings}>
               <EditChatbotIcon chatBot={chatBot} register={register} errors={errors} />
-              <div className="mt-4 flex justify-end border-t border-slate-100 pt-4">
+              <div className="mt-4 flex justify-end border-t border-border pt-4">
                 <Button
                   type="submit"
-                  className="h-9 rounded-lg bg-[#5b5ce2] px-4 text-[13px] font-bold text-white hover:bg-[#4c4dd6]"
+                  className="h-9 rounded-lg bg-primary px-4 text-[13px] font-bold text-primary-foreground hover:bg-primary/90"
                 >
                   <Loader loading={loading}>Save icon</Loader>
                 </Button>
@@ -323,19 +323,19 @@ const SettingsForm = ({
           >
             <form onSubmit={onUpdateSettings}>
               <DomainUpdate name={name} register={register} errors={errors} />
-              <div className="mt-4 flex items-center justify-between gap-3 border-t border-slate-100 pt-4">
+              <div className="mt-4 flex items-center justify-between gap-3 border-t border-border pt-4">
                 {/* Deleting lives on the client page now, one click from anywhere.
                     The link keeps this a dead end rather than a second, differently
                     guarded way to do the same destructive thing. */}
                 <a
                   href={`/clients/${id}`}
-                  className="text-[12.5px] font-semibold text-slate-400 underline underline-offset-2 hover:text-rose-600"
+                  className="text-[12.5px] font-semibold text-muted-foreground/70 underline underline-offset-2 hover:text-rose-600"
                 >
                   Delete this client
                 </a>
                 <Button
                   type="submit"
-                  className="h-9 rounded-lg bg-[#5b5ce2] px-4 text-[13px] font-bold text-white hover:bg-[#4c4dd6]"
+                  className="h-9 rounded-lg bg-primary px-4 text-[13px] font-bold text-primary-foreground hover:bg-primary/90"
                 >
                   <Loader loading={loading}>Save</Loader>
                 </Button>

@@ -93,8 +93,8 @@ const CodeSnippet = ({ id }: Props) => {
       />
 
       {publishState && (
-        <div className="flex w-full flex-wrap items-center justify-between gap-3 rounded-lg border border-slate-200 px-4 py-3">
-          <p className="text-sm text-slate-600">
+        <div className="flex w-full flex-wrap items-center justify-between gap-3 rounded-xl border border-border px-4 py-3">
+          <p className="text-sm text-muted-foreground">
             {publishState.assistantStatus === 'published'
               ? 'This assistant is live. The snippet below is answering visitors.'
               : 'This assistant is not live yet — the snippet below will be installed but will not answer.'}
@@ -113,7 +113,7 @@ const CodeSnippet = ({ id }: Props) => {
       <div className="w-full flex items-center gap-3">
         <label className="text-sm">Margin</label>
         <select
-          className="border rounded-md px-2 py-1 text-sm"
+          className="rounded-md border border-border bg-card px-2 py-1 text-sm text-foreground"
           value={margin}
           onChange={(e)=>setMargin(parseInt(e.target.value))}
         >
@@ -123,7 +123,7 @@ const CodeSnippet = ({ id }: Props) => {
         </select>
         <label className="text-sm">Bubble</label>
         <select
-          className="border rounded-md px-2 py-1 text-sm"
+          className="rounded-md border border-border bg-card px-2 py-1 text-sm text-foreground"
           value={size}
           onChange={(e)=>setSize(e.target.value as 'sm'|'md')}
         >
@@ -135,16 +135,16 @@ const CodeSnippet = ({ id }: Props) => {
           type="button"
           onClick={rotate}
           disabled={loadingKey || !publicKey}
-          className="ml-auto inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs font-medium disabled:opacity-50"
+          className="ml-auto inline-flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1 text-xs font-medium text-foreground transition-colors hover:bg-muted disabled:opacity-50"
           title="Issues a new key and invalidates this one. The snippet on the client's website must be replaced."
         >
           {loadingKey ? <Loader2 className="h-3 w-3 animate-spin" /> : <RefreshCw className="h-3 w-3" />}
           Rotate key
         </button>
       </div>
-      <div className="bg-cream px-6 py-4 rounded-lg relative w-full overflow-x-auto mt-3">
+      <div className="relative mt-3 w-full overflow-x-auto rounded-xl border border-border bg-muted px-6 py-4">
         <Copy
-          className="absolute top-5 right-5 text-brand-primary/60 hover:text-brand-primary cursor-pointer"
+          className="absolute right-5 top-5 cursor-pointer text-muted-foreground transition-colors hover:text-foreground"
           onClick={() => {
             if (!publicKey) return
             navigator.clipboard.writeText(snippet)
@@ -155,7 +155,7 @@ const CodeSnippet = ({ id }: Props) => {
           }}
         />
         <pre className="whitespace-pre text-sm min-w-full">
-          <code className="text-brand-primary/70">{snippet}</code>
+          <code className="text-foreground">{snippet}</code>
         </pre>
       </div>
     </div>

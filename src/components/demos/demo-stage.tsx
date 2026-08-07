@@ -79,6 +79,9 @@ export default function DemoStage({
   primaryColor,
 }: DemoStageProps) {
   const accent = primaryColor && HEX.test(primaryColor.trim()) ? primaryColor.trim() : BRAND
+  // A demo row with no name is a data problem, not something a prospect should
+  // read as a blank heading.
+  const displayName = businessName?.trim() || 'This business'
   const [logoBroken, setLogoBroken] = useState(false)
 
   const {
@@ -90,7 +93,6 @@ export default function DemoStage({
     messageWindowRef,
     currentBot,
     loading,
-    onRealTime,
     onChats,
     setOnChats,
     errors,
@@ -180,15 +182,15 @@ export default function DemoStage({
           ) : (
             <span
               aria-hidden="true"
-              className="grid h-11 w-11 shrink-0 place-items-center rounded-xl text-base font-black text-white"
+              className="grid h-11 w-11 shrink-0 place-items-center rounded-xl text-base font-semibold text-white"
               style={{ backgroundColor: accent }}
             >
-              {businessName.trim().charAt(0).toUpperCase() || 'A'}
+              {displayName.charAt(0).toUpperCase()}
             </span>
           )}
           <div className="min-w-0">
-            <h1 className="text-xl font-black leading-tight tracking-tight text-slate-900 sm:text-2xl">
-              {businessName}
+            <h1 className="text-xl font-semibold leading-tight tracking-tight text-slate-900 sm:text-2xl">
+              {displayName}
             </h1>
             <p className="mt-1 text-[13px] text-slate-500">
               An AI assistant, built from {host ? `the public pages on ${host}` : 'your public website'}.
@@ -203,17 +205,15 @@ export default function DemoStage({
         </p>
 
         <div className="mt-7 grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start">
-          <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_12px_40px_rgba(15,23,42,.06)]">
+          <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-[0_12px_40px_rgba(15,23,42,.06)]">
             <div className="bg-[linear-gradient(135deg,#f8f9fc_0%,#eef0f6_100%)] p-3 sm:p-5">
               <Loader loading={loading}>
                 {currentBot ? (
                   <div className="mx-auto h-[70vh] min-h-[460px] max-w-[520px] sm:h-[620px]">
                     <BotWindow
                       errors={errors}
-                      setChat={setOnChats}
-                      realtimeMode={onRealTime}
                       helpdesk={currentBot.helpdesk || []}
-                      domainName={currentBot.name || businessName}
+                      domainName={currentBot.name || displayName}
                       ref={messageWindowRef}
                       help={currentBot.chatBot?.helpdesk}
                       theme={currentBot.chatBot?.background}
@@ -250,8 +250,8 @@ export default function DemoStage({
 
           <aside className="space-y-4">
             {currentBot && !hasStarted && (
-              <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_8px_30px_rgba(15,23,42,.04)]">
-                <p className="text-sm font-black text-slate-900">Try one of these</p>
+              <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-[0_8px_30px_rgba(15,23,42,.04)]">
+                <p className="text-sm font-semibold text-slate-900">Try one of these</p>
                 <p className="mt-1 text-[13px] leading-5 text-slate-500">
                   Whatever your customers ask on the phone works here too.
                 </p>
@@ -270,8 +270,8 @@ export default function DemoStage({
               </div>
             )}
 
-            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_8px_30px_rgba(15,23,42,.04)]">
-              <p className="text-sm font-black text-slate-900">Want this on your website?</p>
+            <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-[0_8px_30px_rgba(15,23,42,.04)]">
+              <p className="text-sm font-semibold text-slate-900">Want this on your website?</p>
               <p className="mt-2 text-[13px] leading-5 text-slate-500">
                 It answers visitors around the clock and passes on anything it cannot handle. Ask
                 here and whoever sent you this link will see the question, or just reply to them
@@ -292,7 +292,7 @@ export default function DemoStage({
                 "nothing is published publicly" would be true and still leave
                 the wrong impression, so it says who can read it instead. */}
             <p className="px-1 text-[11px] leading-4 text-slate-400">
-              A demo built for {businessName}. Whoever sent you this link can read what you ask
+              A demo built for {displayName}. Whoever sent you this link can read what you ask
               here, the same way they would see messages from your website.
             </p>
           </aside>

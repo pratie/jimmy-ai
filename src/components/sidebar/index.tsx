@@ -79,7 +79,7 @@ function RailTooltip({ label }: { label: string }) {
   return (
     <span
       role="tooltip"
-      className="pointer-events-none absolute left-full top-1/2 z-50 ml-2 -translate-y-1/2 whitespace-nowrap rounded-[6px] bg-[#1B2337] px-2 py-1 text-[12px] font-medium text-white opacity-0 shadow-lg transition-opacity duration-150 group-hover:opacity-100 group-focus-visible:opacity-100 motion-reduce:transition-none"
+      className="pointer-events-none absolute left-full top-1/2 z-50 ml-2 -translate-y-1/2 whitespace-nowrap rounded-[6px] bg-sidebar-muted px-2 py-1 text-[12px] font-medium text-white opacity-0 shadow-lg transition-opacity duration-150 group-hover:opacity-100 group-focus-visible:opacity-100 motion-reduce:transition-none"
     >
       {label}
     </span>
@@ -128,7 +128,7 @@ const SideBar = ({
         href={item.href}
         aria-label={rail ? item.label : undefined}
         className={cn(
-          'group relative flex h-9 items-center gap-2.5 rounded-[8px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7B7CF0]',
+          'group relative flex h-9 items-center gap-2.5 rounded-[8px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-accent',
           rail ? 'justify-center px-0' : 'px-2.5',
           small ? 'text-[13px]' : 'text-[13.5px]',
           active
@@ -138,8 +138,7 @@ const SideBar = ({
       >
         {active && (
           <span
-            className="absolute left-0 top-1/2 h-4 w-[2.5px] -translate-y-1/2 rounded-r-full"
-            style={{ backgroundColor: '#7B7CF0' }}
+            className="absolute left-0 top-1/2 h-4 w-[2.5px] -translate-y-1/2 rounded-r-full bg-sidebar-accent"
             aria-hidden="true"
           />
         )}
@@ -162,9 +161,9 @@ const SideBar = ({
         onClick={() => setMobileOpen(true)}
         aria-label="Open navigation"
         aria-expanded={mobileOpen}
-        className="fixed left-3 top-3 z-40 grid h-10 w-10 place-items-center rounded-[10px] border border-black/[0.08] bg-white shadow-sm md:hidden"
+        className="fixed left-3 top-3 z-40 grid h-10 w-10 place-items-center rounded-[10px] border border-border bg-card shadow-sm md:hidden"
       >
-        <Menu className="h-[18px] w-[18px] text-[#0C1424]" />
+        <Menu className="h-[18px] w-[18px] text-foreground" />
       </button>
 
       {/* Scrim. Fades rather than appearing, so the drawer reads as sliding
@@ -173,14 +172,14 @@ const SideBar = ({
         <div
           onClick={() => setMobileOpen(false)}
           aria-hidden="true"
-          className="fixed inset-0 z-40 bg-[#0C1424]/40 backdrop-blur-[2px] md:hidden"
+          className="fixed inset-0 z-40 bg-foreground/40 backdrop-blur-[2px] md:hidden"
         />
       )}
 
       <aside
         aria-label="Main navigation"
         className={cn(
-          'fixed inset-y-0 left-0 z-50 flex flex-col border-r border-white/10 bg-[#0b1020] text-white',
+          'fixed inset-y-0 left-0 z-50 flex flex-col border-r border-white/10 bg-sidebar text-sidebar-foreground',
           'transition-[width,transform] duration-200 ease-out motion-reduce:transition-none',
           'md:relative md:flex-none md:translate-x-0',
           rail ? 'md:w-[68px]' : 'md:w-[268px]',
@@ -199,7 +198,7 @@ const SideBar = ({
             <div className="relative h-9 w-9 shrink-0 overflow-hidden rounded-xl bg-white p-1.5">
               <Image src="/images/chatdock-mark.png" alt="ChatDock" fill sizes="36px" className="object-contain p-1" />
             </div>
-            {!rail && <p className="truncate text-sm font-black tracking-tight">ChatDock</p>}
+            {!rail && <p className="truncate text-sm font-semibold tracking-tight">ChatDock</p>}
           </Link>
 
           {!rail && (
@@ -208,7 +207,7 @@ const SideBar = ({
               onClick={toggleCollapsed}
               title="Collapse sidebar  ⌘B"
               aria-label="Collapse sidebar"
-              className="hidden shrink-0 rounded-[7px] p-1.5 text-white/35 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7B7CF0] md:block"
+              className="hidden shrink-0 rounded-[7px] p-1.5 text-white/35 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-accent md:block"
             >
               <PanelLeftClose className="h-[17px] w-[17px]" />
             </button>
@@ -224,7 +223,7 @@ const SideBar = ({
               onClick={toggleCollapsed}
               title="Expand sidebar  ⌘B"
               aria-label="Expand sidebar"
-              className="group relative grid h-8 w-8 place-items-center rounded-[7px] text-white/40 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7B7CF0]"
+              className="group relative grid h-8 w-8 place-items-center rounded-[7px] text-white/40 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-accent"
             >
               <PanelLeftOpen className="h-[17px] w-[17px]" />
               <RailTooltip label="Expand sidebar" />
@@ -285,8 +284,7 @@ const SideBar = ({
         <div className={cn('border-t border-white/10 p-2.5 md:p-3', rail && 'md:px-2')}>
           <div className={cn('flex items-center gap-2.5 rounded-[10px] py-1.5', rail ? 'justify-center px-0' : 'px-1.5')}>
             <div
-              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold"
-              style={{ backgroundColor: '#4F46E5' }}
+              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary text-[11px] font-semibold text-primary-foreground"
             >
               {user?.fullname?.charAt(0).toUpperCase() || 'C'}
             </div>
@@ -296,11 +294,15 @@ const SideBar = ({
                   <p className="truncate text-[12px] font-medium leading-tight">
                     {user?.fullname || 'ChatDock user'}
                   </p>
-                  <p className="truncate text-[10.5px] text-white/40">{user?.email || ''}</p>
+                  {/* Rendered only when present — an empty <p> still claims a
+                      line and left the name looking oddly off-centre. */}
+                  {user?.email && (
+                    <p className="truncate text-[10.5px] text-white/40">{user.email}</p>
+                  )}
                 </div>
                 <button
                   onClick={() => signOut(() => router.push('/'))}
-                  className="shrink-0 rounded-[7px] p-1.5 text-white/35 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7B7CF0]"
+                  className="shrink-0 rounded-[7px] p-1.5 text-white/35 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-accent"
                   title="Sign out"
                   aria-label="Sign out"
                 >

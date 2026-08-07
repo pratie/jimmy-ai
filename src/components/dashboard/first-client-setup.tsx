@@ -304,7 +304,7 @@ export default function FirstClientSetup({ organizationName }: { organizationNam
                   aria-invalid={!!error}
                   aria-describedby={error ? errorId : undefined}
                   placeholder="acmedental.com"
-                  className="h-11 w-full rounded-[10px] border pl-9 pr-3 text-[14px] outline-none transition-colors focus:border-[#4F46E5] focus:ring-4 focus:ring-[#4F46E5]/12 disabled:opacity-60"
+                  className="h-11 w-full rounded-[10px] border pl-9 pr-3 text-[14px] outline-none transition-colors focus:border-ring focus:ring-4 focus:ring-ring/20 disabled:opacity-60"
                   style={{ borderColor: error ? cd.danger : cd.lineStrong, color: cd.ink }}
                 />
               </div>

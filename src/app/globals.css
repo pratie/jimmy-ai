@@ -28,42 +28,50 @@ body::before {
 
 @layer base {
   :root {
-    /* ── Light Mode (default) ── */
-    --background: 228 26% 97%;
-    --foreground: 224 47% 10%;
+    /* ── Light Mode (default — the dashboard is pinned here) ──
+       These values are the HSL form of the `cd` palette in
+       src/lib/design-tokens.ts. The dashboard has two ways of naming a colour:
+       Tailwind token utilities (bg-card, text-muted-foreground…) and the `cd`
+       object used for inline styles. They have to resolve to the *same* pixels,
+       otherwise a card built one way sits a shade off a card built the other. */
+    --background: 220 20% 97%;      /* cd.canvas   #F6F7F9 */
+    --foreground: 220 50% 9%;       /* cd.ink      #0C1424 */
 
-    --card: 0 0% 100%;              /* #FFFFFF */
-    --card-foreground: 0 0% 4%;     /* #0A0A0A */
+    --card: 0 0% 100%;              /* cd.surface  #FFFFFF */
+    --card-foreground: 220 50% 9%;  /* cd.ink      #0C1424 */
 
     --popover: 0 0% 100%;           /* #FFFFFF */
-    --popover-foreground: 0 0% 4%;  /* #0A0A0A */
+    --popover-foreground: 220 50% 9%;
 
-    --primary: 240 70% 62%;
+    --primary: 240 70% 62%;         /* cd.accent   #5B5CE2 — the ChatDock purple */
     --primary-foreground: 0 0% 100%; /* #FFFFFF */
 
-    --secondary: 240 5% 96%;        /* #F4F4F5 */
-    --secondary-foreground: 0 0% 9%; /* #171717 */
+    --secondary: 220 27% 96%;       /* cd.sunken   #F1F3F7 */
+    --secondary-foreground: 220 24% 24%; /* cd.body #3D4A61 */
 
-    --muted: 228 23% 95%;
-    --muted-foreground: 222 12% 45%;
+    --muted: 220 27% 96%;           /* cd.sunken   #F1F3F7 */
+    --muted-foreground: 219 15% 46%; /* cd.muted   #647087 */
 
-    --accent: 240 5% 96%;           /* #F4F4F5 */
-    --accent-foreground: 0 0% 9%;   /* #171717 */
+    --accent: 220 27% 96%;          /* cd.sunken   #F1F3F7 */
+    --accent-foreground: 220 50% 9%;
 
-    --destructive: 0 84% 60%;       /* #EF4444 */
-    --destructive-foreground: 0 0% 98%;
+    --destructive: 4 76% 40%;       /* cd.danger   #B42318 */
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 224 20% 89%;
-    --input: 224 20% 89%;
+    --border: 218 24% 91%;          /* cd.line     #E3E7EE */
+    --input: 218 24% 91%;
     --ring: 240 70% 62%;
 
-    --radius: 0.75rem;
+    --radius: 0.75rem;              /* radius.card — 12px */
 
-    /* Sidebar (clean light style) */
-    --sidebar-bg: 240 5% 98%;          /* #FAFAFA */
-    --sidebar-foreground: 240 10% 4%;   /* #0A0A0A */
-    --sidebar-muted: 240 5% 95%;        /* #F4F4F5 */
-    --sidebar-border: 240 6% 90%;       /* #E4E4E7 */
+    /* Sidebar. Always dark, in both colour schemes: it is the one surface that
+       does not follow the page, so the tokens carry the deep-ink values rather
+       than light ones that no component ever asked for. */
+    --sidebar-bg: 226 49% 8%;          /* #0B1020 */
+    --sidebar-foreground: 0 0% 100%;   /* #FFFFFF */
+    --sidebar-muted: 226 39% 13%;      /* #141A2E — raised rows, dropdown panel */
+    --sidebar-border: 226 30% 20%;
+    --sidebar-accent: 240 80% 71%;     /* #7B7CF0 — primary, lifted to read on ink */
   }
 
   .dark {
@@ -96,10 +104,11 @@ body::before {
     --input: 240 4% 16%;
     --ring: 211 100% 50%;
 
-    --sidebar-bg: 0 0% 4%;
-    --sidebar-foreground: 0 0% 98%;
-    --sidebar-muted: 240 4% 10%;
-    --sidebar-border: 240 4% 16%;
+    --sidebar-bg: 226 49% 8%;
+    --sidebar-foreground: 0 0% 100%;
+    --sidebar-muted: 226 39% 13%;
+    --sidebar-border: 226 30% 20%;
+    --sidebar-accent: 240 80% 71%;
   }
 }
 

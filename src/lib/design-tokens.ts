@@ -27,9 +27,16 @@ export const cd = {
   line: '#E3E7EE',
   lineStrong: '#CBD2DE',
 
-  /** Reserved: primary action, active nav, focus, progress, selected data. */
-  accent: '#4F46E5',
-  accentHover: '#4338CA',
+  /**
+   * Reserved: primary action, active nav, focus, progress, selected data.
+   *
+   * This is the same purple as `--primary` and as the marketing site. It used
+   * to be indigo-600, which meant the dashboard shipped a second, near-miss
+   * brand colour — the kind of half-shade difference that reads as sloppy
+   * rather than as a decision.
+   */
+  accent: '#5B5CE2',
+  accentHover: '#4A4BD0',
   accentSoft: '#EEF0FF',
   accentLine: '#C7CBF5',
 

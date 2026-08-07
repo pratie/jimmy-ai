@@ -16,13 +16,13 @@ export const DataTable = ({ headers, children }: DataTableProps) => {
   return (
     <Table className="overflow-hidden">
       <TableHeader>
-        <TableRow className="border-slate-100 bg-slate-50/70 hover:bg-slate-50/70">
+        <TableRow className="border-border bg-muted hover:bg-muted">
           {headers.map((header, key) => (
             <TableHead
               key={key}
               className={cn(
                 key == headers.length - 1 && 'text-right',
-                'h-11 text-[10px] font-black uppercase tracking-[0.12em] text-slate-400'
+                'h-11 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground'
               )}
             >
               {header}

@@ -63,6 +63,7 @@ const config = {
           foreground: 'hsl(var(--sidebar-foreground))',
           muted: 'hsl(var(--sidebar-muted))',
           border: 'hsl(var(--sidebar-border))',
+          accent: 'hsl(var(--sidebar-accent))',
         },
 
         /* ── Semantic status colors ── */

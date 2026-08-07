@@ -21,7 +21,7 @@ import { useToast } from '@/components/ui/use-toast'
 
 const LABEL: Record<PublishableStatus, { badge: string; tone: string }> = {
   published: { badge: 'Live', tone: 'bg-emerald-50 text-emerald-700 ring-emerald-600/20' },
-  paused: { badge: 'Paused', tone: 'bg-slate-100 text-slate-600 ring-slate-500/20' },
+  paused: { badge: 'Paused', tone: 'bg-muted text-muted-foreground ring-border' },
   draft: { badge: 'Not published', tone: 'bg-amber-50 text-amber-700 ring-amber-600/20' },
 }
 
@@ -105,8 +105,8 @@ export default function PublishToggle({
         }
         className={`inline-flex h-9 items-center gap-1.5 rounded-lg px-3.5 text-[13px] font-bold transition-colors disabled:opacity-60 ${
           isLive
-            ? 'border border-slate-200 bg-white text-slate-900 hover:bg-slate-50'
-            : 'bg-[#5b5ce2] text-white hover:bg-[#4c4dd6]'
+            ? 'border border-border bg-card text-foreground hover:bg-muted'
+            : 'bg-primary text-primary-foreground hover:bg-primary/90'
         }`}
       >
         {pending ? (

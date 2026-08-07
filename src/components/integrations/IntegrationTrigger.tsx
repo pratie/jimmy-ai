@@ -29,9 +29,9 @@ const IntegrationTrigger = ({
       logo={logo}
       description={descrioption}
       trigger={
-        <Card className="px-3 py-2 cursor-pointer flex gap-2">
-          <CloudIcon />
-          {connections[name] ? 'connected' : 'connect'}
+        <Card className="flex cursor-pointer items-center gap-2 rounded-lg border-border bg-card px-3 py-2 text-sm font-semibold text-foreground transition-colors hover:bg-muted">
+          <CloudIcon className="h-4 w-4 shrink-0 text-muted-foreground" />
+          {connections[name] ? 'Connected' : 'Connect'}
         </Card>
       }
     >

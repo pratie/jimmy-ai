@@ -4,6 +4,8 @@ import * as React from 'react'
 import { useRouter } from 'next/navigation'
 import { Building2, Check, ChevronsUpDown, Plus, Search } from 'lucide-react'
 
+import { cd } from '@/lib/design-tokens'
+
 type Workspace = {
   id: string
   name: string
@@ -83,7 +85,7 @@ export default function ClientSwitcher({
   if (isDirectBusiness) {
     return (
       <div className="flex items-center gap-2.5 rounded-lg bg-white/[0.06] px-3 py-2.5">
-        <span className="grid h-7 w-7 shrink-0 place-items-center rounded-md bg-[#5B5CE2] text-[10px] font-bold">
+        <span className="grid h-7 w-7 shrink-0 place-items-center rounded-md bg-primary text-[10px] font-bold text-primary-foreground">
           {organizationName.slice(0, 2).toUpperCase()}
         </span>
         <span className="min-w-0 flex-1 truncate text-[13px] font-semibold">{organizationName}</span>
@@ -98,11 +100,11 @@ export default function ClientSwitcher({
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
         aria-haspopup="listbox"
-        className="flex w-full items-center gap-2.5 rounded-lg bg-white/[0.06] px-3 py-2.5 text-left transition-colors hover:bg-white/[0.1] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5B5CE2]"
+        className="flex w-full items-center gap-2.5 rounded-lg bg-white/[0.06] px-3 py-2.5 text-left transition-colors hover:bg-white/[0.1] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-accent"
       >
         <span
           className="grid h-7 w-7 shrink-0 place-items-center rounded-md text-[10px] font-bold"
-          style={{ backgroundColor: active?.primaryColor ?? '#5B5CE2' }}
+          style={{ backgroundColor: active?.primaryColor ?? cd.accent }}
         >
           {active ? initials(active) : <Building2 className="h-3.5 w-3.5" />}
         </span>
@@ -124,7 +126,7 @@ export default function ClientSwitcher({
       {open && (
         <div
           role="listbox"
-          className="absolute left-0 right-0 top-full z-50 mt-1.5 overflow-hidden rounded-lg border border-white/10 bg-[#141a2e] shadow-2xl"
+          className="absolute left-0 right-0 top-full z-50 mt-1.5 overflow-hidden rounded-lg border border-white/10 bg-sidebar-muted shadow-2xl"
         >
           {workspaces.length > 6 && (
             <div className="flex items-center gap-2 border-b border-white/10 px-3 py-2">
@@ -153,7 +155,7 @@ export default function ClientSwitcher({
                 <Building2 className="h-3 w-3" />
               </span>
               All clients
-              {!active && <Check className="ml-auto h-3.5 w-3.5 text-[#5B5CE2]" />}
+              {!active && <Check className="ml-auto h-3.5 w-3.5 text-sidebar-accent" />}
             </button>
 
             {filtered.map((w) => (
@@ -167,7 +169,7 @@ export default function ClientSwitcher({
               >
                 <span
                   className="grid h-6 w-6 shrink-0 place-items-center rounded text-[9px] font-bold"
-                  style={{ backgroundColor: w.primaryColor ?? '#5B5CE2' }}
+                  style={{ backgroundColor: w.primaryColor ?? cd.accent }}
                 >
                   {initials(w)}
                 </span>
@@ -177,7 +179,7 @@ export default function ClientSwitcher({
                     DEMO
                   </span>
                 )}
-                {w.id === activeWorkspaceId && <Check className="h-3.5 w-3.5 shrink-0 text-[#5B5CE2]" />}
+                {w.id === activeWorkspaceId && <Check className="h-3.5 w-3.5 shrink-0 text-sidebar-accent" />}
               </button>
             ))}
 
@@ -193,7 +195,7 @@ export default function ClientSwitcher({
                 setOpen(false)
                 router.push('/clients?new=1')
               }}
-              className="flex w-full items-center gap-2.5 border-t border-white/10 px-3 py-2.5 text-left text-[12.5px] font-medium text-[#9b9cff] hover:bg-white/[0.06]"
+              className="flex w-full items-center gap-2.5 border-t border-white/10 px-3 py-2.5 text-left text-[12.5px] font-medium text-sidebar-accent hover:bg-white/[0.06]"
             >
               <Plus className="h-3.5 w-3.5" />
               Add a client
