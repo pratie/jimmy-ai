@@ -14,6 +14,7 @@ import {
 } from '@/lib/tenant'
 import { assertEntitlement, EntitlementError, hasFeature } from '@/lib/entitlements'
 import { AuthorizationError } from '@/lib/permissions'
+import { linkAssistantToWorkspaceSources, linkSourceToAssistants } from '@/lib/knowledge/ingest'
 
 /**
  * Workspace and assistant settings.
@@ -149,7 +150,7 @@ export const onIntegrateDomain = async (domain: string, icon: string) => {
         },
       })
 
-      await tx.assistant.create({
+      const assistant = await tx.assistant.create({
         data: {
           clientWorkspaceId: workspace.id,
           name: `${canonicalDomain} receptionist`,
@@ -166,10 +167,22 @@ export const onIntegrateDomain = async (domain: string, icon: string) => {
         data: { onboardingStatus: 'first_client_created' },
       })
 
-      return workspace
+      return { workspace, assistantId: assistant.id }
     })
 
-    return { status: 200, message: 'Client added', id: created.id, name: created.name }
+    // A workspace created here is empty, so this normally links nothing. It is
+    // the other half of the invariant — an assistant must be able to read the
+    // sources its workspace already holds — and the day a second assistant is
+    // added to an existing client, it is what keeps that assistant from being
+    // born blind.
+    await linkAssistantToWorkspaceSources(created.workspace.id, created.assistantId)
+
+    return {
+      status: 200,
+      message: 'Client added',
+      id: created.workspace.id,
+      name: created.workspace.name,
+    }
   } catch (error) {
     if (error instanceof EntitlementError) return { status: 402, message: error.message }
     if (error instanceof AuthorizationError) return { status: 403, message: error.message }
@@ -892,7 +905,7 @@ async function faqSourceFor(clientWorkspaceId: string, userId: string) {
   })
   if (existing) return existing
 
-  return client.knowledgeSource.create({
+  const source = await client.knowledgeSource.create({
     data: {
       clientWorkspaceId,
       sourceType: 'faq',
@@ -904,6 +917,13 @@ async function faqSourceFor(clientWorkspaceId: string, userId: string) {
     },
     select: { id: true },
   })
+
+  // Without this the curated answers are invisible to retrieval — the SQL
+  // search filters chunks by the assistant's enabled sources. See
+  // lib/knowledge/ingest.
+  await linkSourceToAssistants(clientWorkspaceId, source.id)
+
+  return source
 }
 
 export const onCreateHelpDeskQuestion = async (

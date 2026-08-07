@@ -143,18 +143,16 @@ export async function POST(req: Request) {
     const ragStart = Date.now()
     let citations: SearchResult[] = []
     try {
-      citations = await searchKnowledgeBaseMultiQuery(
-        message,
-        { clientWorkspaceId: context.clientWorkspaceId, assistantId: context.assistantId },
-        5,
-        8
-      )
+      // `retrievalAssistantId`, not `assistantId` — an assistant with no source
+      // links means "no subset chosen", and scoping to it would return nothing
+      // at all. See lib/widget/resolve.
+      const scope = {
+        clientWorkspaceId: context.clientWorkspaceId,
+        assistantId: context.retrievalAssistantId,
+      }
+      citations = await searchKnowledgeBaseMultiQuery(message, scope, 5, 8)
       if (citations.length === 0) {
-        citations = await searchKnowledgeBaseWithFallback(
-          message,
-          { clientWorkspaceId: context.clientWorkspaceId, assistantId: context.assistantId },
-          5
-        )
+        citations = await searchKnowledgeBaseWithFallback(message, scope, 5)
       }
     } catch (error) {
       devError('[Bot Stream] retrieval failed:', error)

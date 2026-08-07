@@ -126,7 +126,10 @@ export const onAiChatBotAssistant = async (
     try {
       citations = await searchKnowledgeBaseWithFallback(
         message,
-        { clientWorkspaceId: context.clientWorkspaceId, assistantId: context.assistantId },
+        // Not `assistantId` — see the note on `retrievalAssistantId` in
+        // lib/widget/resolve: an unlinked assistant must fall back to
+        // workspace-wide retrieval rather than matching nothing.
+        { clientWorkspaceId: context.clientWorkspaceId, assistantId: context.retrievalAssistantId },
         5
       )
     } catch (error) {

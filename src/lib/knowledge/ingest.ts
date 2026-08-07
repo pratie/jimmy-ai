@@ -51,6 +51,100 @@ export type IngestResult = {
 
 const sha256 = (text: string) => createHash('sha256').update(text).digest('hex')
 
+/* ── URL identity ───────────────────────────────────────────────────────── */
+
+const TRACKING_PARAMS = /^(utm_|fbclid$|gclid$|msclkid$|mc_[ce]id$|ref$|source$)/i
+
+/**
+ * One stable identity per page.
+ *
+ * Documents are keyed by `canonicalUrl` and sources by `originalUrl`, so
+ * `https://x.co`, `https://www.x.co/`, and `https://X.co/?utm_source=x` used to
+ * be three different rows for the same page — the mechanism behind
+ * bulktranscripts.co having two "active" sources holding two copies of its
+ * homepage, and every retrieval seeing each passage twice.
+ *
+ * Non-http schemes (`manual://`, `file://`) are returned untouched.
+ */
+export function canonicalizeUrl(raw: string): string {
+  const trimmed = raw.trim()
+  if (!/^https?:\/\//i.test(trimmed)) return trimmed
+
+  try {
+    const url = new URL(trimmed)
+    url.protocol = 'https:'
+    url.hostname = url.hostname.toLowerCase().replace(/^www\./, '')
+    url.hash = ''
+    for (const key of [...url.searchParams.keys()]) {
+      if (TRACKING_PARAMS.test(key)) url.searchParams.delete(key)
+    }
+    url.pathname = url.pathname.replace(/\/+$/, '')
+    return url.toString().replace(/\/$/, '')
+  } catch {
+    return trimmed
+  }
+}
+
+/* ── Assistant ↔ source links ───────────────────────────────────────────── */
+
+/**
+ * Every assistant in the workspace can read this source.
+ *
+ * `match_knowledge_chunks_scoped` filters chunks by AssistantKnowledgeSource
+ * whenever it is given an assistant id, and the public chat endpoints always
+ * give it one. Nothing in the app ever wrote these rows, so every workspace
+ * created through the product retrieved exactly nothing — the assistant
+ * answered from the "no reference material" branch of the prompt on every turn,
+ * silently, for its entire life.
+ *
+ * Linking on creation is the default because that is what an operator means by
+ * adding knowledge to a client. Per-assistant subsets remain possible by
+ * disabling a link afterwards; they are just no longer the accidental default
+ * of "nobody can see anything".
+ */
+export async function linkSourceToAssistants(
+  clientWorkspaceId: string,
+  knowledgeSourceId: string
+): Promise<number> {
+  const assistants = await client.assistant.findMany({
+    where: { clientWorkspaceId, deletedAt: null },
+    select: { id: true },
+  })
+  if (assistants.length === 0) return 0
+
+  const result = await client.assistantKnowledgeSource.createMany({
+    data: assistants.map((assistant) => ({
+      assistantId: assistant.id,
+      knowledgeSourceId,
+      enabled: true,
+    })),
+    skipDuplicates: true,
+  })
+  return result.count
+}
+
+/** The reverse: a new assistant inherits the knowledge its workspace already has. */
+export async function linkAssistantToWorkspaceSources(
+  clientWorkspaceId: string,
+  assistantId: string
+): Promise<number> {
+  const sources = await client.knowledgeSource.findMany({
+    where: { clientWorkspaceId, deletedAt: null },
+    select: { id: true },
+  })
+  if (sources.length === 0) return 0
+
+  const result = await client.assistantKnowledgeSource.createMany({
+    data: sources.map((source) => ({
+      assistantId,
+      knowledgeSourceId: source.id,
+      enabled: true,
+    })),
+    skipDuplicates: true,
+  })
+  return result.count
+}
+
 /* ── Sources ────────────────────────────────────────────────────────────── */
 
 export async function createSource(input: {
@@ -68,34 +162,43 @@ export async function createSource(input: {
   // as "2 documents", the source list filled with identical entries, and each
   // attempt spent another slot from `maximum_training_sources` — so a user
   // retrying a failure could exhaust their plan by fixing nothing.
-  if (input.originalUrl) {
+  const originalUrl = input.originalUrl ? canonicalizeUrl(input.originalUrl) : null
+
+  if (originalUrl) {
     const existing = await client.knowledgeSource.findFirst({
       where: {
         clientWorkspaceId: input.clientWorkspaceId,
         sourceType: input.sourceType,
-        originalUrl: input.originalUrl,
+        // Both forms: rows written before URLs were canonicalised still carry
+        // the raw value, and they must match rather than spawn a twin.
+        originalUrl: { in: [...new Set([originalUrl, input.originalUrl!])] },
         deletedAt: null,
       },
+      orderBy: { createdAt: 'asc' },
     })
     if (existing) {
-      return client.knowledgeSource.update({
+      const source = await client.knowledgeSource.update({
         where: { id: existing.id },
         // Back to `queued`: the caller is about to re-crawl it, and leaving a
         // stale `failed` on a source now being retried is how the UI ends up
         // contradicting itself.
-        data: { syncStatus: 'queued', status: 'active', name: input.name },
+        data: { syncStatus: 'queued', status: 'active', name: input.name, originalUrl },
       })
+      // An assistant added after the source was first created would otherwise
+      // never see it.
+      await linkSourceToAssistants(input.clientWorkspaceId, source.id)
+      return source
     }
   }
 
   await assertEntitlement(input.organizationId, 'maximum_training_sources')
 
-  return client.knowledgeSource.create({
+  const source = await client.knowledgeSource.create({
     data: {
       clientWorkspaceId: input.clientWorkspaceId,
       sourceType: input.sourceType,
       name: input.name,
-      originalUrl: input.originalUrl ?? null,
+      originalUrl,
       storagePath: input.storagePath ?? null,
       mimeType: input.mimeType ?? null,
       status: 'active',
@@ -103,6 +206,13 @@ export async function createSource(input: {
       createdByUserId: input.userId ?? null,
     },
   })
+
+  // Creating a source and not linking it is indistinguishable, at retrieval
+  // time, from having no knowledge at all. Every ingestion path funnels through
+  // here, so this is the one place that has to remember.
+  await linkSourceToAssistants(input.clientWorkspaceId, source.id)
+
+  return source
 }
 
 /**
@@ -121,19 +231,23 @@ export async function upsertDocument(input: {
 }): Promise<{ documentId: string; changed: boolean }> {
   const cleaned = sanitizeKnowledgeBase(input.text)
   const hash = sha256(cleaned)
+  const canonicalUrl = canonicalizeUrl(input.canonicalUrl)
 
   const existing = await client.knowledgeDocument.findUnique({
     where: {
       knowledgeSourceId_canonicalUrl: {
         knowledgeSourceId: input.knowledgeSourceId,
-        canonicalUrl: input.canonicalUrl,
+        canonicalUrl,
       },
     },
     select: { id: true, contentHash: true },
   })
 
+  let documentId: string
+  let changed: boolean
+
   if (existing) {
-    const changed = existing.contentHash !== hash
+    changed = existing.contentHash !== hash
     await client.knowledgeDocument.update({
       where: { id: existing.id },
       data: {
@@ -145,25 +259,66 @@ export async function upsertDocument(input: {
         lastCrawledAt: new Date(),
       },
     })
-    return { documentId: existing.id, changed }
+    documentId = existing.id
+  } else {
+    const created = await client.knowledgeDocument.create({
+      data: {
+        knowledgeSourceId: input.knowledgeSourceId,
+        clientWorkspaceId: input.clientWorkspaceId,
+        canonicalUrl,
+        title: input.title ?? null,
+        extractedText: cleaned,
+        contentHash: hash,
+        status: 'active',
+        language: 'en',
+        lastCrawledAt: new Date(),
+      },
+      select: { id: true },
+    })
+    documentId = created.id
+    changed = true
   }
 
-  const created = await client.knowledgeDocument.create({
-    data: {
-      knowledgeSourceId: input.knowledgeSourceId,
-      clientWorkspaceId: input.clientWorkspaceId,
-      canonicalUrl: input.canonicalUrl,
-      title: input.title ?? null,
-      extractedText: cleaned,
-      contentHash: hash,
+  await supersedeDuplicateDocuments(input.clientWorkspaceId, canonicalUrl, documentId)
+  return { documentId, changed }
+}
+
+/**
+ * Retires other live copies of the same page in the same workspace.
+ *
+ * The uniqueness the schema enforces is (source, canonicalUrl), so two sources
+ * pointing at one website each held their own copy of every shared page and
+ * retrieval returned both — the same passage twice, crowding out everything
+ * else in a five-chunk context window. The newest copy wins; the older ones are
+ * archived and their chunks deleted, because a chunk nobody should retrieve is
+ * only a way to keep paying the index for a wrong answer.
+ */
+async function supersedeDuplicateDocuments(
+  clientWorkspaceId: string,
+  canonicalUrl: string,
+  keepDocumentId: string
+): Promise<number> {
+  const duplicates = await client.knowledgeDocument.findMany({
+    where: {
+      clientWorkspaceId,
+      canonicalUrl,
+      id: { not: keepDocumentId },
+      deletedAt: null,
       status: 'active',
-      language: 'en',
-      lastCrawledAt: new Date(),
     },
     select: { id: true },
   })
+  if (duplicates.length === 0) return 0
 
-  return { documentId: created.id, changed: true }
+  const ids = duplicates.map((d) => d.id)
+  await client.knowledgeChunk.deleteMany({ where: { knowledgeDocumentId: { in: ids } } })
+  await client.knowledgeDocument.updateMany({
+    where: { id: { in: ids } },
+    data: { status: 'archived', deletedAt: new Date() },
+  })
+
+  devLog(`[Ingest] superseded ${ids.length} duplicate document(s) for ${canonicalUrl}`)
+  return ids.length
 }
 
 /* ── Embedding ──────────────────────────────────────────────────────────── */

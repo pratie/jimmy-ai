@@ -61,6 +61,90 @@ async function primaryWebsiteUrl(clientWorkspaceId: string): Promise<string> {
   return target
 }
 
+/* ── Page selection ─────────────────────────────────────────────────────── */
+
+/**
+ * How many pages a first ingestion reads.
+ *
+ * It used to read one: the homepage. A homepage is a poster — it names the
+ * company and says very little a visitor actually asks about, so every
+ * assistant was trained on marketing copy and then met questions about pricing,
+ * hours and services it had never seen. Twelve is a deliberate compromise: deep
+ * enough to cover the pages that answer real questions, shallow enough that a
+ * crawl stays inside a request timeout and inside the free plan's monthly page
+ * allowance.
+ */
+const DEFAULT_INGEST_PAGE_LIMIT = Number(process.env.FIRECRAWL_INGEST_PAGE_LIMIT ?? 12)
+
+/**
+ * Paths worth reading, most valuable first. A receptionist is asked what things
+ * cost, what is offered, and how to get in touch — in that order.
+ */
+const PAGE_PRIORITY: RegExp[] = [
+  /^\/(pricing|plans|price|packages|rates)/i,
+  /^\/(services|solutions|products|features|what-we-do)/i,
+  /^\/(faq|faqs|help|support|questions)/i,
+  /^\/(about|about-us|our-story|team|who-we-are)/i,
+  /^\/(contact|contact-us|book|booking|appointments?|schedule|get-started)/i,
+  /^\/(hours|locations?|service-areas?|areas-we-serve)/i,
+  /^\/(how-it-works|process|why-us|testimonials|reviews|case-studies)/i,
+]
+
+const SKIPPED_PATH = /\.(pdf|jpe?g|png|gif|svg|webp|zip|mp4|mp3|css|js|xml|ico)$/i
+const SKIPPED_SECTION =
+  /^\/(wp-|cdn-cgi|_next|api|cart|checkout|account|login|signin|signup|register|privacy|terms|legal|cookie)/i
+
+/**
+ * Orders discovered URLs so the page budget is spent on the useful ones.
+ *
+ * Same host only, no assets, no legal boilerplate, and shallow paths before
+ * deep ones — a blog post buried four levels down is rarely what a visitor is
+ * asking about, and there are hundreds of them.
+ */
+function selectPagesToCrawl(homepage: string, discovered: string[], limit: number): string[] {
+  let host: string
+  try {
+    host = new URL(homepage).hostname.replace(/^www\./, '')
+  } catch {
+    return [homepage]
+  }
+
+  const seen = new Set<string>([homepage.replace(/\/+$/, '')])
+  const candidates: { url: string; rank: number; depth: number }[] = []
+
+  for (const raw of discovered) {
+    let parsed: URL
+    try {
+      parsed = new URL(raw)
+    } catch {
+      continue
+    }
+    if (parsed.hostname.replace(/^www\./, '') !== host) continue
+
+    const path = parsed.pathname.replace(/\/+$/, '') || '/'
+    if (path === '/') continue
+    if (SKIPPED_PATH.test(path) || SKIPPED_SECTION.test(path)) continue
+
+    parsed.hash = ''
+    const url = parsed.toString().replace(/\/+$/, '')
+    if (seen.has(url)) continue
+    seen.add(url)
+
+    const priority = PAGE_PRIORITY.findIndex((pattern) => pattern.test(path))
+    candidates.push({
+      url,
+      // Unmatched pages sort after every matched one, but are still eligible:
+      // a site whose pricing lives at /join should not end up with one page.
+      rank: priority === -1 ? PAGE_PRIORITY.length : priority,
+      depth: path.split('/').filter(Boolean).length,
+    })
+  }
+
+  candidates.sort((a, b) => a.rank - b.rank || a.depth - b.depth || a.url.length - b.url.length)
+
+  return [homepage, ...candidates.slice(0, Math.max(0, limit - 1)).map((c) => c.url)]
+}
+
 function toResponse(error: unknown, fallback: string) {
   // `upgradeRequired` lets the UI show an upgrade prompt instead of a generic
   // failure when the wall is the plan rather than a bug.
@@ -84,6 +168,15 @@ export const onScrapeWebsiteForDomain = async (workspaceId: string, url?: string
     // The caller may omit the URL, in which case the client's own primary
     // website is used — that is the common case from the knowledge panel.
     const target = normalizeUrl(url ?? (await primaryWebsiteUrl(scope.clientWorkspaceId)))
+
+    // The plan's remaining page allowance caps the crawl. Checked rather than
+    // asserted: a client with three pages left should get three pages, not an
+    // upgrade wall — the homepage alone was already allowed above.
+    const allowance = await checkEntitlement(scope.organizationId, 'monthly_crawl_pages', 0)
+    const remaining =
+      allowance.limit === null ? Number.POSITIVE_INFINITY : Number(allowance.remaining)
+    const pageBudget = Math.max(1, Math.min(DEFAULT_INGEST_PAGE_LIMIT, remaining))
+
     const source = await createSource({
       ...scope,
       sourceType: 'website',
@@ -91,22 +184,88 @@ export const onScrapeWebsiteForDomain = async (workspaceId: string, url?: string
       originalUrl: target,
     })
 
+    // Discovery is best-effort: a site with no sitemap, or a Firecrawl map that
+    // fails, still gets its homepage read rather than nothing.
+    let pages = [target]
+    if (pageBudget > 1) {
+      try {
+        const mapped = await mapWebsite({ url: target, limit: 200 })
+        if (mapped.success && mapped.links?.length) {
+          const links = mapped.links.map((link) => (typeof link === 'string' ? link : link.url))
+          pages = selectPagesToCrawl(target, links, pageBudget)
+        }
+      } catch (error) {
+        devError('[Knowledge] page discovery failed, falling back to homepage:', error)
+      }
+    }
+
     const job = await startCrawlJob({
       knowledgeSourceId: source.id,
       clientWorkspaceId: scope.clientWorkspaceId,
       userId: scope.userId,
-      configuration: { url: target, mode: 'single-page' },
+      configuration: { url: target, mode: 'site-crawl', pageCount: pages.length },
     })
 
-    const result = await scrapeWebsite({ url: target, onlyMainContent: true, formats: ['markdown'] })
+    const changedDocuments: string[] = []
+    let processed = 0
+    let failed = 0
 
-    if (!result.success || !result.data?.markdown) {
+    // Fetched in small parallel batches. Twelve pages read one after another is
+    // most of a minute, and this action is awaited by the first-client setup
+    // flow behind a 90-second timeout — a deeper crawl must not turn "we read
+    // your website" into "this timed out".
+    const CONCURRENCY = 4
+    for (let start = 0; start < pages.length; start += CONCURRENCY) {
+      const batch = pages.slice(start, start + CONCURRENCY)
+      const results = await Promise.all(
+        batch.map(async (pageUrl) => {
+          try {
+            const result = await scrapeWebsite({
+              url: pageUrl,
+              onlyMainContent: true,
+              formats: ['markdown'],
+            })
+            if (!result.success || !result.data?.markdown) return null
+            return { pageUrl, markdown: result.data.markdown, title: result.data.metadata?.title }
+          } catch (error) {
+            devError('[Knowledge] page failed:', pageUrl, error)
+            return null
+          }
+        })
+      )
+
+      // Written sequentially: `upsertDocument` supersedes duplicates of the same
+      // canonical URL, and concurrent writers racing over that would be a way to
+      // archive the copy that was just written.
+      for (const page of results) {
+        if (!page) {
+          failed += 1
+          continue
+        }
+        try {
+          const { documentId, changed } = await upsertDocument({
+            knowledgeSourceId: source.id,
+            clientWorkspaceId: scope.clientWorkspaceId,
+            canonicalUrl: page.pageUrl,
+            title: page.title ?? page.pageUrl,
+            text: page.markdown,
+          })
+          if (changed) changedDocuments.push(documentId)
+          processed += 1
+        } catch (error) {
+          devError('[Knowledge] page store failed:', page.pageUrl, error)
+          failed += 1
+        }
+      }
+    }
+
+    if (processed === 0) {
       await finishCrawlJob(job.id, {
-        pagesDiscovered: 1,
+        pagesDiscovered: pages.length,
         pagesProcessed: 0,
-        pagesFailed: 1,
+        pagesFailed: failed,
         errorCode: 'scrape_failed',
-        errorMessage: result.error ?? 'No readable content',
+        errorMessage: 'No readable content',
       })
       await client.knowledgeSource.update({
         where: { id: source.id },
@@ -119,36 +278,35 @@ export const onScrapeWebsiteForDomain = async (workspaceId: string, url?: string
       }
     }
 
-    const { documentId } = await upsertDocument({
-      knowledgeSourceId: source.id,
-      clientWorkspaceId: scope.clientWorkspaceId,
-      canonicalUrl: target,
-      title: result.data.metadata?.title ?? target,
-      text: result.data.markdown,
+    await finishCrawlJob(job.id, {
+      pagesDiscovered: pages.length,
+      pagesProcessed: processed,
+      pagesFailed: failed,
     })
-
-    await finishCrawlJob(job.id, { pagesDiscovered: 1, pagesProcessed: 1, pagesFailed: 0 })
     await recordUsage({
       organizationId: scope.organizationId,
       clientWorkspaceId: scope.clientWorkspaceId,
       eventType: 'crawl_page',
-      quantity: 1,
+      quantity: processed,
       unit: 'page',
       provider: 'firecrawl',
-      idempotencyKey: `crawl-${job.id}-1`,
+      idempotencyKey: `crawl-${job.id}`,
     })
 
     const indexed = await indexSource({
       knowledgeSourceId: source.id,
       clientWorkspaceId: scope.clientWorkspaceId,
       organizationId: scope.organizationId,
-      documentIds: [documentId],
+      documentIds: changedDocuments.length ? changedDocuments : undefined,
     })
 
     return {
       status: 200,
-      message: 'Website content added',
+      message:
+        processed === 1 ? 'Website content added' : `Website content added (${processed} pages)`,
       sourceId: source.id,
+      pagesProcessed: processed,
+      pagesFailed: failed,
       chunksCreated: indexed.chunksCreated,
     }
   } catch (error) {

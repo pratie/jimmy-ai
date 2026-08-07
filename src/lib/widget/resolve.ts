@@ -28,6 +28,19 @@ export type WidgetResolution =
 export type WidgetContext = {
   deploymentId: string
   assistantId: string
+  /**
+   * The assistant id to scope RETRIEVAL by — `assistantId` when this assistant
+   * has knowledge sources linked to it, and `null` when it has none.
+   *
+   * `match_knowledge_chunks_scoped` reads an assistant id as "only the sources
+   * explicitly enabled for this assistant". An assistant with zero links
+   * therefore matches zero chunks, which is how every workspace created through
+   * the app answered from an empty knowledge base while its dashboard showed a
+   * fully indexed one. Passing null degrades to workspace-wide retrieval — the
+   * correct reading of "no subset has been chosen" — so a path that forgets to
+   * write the link costs nothing.
+   */
+  retrievalAssistantId: string | null
   clientWorkspaceId: string
   organizationId: string
   channel: 'web_chat' | 'preview' | 'shareable_demo'
@@ -107,6 +120,14 @@ export async function resolveWidgetRequest(
           humanHandoffEnabled: true,
           citationsEnabled: true,
           behaviorSettings: true,
+          // One row is all the question needs answering: "does this assistant
+          // have any source subset at all?" Folded into the resolution query so
+          // the guard costs no extra round trip on the hot path.
+          knowledgeSourceLinks: {
+            where: { enabled: true, knowledgeSource: { deletedAt: null } },
+            select: { id: true },
+            take: 1,
+          },
           clientWorkspace: {
             select: {
               id: true,
@@ -216,6 +237,7 @@ export async function resolveWidgetRequest(
     context: {
       deploymentId: deployment.id,
       assistantId: assistant.id,
+      retrievalAssistantId: assistant.knowledgeSourceLinks.length > 0 ? assistant.id : null,
       clientWorkspaceId: workspace.id,
       organizationId: organization.id,
       channel: CHANNEL_BY_DEPLOYMENT[deployment.deploymentType] ?? 'web_chat',
