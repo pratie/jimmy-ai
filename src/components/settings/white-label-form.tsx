@@ -6,16 +6,19 @@ import { Input } from '../ui/input'
 import { Label } from '../ui/label'
 import { Switch } from '../ui/switch'
 import { Loader } from '../loader'
-import { toast } from 'sonner'
+import { useToast } from '../ui/use-toast'
 import { onGetWhiteLabelSettings, onUpdateWhiteLabelSettings } from '@/actions/settings'
 
 const WhiteLabelBranding = () => {
+  // The dashboard mounts exactly one toaster — the shadcn one, in the main
+  // layout. This form used to call sonner, whose provider is never rendered, so
+  // saving branding reported nothing at all.
+  const { toast } = useToast()
   const [loading, setLoading] = useState(false)
   const [fetching, setFetching] = useState(true)
   const [agencyName, setAgencyName] = useState('ChatDock')
   const [agencyLogo, setAgencyLogo] = useState('')
   const [agencyColor, setAgencyColor] = useState('#0f172a')
-  const [agencyDomain, setAgencyDomain] = useState('')
   const [hideBranding, setHideBranding] = useState(false)
 
   // Fetch current white label settings on load
@@ -27,9 +30,6 @@ const WhiteLabelBranding = () => {
           setAgencyName(res.settings.agencyName || 'ChatDock')
           setAgencyLogo(res.settings.agencyLogo || '')
           setAgencyColor(res.settings.agencyColor || '#0f172a')
-          // Custom agency domains are not implemented yet — the field stays
-          // empty rather than pretending to hold a configured value.
-          setAgencyDomain('')
           setHideBranding(res.settings.hideBranding || false)
         }
       } catch (err) {
@@ -53,13 +53,21 @@ const WhiteLabelBranding = () => {
       })
 
       if (res?.status === 200) {
-        toast.success(res.message || 'Branding updated successfully!')
+        toast({ title: 'Branding saved', description: res.message || 'Your agency branding is now in use.' })
       } else {
-        toast.error(res?.message || 'Failed to update branding settings')
+        toast({
+          variant: 'destructive',
+          title: 'Not saved',
+          description: res?.message || 'Could not update the branding settings.',
+        })
       }
     } catch (err) {
       console.error('Error saving white label settings:', err)
-      toast.error('An error occurred. Please try again.')
+      toast({
+        variant: 'destructive',
+        title: 'Not saved',
+        description: 'Something went wrong. Try again.',
+      })
     } finally {
       setLoading(false)
     }
@@ -74,7 +82,7 @@ const WhiteLabelBranding = () => {
   }
 
   return (
-    <section className="grid gap-7 rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_6px_24px_rgba(15,23,42,.035)] lg:grid-cols-[220px_minmax(0,1fr)] md:p-7">
+    <section className="grid gap-7 rounded-xl border border-border bg-card p-6 shadow-[0_6px_24px_rgba(15,23,42,.035)] lg:grid-cols-[220px_minmax(0,1fr)] md:p-7">
       <div>
         <Section
           label="Agency Branding"
@@ -149,21 +157,31 @@ const WhiteLabelBranding = () => {
             </p>
           </div>
 
-          {/* Custom domain */}
+          {/* Custom domain — not implemented. Rendered disabled rather than
+              hidden: agencies ask for this on the first call, and an empty box
+              that silently discards what they type is worse than a field that
+              says plainly it isn't ready. Nothing here is submitted. */}
           <div className="flex flex-col gap-2">
-            <Label htmlFor="agency-domain" className="text-sm font-semibold text-foreground/80">
-              White-Label Portal Domain
-            </Label>
+            <div className="flex items-center gap-2">
+              <Label htmlFor="agency-domain" className="text-sm font-semibold text-foreground/50">
+                White-Label Portal Domain
+              </Label>
+              <span className="rounded-full border border-border bg-muted px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                Coming soon
+              </span>
+            </div>
             <Input
               id="agency-domain"
               type="text"
+              disabled
+              readOnly
               placeholder="e.g. portal.myagency.com"
-              value={agencyDomain}
-              onChange={(e) => setAgencyDomain(e.target.value)}
-              className="rounded-xl bg-background border-input text-foreground placeholder:text-muted-foreground"
+              value=""
+              className="cursor-not-allowed rounded-xl border-input bg-muted text-foreground placeholder:text-muted-foreground"
             />
             <p className="text-[11px] text-muted-foreground">
-              Point a CNAME record to `chatdock.io` to white-label client dashboards entirely.
+              Serving client dashboards from your own domain isn&apos;t available yet. Your agency
+              name, logo and accent colour above already apply everywhere.
             </p>
           </div>
 

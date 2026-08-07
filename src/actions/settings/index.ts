@@ -100,6 +100,27 @@ export const onIntegrateDomain = async (domain: string, icon: string) => {
     })
     if (duplicate) return { status: 400, message: 'That client already exists' }
 
+    // A previously deleted client may still be holding this slug. The unique
+    // constraint is on (organizationId, slug) regardless of `deletedAt`, so
+    // without this the insert below fails with a raw P2002 and the operator is
+    // told nothing useful about a client they already deleted. Deletes free the
+    // slug themselves now; this heals the ones deleted before they did.
+    //
+    // Renamed one row at a time, never with a single `updateMany`: that would
+    // give every stale row the *same* new slug and trip the very constraint it
+    // is trying to clear the moment a client has been created and deleted more
+    // than once.
+    const stale = await client.clientWorkspace.findMany({
+      where: { organizationId: ctx.organizationId, slug, NOT: { deletedAt: null } },
+      select: { id: true },
+    })
+    for (const row of stale) {
+      await client.clientWorkspace.update({
+        where: { id: row.id },
+        data: { slug: `${slug}-deleted-${row.id.slice(0, 8)}` },
+      })
+    }
+
     await assertEntitlement(ctx.organizationId, 'maximum_client_workspaces')
     await assertEntitlement(ctx.organizationId, 'maximum_assistants')
 
@@ -183,7 +204,7 @@ export const onGetAllAccountDomains = async () => {
           select: {
             id: true,
             email: true,
-            conversations: { select: { id: true, handoffStatus: true } },
+            conversations: { select: { id: true } },
           },
         },
         knowledgeSources: { select: { syncStatus: true } },
@@ -207,13 +228,7 @@ export const onGetAllAccountDomains = async () => {
         customer: w.leads.map((lead) => ({
           id: lead.id,
           email: lead.email,
-          chatRoom: lead.conversations.map((c) => ({
-            id: c.id,
-            // `accepted` and `active` both mean a human owns the conversation
-            // and the assistant must stay silent — `src/lib/chat/session.ts`
-            // is the behavioural truth and this projection now matches it.
-            live: c.handoffStatus === 'accepted' || c.handoffStatus === 'active',
-          })),
+          chatRoom: lead.conversations.map((c) => ({ id: c.id })),
         })),
       })),
     }
@@ -376,7 +391,18 @@ export const onDeleteUserDomain = async (id: string) => {
     await client.$transaction(async (tx) => {
       await tx.clientWorkspace.update({
         where: { id: access.clientWorkspaceId },
-        data: { status: 'archived', archivedAt: now, deletedAt: now },
+        data: {
+          status: 'archived',
+          archivedAt: now,
+          deletedAt: now,
+          // Frees the name. `@@unique([organizationId, slug])` does not exclude
+          // soft-deleted rows, while every duplicate check filters on
+          // `deletedAt: null` — so a deleted client kept its slug reserved and
+          // re-adding the same website failed with a raw P2002 the operator
+          // could do nothing about. Deleting a client has to actually give the
+          // domain back.
+          slug: `${access.clientWorkspaceId.slice(0, 8)}-deleted-${now.getTime()}`,
+        },
       })
 
       // Revoke every way in. Without this an embed script left on the client's

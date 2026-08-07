@@ -8,8 +8,11 @@ const isPublicRoute = createRouteMatcher([
   '/portal(.*)',
   '/images(.*)',
   '/chatbot',
-  // Public preview so you can share a link
-  '/preview(.*)',
+  // `/preview/[workspaceId]` is the agency's own test workspace, not a share
+  // link — it renders a *draft* assistant for a named client. It authenticates
+  // and authorises in the page itself; leaving it in the public list only made
+  // that check unreachable for signed-out visitors. Prospect-facing sharing is
+  // `/d/[token]`, which is public below.
   // The live demo is the top-of-funnel proof; asking for a login to reach it
   // would defeat the entire point of it.
   '/demo(.*)',
