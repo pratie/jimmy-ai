@@ -1,19 +1,20 @@
 'use client'
-import { useSettings } from '@/hooks/settings/use-settings'
+
 import React, { useEffect, useState } from 'react'
-import { DomainUpdate } from './domain-update'
-import CodeSnippet from './code-snippet'
-import EditChatbotIcon from './edit-chatbot-icon'
-import { Button } from '@/components/ui/button'
-import { Loader } from '@/components/loader'
-import KnowledgeBaseViewer, { type KnowledgeSummary } from '@/components/settings/knowledge-base-viewer'
+import { ExternalLink } from 'lucide-react'
+
 import { onGetEmbeddingStatus } from '@/actions/firecrawl'
-import { ArrowRight, ExternalLink } from 'lucide-react'
-import { cn } from '@/lib/utils'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import CodeSnippet from './code-snippet'
+import { DomainUpdate } from './domain-update'
+import EditChatbotIcon from './edit-chatbot-icon'
 import HelpDesk from './help-desk'
+import KnowledgeBaseViewer, { type KnowledgeSummary } from '@/components/settings/knowledge-base-viewer'
 import TestAndCustomise from '@/components/settings/test-and-customise'
+import { Loader } from '@/components/loader'
+import { Button } from '@/components/ui/button'
+import { useSettings } from '@/hooks/settings/use-settings'
 import { getPlanLimits } from '@/lib/plans'
+import { cn } from '@/lib/utils'
 
 type Props = {
   id: string
@@ -37,33 +38,32 @@ type Props = {
   knowledgeBaseSizeMB?: number
 }
 
-type TabKey = 'knowledge' | 'behavior' | 'appearance' | 'domain'
+/**
+ * One client, two places to be.
+ *
+ * There used to be four tabs — Knowledge base, AI behaviour, Test & customise,
+ * Domain & embed — and the assistant you were configuring only appeared on one
+ * of them. Everything that shapes a reply now lives in a single workspace with
+ * the live chat pinned beside it, so a change and its effect are never a
+ * navigation apart. Behaviour, embed and the domain field were sections, not
+ * destinations, and they are sections now.
+ *
+ * Knowledge stays its own view. Managing sources is a different job from tuning
+ * an assistant, it needs the full width, and it is the one place where the chat
+ * beside it would have nothing to say.
+ */
 
-const TAB_KEYS: TabKey[] = ['knowledge', 'behavior', 'appearance', 'domain']
+type ViewKey = 'assistant' | 'knowledge'
 
-/** One card. Every panel on this screen is made of these and nothing else. */
-const Section = ({
-  title,
-  description,
-  action,
-  children,
-}: {
-  title: string
-  description?: string
-  action?: React.ReactNode
-  children: React.ReactNode
-}) => (
-  <section className="rounded-xl border border-border bg-card p-5">
-    <div className="flex flex-wrap items-start justify-between gap-3">
-      <div className="min-w-0">
-        <h2 className="text-sm font-semibold tracking-tight text-foreground">{title}</h2>
-        {description && <p className="mt-1 text-[12.5px] leading-5 text-muted-foreground">{description}</p>}
-      </div>
-      {action}
-    </div>
-    <div className="mt-4">{children}</div>
-  </section>
-)
+/** The old four tabs are still linked from elsewhere and sit in people's
+ *  history, so every one of them still lands somewhere sensible. */
+const VIEW_ALIASES: Record<string, ViewKey> = {
+  assistant: 'assistant',
+  behavior: 'assistant',
+  appearance: 'assistant',
+  domain: 'assistant',
+  knowledge: 'knowledge',
+}
 
 const SettingsForm = ({
   id,
@@ -80,35 +80,39 @@ const SettingsForm = ({
 
   const [embedStatus, setEmbedStatus] = useState<'not_started' | 'processing' | 'completed' | 'failed'>('not_started')
   const [hasEmbeddings, setHasEmbeddings] = useState(false)
-  const [activeTab, setActiveTab] = useState<TabKey>('knowledge')
+  const [view, setView] = useState<ViewKey>('assistant')
+  const [deepLinkSection, setDeepLinkSection] = useState<
+    'appearance' | 'embed' | undefined
+  >(undefined)
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const params = new URLSearchParams(window.location.search)
-      const tabParam = params.get('tab') as TabKey
-      if (tabParam && TAB_KEYS.includes(tabParam)) {
-        setActiveTab(tabParam)
-      }
-    }
+    if (typeof window === 'undefined') return
+    const param = new URLSearchParams(window.location.search).get('tab')
+    if (param && VIEW_ALIASES[param]) setView(VIEW_ALIASES[param])
+    // Old tab links promised a specific place, so open that section rather
+    // than landing on the workspace default.
+    if (param === 'domain') setDeepLinkSection('embed')
+    if (param === 'appearance') setDeepLinkSection('appearance')
   }, [])
 
   /**
-   * Keeps the open tab in the URL.
+   * Keeps the open view in the URL.
    *
-   * `activeTab` is component state defaulting to `'knowledge'`, so any remount
-   * — a `router.refresh()` after a save, a hot reload, a back/forward — used to
-   * silently return the user to the first tab. Writing it to the URL means the
-   * mount effect above restores where they actually were, and the tab becomes
-   * linkable. `replaceState` rather than a router push: this is not a
+   * `view` is component state, so any remount — a `router.refresh()` after a
+   * save, a hot reload, a back/forward — used to silently return the user to the
+   * first tab. Writing it to the URL means the mount effect above restores where
+   * they actually were. `replaceState` rather than a router push: this is not a
    * navigation and should not stack history entries.
    */
-  const selectTab = React.useCallback((value: TabKey) => {
-    setActiveTab(value)
+  const selectView = React.useCallback((next: ViewKey) => {
+    setView(next)
     if (typeof window === 'undefined') return
     const url = new URL(window.location.href)
-    url.searchParams.set('tab', value)
+    url.searchParams.set('tab', next)
     window.history.replaceState(window.history.state, '', url)
   }, [])
+
+  const showKnowledge = React.useCallback(() => selectView('knowledge'), [selectView])
 
   useEffect(() => {
     let mounted = true
@@ -128,100 +132,131 @@ const SettingsForm = ({
   }, [id])
 
   // Indexed chunks, not the dead `chatBot.knowledgeBase` blob: that field is
-  // permanently null under the current schema, so this step could never be
-  // ticked no matter how much content the client actually had.
+  // permanently null under the current schema, so this could never be ticked no
+  // matter how much content the client actually had.
   const kbDone = knowledge.chunks > 0
-  const trainDone = hasEmbeddings || embedStatus === 'completed'
-  const behaviorDone = !!chatBot?.mode && !!chatBot?.brandTone && !!chatBot?.language
+  const trained = hasEmbeddings || embedStatus === 'completed'
 
-  /**
-   * The tab strip is the only navigation on this screen.
-   *
-   * There used to be a "launch readiness 2/3" card above it with its own three
-   * step buttons, which meant two navigations to four places and a percentage
-   * bar restating what the tabs could say themselves. Readiness now rides
-   * inside the nav as a dot per destination: solid when that piece is done,
-   * hollow when it still needs the user. `done: null` is a destination with
-   * nothing to complete — Test & customise is a place you go, not a box you
-   * tick — and it gets no dot rather than a permanently empty one.
-   */
-  const tabs: Array<{ key: TabKey; label: string; done: boolean | null; todo: string }> = [
-    { key: 'knowledge', label: 'Knowledge base', done: kbDone, todo: 'No content indexed yet' },
-    { key: 'behavior', label: 'AI behaviour', done: behaviorDone, todo: 'Personality not set yet' },
-    { key: 'appearance', label: 'Test & customise', done: null, todo: '' },
-    { key: 'domain', label: 'Domain & embed', done: trainDone, todo: 'Not trained and installed yet' },
+  const views: { key: ViewKey; label: string; needsAttention: boolean }[] = [
+    { key: 'assistant', label: 'Assistant', needsAttention: false },
+    { key: 'knowledge', label: 'Knowledge', needsAttention: !kbDone || !trained },
   ]
 
   return (
     /**
      * A div, not a form — deliberately.
      *
-     * This used to wrap everything, including the tab panels. The Test &
-     * customise panel contains a real chat whose composer is its own `<form>`,
-     * and a submit from it bubbled up and fired `onUpdateSettings`, which ends
-     * in `reset()` + `router.refresh()`. `activeTab` is component state
-     * defaulting to `'knowledge'`, so the remount that followed threw the user
-     * out of the panel and back to the Knowledge Base tab — mid-conversation,
-     * after a couple of messages.
-     *
-     * Guarding it with `stopPropagation` treated the symptom and still left a
-     * nested form, which is invalid HTML the moment either panel is
-     * server-rendered. Each card that actually has fields to save now owns its
-     * own form instead, so nothing that isn't a settings field can submit one.
+     * This used to wrap everything. The workspace contains a real chat whose
+     * composer is its own `<form>`, and a submit from it bubbled up and fired
+     * `onUpdateSettings`, which ends in `reset()` + `router.refresh()` — throwing
+     * the user out of the panel mid-conversation. Each card that actually has
+     * fields to save owns its own form instead.
      */
-    <div className="space-y-5 pb-10">
-      <div className="flex flex-wrap items-end justify-between gap-3">
+    <div className="flex flex-col gap-5 pb-8">
+      <header className="flex flex-wrap items-end justify-between gap-x-4 gap-y-3">
         <div className="min-w-0">
           <h1 className="truncate text-xl font-semibold tracking-tight text-foreground">{name}</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Configuration — what the assistant knows, how it speaks, and where it lives.
+          <p className="mt-1 text-[13px] text-muted-foreground">
+            Tune the assistant on the left, talk to it on the right.
           </p>
         </div>
-        <a
-          href={`/preview/${id}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-border bg-card px-4 text-[13px] font-bold text-foreground transition-colors hover:bg-muted"
-        >
-          Open test workspace
-          <ExternalLink className="h-3.5 w-3.5" />
-        </a>
-      </div>
 
-      <Tabs value={activeTab} onValueChange={(value) => selectTab(value as TabKey)} className="space-y-5">
-        {/* Two columns on a phone, one row from `sm` up. A scrolling strip hid
-            the last destination behind an edge nobody knew to swipe. */}
-        <TabsList className="grid h-auto w-full grid-cols-2 gap-1 rounded-xl border border-border bg-card p-1 sm:flex sm:w-auto sm:justify-start">
-          {tabs.map((tab) => (
-            <TabsTrigger
-              key={tab.key}
-              value={tab.key}
-              title={tab.done === false ? tab.todo : undefined}
-              className={cn(
-                'flex items-center justify-center gap-2 rounded-xl px-3.5 py-2 text-[13px] font-bold text-muted-foreground transition-colors',
-                'hover:text-foreground data-[state=active]:bg-muted data-[state=active]:text-foreground data-[state=active]:shadow-none'
-              )}
-            >
-              {tab.done !== null && (
-                <span
-                  aria-hidden
-                  className={cn(
-                    'h-1.5 w-1.5 shrink-0 rounded-full',
-                    tab.done ? 'bg-emerald-500' : 'bg-amber-400'
-                  )}
-                />
-              )}
-              <span className="truncate">{tab.label}</span>
-              {tab.done === false && <span className="sr-only">— {tab.todo}</span>}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-
-        <TabsContent value="knowledge" className="mt-0">
-          <Section
-            title="Knowledge base"
-            description="Everything the assistant is allowed to answer from. Nothing else gets said."
+        <div className="flex shrink-0 items-center gap-2">
+          <div
+            role="tablist"
+            aria-label="Client workspace"
+            className="flex gap-1 rounded-xl border border-border bg-muted/50 p-1"
           >
+            {views.map((entry) => {
+              const active = view === entry.key
+              return (
+                <button
+                  key={entry.key}
+                  type="button"
+                  role="tab"
+                  aria-selected={active}
+                  onClick={() => selectView(entry.key)}
+                  className={cn(
+                    'inline-flex h-8 items-center gap-1.5 rounded-lg px-3 text-[12.5px] font-semibold transition-[background-color,color,box-shadow] duration-150 motion-reduce:transition-none',
+                    active
+                      ? 'bg-card text-foreground shadow-[0_1px_2px_rgba(15,23,42,0.08)]'
+                      : 'text-muted-foreground hover:text-foreground'
+                  )}
+                >
+                  {entry.label}
+                  {entry.needsAttention && (
+                    <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-amber-400" />
+                  )}
+                </button>
+              )
+            })}
+          </div>
+
+          <a
+            href={`/preview/${id}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-border bg-card px-3 text-[12.5px] font-semibold text-foreground transition-colors duration-150 hover:bg-muted"
+          >
+            Full-screen test
+            <ExternalLink className="h-3.5 w-3.5" />
+          </a>
+        </div>
+      </header>
+
+      {view === 'assistant' ? (
+        <TestAndCustomise
+          workspaceId={id}
+          assistantName={name}
+          currentTheme={chatBot?.theme as any}
+          currentWelcomeMessage={chatBot?.welcomeMessage ?? null}
+          currentMode={chatBot?.mode ?? null}
+          currentBrandTone={chatBot?.brandTone ?? null}
+          currentLanguage={chatBot?.language ?? null}
+          knowledgeChunks={knowledge.chunks}
+          advancedHref={`/settings/${name}/advanced`}
+          onManageKnowledge={showKnowledge}
+          initialSection={deepLinkSection}
+          helpDeskSlot={<HelpDesk id={id} />}
+          embedSlot={<CodeSnippet id={id} />}
+          identitySlot={
+            /* Name and avatar save through the settings form the page already
+               owns, so they carry their own submit rather than joining the
+               workspace's draft bar. */
+            <form onSubmit={onUpdateSettings} className="flex flex-col gap-4 border-t border-border pt-4">
+              <DomainUpdate name={name} register={register} errors={errors} />
+              <EditChatbotIcon chatBot={chatBot} register={register} errors={errors} />
+              <div className="flex items-center justify-between gap-3">
+                {/* Deleting lives on the client page, one click from anywhere. The
+                    link keeps this a dead end rather than a second, differently
+                    guarded way to do the same destructive thing. */}
+                <a
+                  href={`/clients/${id}`}
+                  className="text-[11.5px] font-medium text-muted-foreground/70 underline underline-offset-2 transition-colors hover:text-rose-600"
+                >
+                  Delete this client
+                </a>
+                <Button
+                  type="submit"
+                  className="h-8 rounded-lg bg-primary px-3.5 text-[12.5px] font-semibold text-primary-foreground hover:bg-primary/90"
+                >
+                  <Loader loading={loading}>Save identity</Loader>
+                </Button>
+              </div>
+            </form>
+          }
+        />
+      ) : (
+        <section className="rounded-xl border border-border bg-card p-5">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div className="min-w-0">
+              <h2 className="text-sm font-semibold tracking-tight text-foreground">Knowledge base</h2>
+              <p className="mt-1 text-[12.5px] leading-5 text-muted-foreground">
+                Everything the assistant is allowed to answer from. Nothing else gets said.
+              </p>
+            </div>
+          </div>
+          <div className="mt-4">
             <KnowledgeBaseViewer
               domainId={id}
               domainName={name}
@@ -231,126 +266,9 @@ const SettingsForm = ({
               kbSizeMB={knowledgeBaseSizeMB || 0}
               kbSizeLimit={planLimits.knowledgeBaseMB}
             />
-          </Section>
-        </TabsContent>
-
-        <TabsContent value="behavior" className="mt-0 space-y-3">
-          <Section
-            title="AI behaviour"
-            description="How the agent handles a visitor once it has something to say."
-            action={
-              <a
-                href={`/settings/${name}/advanced`}
-                className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-border bg-card px-3 text-[13px] font-bold text-foreground transition-colors hover:bg-muted"
-              >
-                Advanced settings
-                <ArrowRight className="h-3.5 w-3.5" />
-              </a>
-            }
-          >
-            {/* Mode and brand voice used to live here in their own widgets, and
-                neither ever saved: both called their action with the arguments
-                reversed — `onUpdateBotMode(mode, domainId)` against a signature
-                of `(workspaceId, mode)` — so the mode string arrived as the
-                workspace id, resolved to nothing, and every attempt returned
-                400. They now live in Test & customise, called correctly and
-                next to a chat that shows what they do. */}
-            <p className="text-[13px] leading-6 text-muted-foreground">
-              How the assistant speaks and what it is trying to achieve are set in{' '}
-              <button
-                type="button"
-                onClick={() => selectTab('appearance')}
-                className="font-bold text-primary underline underline-offset-2"
-              >
-                Test &amp; customise
-              </button>
-              , where you can hear the difference straight away. This tab holds the deeper
-              controls: qualifying questions and curated answers.
-            </p>
-          </Section>
-
-          <Section
-            title="Help desk"
-            description="Questions you want answered a particular way, every time."
-          >
-            <HelpDesk id={id} />
-          </Section>
-        </TabsContent>
-
-        <TabsContent value="appearance" className="mt-0 space-y-3">
-          <Section
-            title="Test & customise"
-            description="Talk to the assistant and change how it looks, side by side."
-          >
-            <TestAndCustomise
-              workspaceId={id}
-              assistantName={name}
-              currentTheme={chatBot?.theme as any}
-              currentWelcomeMessage={chatBot?.welcomeMessage ?? null}
-              currentMode={chatBot?.mode ?? null}
-              currentBrandTone={chatBot?.brandTone ?? null}
-              currentLanguage={chatBot?.language ?? null}
-              knowledgeChunks={knowledge.chunks}
-            />
-          </Section>
-
-          {/* The icon uploads through the settings form rather than the panel,
-              so it carries its own form and its own Save. One button per thing
-              it saves — the previous single Save at the foot of the page gave
-              no clue which of four tabs it was acting on. */}
-          <Section
-            title="Chat icon"
-            description="The avatar visitors see on the bubble and beside every reply."
-          >
-            <form onSubmit={onUpdateSettings}>
-              <EditChatbotIcon chatBot={chatBot} register={register} errors={errors} />
-              <div className="mt-4 flex justify-end border-t border-border pt-4">
-                <Button
-                  type="submit"
-                  className="h-9 rounded-lg bg-primary px-4 text-[13px] font-bold text-primary-foreground hover:bg-primary/90"
-                >
-                  <Loader loading={loading}>Save icon</Loader>
-                </Button>
-              </div>
-            </form>
-          </Section>
-        </TabsContent>
-
-        <TabsContent value="domain" className="mt-0 space-y-3">
-          <Section
-            title="Domain"
-            description="The site this assistant belongs to."
-          >
-            <form onSubmit={onUpdateSettings}>
-              <DomainUpdate name={name} register={register} errors={errors} />
-              <div className="mt-4 flex items-center justify-between gap-3 border-t border-border pt-4">
-                {/* Deleting lives on the client page now, one click from anywhere.
-                    The link keeps this a dead end rather than a second, differently
-                    guarded way to do the same destructive thing. */}
-                <a
-                  href={`/clients/${id}`}
-                  className="text-[12.5px] font-semibold text-muted-foreground/70 underline underline-offset-2 hover:text-rose-600"
-                >
-                  Delete this client
-                </a>
-                <Button
-                  type="submit"
-                  className="h-9 rounded-lg bg-primary px-4 text-[13px] font-bold text-primary-foreground hover:bg-primary/90"
-                >
-                  <Loader loading={loading}>Save</Loader>
-                </Button>
-              </div>
-            </form>
-          </Section>
-
-          <Section
-            title="Embed & launch"
-            description="Paste this once into the site’s HTML. It stays current on its own."
-          >
-            <CodeSnippet id={id} />
-          </Section>
-        </TabsContent>
-      </Tabs>
+          </div>
+        </section>
+      )}
     </div>
   )
 }

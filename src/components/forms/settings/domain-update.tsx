@@ -9,9 +9,11 @@ type DomainUpdateProps = {
   errors: FieldErrors<FieldValues>
 }
 
+/** Sits inside the workspace's Identity section, so it takes the width it is
+ *  given rather than the 400px it used to insist on. */
 export const DomainUpdate = ({ name, register, errors }: DomainUpdateProps) => {
   return (
-    <div className="flex gap-2 pt-5 items-end w-[400px]">
+    <div className="w-full max-w-sm text-[12px] font-semibold text-foreground">
       <FormGenerator
         label="Domain name"
         register={register}

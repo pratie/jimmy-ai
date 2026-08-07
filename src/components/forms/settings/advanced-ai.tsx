@@ -12,6 +12,7 @@ import { DEFAULT_MODE_BLOCKS } from '@/lib/promptBuilder'
 import { useRouter } from 'next/navigation'
 import { AVAILABLE_MODELS } from '@/lib/ai-models'
 import { OpenAIIcon, AnthropicIcon, GoogleIcon } from '@/components/icons/provider-icons'
+import { ArrowLeft } from 'lucide-react'
 
 type Props = {
   domainId: string
@@ -83,29 +84,30 @@ const AdvancedAISettings = ({
   }
 
   return (
-    <div className="flex flex-col gap-5 text-foreground">
-      {/* Same header shape as the settings screen: title, one line of context,
-          and a single action on the right. */}
+    <div className="flex flex-col gap-4 text-foreground">
+      {/* Same header shape as the workspace: title, one line of context, and a
+          single action on the right. */}
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div className="min-w-0">
-          <h1 className="truncate text-xl font-semibold tracking-tight text-foreground">Advanced AI</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Model selection and mode-specific instruction overrides.
+          <h1 className="truncate text-xl font-semibold tracking-tight text-foreground">Advanced</h1>
+          <p className="mt-1 text-[13px] text-muted-foreground">
+            Model, response variation and the instruction block behind each mode.
           </p>
         </div>
         <a
           href={`/settings/${domainName}`}
-          className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-border bg-card px-4 text-[13px] font-bold text-foreground transition-colors hover:bg-muted"
+          className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-border bg-card px-3 text-[12.5px] font-semibold text-foreground transition-colors duration-150 hover:bg-muted"
         >
-          Back to agent
+          <ArrowLeft className="h-3.5 w-3.5" />
+          Back to the assistant
         </a>
       </div>
 
       {/* Model Provider Config */}
-      <Card className="rounded-xl border-border bg-card shadow-[0_6px_24px_rgba(15,23,42,.035)]">
+      <Card className="rounded-xl border-border bg-card shadow-[0_1px_2px_rgba(15,23,42,0.05)]">
         <CardHeader className="border-b border-border pb-4">
-          <CardTitle className="text-base font-semibold text-foreground">Model and response range</CardTitle>
-          <CardDescription className="text-sm text-muted-foreground">Choose the model and balance consistency with variation.</CardDescription>
+          <CardTitle className="text-sm font-semibold tracking-tight text-foreground">Model and response range</CardTitle>
+          <CardDescription className="text-[12.5px] leading-5 text-muted-foreground">Choose the model and balance consistency with variation.</CardDescription>
         </CardHeader>
         <CardContent className="pt-6">
           <Loader loading={savingModel}>
@@ -179,24 +181,37 @@ const AdvancedAISettings = ({
                 </div>
               </div>
             </div>
-            <Button className="mt-6 rounded-xl bg-foreground text-sm font-semibold text-background hover:bg-foreground/90" onClick={onSaveModel} disabled={savingModel}>Save model settings</Button>
+            <Button className="mt-6 h-9 rounded-lg bg-primary px-4 text-[12.5px] font-semibold text-primary-foreground hover:bg-primary/90" onClick={onSaveModel} disabled={savingModel}>Save model settings</Button>
           </Loader>
         </CardContent>
       </Card>
 
       {/* Per-mode prompt overrides */}
-      <Card className="rounded-xl border-border bg-card shadow-[0_6px_24px_rgba(15,23,42,.035)]">
+      <Card className="rounded-xl border-border bg-card shadow-[0_1px_2px_rgba(15,23,42,0.05)]">
         <CardHeader className="border-b border-border pb-4">
-          <CardTitle className="text-base font-semibold text-foreground">Mode instructions</CardTitle>
-          <CardDescription className="text-sm text-muted-foreground">Override the instruction block used for each agent mode.</CardDescription>
+          <CardTitle className="text-sm font-semibold tracking-tight text-foreground">Mode instructions</CardTitle>
+          <CardDescription className="text-[12.5px] leading-5 text-muted-foreground">Override the instruction block used for each agent mode.</CardDescription>
         </CardHeader>
         <CardContent className="pt-6">
           <Loader loading={savingPrompts}>
             <div>
-              <div className="mb-4 flex flex-wrap gap-2">{promptOptions.map((option) => <button key={option.key} type="button" onClick={() => setActivePrompt(option.key)} className={`rounded-lg px-3 py-2 text-xs font-semibold transition ${activePrompt === option.key ? 'bg-foreground text-background' : 'border border-border bg-card text-muted-foreground hover:bg-muted'}`}>{option.label}</button>)}</div>
+              {/* Same segmented shape the workspace uses for mode, so the two
+                  screens read as one product. */}
+              <div className="mb-4 flex w-full max-w-md gap-1 rounded-xl border border-border bg-muted/50 p-1">
+                {promptOptions.map((option) => (
+                  <button
+                    key={option.key}
+                    type="button"
+                    onClick={() => setActivePrompt(option.key)}
+                    className={`flex-1 rounded-lg px-2 py-1.5 text-[12.5px] font-semibold transition-[background-color,color,box-shadow,transform] duration-150 active:scale-[0.98] motion-reduce:transition-none motion-reduce:active:scale-100 ${activePrompt === option.key ? 'bg-card text-foreground shadow-[0_1px_2px_rgba(15,23,42,0.08)]' : 'text-muted-foreground hover:text-foreground'}`}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
               <Label className="text-xs font-semibold text-foreground">{selectedPrompt.label} instructions</Label>
-              <Textarea value={selectedPrompt.value} onChange={(event) => selectedPrompt.update(event.target.value)} rows={12} className="mt-2 rounded-xl border-border bg-card font-mono text-xs leading-6 text-foreground focus:border-ring focus:ring-ring/20" />
-              <div className="mt-4 flex items-center justify-between gap-4"><p className="text-xs text-muted-foreground/70">Changes affect future conversations using this mode.</p><Button onClick={onSavePrompts} disabled={savingPrompts} className="shrink-0 rounded-xl bg-foreground text-sm font-semibold text-background hover:bg-foreground/90">Save instructions</Button></div>
+              <Textarea value={selectedPrompt.value} onChange={(event) => selectedPrompt.update(event.target.value)} rows={12} className="mt-2 rounded-lg border-border bg-card font-mono text-xs leading-6 text-foreground focus:border-ring focus:ring-ring/20" />
+              <div className="mt-4 flex flex-wrap items-center justify-between gap-3"><p className="text-[11.5px] text-muted-foreground/70">Changes affect future conversations using this mode.</p><Button onClick={onSavePrompts} disabled={savingPrompts} className="h-9 shrink-0 rounded-lg bg-primary px-4 text-[12.5px] font-semibold text-primary-foreground hover:bg-primary/90">Save instructions</Button></div>
             </div>
           </Loader>
         </CardContent>

@@ -26,8 +26,12 @@ const DomainSettingsPage = async (
   return (
     <>
       <InfoBar />
+      {/* The workspace's test chat is `sticky` inside this scroller, so its
+          height is measured against `100vh` minus the info bar and this
+          padding. Changing either means revisiting `lg:h-[calc(100vh-100px)]`
+          in `test-and-customise`. */}
       <div className="w-full flex-1 h-0 overflow-y-auto overflow-x-hidden">
-        <div className="mx-auto max-w-6xl px-5 py-7 md:px-8">
+        <div className="mx-auto max-w-[1280px] px-5 py-7 md:px-8">
           <SettingsForm
             plan={domain.subscription?.plan!}
             chatBot={activeDomain.chatBot as never}

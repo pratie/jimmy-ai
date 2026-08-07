@@ -137,10 +137,10 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
               <h3 className="text-sm font-semibold leading-tight">
                 {domainName || 'Assistant'}
               </h3>
-              <p className="mt-1 flex items-center gap-1.5 text-[10px] opacity-60">
-                <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" aria-hidden="true" />
-                AI assistant · Online
-              </p>
+              {/* No status dot. Nothing here knows whether anyone is around,
+                  and a green "Online" next to an AI is a claim the product
+                  cannot back — including in the agency's own test panel. */}
+              <p className="mt-1 text-[10px] opacity-60">AI assistant</p>
             </div>
           </div>
           <div className="flex items-center">

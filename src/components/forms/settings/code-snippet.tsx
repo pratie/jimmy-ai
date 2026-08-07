@@ -1,5 +1,4 @@
 'use client'
-import Section from '@/components/section-label'
 import { useToast } from '@/components/ui/use-toast'
 import { Copy, Loader2, RefreshCw } from 'lucide-react'
 import React from 'react'
@@ -85,19 +84,17 @@ const CodeSnippet = ({ id }: Props) => {
     ? `<script defer src="${appUrl}/embed.min.js" data-key="${publicKey}" data-app-origin="${appUrl}" data-margin="${margin}" data-size="${size}"></script>`
     : 'Loading your embed key…'
 
-  return (
-    <div className="mt-10 flex flex-col gap-5 items-start">
-      <Section
-        label="Code snippet"
-        message="Paste this in <head> (defer) or before </body> on your site."
-      />
+  const SELECT =
+    'rounded-md border border-border bg-card px-2 py-1 text-[12px] font-medium text-foreground outline-none transition-colors duration-150 focus:border-ring'
 
+  return (
+    <div className="flex w-full min-w-0 flex-col gap-3">
       {publishState && (
-        <div className="flex w-full flex-wrap items-center justify-between gap-3 rounded-xl border border-border px-4 py-3">
-          <p className="text-sm text-muted-foreground">
+        <div className="flex w-full flex-wrap items-center justify-between gap-3 rounded-lg border border-border px-3 py-2.5">
+          <p className="min-w-0 flex-1 text-[11.5px] leading-5 text-muted-foreground">
             {publishState.assistantStatus === 'published'
-              ? 'This assistant is live. The snippet below is answering visitors.'
-              : 'This assistant is not live yet — the snippet below will be installed but will not answer.'}
+              ? 'Live. The snippet below is answering visitors.'
+              : 'Not live yet — the snippet installs, but the assistant will not answer.'}
           </p>
           <PublishToggle
             workspaceId={id}
@@ -110,53 +107,60 @@ const CodeSnippet = ({ id }: Props) => {
           />
         </div>
       )}
-      <div className="w-full flex items-center gap-3">
-        <label className="text-sm">Margin</label>
-        <select
-          className="rounded-md border border-border bg-card px-2 py-1 text-sm text-foreground"
-          value={margin}
-          onChange={(e)=>setMargin(parseInt(e.target.value))}
+
+      <div className="relative w-full min-w-0 overflow-hidden rounded-lg border border-border bg-muted">
+        <button
+          type="button"
+          aria-label="Copy the snippet"
+          className="absolute right-2 top-2 z-10 grid h-7 w-7 place-items-center rounded-md bg-card/90 text-muted-foreground shadow-[0_1px_2px_rgba(15,23,42,0.08)] transition-[color,transform] duration-150 hover:text-foreground active:scale-[0.94] disabled:opacity-50 motion-reduce:active:scale-100"
+          disabled={!publicKey}
+          onClick={() => {
+            if (!publicKey) return
+            navigator.clipboard.writeText(snippet)
+            toast({
+              title: 'Copied',
+              description: 'Paste it into the site’s HTML.',
+            })
+          }}
         >
-          <option value={24}>24 px</option>
-          <option value={32}>32 px</option>
-          <option value={48}>48 px</option>
-        </select>
-        <label className="text-sm">Bubble</label>
-        <select
-          className="rounded-md border border-border bg-card px-2 py-1 text-sm text-foreground"
-          value={size}
-          onChange={(e)=>setSize(e.target.value as 'sm'|'md')}
-        >
-          <option value="sm">Small</option>
-          <option value="md">Medium</option>
-        </select>
+          <Copy className="h-3.5 w-3.5" />
+        </button>
+        <pre className="overflow-x-auto px-3 py-3 pr-12 text-[11.5px] leading-5">
+          <code className="text-foreground">{snippet}</code>
+        </pre>
+      </div>
+      <p className="text-[11px] leading-4 text-muted-foreground/70">
+        Goes in <code className="font-mono">&lt;head&gt;</code> or just before{' '}
+        <code className="font-mono">&lt;/body&gt;</code>. It stays current on its own.
+      </p>
+
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-2 border-t border-border pt-3">
+        <label className="flex items-center gap-1.5 text-[12px] text-muted-foreground">
+          Margin
+          <select className={SELECT} value={margin} onChange={(e) => setMargin(parseInt(e.target.value))}>
+            <option value={24}>24 px</option>
+            <option value={32}>32 px</option>
+            <option value={48}>48 px</option>
+          </select>
+        </label>
+        <label className="flex items-center gap-1.5 text-[12px] text-muted-foreground">
+          Bubble
+          <select className={SELECT} value={size} onChange={(e) => setSize(e.target.value as 'sm' | 'md')}>
+            <option value="sm">Small</option>
+            <option value="md">Medium</option>
+          </select>
+        </label>
 
         <button
           type="button"
           onClick={rotate}
           disabled={loadingKey || !publicKey}
-          className="ml-auto inline-flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1 text-xs font-medium text-foreground transition-colors hover:bg-muted disabled:opacity-50"
+          className="ml-auto inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-[11.5px] font-semibold text-muted-foreground transition-colors duration-150 hover:bg-muted hover:text-foreground disabled:opacity-50"
           title="Issues a new key and invalidates this one. The snippet on the client's website must be replaced."
         >
           {loadingKey ? <Loader2 className="h-3 w-3 animate-spin" /> : <RefreshCw className="h-3 w-3" />}
           Rotate key
         </button>
-      </div>
-      <div className="relative mt-3 w-full overflow-x-auto rounded-xl border border-border bg-muted px-6 py-4">
-        <Copy
-          className="absolute right-5 top-5 cursor-pointer text-muted-foreground transition-colors hover:text-foreground"
-          onClick={() => {
-            if (!publicKey) return
-            navigator.clipboard.writeText(snippet)
-            toast({
-              title: 'Copied to clipboard',
-              description: 'You can now paste the code inside your website',
-            })
-          }}
-        />
-        <pre className="whitespace-pre text-sm min-w-full">
-          <code className="text-foreground">{snippet}</code>
-        </pre>
       </div>
     </div>
   )
