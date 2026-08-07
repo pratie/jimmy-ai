@@ -2,7 +2,6 @@ import { ChatBotMessageProps } from '@/schemas/conversation.schema'
 import React, { forwardRef, useState } from 'react'
 import { UseFormRegister, UseFormWatch } from 'react-hook-form'
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'
-import RealTimeMode from './real-time'
 import { getKieImageUrl } from '@/lib/kie-api'
 import { cn } from '@/lib/utils'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs'
@@ -33,27 +32,12 @@ type Props = {
   showBranding?: boolean
   agencyName?: string
   onSuggestion?: (suggestion: string) => void
-  realtimeMode:
-  | {
-    chatroom: string
-    mode: boolean
-  }
-  | undefined
   helpdesk: {
     id: string
     question: string
     answer: string
     domainId: string | null
   }[]
-  setChat: React.Dispatch<
-    React.SetStateAction<
-      {
-        role: 'user' | 'assistant'
-        content: string
-        link?: string | undefined
-      }[]
-    >
-  >
 }
 
 export const BotWindow = forwardRef<HTMLDivElement, Props>(
@@ -67,8 +51,6 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
       onResponding,
       domainName,
       helpdesk,
-      realtimeMode,
-      setChat,
       textColor,
       themeConfig,
       theme,
@@ -159,12 +141,6 @@ export const BotWindow = forwardRef<HTMLDivElement, Props>(
                 <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" aria-hidden="true" />
                 AI assistant · Online
               </p>
-              {realtimeMode?.mode && (
-                <RealTimeMode
-                  setChats={setChat}
-                  chatRoomId={realtimeMode.chatroom}
-                />
-              )}
             </div>
           </div>
           <div className="flex items-center">

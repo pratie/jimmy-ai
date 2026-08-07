@@ -1,54 +1,37 @@
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+
 import {
   onGetChatMessages,
   onGetDomainChatRooms,
-  onOwnerSendMessage,
-  onRealTimeChat,
-  onViewUnReadMessages,
+  type InboxConversation,
 } from '@/actions/conversation'
 import { useChatContext } from '@/context/user-chat-context'
-import { getMonthName } from '@/lib/utils'
-import { pusherClient } from '@/lib/pusher-client'
-import {
-  ChatBotMessageSchema,
-  ConversationSearchSchema,
-} from '@/schemas/conversation.schema'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { useEffect, useRef, useState, useCallback } from 'react'
-import { useForm } from 'react-hook-form'
+import { ConversationSearchSchema } from '@/schemas/conversation.schema'
 
+/**
+ * The conversation inbox is read-only: the assistant handles every reply, so
+ * there is nothing here that sends. The hook only fetches a workspace's
+ * conversations and, on selection, that conversation's transcript.
+ */
 export const useConversation = () => {
   const { register, watch, setValue } = useForm({
     resolver: zodResolver(ConversationSearchSchema),
     mode: 'onChange',
   })
-  const { setLoading: loadMessages, setChats, setChatRoom } = useChatContext()
-  const [chatRooms, setChatRooms] = useState<
-    {
-      chatRoom: {
-        id: string
-        createdAt: Date
-        message: {
-          message: string
-          createdAt: Date
-          seen: boolean
-        }[]
-      }[]
-      email: string | null
-    }[]
-  >([])
+  const { setLoading: loadMessages, setChats, setChatRoom, setLead } = useChatContext()
+  const [conversations, setConversations] = useState<InboxConversation[]>([])
   const [loading, setLoading] = useState<boolean>(false)
 
-  // Function to manually load chat rooms for a domain
   const onLoadChatRoomsForDomain = useCallback(async (domainId: string) => {
     setLoading(true)
     try {
-      const rooms = await onGetDomainChatRooms(domainId)
-      if (rooms) {
-        setLoading(false)
-        setChatRooms(rooms.customer)
-      }
+      const result = await onGetDomainChatRooms(domainId)
+      setConversations(result.conversations)
     } catch (error) {
-      console.log(error)
+      console.error('[Conversations] failed to load inbox:', error)
+    } finally {
       setLoading(false)
     }
   }, [])
@@ -64,144 +47,84 @@ export const useConversation = () => {
 
   const onGetActiveChatMessages = async (id: string) => {
     try {
+      setChatRoom(id)
       loadMessages(true)
-      const messages = await onGetChatMessages(id)
-      if (messages) {
-        setChatRoom(id)
-        loadMessages(false)
-        setChats(messages[0].message as never)
+      const transcript = await onGetChatMessages(id)
+      if (transcript) {
+        setChats(transcript.messages)
+        setLead(transcript.lead)
+      } else {
+        setChats([])
+        setLead(null)
       }
     } catch (error) {
-      console.log(error)
+      console.error('[Conversations] failed to load transcript:', error)
+    } finally {
+      loadMessages(false)
     }
   }
+
   return {
     register,
     setValue,
-    chatRooms,
+    conversations,
     loading,
     onGetActiveChatMessages,
     onLoadChatRoomsForDomain,
   }
 }
 
-export const useChatTime = (createdAt: Date, roomId: string) => {
-  const { chatRoom } = useChatContext()
-  const [messageSentAt, setMessageSentAt] = useState<string>()
-  const [urgent, setUrgent] = useState<boolean>(false)
+const MONTHS = [
+  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+]
 
-  const onSetMessageRecievedDate = () => {
-    const dt = new Date(createdAt)
-    const current = new Date()
-    const currentDate = current.getDate()
-    const hr = dt.getHours()
-    const min = dt.getMinutes()
-    const date = dt.getDate()
-    const month = dt.getMonth()
-    const difference = currentDate - date
+/**
+ * Time label for a conversation row: clock time for today, day + month before
+ * that, and the year once it is no longer the current one.
+ */
+export const formatInboxTime = (value: Date | string | null | undefined) => {
+  if (!value) return ''
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return ''
 
-    if (difference <= 0) {
-      setMessageSentAt(`${hr}:${min}${hr > 12 ? 'PM' : 'AM'}`)
-      if (current.getHours() - dt.getHours() < 2) {
-        setUrgent(true)
-      }
-    } else {
-      setMessageSentAt(`${date} ${getMonthName(month)}`)
-    }
+  const now = new Date()
+  const sameDay =
+    date.getFullYear() === now.getFullYear() &&
+    date.getMonth() === now.getMonth() &&
+    date.getDate() === now.getDate()
+
+  if (sameDay) {
+    return date.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })
   }
-
-  const onSeenChat = async () => {
-    if (chatRoom == roomId && urgent) {
-      await onViewUnReadMessages(roomId)
-      setUrgent(false)
-    }
-  }
-
-  useEffect(() => {
-    onSeenChat()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [chatRoom])
-
-  useEffect(() => {
-    onSetMessageRecievedDate()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  return { messageSentAt, urgent, onSeenChat }
+  const stamp = `${date.getDate()} ${MONTHS[date.getMonth()]}`
+  return date.getFullYear() === now.getFullYear() ? stamp : `${stamp} ${date.getFullYear()}`
 }
 
-export const useChatWindow = () => {
-  const { chats, loading, setChats, chatRoom } = useChatContext()
-  const messageWindowRef = useRef<HTMLDivElement | null>(null)
-  const { register, handleSubmit, reset } = useForm({
-    resolver: zodResolver(ChatBotMessageSchema),
-    mode: 'onChange',
+/** Full timestamp for a message inside the transcript. */
+export const formatMessageTime = (value: Date | string) => {
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return ''
+  return date.toLocaleString(undefined, {
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
   })
-  const onScrollToBottom = () => {
+}
+
+/** Scroll-managed transcript reader for the selected conversation. */
+export const useChatWindow = () => {
+  const { chats, loading, chatRoom, lead } = useChatContext()
+  const messageWindowRef = useRef<HTMLDivElement | null>(null)
+
+  useEffect(() => {
     messageWindowRef.current?.scroll({
       top: messageWindowRef.current.scrollHeight,
       left: 0,
       behavior: 'smooth',
     })
-  }
+  }, [chats])
 
-  useEffect(() => {
-    onScrollToBottom()
-  }, [chats, messageWindowRef])
-
-  useEffect(() => {
-    if (!chatRoom) return
-
-    const handler = (data: any) => {
-      setChats((prev) => [...prev, data.chat])
-    }
-
-    const channel = pusherClient.subscribe(chatRoom)
-    channel.bind('realtime-mode', handler)
-
-    return () => {
-      channel.unbind('realtime-mode', handler)
-      pusherClient.unsubscribe(chatRoom)
-    }
-  }, [chatRoom, setChats])
-
-  const onHandleSentMessage = handleSubmit(async (values) => {
-    try {
-      // Validate message content
-      if (!values.content || values.content.trim() === '') {
-        console.log('Empty message, skipping send')
-        return
-      }
-
-      reset()
-      const message = await onOwnerSendMessage(
-        chatRoom!,
-        values.content,
-        'assistant'
-      )
-      //WIP: Remove this line
-      if (message) {
-        //remove this
-        // setChats((prev) => [...prev, message.message[0]])
-
-        await onRealTimeChat(
-          chatRoom!,
-          message.message[0].message,
-          message.message[0].id,
-          'assistant'
-        )
-      }
-    } catch (error) {
-      console.log(error)
-    }
-  })
-
-  return {
-    messageWindowRef,
-    register,
-    onHandleSentMessage,
-    chats,
-    loading,
-    chatRoom,
-  }
+  return { messageWindowRef, chats, loading, chatRoom, lead }
 }

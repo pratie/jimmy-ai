@@ -64,8 +64,6 @@
     "openai": "^4.47.1",
     "pdf-parse-fork": "^1.2.0",
     "prisma": "^5.13.0",
-    "pusher": "^5.2.0",
-    "pusher-js": "^8.4.0-rc2",
     "react": "^18",
     "react-day-picker": "^8.10.1",
     "react-dom": "^18",

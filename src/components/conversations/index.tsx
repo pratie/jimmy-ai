@@ -1,10 +1,13 @@
 'use client'
-import { useConversation } from '@/hooks/conversation/use-conversation'
+
 import React from 'react'
-import ConversationSearch from './search'
-import { Loader } from '../loader'
-import ChatCard from './chat-card'
 import { Inbox } from 'lucide-react'
+
+import { useConversation } from '@/hooks/conversation/use-conversation'
+import { useChatContext } from '@/context/user-chat-context'
+import ConversationSearch from './search'
+import ChatCard from './chat-card'
+import { Loader } from '../loader'
 
 type Props = {
   domains?:
@@ -17,40 +20,53 @@ type Props = {
 }
 
 const ConversationMenu = ({ domains }: Props) => {
-  const { register, setValue, chatRooms, loading, onGetActiveChatMessages, onLoadChatRoomsForDomain } =
-    useConversation()
+  const {
+    register,
+    setValue,
+    conversations,
+    loading,
+    onGetActiveChatMessages,
+    onLoadChatRoomsForDomain,
+  } = useConversation()
+  const { chatRoom } = useChatContext()
 
   return (
-    <div className="h-full bg-white">
-      <div className="border-b border-slate-100 px-5 pb-4 pt-5">
-        <p className="text-sm font-semibold text-slate-950">Customer conversations</p>
-        <p className="mt-1 text-[11px] font-medium text-slate-400">Review, qualify, or take over live.</p>
+    <div className="flex h-full flex-col bg-card">
+      <div className="shrink-0 border-b border-border px-5 pb-4 pt-5">
+        <p className="text-sm font-semibold text-foreground">Conversations</p>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Every chat your assistant has handled.
+        </p>
       </div>
+
       <ConversationSearch
         domains={domains}
         register={register}
         setValue={setValue}
         onAutoSelect={onLoadChatRoomsForDomain}
       />
-      <div className="flex flex-col py-2">
+
+      <div className="min-h-0 flex-1 overflow-y-auto">
         <Loader loading={loading}>
-          {chatRooms.length ? (
-            chatRooms.map((room) => (
+          {conversations.length ? (
+            conversations.map((conversation) => (
               <ChatCard
-                seen={room.chatRoom[0].message[0]?.seen}
-                id={room.chatRoom[0].id}
-                onChat={() => onGetActiveChatMessages(room.chatRoom[0].id)}
-                createdAt={room.chatRoom[0].message[0]?.createdAt}
-                key={room.chatRoom[0].id}
-                title={room.email || '👤 Anonymous User'}
-                description={room.chatRoom[0].message[0]?.message}
+                key={conversation.id}
+                conversation={conversation}
+                active={chatRoom === conversation.id}
+                onChat={() => onGetActiveChatMessages(conversation.id)}
               />
             ))
           ) : (
-            <div className="flex flex-col items-center px-6 py-12 text-center">
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-100 text-slate-400"><Inbox className="h-5 w-5" /></div>
-              <p className="mt-3 text-xs font-black text-slate-700">No conversations yet</p>
-              <p className="mt-1 text-[10px] leading-4 text-slate-400">New visitor messages will appear here.</p>
+            <div className="flex flex-col items-center px-6 py-14 text-center">
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-muted text-muted-foreground">
+                <Inbox className="h-5 w-5" />
+              </div>
+              <p className="mt-4 text-sm font-semibold text-foreground">No conversations yet</p>
+              <p className="mt-1.5 text-xs leading-5 text-muted-foreground">
+                Share your assistant or test it in the playground — visitor chats will show up
+                here.
+              </p>
             </div>
           )}
         </Loader>

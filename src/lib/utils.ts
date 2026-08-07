@@ -11,10 +11,6 @@ export const extractUUIDFromString = (url: string) => {
   )
 }
 
-// ⚠️ Pusher has been moved to separate files for security:
-// - Server: import { pusherServer } from '@/lib/pusher-server' (server actions only)
-// - Client: import { pusherClient } from '@/lib/pusher-client' (client components)
-
 // Send dimension updates to parent window
 // Note: Uses wildcard '*' origin because iframe can be embedded on any customer domain
 // This is safe - only sends non-sensitive dimension data: {width: number, height: number}

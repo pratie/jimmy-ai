@@ -1,62 +1,59 @@
 'use client'
-import { useChatTime } from '@/hooks/conversation/use-conversation'
+
 import React from 'react'
-import { CardDescription } from '../ui/card'
-import { Avatar, AvatarFallback } from '../ui/avatar'
 import { User } from 'lucide-react'
-import { UrgentIcon } from '@/icons/urgent-icon'
+
+import { Avatar, AvatarFallback } from '../ui/avatar'
+import { cn } from '@/lib/utils'
+import { formatInboxTime } from '@/hooks/conversation/use-conversation'
+import type { InboxConversation } from '@/actions/conversation'
 
 type Props = {
-  title: string
-  description?: string
-  createdAt: Date
-  id: string
+  conversation: InboxConversation
+  active: boolean
   onChat(): void
-  seen?: boolean
 }
 
-const ChatCard = ({
-  title,
-  description,
-  createdAt,
-  onChat,
-  id,
-  seen,
-}: Props) => {
-  const { messageSentAt, urgent } = useChatTime(createdAt, id)
+/** Best available name for a visitor: whatever the assistant managed to capture. */
+export const visitorLabel = (lead: InboxConversation['lead']) =>
+  lead?.name || lead?.email || lead?.phone || 'Anonymous visitor'
+
+const ChatCard = ({ conversation, active, onChat }: Props) => {
+  const preview = conversation.preview
 
   return (
     <button
+      type="button"
       onClick={onChat}
-      className="w-full border-b border-slate-100 px-4 py-3.5 text-left transition hover:bg-indigo-50/50"
+      aria-current={active ? 'true' : undefined}
+      className={cn(
+        'w-full border-b border-border px-4 py-3.5 text-left transition-colors',
+        'hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset',
+        active && 'bg-accent'
+      )}
     >
       <div className="flex gap-3">
-        <div>
-          <Avatar>
-            <AvatarFallback className="bg-slate-100 text-slate-500">
-              <User className="h-4 w-4" />
-            </AvatarFallback>
-          </Avatar>
-        </div>
-        <div className="flex min-w-0 flex-1 justify-between gap-3">
-          <div className="min-w-0">
-            <div className="flex items-center gap-2">
-              <CardDescription className="truncate font-black leading-none text-slate-900">
-                {title}
-              </CardDescription>
-              {urgent && !seen && <UrgentIcon />}
-            </div>
-            <CardDescription className="mt-1.5 truncate text-[11px] text-slate-400">
-              {description
-                ? description.substring(0, 20) + '...'
-                : 'This chatroom is empty'}
-            </CardDescription>
+        <Avatar className="h-9 w-9 shrink-0">
+          <AvatarFallback className="bg-muted text-muted-foreground">
+            <User className="h-4 w-4" />
+          </AvatarFallback>
+        </Avatar>
+
+        <div className="flex min-w-0 flex-1 flex-col gap-1">
+          <div className="flex items-baseline justify-between gap-3">
+            <p className="truncate text-sm font-semibold text-foreground">
+              {visitorLabel(conversation.lead)}
+            </p>
+            <span className="shrink-0 text-[11px] text-muted-foreground">
+              {formatInboxTime(conversation.lastMessageAt ?? conversation.startedAt)}
+            </span>
           </div>
-          <div className="shrink-0">
-            <CardDescription className="text-[10px] font-semibold text-slate-400">
-              {createdAt ? messageSentAt : ''}
-            </CardDescription>
-          </div>
+
+          <p className="truncate text-xs text-muted-foreground">
+            {preview?.message
+              ? `${preview.role === 'assistant' ? 'Assistant: ' : ''}${preview.message}`
+              : 'No messages yet'}
+          </p>
         </div>
       </div>
     </button>

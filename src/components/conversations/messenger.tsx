@@ -1,48 +1,150 @@
 'use client'
 
-import { useChatWindow } from '@/hooks/conversation/use-conversation'
-import { ArrowLeft, ArrowUp, Bot, Paperclip, Radio, Sparkles } from 'lucide-react'
 import React from 'react'
-import Bubble from '../chatbot/bubble'
+import { ArrowLeft, Bot, Mail, MessagesSquare, Phone, Sparkles, User } from 'lucide-react'
+
+import { formatMessageTime, useChatWindow } from '@/hooks/conversation/use-conversation'
+import { renderMessageContent } from '../chatbot/bubble'
+import { cn } from '@/lib/utils'
 import { Loader } from '../loader'
 
-const Messenger = ({ onBack }: { onBack?: () => void }) => {
-  const { messageWindowRef, chats, loading, chatRoom, onHandleSentMessage, register } = useChatWindow()
+/** Contact details the assistant captured, shown above the transcript. */
+const LeadSummary = ({
+  lead,
+}: {
+  lead: { name: string | null; email: string | null; phone: string | null }
+}) => {
+  const fields = [
+    lead.name ? { icon: User, value: lead.name, label: 'Name' } : null,
+    lead.email ? { icon: Mail, value: lead.email, label: 'Email' } : null,
+    lead.phone ? { icon: Phone, value: lead.phone, label: 'Phone' } : null,
+  ].filter(Boolean) as { icon: typeof User; value: string; label: string }[]
+
+  if (!fields.length) return null
 
   return (
-    <div className="relative flex min-h-0 flex-1 flex-col bg-[#fafbfe]">
-      <div className="flex h-[72px] shrink-0 items-center justify-between border-b border-slate-200 bg-white px-5">
-        <div className="flex items-center gap-3">
-          {onBack && <button type="button" onClick={onBack} aria-label="Back to conversations" className="grid h-9 w-9 place-items-center rounded-xl border border-slate-200 text-slate-500"><ArrowLeft className="h-4 w-4" /></button>}
-          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#0b1020] text-white"><Bot className="h-[18px] w-[18px]" /></div>
-          <div><p className="text-xs font-semibold text-slate-900">Conversation workspace</p><p className="mt-1 flex items-center gap-1.5 text-[10px] font-medium text-slate-400"><Radio className="h-3 w-3 text-emerald-500" /> AI replies active</p></div>
+    <div className="mx-auto mb-2 w-full max-w-3xl rounded-xl border border-border bg-card p-3.5">
+      <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+        Captured contact details
+      </p>
+      <div className="mt-2.5 flex flex-wrap gap-x-6 gap-y-2">
+        {fields.map(({ icon: Icon, value, label }) => (
+          <div key={label} className="flex items-center gap-2 text-sm text-foreground">
+            <Icon className="h-3.5 w-3.5 shrink-0 text-muted-foreground" aria-hidden="true" />
+            <span className="sr-only">{label}: </span>
+            <span className="font-medium">{value}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+/** One turn of the transcript. Read-only — nothing here can be sent from. */
+const TranscriptBubble = ({
+  role,
+  message,
+  createdAt,
+}: {
+  role: 'assistant' | 'user'
+  message: string
+  createdAt: Date
+}) => {
+  const isAssistant = role === 'assistant'
+
+  return (
+    <div className={cn('flex w-full flex-col gap-1', isAssistant ? 'items-start' : 'items-end')}>
+      <div
+        className={cn(
+          'max-w-[min(32rem,85%)] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed',
+          isAssistant
+            ? 'rounded-bl-sm bg-muted text-foreground'
+            : 'rounded-br-sm bg-primary text-primary-foreground'
+        )}
+      >
+        <span className="whitespace-pre-wrap break-words">{renderMessageContent(message)}</span>
+      </div>
+      <span className="px-1 text-[10px] text-muted-foreground">
+        {isAssistant ? 'Assistant' : 'Visitor'} · {formatMessageTime(createdAt)}
+      </span>
+    </div>
+  )
+}
+
+const Messenger = ({ onBack }: { onBack?: () => void }) => {
+  const { messageWindowRef, chats, loading, chatRoom, lead } = useChatWindow()
+
+  return (
+    <div className="relative flex min-h-0 flex-1 flex-col bg-background">
+      <div className="flex h-[72px] shrink-0 items-center gap-3 border-b border-border bg-card px-5">
+        {onBack && (
+          <button
+            type="button"
+            onClick={onBack}
+            aria-label="Back to conversations"
+            className="grid h-9 w-9 place-items-center rounded-xl border border-border text-muted-foreground transition-colors hover:bg-accent"
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </button>
+        )}
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-muted text-muted-foreground">
+          <Bot className="h-[18px] w-[18px]" />
         </div>
-        <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[9px] font-black uppercase tracking-wider text-emerald-700">Online</span>
+        <div className="min-w-0">
+          <p className="truncate text-sm font-semibold text-foreground">Transcript</p>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            {chatRoom
+              ? 'Your AI assistant handles all replies'
+              : 'Pick a conversation to read it'}
+          </p>
+        </div>
       </div>
 
       <div className="flex min-h-0 flex-1 flex-col">
         <Loader loading={loading}>
-          <div ref={messageWindowRef} className="chat-window flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-5 py-6 md:px-8">
-            {chats.length ? chats.map((chat) => (
-              <Bubble key={chat.id} message={{ role: chat.role!, content: chat.message }} createdAt={chat.createdAt} />
-            )) : (
+          <div
+            ref={messageWindowRef}
+            className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-5 py-6 md:px-8"
+          >
+            {!chatRoom ? (
               <div className="m-auto flex max-w-sm flex-col items-center text-center">
-                <div className="flex h-16 w-16 items-center justify-center rounded-[22px] bg-indigo-50 text-[#5b5ce2]"><Sparkles className="h-7 w-7" /></div>
-                <h3 className="mt-5 text-lg font-black tracking-tight text-slate-900">Select a conversation</h3>
-                <p className="mt-2 text-xs font-medium leading-5 text-slate-400">Read the full visitor journey, inspect captured context, or take over from the AI agent.</p>
+                <div className="flex h-16 w-16 items-center justify-center rounded-[22px] bg-muted text-muted-foreground">
+                  <Sparkles className="h-7 w-7" />
+                </div>
+                <h3 className="mt-5 text-lg font-semibold text-foreground">
+                  Select a conversation
+                </h3>
+                <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                  Read the full visitor journey and any contact details the assistant captured
+                  along the way.
+                </p>
+              </div>
+            ) : chats.length ? (
+              <>
+                {lead && <LeadSummary lead={lead} />}
+                {chats.map((chat) => (
+                  <TranscriptBubble
+                    key={chat.id}
+                    role={chat.role}
+                    message={chat.message}
+                    createdAt={chat.createdAt}
+                  />
+                ))}
+              </>
+            ) : (
+              <div className="m-auto flex max-w-sm flex-col items-center text-center">
+                <div className="flex h-16 w-16 items-center justify-center rounded-[22px] bg-muted text-muted-foreground">
+                  <MessagesSquare className="h-7 w-7" />
+                </div>
+                <h3 className="mt-5 text-lg font-semibold text-foreground">No messages</h3>
+                <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                  This conversation was started but nothing was ever said.
+                </p>
               </div>
             )}
           </div>
         </Loader>
       </div>
-
-      <form onSubmit={onHandleSentMessage} className="shrink-0 border-t border-slate-200 bg-white p-4 md:p-5">
-        <div className="mx-auto flex max-w-3xl items-end gap-2 rounded-2xl border border-slate-200 bg-slate-50 p-2 shadow-sm focus-within:border-[#5b5ce2]/30 focus-within:bg-white focus-within:ring-4 focus-within:ring-[#5b5ce2]/8">
-          <button type="button" className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-slate-400 hover:bg-white hover:text-slate-700" aria-label="Attach file"><Paperclip className="h-4 w-4" /></button>
-          <input {...register('content')} placeholder={chatRoom ? 'Reply to this conversation…' : 'Select a conversation to reply'} disabled={!chatRoom} className="h-9 min-w-0 flex-1 bg-transparent px-1 text-sm font-medium text-slate-800 outline-none placeholder:text-slate-400 disabled:cursor-not-allowed" />
-          <button type="submit" disabled={!chatRoom} className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#5b5ce2] text-white shadow-md transition hover:bg-[#4f50d8] disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400" aria-label="Send message"><ArrowUp className="h-4 w-4" /></button>
-        </div>
-      </form>
     </div>
   )
 }

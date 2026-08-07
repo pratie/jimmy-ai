@@ -1,6 +1,5 @@
 import { onAiChatBotAssistant, onGetCurrentChatBot } from '@/actions/bot'
 import { postToParent } from '@/lib/utils'
-import { pusherClient } from '@/lib/pusher-client'
 import { uploadFile } from '@/lib/kie-api'
 import {
   ChatBotMessageProps,
@@ -83,9 +82,13 @@ export const useChatBot = (options?: UseChatBotOptions) => {
   >([])
   const [onAiTyping, setOnAiTyping] = useState<boolean>(false)
   const [currentBotId, setCurrentBotId] = useState<string>()
-  const [onRealTime, setOnRealTime] = useState<
-    { chatroom: string; mode: boolean } | undefined
-  >(undefined)
+
+  /** Snaps the transcript to the newest message after React has painted it. */
+  const scrollToBottom = () => {
+    const el = messageWindowRef.current
+    if (!el) return
+    setTimeout(() => el.scroll({ top: el.scrollHeight, left: 0, behavior: 'smooth' }), 0)
+  }
 
   const onScrollToBottom = () => {
     const el = messageWindowRef.current
@@ -189,7 +192,7 @@ export const useChatBot = (options?: UseChatBotOptions) => {
   const onStartChatting = handleSubmit(async (values) => {
     const anonymousId = getAnonymousId()
     // Always snap to bottom on user send
-    { const el = messageWindowRef.current; if (el) setTimeout(() => el.scroll({ top: el.scrollHeight, behavior: 'smooth' }), 0) }
+    scrollToBottom()
 
     if (values.image?.length) {
       const uploadResult = await uploadFile(values.image[0])
@@ -200,16 +203,14 @@ export const useChatBot = (options?: UseChatBotOptions) => {
       }
 
       const uploaded = uploadResult.data!
-      if (!onRealTime?.mode) {
-        setOnChats((prev: any) => [
-          ...prev,
-          {
-            role: 'user',
-            content: uploaded.downloadUrl,
-          },
-        ])
-        { const el = messageWindowRef.current; if (el) setTimeout(() => el.scroll({ top: el.scrollHeight, behavior: 'smooth' }), 0) }
-      }
+      setOnChats((prev: any) => [
+        ...prev,
+        {
+          role: 'user',
+          content: uploaded.downloadUrl,
+        },
+      ])
+      scrollToBottom()
 
       setOnAiTyping(true)
       const response = await onAiChatBotAssistant(
@@ -220,35 +221,26 @@ export const useChatBot = (options?: UseChatBotOptions) => {
         anonymousId
       )
 
-      if (response) {
-        setOnAiTyping(false)
-        { const el = messageWindowRef.current; if (el) setTimeout(() => el.scroll({ top: el.scrollHeight, behavior: 'smooth' }), 0) }
-        { const el = messageWindowRef.current; if (el) setTimeout(() => el.scroll({ top: el.scrollHeight, behavior: 'smooth' }), 0) }
-        if (response.live) {
-          setOnRealTime((prev) => ({
-            ...prev,
-            chatroom: ('chatRoom' in response ? (response.chatRoom as string) : (prev?.chatroom ?? '')),
-            mode: response.live,
-          }))
-        } else {
-          setOnChats((prev: any) => [...prev, response.response])
-          { const el = messageWindowRef.current; if (el) setTimeout(() => el.scroll({ top: el.scrollHeight, behavior: 'smooth' }), 0) }
-        }
+      // Cleared whether or not a reply came back — leaving the typing
+      // indicator up on a failed turn tells the visitor to keep waiting for
+      // something that is never coming.
+      setOnAiTyping(false)
+      if (response?.response) {
+        setOnChats((prev: any) => [...prev, response.response])
+        scrollToBottom()
       }
     }
     reset()
 
     if (values.content) {
-      if (!onRealTime?.mode) {
-        setOnChats((prev: any) => [
-          ...prev,
-          {
-            role: 'user',
-            content: values.content,
-          },
-        ])
-        { const el = messageWindowRef.current; if (el) setTimeout(() => el.scroll({ top: el.scrollHeight, behavior: 'smooth' }), 0) }
-      }
+      setOnChats((prev: any) => [
+        ...prev,
+        {
+          role: 'user',
+          content: values.content,
+        },
+      ])
+      scrollToBottom()
 
       setOnAiTyping(true)
 
@@ -267,31 +259,10 @@ export const useChatBot = (options?: UseChatBotOptions) => {
         const contentType = streamResponse.headers.get('Content-Type') || ''
         const isSSE = contentType.startsWith('text/event-stream')
 
-        // JSON response path (e.g., live mode or errors)
+        // JSON response path (errors)
         if (!isSSE) {
           const data = await streamResponse.json().catch(() => ({}))
           setOnAiTyping(false)
-
-          if (data && data.live) {
-            setOnRealTime((prev) => ({
-              ...prev,
-              chatroom: data.chatRoom,
-              mode: true,
-            }))
-            // Do not add/keep empty assistant placeholder in live mode
-            setOnChats((prev: any) => {
-              const updated = [...prev]
-              if (
-                updated.length > 0 &&
-                updated[updated.length - 1].role === 'assistant' &&
-                (!updated[updated.length - 1].content || updated[updated.length - 1].content.trim() === '')
-              ) {
-                updated.pop()
-              }
-              return updated
-            })
-            return
-          }
 
           if (data && data.error) {
             // Show server message or generic error
@@ -321,7 +292,7 @@ export const useChatBot = (options?: UseChatBotOptions) => {
 
         // Create assistant message placeholder only for SSE
         setOnChats((prev: any) => [...prev, { role: 'assistant', content: '' }])
-        { const el = messageWindowRef.current; if (el) setTimeout(() => el.scroll({ top: el.scrollHeight, behavior: 'smooth' }), 0) }
+        scrollToBottom()
 
         while (true) {
           const { done, value } = await reader.read()
@@ -376,37 +347,18 @@ export const useChatBot = (options?: UseChatBotOptions) => {
           anonymousId
         )
 
-        if (response) {
-          if (response.live) {
-            // Enter realtime mode; remove empty assistant placeholder if present
-            setOnRealTime((prev) => ({
-              ...prev,
-              chatroom: ('chatRoom' in response ? (response.chatRoom as string) : (prev?.chatroom ?? '')),
-              mode: response.live,
-            }))
-            setOnChats((prev: any) => {
-              const updated = [...prev]
-              if (
-                updated.length > 0 &&
-                updated[updated.length - 1].role === 'assistant' &&
-                (!updated[updated.length - 1].content || updated[updated.length - 1].content.trim() === '')
-              ) {
-                updated.pop()
-              }
-              return updated
-            })
-          } else if (response.response) {
-            setOnChats((prev: any) => {
-              const updated = [...prev]
-              if (updated.length > 0 && updated[updated.length - 1].role === 'assistant') {
-                // Replace the placeholder/partial assistant message with fallback content
-                updated[updated.length - 1] = response.response
-              } else {
-                updated.push(response.response)
-              }
-              return updated
-            })
-          }
+        if (response?.response) {
+          setOnChats((prev: any) => {
+            const updated = [...prev]
+            if (updated.length > 0 && updated[updated.length - 1].role === 'assistant') {
+              // Replace the placeholder/partial assistant message with fallback content
+              updated[updated.length - 1] = response.response
+            } else {
+              updated.push(response.response)
+            }
+            return updated
+          })
+          scrollToBottom()
         }
       }
     }
@@ -425,49 +377,6 @@ export const useChatBot = (options?: UseChatBotOptions) => {
     currentBot,
     loading,
     setOnChats,
-    onRealTime,
     errors,
   }
-}
-
-export const useRealTime = (
-  chatRoom: string,
-  setChats: React.Dispatch<
-    React.SetStateAction<
-      {
-        role: 'user' | 'assistant'
-        content: string
-        link?: string | undefined
-      }[]
-    >
-  >
-) => {
-  const counterRef = useRef(1)
-
-  useEffect(() => {
-    if (!chatRoom) return
-
-    counterRef.current = 1
-
-    const handler = (data: any) => {
-      if (counterRef.current !== 1) {
-        setChats((prev) => [
-          ...prev,
-          {
-            role: data.chat.role,
-            content: data.chat.message,
-          },
-        ])
-      }
-      counterRef.current += 1
-    }
-
-    pusherClient.subscribe(chatRoom)
-    pusherClient.bind('realtime-mode', handler)
-
-    return () => {
-      pusherClient.unbind('realtime-mode', handler)
-      pusherClient.unsubscribe(chatRoom)
-    }
-  }, [chatRoom, setChats])
 }

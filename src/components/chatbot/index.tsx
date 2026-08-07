@@ -26,7 +26,6 @@ const AiChatBot = (props: Props) => {
     messageWindowRef,
     currentBot,
     loading,
-    onRealTime,
     setOnChats,
     errors,
   } = useChatBot()
@@ -54,8 +53,6 @@ const AiChatBot = (props: Props) => {
           <Loader loading={loading}>
             <BotWindow
               errors={errors}
-              setChat={setOnChats}
-              realtimeMode={onRealTime}
               helpdesk={currentBot?.helpdesk || []}
               domainName={currentBot?.name || 'Assistant'}
               ref={messageWindowRef}

@@ -5,76 +5,76 @@ import { accessibleWorkspaceIds, requireTenantContext, requireWorkspace } from '
 import { AuthorizationError } from '@/lib/permissions'
 
 /**
- * Conversation inbox and human handoff.
+ * Read-only conversation inbox.
  *
- * The old `ChatRoom.live` boolean meant "a human is here", "a human was
- * requested" and "a human finished" all at once, so the UI could not tell an
- * abandoned takeover from a completed one. `Conversation.handoffStatus` has six
- * explicit states; the `live` field these actions still return is derived from
- * it for the current UI.
+ * The assistant answers every conversation itself; there is no human takeover.
+ * The previous version of this module exposed a realtime handoff surface
+ * (`onToggleRealtime`, `onOwnerSendMessage`, a Pusher-delivered reply channel)
+ * whose delivery half was never built — an owner's "reply" was written to the
+ * database and never reached the visitor. Showing a composer for a message that
+ * cannot arrive is worse than showing none, so the inbox is now strictly a
+ * transcript reader.
+ *
+ * `Conversation.handoffStatus` remains in the schema but is no longer read.
  */
 
-const liveFrom = (status: string) => status === 'active' || status === 'accepted'
+export type InboxLead = {
+  name: string | null
+  email: string | null
+  phone: string | null
+}
+
+export type InboxConversation = {
+  id: string
+  startedAt: Date
+  lastMessageAt: Date | null
+  messageCount: number
+  lead: InboxLead | null
+  /** Most recent message, for the list preview. */
+  preview: { message: string; createdAt: Date; role: 'user' | 'assistant' } | null
+}
+
+export type ConversationTranscript = {
+  id: string
+  startedAt: Date
+  lead: InboxLead | null
+  messages: {
+    id: string
+    role: 'user' | 'assistant'
+    message: string
+    createdAt: Date
+  }[]
+}
 
 /** Confirms a conversation belongs to a workspace the caller may reach. */
-async function assertConversationAccess(
-  conversationId: string,
-  permission: 'viewConversations' | 'takeOverConversation'
-) {
+async function assertConversationAccess(conversationId: string) {
   const ctx = await requireTenantContext()
   const workspaceIds = await accessibleWorkspaceIds(ctx)
 
   const conversation = await client.conversation.findFirst({
     where: { id: conversationId, clientWorkspaceId: { in: workspaceIds } },
-    select: { id: true, clientWorkspaceId: true, handoffStatus: true },
+    select: {
+      id: true,
+      clientWorkspaceId: true,
+      startedAt: true,
+      lead: { select: { name: true, email: true, phone: true } },
+    },
   })
   if (!conversation) {
-    throw new AuthorizationError(permission, 'conversation is not in an accessible workspace')
+    throw new AuthorizationError(
+      'viewConversations',
+      'conversation is not in an accessible workspace'
+    )
   }
 
-  await requireWorkspace(conversation.clientWorkspaceId, permission)
+  await requireWorkspace(conversation.clientWorkspaceId, 'viewConversations')
   return conversation
 }
 
-/**
- * Starts or ends a human takeover.
- * `requested` is set by the assistant; an agent moving to `active` is what
- * actually silences automated replies.
- */
-export const onToggleRealtime = async (id: string, state: boolean) => {
-  try {
-    const conversation = await assertConversationAccess(id, 'takeOverConversation')
-
-    const updated = await client.conversation.update({
-      where: { id: conversation.id },
-      data: { handoffStatus: state ? 'active' : 'completed' },
-      select: { id: true, handoffStatus: true },
-    })
-
-    return {
-      status: 200,
-      message: state ? 'Realtime mode enabled' : 'Realtime mode disabled',
-      chatRoom: { id: updated.id, live: liveFrom(updated.handoffStatus) },
-    }
-  } catch (error) {
-    if (error instanceof AuthorizationError) return { status: 403, message: error.message }
-    console.error('[Conversation] onToggleRealtime failed:', error)
-    return { status: 400, message: 'Could not change realtime mode' }
-  }
-}
-
-export const onGetConversationMode = async (id: string) => {
-  try {
-    const conversation = await assertConversationAccess(id, 'viewConversations')
-    return { live: liveFrom(conversation.handoffStatus), handoffStatus: conversation.handoffStatus }
-  } catch (error) {
-    console.error('[Conversation] onGetConversationMode failed:', error)
-    return undefined
-  }
-}
-
-/** Inbox listing for one client workspace. */
-export const onGetDomainChatRooms = async (id: string) => {
+/** Inbox listing for one client workspace, newest activity first. */
+export const onGetDomainChatRooms = async (
+  id: string
+): Promise<{ conversations: InboxConversation[] }> => {
   try {
     const { access } = await requireWorkspace(id, 'viewConversations')
 
@@ -83,10 +83,10 @@ export const onGetDomainChatRooms = async (id: string) => {
       orderBy: { lastMessageAt: 'desc' },
       select: {
         id: true,
-        createdAt: true,
-        handoffStatus: true,
-        lead: { select: { email: true, name: true, phone: true } },
-        visitor: { select: { anonymousId: true } },
+        startedAt: true,
+        lastMessageAt: true,
+        messageCount: true,
+        lead: { select: { name: true, email: true, phone: true } },
         messages: {
           select: { content: true, createdAt: true, role: true },
           orderBy: { createdAt: 'desc' },
@@ -96,118 +96,62 @@ export const onGetDomainChatRooms = async (id: string) => {
     })
 
     return {
-      customer: conversations.map((conversation) => ({
-        email: conversation.lead?.email ?? null,
-        name: conversation.lead?.name ?? null,
-        phone: conversation.lead?.phone ?? null,
-        chatRoom: [
-          {
-            id: conversation.id,
-            createdAt: conversation.createdAt,
-            live: liveFrom(conversation.handoffStatus),
-            message: conversation.messages.map((m) => ({
-              message: m.content,
-              createdAt: m.createdAt,
-              // `seen` no longer exists as a column; an agent-authored message
-              // is inherently seen by the agent.
-              seen: m.role !== 'visitor',
-            })),
-          },
-        ],
-      })),
+      conversations: conversations.map((conversation) => {
+        const last = conversation.messages[0]
+        return {
+          id: conversation.id,
+          startedAt: conversation.startedAt,
+          lastMessageAt: conversation.lastMessageAt,
+          messageCount: conversation.messageCount,
+          lead: conversation.lead ?? null,
+          preview: last
+            ? {
+                message: last.content,
+                createdAt: last.createdAt,
+                role: last.role === 'visitor' ? ('user' as const) : ('assistant' as const),
+              }
+            : null,
+        }
+      }),
     }
   } catch (error) {
-    if (error instanceof AuthorizationError) return { customer: [] }
-    console.error('[Conversation] onGetDomainChatRooms failed:', error)
-    return { customer: [] }
+    if (!(error instanceof AuthorizationError)) {
+      console.error('[Conversation] onGetDomainChatRooms failed:', error)
+    }
+    return { conversations: [] }
   }
 }
 
-export const onGetChatMessages = async (id: string) => {
+/** Full transcript plus whatever contact details the assistant captured. */
+export const onGetChatMessages = async (
+  id: string
+): Promise<ConversationTranscript | undefined> => {
   try {
-    const conversation = await assertConversationAccess(id, 'viewConversations')
+    const conversation = await assertConversationAccess(id)
 
     const messages = await client.message.findMany({
       where: { conversationId: conversation.id },
       orderBy: { createdAt: 'asc' },
-      select: { id: true, role: true, content: true, createdAt: true, messageType: true },
-    })
-
-    return [
-      {
-        id: conversation.id,
-        live: liveFrom(conversation.handoffStatus),
-        message: messages.map((m) => ({
-          id: m.id,
-          // The UI still expects the legacy two-value role.
-          role: m.role === 'visitor' ? 'user' : 'assistant',
-          message: m.content,
-          createdAt: m.createdAt,
-          seen: true,
-        })),
-      },
-    ]
-  } catch (error) {
-    console.error('[Conversation] onGetChatMessages failed:', error)
-    return undefined
-  }
-}
-
-/**
- * No-op retained for the UI.
- *
- * Per-message read receipts were dropped: `ChatMessage.seen` was written but
- * never read anywhere that affected behaviour. Reintroduce it deliberately if
- * unread badges become a real requirement.
- */
-export const onViewUnReadMessages = async (_id: string) => {
-  return { status: 200 }
-}
-
-export const onRealTimeChat = async (
-  chatRoomId: string,
-  message: string,
-  id: string,
-  role: 'assistant' | 'user'
-) => {
-  return { chatRoomId, message, id, role }
-}
-
-/** An agent replying as a human inside a live conversation. */
-export const onOwnerSendMessage = async (
-  chatRoom: string,
-  message: string,
-  role: 'assistant' | 'user'
-) => {
-  try {
-    const conversation = await assertConversationAccess(chatRoom, 'takeOverConversation')
-
-    const created = await client.message.create({
-      data: {
-        conversationId: conversation.id,
-        clientWorkspaceId: conversation.clientWorkspaceId,
-        // Recorded as human_agent, not assistant — conflating the two makes
-        // "how much did the assistant actually handle" unanswerable, and that
-        // number is the client-facing proof of value.
-        role: role === 'assistant' ? 'human_agent' : 'visitor',
-        messageType: 'text',
-        content: message,
-      },
-      select: { id: true, content: true, role: true, createdAt: true },
-    })
-
-    await client.conversation.update({
-      where: { id: conversation.id },
-      data: { lastMessageAt: created.createdAt, messageCount: { increment: 1 } },
+      select: { id: true, role: true, content: true, createdAt: true },
     })
 
     return {
-      status: 200,
-      message: [{ id: created.id, message: created.content, role, createdAt: created.createdAt }],
+      id: conversation.id,
+      startedAt: conversation.startedAt,
+      lead: conversation.lead ?? null,
+      messages: messages.map((m) => ({
+        id: m.id,
+        // The transcript is a two-sided read: everything that is not the
+        // visitor is rendered as the assistant's side.
+        role: m.role === 'visitor' ? ('user' as const) : ('assistant' as const),
+        message: m.content,
+        createdAt: m.createdAt,
+      })),
     }
   } catch (error) {
-    if (error instanceof AuthorizationError) return { status: 403, message: [] }
-    console.error('[Conversation] onOwnerSendMessage failed:', error)
-    return { status: 400, message: [] }
+    if (!(error instanceof AuthorizationError)) {
+      console.error('[Conversation] onGetChatMessages failed:', error)
+    }
+    return undefined
   }
 }

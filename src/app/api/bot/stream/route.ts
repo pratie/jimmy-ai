@@ -132,11 +132,6 @@ export async function POST(req: Request) {
 
     await appendVisitorMessage(session, context, message)
 
-    // A human has taken over: stay silent rather than talking over the agent.
-    if (session.isLive) {
-      return json({ live: true, message: 'A team member is replying to this conversation.' }, 200)
-    }
-
     // Contact details volunteered in the message body.
     const email = extractEmailsFromString(message)?.[0] ?? null
     const phone = extractPhone(message)
@@ -233,16 +228,17 @@ export async function POST(req: Request) {
     const history = await recentMessages(session.conversationId, 20)
     const priorTurns = Array.isArray(chat) && chat.length > 0 ? chat : history
 
-    const messages = [
-      { role: 'system', content: systemPrompt },
-      ...priorTurns,
-      { role: 'user', content: message },
-    ]
+    // The system prompt goes in `system`, not as a message in the array. The
+    // AI SDK warns on every request otherwise, and it is right to: a system
+    // message sitting in the same list as visitor turns is one bug away from
+    // being reachable by whatever a visitor types.
+    const messages = [...priorTurns, { role: 'user', content: message }]
 
     /* ── Stream ── */
     const llmStart = Date.now()
     const result = streamText({
       model: getModel(context.assistant.modelName) as never,
+      system: systemPrompt,
       messages: messages as never,
       temperature: context.assistant.temperature,
       maxOutputTokens: 2000,

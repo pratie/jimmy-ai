@@ -117,9 +117,6 @@ export const onAiChatBotAssistant = async (
     const session = await resolveSession({ context, anonymousId: visitorKey })
     await appendVisitorMessage(session, context, message)
 
-    // A human is handling this conversation — do not talk over them.
-    if (session.isLive) return { live: true }
-
     const email = extractEmailsFromString(message)?.[0] ?? null
     const leadId = context.assistant.leadCaptureEnabled
       ? await captureLead({ context, session, email })
@@ -187,11 +184,13 @@ export const onAiChatBotAssistant = async (
     const startedAt = Date.now()
     const { text, usage } = await generateText({
       model: getModel(context.assistant.modelName) as never,
-      messages: [
-        { role: 'system', content: systemPrompt },
-        ...chat,
-        { role: 'user', content: message },
-      ],
+      // AI SDK v5 takes the system prompt as its own option. Threading it in as
+      // a `messages[0]` with role 'system' is not the documented shape and some
+      // providers drop or demote it, which is how the assistant ended up
+      // ignoring its own instructions on this path while the streaming route —
+      // which passes it here — obeyed them.
+      system: systemPrompt,
+      messages: [...chat, { role: 'user', content: message }],
       temperature: context.assistant.temperature,
       maxOutputTokens: 800,
     })
@@ -214,42 +213,5 @@ export const onAiChatBotAssistant = async (
   } catch (error) {
     devError('[Bot] onAiChatBotAssistant failed:', error)
     return undefined
-  }
-}
-
-/**
- * Persists a message delivered over the realtime channel, where Pusher has
- * already handled delivery and only storage is needed.
- */
-export const onStoreConversations = async (
-  conversationId: string,
-  message: string,
-  role: 'assistant' | 'user'
-) => {
-  try {
-    const conversation = await client.conversation.findUnique({
-      where: { id: conversationId },
-      select: { id: true, clientWorkspaceId: true, assistantId: true },
-    })
-    if (!conversation) return
-
-    const created = await client.message.create({
-      data: {
-        conversationId: conversation.id,
-        clientWorkspaceId: conversation.clientWorkspaceId,
-        assistantId: conversation.assistantId,
-        role: role === 'user' ? 'visitor' : 'assistant',
-        messageType: 'text',
-        content: message,
-      },
-      select: { createdAt: true },
-    })
-
-    await client.conversation.update({
-      where: { id: conversation.id },
-      data: { lastMessageAt: created.createdAt, messageCount: { increment: 1 } },
-    })
-  } catch (error) {
-    devError('[Bot] onStoreConversations failed:', error)
   }
 }

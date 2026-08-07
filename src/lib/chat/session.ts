@@ -32,8 +32,6 @@ export type ChatSession = {
   conversationId: string
   visitorId: string
   leadId: string | null
-  /** True when a human has taken over — the assistant must stay silent. */
-  isLive: boolean
 }
 
 /**
@@ -78,7 +76,7 @@ export async function resolveSession(input: {
       status: 'active',
     },
     orderBy: { startedAt: 'desc' },
-    select: { id: true, leadId: true, handoffStatus: true },
+    select: { id: true, leadId: true },
   })
 
   if (existing) {
@@ -86,7 +84,6 @@ export async function resolveSession(input: {
       conversationId: existing.id,
       visitorId: visitor.id,
       leadId: existing.leadId,
-      isLive: existing.handoffStatus === 'active' || existing.handoffStatus === 'accepted',
     }
   }
 
@@ -105,7 +102,7 @@ export async function resolveSession(input: {
     select: { id: true },
   })
 
-  return { conversationId: conversation.id, visitorId: visitor.id, leadId: null, isLive: false }
+  return { conversationId: conversation.id, visitorId: visitor.id, leadId: null }
 }
 
 /**
