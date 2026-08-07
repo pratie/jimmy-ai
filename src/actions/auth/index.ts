@@ -40,7 +40,6 @@ function displayNameOf(user: NonNullable<Awaited<ReturnType<typeof currentUser>>
 export const onCompleteUserRegistration = async (
   fullName: string,
   clerkId: string,
-  _type: string,
   email: string,
   organizationName?: string,
   organizationType: OrganizationType = 'agency'

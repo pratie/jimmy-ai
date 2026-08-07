@@ -11,8 +11,6 @@ type Props = {
 function AccountDetailsForm({ errors, register }: Props) {
   return (
     <>
-      <p className="text-sm font-semibold text-slate-800">Account details</p>
-      <p className="mb-1 text-xs text-slate-500">Use the email you want associated with the agency.</p>
       {USER_REGISTRATION_FORM.map((field) => (
         <FormGenerator
           key={field.id}

@@ -44,7 +44,6 @@ const relative = (date: Date) => {
 const ACTIVITY_ICON = {
   lead: UserRoundCheck,
   booking: CalendarCheck2,
-  handoff: Inbox,
   published: Zap,
   knowledge: Building2,
 } as const
@@ -337,7 +336,7 @@ export default function AgencyOverview({
               <EmptyState
                 icon={Inbox}
                 title="Nothing yet"
-                body="Leads, booking requests and handoffs will appear here as your assistants work."
+                body="Leads and booking requests will appear here as your assistants work."
               />
             ) : (
               <ul>

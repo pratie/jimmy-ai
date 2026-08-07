@@ -19,8 +19,6 @@ type SignUpFormContextValue = {
     onNext: React.Dispatch<React.SetStateAction<number>>
   ) => Promise<void>
   loading: boolean
-  showAccountForm: boolean
-  setShowAccountForm: React.Dispatch<React.SetStateAction<boolean>>
 }
 
 const SignUpFormContext = React.createContext<SignUpFormContextValue | undefined>(undefined)
@@ -35,7 +33,6 @@ export const useSignUpFormContext = () => {
 
 const SignUpFormProvider = ({ children }: Props) => {
   const { methods, onHandleSubmit, onGenerateOTP, loading } = useSignUpForm()
-  const [showAccountForm, setShowAccountForm] = React.useState<boolean>(false)
   // Inner initializer to run inside context provider
   const Initializer = () => {
     const params = useSearchParams()
@@ -74,9 +71,7 @@ const SignUpFormProvider = ({ children }: Props) => {
     <AuthContextProvider>
       <Initializer />
       <FormProvider {...methods}>
-        <SignUpFormContext.Provider
-          value={{ onGenerateOTP, loading, showAccountForm, setShowAccountForm }}
-        >
+        <SignUpFormContext.Provider value={{ onGenerateOTP, loading }}>
           <form
             onSubmit={onHandleSubmit}
             className="h-full"

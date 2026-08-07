@@ -23,7 +23,10 @@ export default function AutoUpgradeRedirect({ currentPlan }: { currentPlan: Plan
     qs.set('plan', rawPlan)
     if (billing) qs.set('billing', billing)
     sessionStorage.setItem(FLAG, '1')
-    router.push(`/dashboard/settings?${qs.toString()}`)
+    // `/settings`, not `/dashboard/settings`: the latter is not a route, so
+    // anyone arriving from the pricing page with ?plan= — the entire paid
+    // sign-up path — hit a 404 as their first screen after registering.
+    router.push(`/settings?${qs.toString()}`)
   }, [params, router, currentPlan])
 
   return null

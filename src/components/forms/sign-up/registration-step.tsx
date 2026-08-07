@@ -1,11 +1,10 @@
 'use client'  // Mark the component as a Client Component
 
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import dynamic from 'next/dynamic'
 import { useAuthContextHook } from '@/context/use-auth-context'
 import { useFormContext } from 'react-hook-form'
 import { Spinner } from '@/components/spinner'
-import { useSignUpFormContext } from './form-provider'
 
 const LoadingSpinner = () => <Spinner noPadding={false} />
 
@@ -28,15 +27,19 @@ const RegistrationFormStep = (props: Props) => {
     setValue,
   } = useFormContext()
   const { currentStep } = useAuthContextHook()
-  const { showAccountForm } = useSignUpFormContext()
   const [onOTP, setOnOTP] = useState<string>('')
 
-  setValue('otp', onOTP)
+  // Was called straight from the render body, which writes to form state during
+  // another component's render.
+  useEffect(() => {
+    setValue('otp', onOTP)
+  }, [onOTP, setValue])
 
   const StepContent = useMemo(() => {
     switch (currentStep) {
       case 1:
-        if (!showAccountForm) return null
+        // Shown immediately. It used to be hidden behind a "Sign up with Email"
+        // button — a click that revealed a form rather than doing anything.
         return (
           <DetailForm
             errors={errors}
@@ -53,7 +56,7 @@ const RegistrationFormStep = (props: Props) => {
       default:
         return <div />
     }
-  }, [currentStep, register, errors, onOTP, showAccountForm])
+  }, [currentStep, register, errors, onOTP])
 
   return (
     <div className="flex flex-col gap-4">

@@ -160,6 +160,27 @@ export default function ClientOverview({ data }: { data: Overview }) {
         </div>
       )}
 
+      {/* The step nothing in the product used to name.
+          Trained and published is not the finish line — the widget still has to
+          go on the client's website, and the snippet for that is behind a tab
+          ("Domain & embed") that a new user has no reason to open. With zero
+          conversations recorded, saying so is more useful than five zeros. */}
+      {isLive && hasKnowledge && metrics.conversations === 0 && canManage && (
+        <div className="flex flex-wrap items-center gap-3 rounded-xl border border-border bg-card px-4 py-3">
+          <p className="min-w-0 flex-1 text-[13px] leading-6 text-foreground">
+            <strong className="font-bold">This assistant is live and trained.</strong> Add the embed
+            snippet to {workspace.businessName || workspace.name}’s website and it starts answering
+            visitors.
+          </p>
+          <Link
+            href={`/settings/${workspace.id}?tab=domain`}
+            className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg bg-primary px-4 text-[13px] font-bold text-primary-foreground hover:bg-primary/90"
+          >
+            Get the embed code
+          </Link>
+        </div>
+      )}
+
       {/* Metrics */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
         {tiles.map((t) => (

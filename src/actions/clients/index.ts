@@ -388,7 +388,7 @@ export const onGetWorkspaceSwitcherOptions = async () => {
 
 export type ActivityItem = {
   id: string
-  kind: 'lead' | 'booking' | 'handoff' | 'published' | 'knowledge'
+  kind: 'lead' | 'booking' | 'published' | 'knowledge'
   title: string
   clientName: string
   clientId: string
@@ -411,7 +411,11 @@ export const onGetRecentActivity = async (limit = 12) => {
     const scope = { clientWorkspaceId: { in: ids } }
     const naming = { clientWorkspace: { select: { id: true, name: true, businessName: true } } }
 
-    const [leads, bookings, handoffs, published] = await Promise.all([
+    // No handoff query: human takeover was removed from the product, and
+    // `Conversation.handoffStatus` is no longer written or read anywhere else.
+    // The feed was still announcing "Human handoff waiting" for rows left over
+    // from the old feature — an alarm about something nobody can action.
+    const [leads, bookings, published] = await Promise.all([
       client.lead.findMany({
         where: { ...scope, archivedAt: null },
         orderBy: { createdAt: 'desc' },
@@ -423,12 +427,6 @@ export const onGetRecentActivity = async (limit = 12) => {
         orderBy: { createdAt: 'desc' },
         take: limit,
         select: { id: true, status: true, requestedStartAt: true, createdAt: true, ...naming },
-      }),
-      client.conversation.findMany({
-        where: { ...scope, handoffStatus: { in: ['requested', 'accepted', 'active'] } },
-        orderBy: { lastMessageAt: 'desc' },
-        take: limit,
-        select: { id: true, handoffStatus: true, lastMessageAt: true, startedAt: true, ...naming },
       }),
       client.assistant.findMany({
         where: { ...scope, status: 'published', publishedAt: { not: null } },
@@ -457,14 +455,6 @@ export const onGetRecentActivity = async (limit = 12) => {
         clientName: label(b.clientWorkspace),
         clientId: b.clientWorkspace.id,
         at: b.createdAt,
-      })),
-      ...handoffs.map((h) => ({
-        id: `handoff-${h.id}`,
-        kind: 'handoff' as const,
-        title: 'Human handoff waiting',
-        clientName: label(h.clientWorkspace),
-        clientId: h.clientWorkspace.id,
-        at: h.lastMessageAt ?? h.startedAt,
       })),
       ...published.map((a) => ({
         id: `published-${a.id}`,
